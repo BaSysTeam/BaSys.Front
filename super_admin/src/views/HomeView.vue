@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-   <h3>DB Manage</h3>
+   <h3>DB Manage:HOME</h3>
   </div>
 </template>
 
