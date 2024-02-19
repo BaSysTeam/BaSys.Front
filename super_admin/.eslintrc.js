@@ -15,6 +15,9 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'class-methods-use-this': 'off',
+    'import/prefer-default-export': 'off',
+    'no-shadow': 'off', // Turn off the base rule,
+    '@typescript-eslint/no-explicit-any': 'off',
   },
   overrides: [
     {
@@ -27,4 +30,5 @@ module.exports = {
       },
     },
   ],
+
 };
