@@ -1,14 +1,18 @@
 <template>
     <div>
-        <h3>Db connections list</h3>
+      <div>
+        <ViewTitle title="Db connections" :is-waiting="false"></ViewTitle>
+    </div>
     </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import ViewTitle from '@/components/ViewTitle.vue';
 
 @Options({
   components: {
+    ViewTitle,
 
   },
 })
