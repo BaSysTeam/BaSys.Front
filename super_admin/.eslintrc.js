@@ -18,6 +18,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'no-shadow': 'off', // Turn off the base rule,
     '@typescript-eslint/no-explicit-any': 'off',
+    'linebreak-style': ['off', 'windows'],
   },
   overrides: [
     {
