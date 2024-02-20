@@ -6,6 +6,9 @@ module.exports = defineConfig({
     extract: false,
   },
   configureWebpack: {
+    output: {
+      filename: 'super_admin.js',
+    },
     optimization: {
       splitChunks: false,
     },
