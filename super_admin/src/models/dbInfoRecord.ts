@@ -17,12 +17,12 @@ export default class DbInfoRecord {
 
     constructor(options: { [key: string]: any }) {
       this.id = options.id;
-      this.appId = options.appId;
-      this.title = options.title;
-      this.dbKind = options.dbKind;
-      this.connectionString = options.connectionString;
-      this.memo = options.memo;
-      this.isDeleted = options.isDeleted;
+      this.appId = options.appId || '';
+      this.title = options.title || '';
+      this.dbKind = options.dbKind || DbKinds.SqlServer;
+      this.connectionString = options.connectionString || '';
+      this.memo = options.memo || '';
+      this.isDeleted = options.isDeleted || false;
     }
 
     equals(obj: any): boolean {
