@@ -65,6 +65,7 @@
               v-model:selection="selectedRecord"
               :value="appRecords"
               :metaKeySelection="true"
+              showGridlines
               selectionMode="single"
               dataKey="id"
               size="small"

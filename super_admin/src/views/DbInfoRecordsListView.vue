@@ -59,12 +59,13 @@
         <Divider class="m-2" />
       </div>
       <div class="grid">
-        <div class="col-6">
+        <div class="col-12">
           <div class="card m-1">
             <DataTable
               v-model:selection="selectedRecord"
               :value="dbInfoRecords"
               :metaKeySelection="true"
+              showGridlines
               selectionMode="single"
               dataKey="id"
               size="small"
