@@ -10,7 +10,7 @@
           <span class="p-buttonset">
             <Button
               label="Add"
-              severity="info"
+              severity="primary"
               size="small"
               outlined
               icon="pi pi-plus"
@@ -18,7 +18,7 @@
             />
             <Button
               label="Edit"
-              severity="info"
+              severity="primary"
               size="small"
               outlined
               icon="pi pi-pencil"
@@ -36,8 +36,7 @@
             />
           </span>
           <Button
-            label="Copy"
-            severity="info"
+            severity="primary"
             size="small"
             class="ml-1"
             outlined
