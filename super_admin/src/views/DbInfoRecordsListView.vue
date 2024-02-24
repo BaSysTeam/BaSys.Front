@@ -46,7 +46,7 @@
           />
           <SplitButton
             label="Actions"
-            severity="info"
+            severity="primary"
             size="small"
             class="ml-1"
             outlined
