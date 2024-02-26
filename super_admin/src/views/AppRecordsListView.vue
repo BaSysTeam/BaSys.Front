@@ -41,6 +41,7 @@
             class="ml-1"
             outlined
             icon="pi pi-copy"
+            v-tooltip.top="'Copy'"
             :disabled="isSelectedRecordEmpty"
             @click="copyAppRecord"
           />
@@ -62,16 +63,59 @@
           <div class="card m-1">
             <DataTable
               v-model:selection="selectedRecord"
+              v-model:filters="filters"
               :value="appRecords"
               :metaKeySelection="true"
+              :style="dataTableStyle"
+              @row-dblclick="editAppRecord"
               showGridlines
+              filterDisplay="menu"
               selectionMode="single"
               dataKey="id"
               size="small"
+              scrollable
+              scrollHeight="flex"
             >
-              <Column field="id" header="Id"></Column>
-              <Column field="title" header="Title"></Column>
-              <Column field="memo" header="Memo"></Column>
+              <template #empty> No items found. </template>
+              <Column field="id" header="Id">
+                <template #body="{ data }">
+                    {{ data.id }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText
+                      v-model="filterModel.value"
+                      type="text"
+                      class="p-column-filter"
+                      placeholder="Search by Id"
+                    />
+                </template>
+              </Column>
+              <Column field="title" header="Title">
+                <template #body="{ data }">
+                    {{ data.title }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText
+                      v-model="filterModel.value"
+                      type="text"
+                      class="p-column-filter"
+                      placeholder="Search by Title"
+                    />
+                </template>
+              </Column>
+              <Column field="memo" header="Memo">
+                <template #body="{ data }">
+                    {{ data.memo }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText
+                      v-model="filterModel.value"
+                      type="text"
+                      class="p-column-filter"
+                      placeholder="Search by Memo"
+                    />
+                </template>
+              </Column>
             </DataTable>
           </div>
         </div>
@@ -84,6 +128,7 @@
 
       <ConfirmationDialog
         v-if="isDeleteItemDialogVisible"
+        confirmText="Are you sure you want to delete the selected item?"
         @noClick="isDeleteItemDialogVisible = false"
         @yesClick="deleteAppRecord"
       />
@@ -91,7 +136,8 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { Options, mixins } from 'vue-class-component';
+import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import AppRecordDataProvider from '@/dataProviders/appRecordDataProvider';
 import ViewTitle from '@/components/ViewTitle.vue';
 import AppRecordsEditView from '@/components/AppRecordsEditView.vue';
@@ -102,7 +148,9 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import Dialog from 'primevue/dialog';
+import InputText from 'primevue/inputtext';
 import AppRecord from '@/models/appRecord';
+import { ResizeWindow } from '@/mixins/resizeWindow';
 
 @Options({
   components: {
@@ -115,9 +163,10 @@ import AppRecord from '@/models/appRecord';
     Column,
     Divider,
     Dialog,
+    InputText,
   },
 })
-export default class AppRecordsListView extends Vue {
+export default class AppRecordsListView extends mixins(ResizeWindow) {
   isAddDialogVisible = false;
 
   appRecord = new AppRecord({});
@@ -126,12 +175,18 @@ export default class AppRecordsListView extends Vue {
 
   isDeleteItemDialogVisible = false;
 
-  dataService = new AppRecordDataProvider();
+  dataProvider = new AppRecordDataProvider();
+
+  filters = {};
 
   actions = [
     {
       label: 'Update',
       command: () => this.actionUpdate(),
+    },
+    {
+      label: 'Clear filters',
+      command: () => this.initFilters(),
     },
   ];
 
@@ -139,16 +194,43 @@ export default class AppRecordsListView extends Vue {
 
   mounted() {
     this.actionUpdate();
+    this.initFilters();
   }
 
   get isSelectedRecordEmpty() {
     return Object.keys(this.selectedRecord).length === 0;
   }
 
+  get dataTableStyle() {
+    return {
+      height: `${this.windowHeight - 150}px`,
+    };
+  }
+
   actionUpdate() {
-    this.dataService.getAppRecords().then((result) => {
+    this.dataProvider.getAppRecords().then((result) => {
       this.appRecords = result;
     });
+  }
+
+  initFilters() {
+    this.filters = {
+      id:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+      },
+      title:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+      },
+      memo:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+      },
+    };
   }
 
   addAppRecord() {
@@ -165,7 +247,7 @@ export default class AppRecordsListView extends Vue {
 
   deleteAppRecord() {
     if (!this.isSelectedRecordEmpty) {
-      this.dataService.deleteAppRecord(new AppRecord(this.selectedRecord)).then((result) => {
+      this.dataProvider.deleteAppRecord(new AppRecord(this.selectedRecord)).then((result) => {
         if (result === true) {
           this.actionUpdate();
           this.selectedRecord = {};
@@ -179,7 +261,7 @@ export default class AppRecordsListView extends Vue {
   copyAppRecord() {
     if (!this.isSelectedRecordEmpty) {
       const copiedItem = new AppRecord(this.selectedRecord);
-      this.dataService.addAppRecord(copiedItem).then((result) => {
+      this.dataProvider.addAppRecord(copiedItem).then((result) => {
         if (result === true) {
           this.actionUpdate();
         }
@@ -191,7 +273,7 @@ export default class AppRecordsListView extends Vue {
     this.isAddDialogVisible = false;
 
     if (args.id === undefined) {
-      this.dataService.addAppRecord(args).then((result) => {
+      this.dataProvider.addAppRecord(args).then((result) => {
         if (result === true) {
           this.actionUpdate();
         }
@@ -199,7 +281,7 @@ export default class AppRecordsListView extends Vue {
     } else {
       const item = this.appRecords.find((x) => x.id === args.id);
       if (item) {
-        this.dataService.updateAppRecord(args).then((result) => {
+        this.dataProvider.updateAppRecord(args).then((result) => {
           if (result === true) {
             this.actionUpdate();
           }

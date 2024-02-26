@@ -41,6 +41,7 @@
             class="ml-1"
             outlined
             icon="pi pi-copy"
+            v-tooltip.top="'Copy'"
             :disabled="isSelectedRecordEmpty"
             @click="copyDbInfoRecord"
           />
@@ -62,24 +63,112 @@
           <div class="card m-1">
             <DataTable
               v-model:selection="selectedRecord"
+              v-model:filters="filters"
               :value="dbInfoRecords"
               :metaKeySelection="true"
+              :style="dataTableStyle"
+              @row-dblclick="editDbInfoRecord"
               showGridlines
+              filterDisplay="menu"
               selectionMode="single"
               dataKey="id"
               size="small"
+              scrollable
+              scrollHeight="flex"
             >
-              <Column field="id" header="Id"></Column>
-              <Column field="appId" header="AppId"></Column>
-              <Column field="title" header="Title"></Column>
-              <Column field="dbKind" header="DbKind">
-                <template #body="slotProps">
-                  {{ formatDbKind(slotProps.data.dbKind) }}
+              <Column field="id" header="Id" dataType="numeric">
+                <template #body="{ data }">
+                    {{ data.id }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputNumber v-model="filterModel.value" mode="decimal" />
                 </template>
               </Column>
-              <Column field="connectionString" header="Connection string"></Column>
-              <Column field="memo" header="Memo"></Column>
-              <Column field="isDeleted" header="IsDeleted"></Column>
+              <Column field="appId" header="AppId">
+                <template #body="{ data }">
+                    {{ data.appId }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText
+                      v-model="filterModel.value"
+                      type="text"
+                      class="p-column-filter"
+                      placeholder="Search by AppId"
+                    />
+                </template>
+              </Column>
+              <Column field="title" header="Title">
+                <template #body="{ data }">
+                    {{ data.title }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText
+                      v-model="filterModel.value"
+                      type="text"
+                      class="p-column-filter"
+                      placeholder="Search by Title"
+                    />
+                </template>
+              </Column>
+              <Column field="dbKind" header="DbKind">
+                <template #body="{ data }">
+                    {{ formatDbKind(data.dbKind) }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <Dropdown
+                      v-model="filterModel.value"
+                      :options="dbKinds"
+                      optionLabel="name"
+                      optionValue="identifier"
+                      placeholder="Select One"
+                      class="p-column-filter"
+                    >
+                      <template #option="slotProps">
+                          {{ slotProps.option.name }}
+                      </template>
+                    </Dropdown>
+                </template>
+              </Column>
+              <Column field="connectionString" header="Connection string">
+                <template #body="{ data }">
+                    {{ data.connectionString }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText
+                      v-model="filterModel.value"
+                      type="text"
+                      class="p-column-filter"
+                      placeholder="Search by ConnectionString"
+                    />
+                </template>
+              </Column>
+              <Column field="memo" header="Memo">
+                <template #body="{ data }">
+                    {{ data.memo }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText
+                      v-model="filterModel.value"
+                      type="text"
+                      class="p-column-filter"
+                      placeholder="Search by Memo"
+                    />
+                </template>
+              </Column>
+              <Column
+                field="isDeleted"
+                header="IsDeleted"
+                dataType="boolean"
+                bodyClass="text-center"
+              >
+                <template #body="{ data }">
+                    <i v-if="data.isDeleted" class="pi pi-check-circle text-green-500"></i>
+                </template>
+                <template #filter="{ filterModel }">
+                    <span for="isDeleted-filter" class="font-bold"> IsDeleted </span>
+                    <TriStateCheckbox v-model="filterModel.value" inputId="isDeleted-filter" />
+                </template>
+              </Column>
             </DataTable>
           </div>
         </div>
@@ -94,6 +183,7 @@
 
       <ConfirmationDialog
         v-if="isDeleteItemDialogVisible"
+        confirmText="Are you sure you want to delete the selected item?"
         @noClick="isDeleteItemDialogVisible = false"
         @yesClick="deleteDbInfoRecord"
       />
@@ -101,8 +191,9 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { Options, mixins } from 'vue-class-component';
 import { DbKinds } from '@/enums/dbKinds';
+import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import DbInfoRecordDataProvider from '@/dataProviders/dbInfoRecordDataProvider';
 import ViewTitle from '@/components/ViewTitle.vue';
 import DbInfoRecordsEditView from '@/components/DbInfoRecordsEditView.vue';
@@ -114,6 +205,11 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import Dialog from 'primevue/dialog';
+import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
+import TriStateCheckbox from 'primevue/tristatecheckbox';
+import Dropdown from 'primevue/dropdown';
+import { ResizeWindow } from '@/mixins/resizeWindow';
 
 @Options({
   components: {
@@ -126,9 +222,13 @@ import Dialog from 'primevue/dialog';
     Column,
     Divider,
     Dialog,
+    InputNumber,
+    InputText,
+    TriStateCheckbox,
+    Dropdown,
   },
 })
-export default class DbInfoRecordsListView extends Vue {
+export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dbInfoRecord = new DbInfoRecord({});
 
   dataService = new DbInfoRecordDataProvider();
@@ -139,6 +239,8 @@ export default class DbInfoRecordsListView extends Vue {
 
   selectedRecord = {};
 
+  filters = {};
+
   dbInfoRecords: DbInfoRecord[] = [];
 
   actions = [
@@ -146,20 +248,72 @@ export default class DbInfoRecordsListView extends Vue {
       label: 'Update',
       command: () => this.actionUpdate(),
     },
+    {
+      label: 'Clear filters',
+      command: () => this.initFilters(),
+    },
   ];
+
+  dbKinds = ([
+    { name: DbKinds[DbKinds.Postgres], identifier: DbKinds.Postgres },
+    { name: DbKinds[DbKinds.SqlServer], identifier: DbKinds.SqlServer },
+  ]);
 
   mounted() {
     this.actionUpdate();
+    this.initFilters();
   }
 
   get isSelectedRecordEmpty() {
     return Object.keys(this.selectedRecord).length === 0;
   }
 
+  get dataTableStyle() {
+    return {
+      height: `${this.windowHeight - 150}px`,
+    };
+  }
+
   actionUpdate() {
     this.dataService.getDbInfoRecords().then((result) => {
       this.dbInfoRecords = result;
     });
+  }
+
+  initFilters() {
+    this.filters = {
+      id:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+      },
+      appId:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+      },
+      title:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+      },
+      dbKind:
+      {
+        operator: FilterOperator.OR,
+        constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
+      },
+      connectionString:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+      },
+      memo:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+      },
+      isDeleted: { value: null, matchMode: FilterMatchMode.EQUALS },
+    };
   }
 
   addDbInfoRecord() {

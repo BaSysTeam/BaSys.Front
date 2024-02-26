@@ -5,7 +5,7 @@
         :style="{width: '25rem'}"
         :closable="false"
         :draggable="false"
-        :header="header"
+        header="AppRecord"
         class="pb-0"
         modal
       >
@@ -89,17 +89,7 @@ import AppRecord from '@/models/appRecord';
   },
 })
 export default class AppRecordsEditView extends Vue {
-    header = '';
-
     appRecord!: AppRecord;
-
-    mounted() {
-      if (this.appRecord.id === undefined) {
-        this.header = 'Add AppRecord';
-      } else {
-        this.header = 'Edit AppRecord';
-      }
-    }
 
     cancelClick() {
       this.$emit('cancel');

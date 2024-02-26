@@ -5,7 +5,7 @@ export default class DbInfoRecordService {
     private dbInfoRecords: DbInfoRecord[] = [
       new DbInfoRecord({
         id: 1,
-        appId: 'appId_1',
+        appId: 'appRecord_1',
         title: 'title_1',
         dbKind: DbKinds.Postgres,
         connectionString: 'connectionString_1',
@@ -14,16 +14,16 @@ export default class DbInfoRecordService {
       }),
       new DbInfoRecord({
         id: 2,
-        appId: 'appId_2',
+        appId: 'appRecord_2',
         title: 'title_2',
         dbKind: DbKinds.Postgres,
         connectionString: 'connectionString_2',
         memo: 'memo_2',
-        isDeleted: false,
+        isDeleted: true,
       }),
       new DbInfoRecord({
         id: 3,
-        appId: 'appId_3',
+        appId: 'appRecord_3',
         title: 'title_3',
         dbKind: DbKinds.SqlServer,
         connectionString: 'connectionString_3',
