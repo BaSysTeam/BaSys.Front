@@ -1,4 +1,5 @@
 const { defineConfig } = require('@vue/cli-service');
+const path = require('path');
 
 module.exports = defineConfig({
   transpileDependencies: true,
@@ -13,4 +14,5 @@ module.exports = defineConfig({
       splitChunks: false,
     },
   },
+  outputDir: path.resolve(__dirname, '../../BaSys.Back/src/BaSys.Host/wwwroot/app/super_admin')
 });
