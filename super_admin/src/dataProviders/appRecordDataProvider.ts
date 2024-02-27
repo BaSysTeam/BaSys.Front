@@ -3,27 +3,27 @@ import AppRecord from '@/models/appRecord';
 export default class AppRecordService {
     private records: Array<AppRecord> = [
       new AppRecord({
-        id: '1',
+        id: 'appRecord_1',
         memo: 'item1',
         title: 'item1',
       }),
       new AppRecord({
-        id: '2',
+        id: 'appRecord_2',
         memo: 'item2',
         title: 'item2',
       }),
       new AppRecord({
-        id: '3',
+        id: 'appRecord_3',
         memo: 'item3',
         title: 'item3',
       }),
       new AppRecord({
-        id: '4',
+        id: 'appRecord_4',
         memo: 'item4',
         title: 'item4',
       }),
       new AppRecord({
-        id: '5',
+        id: 'appRecord_5',
         memo: 'item5',
         title: 'item5',
       }),

@@ -11,11 +11,24 @@
         >
             <div class="confirmation-content">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span>Are you sure you want to delete the selected item?</span>
+                <span>{{ confirmText }}</span>
             </div>
             <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="$emit('noClick')"/>
-                <Button label="Yes" icon="pi pi-check" text @click="$emit('yesClick')" />
+                <Button
+                  label="No"
+                  icon="pi pi-times"
+                  size="small"
+                  severity="secondary"
+                  @click="$emit('noClick')"
+                  outlined
+                />
+                <Button
+                  label="Yes"
+                  icon="pi pi-check"
+                  size="small"
+                  @click="$emit('yesClick')"
+                  outlined
+                />
             </template>
       </Dialog>
     </div>
@@ -31,13 +44,16 @@ import Button from 'primevue/button';
     Dialog,
     Button,
   },
+  props: {
+    confirmText: String,
+  },
   emits: {
     noClick: null,
     yesClick: null,
   },
 })
 export default class ConfirmationDialog extends Vue {
-
+  confirmText!: string;
 }
 </script>
 

@@ -5,7 +5,7 @@
         :style="{width: '55rem'}"
         :closable="false"
         :draggable="false"
-        :header="header"
+        header="DbInfoRecord"
         class="pb-0"
         modal
       >
@@ -13,9 +13,9 @@
           <div class="grid">
             <div class="col">
               <span id="dbInfoRecordAppId">AppId</span>
-              <InputText
+              <Dropdown
                 v-model="dbInfoRecord.appId"
-                size="small"
+                :options="appIds"
                 aria-labelledby="dbInfoRecordAppId"
                 class="w-full"
               />
@@ -90,6 +90,7 @@
 import { ref } from 'vue';
 import { Options, Vue } from 'vue-class-component';
 import { DbKinds } from '@/enums/dbKinds';
+import AppRecordDataProvider from '@/dataProviders/appRecordDataProvider';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -119,27 +120,30 @@ import DbInfoRecord from '@/models/dbInfoRecord';
   },
 })
 export default class DbInfoRecordsEditView extends Vue {
-    header = '';
-
     dbInfoRecord!: DbInfoRecord;
 
     selectedDbKind = ref();
+
+    dataService = new AppRecordDataProvider();
 
     dbKinds = ([
       { name: DbKinds[DbKinds.Postgres], identifier: DbKinds.Postgres },
       { name: DbKinds[DbKinds.SqlServer], identifier: DbKinds.SqlServer },
     ]);
 
+    appIds:string[] = [];
+
     mounted() {
-      if (this.dbInfoRecord.id === undefined) {
-        this.header = 'Add DbInfoRecord';
-      } else {
+      if (this.dbInfoRecord.id !== undefined) {
         const dbKind = this.dbKinds.find((x) => x.identifier === this.dbInfoRecord.dbKind);
         if (dbKind) {
           this.selectedDbKind = ref(dbKind);
         }
-        this.header = 'Edit DbInfoRecord';
       }
+
+      this.dataService.getAppRecords().then((result) => {
+        this.appIds = result.map(({ id }) => id);
+      });
     }
 
     cancelClick() {
