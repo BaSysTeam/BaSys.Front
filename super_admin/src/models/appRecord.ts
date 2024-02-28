@@ -1,8 +1,6 @@
 export default class AppRecord {
     id: string;
-
     title = '';
-
     memo = '';
 
     constructor(options: { [key: string]: any }) {

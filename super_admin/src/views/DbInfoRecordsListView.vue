@@ -230,17 +230,11 @@ import { ResizeWindow } from '@/mixins/resizeWindow';
 })
 export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dbInfoRecord = new DbInfoRecord({});
-
   dataService = new DbInfoRecordDataProvider();
-
   isAddDialogVisible = false;
-
   isDeleteItemDialogVisible = false;
-
   selectedRecord = {};
-
   filters = {};
-
   dbInfoRecords: DbInfoRecord[] = [];
 
   actions = [
