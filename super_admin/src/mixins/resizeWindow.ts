@@ -5,17 +5,17 @@ import { Options, Vue } from 'vue-class-component';
 export class ResizeWindow extends Vue {
     windowHeight = window.innerHeight;
 
-    mounted() {
+    mounted(): void {
       this.$nextTick(() => {
         window.addEventListener('resize', this.onResize);
       });
     }
 
-    beforeDestroy() {
+    beforeDestroy(): void {
       window.removeEventListener('resize', this.onResize);
     }
 
-    onResize() {
+    onResize(): void {
       this.windowHeight = window.innerHeight;
     }
 }

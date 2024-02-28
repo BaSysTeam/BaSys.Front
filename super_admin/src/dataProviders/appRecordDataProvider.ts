@@ -29,18 +29,18 @@ export default class AppRecordService {
       }),
     ];
 
-    getAppRecords() {
+    getAppRecords(): Promise<AppRecord[]> {
       return Promise.resolve(this.records);
     }
 
-    addAppRecord(param: AppRecord) {
+    addAppRecord(param: AppRecord): Promise<boolean> {
       const newItem = param;
       newItem.id = this.records[this.records.length - 1].id + 1;
       this.records.push(param);
       return Promise.resolve(true);
     }
 
-    updateAppRecord(param: AppRecord) {
+    updateAppRecord(param: AppRecord): Promise<boolean> {
       const item = this.records.find((x) => x.id === param.id);
       if (item) {
         item.title = param.title;
@@ -51,7 +51,7 @@ export default class AppRecordService {
       return Promise.resolve(false);
     }
 
-    deleteAppRecord(param: AppRecord) {
+    deleteAppRecord(param: AppRecord): Promise<boolean> {
       const item = this.records.find((x) => x.id === param.id);
       if (item) {
         const index = this.records.indexOf(item);

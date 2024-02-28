@@ -1,5 +1,5 @@
 <template>
-  <AppHeader title="BaSys: DB manage"></AppHeader>
+  <AppHeaderComponent title="BaSys: DB manage"></AppHeaderComponent>
   <div class="grid h-screen" style="margin-top:0">
     <div class="bs-nav-panel col-fixed" style="padding:0">
       <nav>
@@ -29,11 +29,11 @@
 import { Options, Vue } from 'vue-class-component';
 import { ref } from 'vue';
 import Menu from 'primevue/menu';
-import AppHeader from './components/AppHeader.vue';
+import AppHeaderComponent from './components/AppHeaderComponent.vue';
 
 @Options({
   components: {
-    AppHeader,
+    AppHeaderComponent,
     Menu,
   },
 })
