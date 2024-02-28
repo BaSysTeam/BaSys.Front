@@ -133,7 +133,7 @@ export default class DbInfoRecordsEditView extends Vue {
 
     appIds:string[] = [];
 
-    mounted() {
+    mounted(): void {
       if (this.dbInfoRecord.id !== undefined) {
         const dbKind = this.dbKinds.find((x) => x.identifier === this.dbInfoRecord.dbKind);
         if (dbKind) {
@@ -146,11 +146,11 @@ export default class DbInfoRecordsEditView extends Vue {
       });
     }
 
-    cancelClick() {
+    cancelClick(): void {
       this.$emit('cancel');
     }
 
-    saveClick() {
+    saveClick(): void {
       this.$emit('save', this.dbInfoRecord);
     }
 }

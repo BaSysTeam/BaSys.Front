@@ -32,11 +32,11 @@ export default class DbInfoRecordService {
       }),
     ];
 
-    getDbInfoRecords() {
+    getDbInfoRecords(): Promise<DbInfoRecord[]> {
       return Promise.resolve(this.dbInfoRecords);
     }
 
-    addDbInfoRecord(param: DbInfoRecord) {
+    addDbInfoRecord(param: DbInfoRecord): Promise<boolean> {
       const newItem = param;
       newItem.id = this.dbInfoRecords[this.dbInfoRecords.length - 1].id + 1;
       this.dbInfoRecords.push(param);
@@ -44,7 +44,7 @@ export default class DbInfoRecordService {
       return Promise.resolve(true);
     }
 
-    deleteDbInfoRecord(param: DbInfoRecord) {
+    deleteDbInfoRecord(param: DbInfoRecord): Promise<boolean> {
       const item = this.dbInfoRecords.find((x) => x.id === param.id);
       if (item) {
         const index = this.dbInfoRecords.indexOf(item);
@@ -55,7 +55,7 @@ export default class DbInfoRecordService {
       return Promise.resolve(false);
     }
 
-    updateDbInfoRecord(param: DbInfoRecord) {
+    updateDbInfoRecord(param: DbInfoRecord): Promise<boolean> {
       const item = this.dbInfoRecords.find((x) => x.id === param.id);
       if (item) {
         item.appId = param.appId;

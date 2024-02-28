@@ -91,11 +91,11 @@ import AppRecord from '@/models/appRecord';
 export default class AppRecordsEditView extends Vue {
     appRecord!: AppRecord;
 
-    cancelClick() {
+    cancelClick(): void {
       this.$emit('cancel');
     }
 
-    saveClick() {
+    saveClick(): void {
       this.$emit('save', this.appRecord);
     }
 }

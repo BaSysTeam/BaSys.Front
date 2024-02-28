@@ -192,31 +192,31 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
 
   appRecords: AppRecord[] = [];
 
-  beforeMount() {
+  beforeMount(): void {
     this.initFilters();
   }
 
-  mounted() {
+  mounted(): void {
     this.actionUpdate();
   }
 
-  get isSelectedRecordEmpty() {
+  get isSelectedRecordEmpty(): boolean {
     return Object.keys(this.selectedRecord).length === 0;
   }
 
-  get dataTableStyle() {
+  get dataTableStyle(): object {
     return {
       height: `${this.windowHeight - 150}px`,
     };
   }
 
-  actionUpdate() {
+  actionUpdate(): void {
     this.dataProvider.getAppRecords().then((result) => {
       this.appRecords = result;
     });
   }
 
-  initFilters() {
+  initFilters(): void {
     this.filters = {
       id:
       {
@@ -236,19 +236,19 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     };
   }
 
-  addAppRecord() {
+  addAppRecord(): void {
     this.appRecord = new AppRecord({});
     this.isAddDialogVisible = true;
   }
 
-  editAppRecord() {
+  editAppRecord(): void {
     if (!this.isSelectedRecordEmpty) {
       this.appRecord = new AppRecord(this.selectedRecord);
       this.isAddDialogVisible = true;
     }
   }
 
-  deleteAppRecord() {
+  deleteAppRecord(): void {
     if (!this.isSelectedRecordEmpty) {
       this.dataProvider.deleteAppRecord(new AppRecord(this.selectedRecord)).then((result) => {
         if (result === true) {
@@ -261,7 +261,7 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     this.isDeleteItemDialogVisible = false;
   }
 
-  copyAppRecord() {
+  copyAppRecord(): void {
     if (!this.isSelectedRecordEmpty) {
       const copiedItem = new AppRecord(this.selectedRecord);
       this.dataProvider.addAppRecord(copiedItem).then((result) => {
@@ -272,7 +272,7 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     }
   }
 
-  saveAppRecord(args: AppRecord) {
+  saveAppRecord(args: AppRecord): void {
     this.isAddDialogVisible = false;
 
     if (args.id === undefined) {
@@ -293,7 +293,7 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     }
   }
 
-  deleteDialogOpen() {
+  deleteDialogOpen(): void {
     if (!this.isSelectedRecordEmpty) {
       this.isDeleteItemDialogVisible = true;
     }

@@ -259,31 +259,31 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     { name: DbKinds[DbKinds.SqlServer], identifier: DbKinds.SqlServer },
   ]);
 
-  beforeMount() {
+  beforeMount(): void {
     this.initFilters();
   }
 
-  mounted() {
+  mounted(): void {
     this.actionUpdate();
   }
 
-  get isSelectedRecordEmpty() {
+  get isSelectedRecordEmpty(): boolean {
     return Object.keys(this.selectedRecord).length === 0;
   }
 
-  get dataTableStyle() {
+  get dataTableStyle(): object {
     return {
       height: `${this.windowHeight - 150}px`,
     };
   }
 
-  actionUpdate() {
+  actionUpdate(): void {
     this.dataService.getDbInfoRecords().then((result) => {
       this.dbInfoRecords = result;
     });
   }
 
-  initFilters() {
+  initFilters(): void {
     this.filters = {
       id:
       {
@@ -319,19 +319,19 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     };
   }
 
-  addDbInfoRecord() {
+  addDbInfoRecord(): void {
     this.dbInfoRecord = new DbInfoRecord({});
     this.isAddDialogVisible = true;
   }
 
-  editDbInfoRecord() {
+  editDbInfoRecord(): void {
     if (!this.isSelectedRecordEmpty) {
       this.dbInfoRecord = new DbInfoRecord(this.selectedRecord);
       this.isAddDialogVisible = true;
     }
   }
 
-  deleteDbInfoRecord() {
+  deleteDbInfoRecord(): void {
     if (!this.isSelectedRecordEmpty) {
       this.dataService.deleteDbInfoRecord(new DbInfoRecord(this.selectedRecord))
         .then((result) => {
@@ -345,7 +345,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     this.isDeleteItemDialogVisible = false;
   }
 
-  copyDbInfoRecord() {
+  copyDbInfoRecord(): void {
     if (!this.isSelectedRecordEmpty) {
       const copiedItem = new DbInfoRecord(this.selectedRecord);
       this.dataService.addDbInfoRecord(copiedItem).then((result) => {
@@ -356,7 +356,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     }
   }
 
-  saveDbInfoRecord(args: DbInfoRecord) {
+  saveDbInfoRecord(args: DbInfoRecord): void {
     this.isAddDialogVisible = false;
 
     if (args.id === undefined) {
@@ -377,11 +377,11 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     }
   }
 
-  formatDbKind(kind: DbKinds) {
+  formatDbKind(kind: DbKinds): string {
     return DbKinds[kind];
   }
 
-  deleteDialogOpen() {
+  deleteDialogOpen(): void {
     if (!this.isSelectedRecordEmpty) {
       this.isDeleteItemDialogVisible = true;
     }
