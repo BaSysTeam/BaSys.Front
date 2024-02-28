@@ -2,7 +2,7 @@
     <div>
       <div class="grid">
         <div class="col">
-          <ViewTitle title="Db connections" :is-waiting="false" />
+          <ViewTitleComponent title="Db connections" :is-waiting="false" />
         </div>
       </div>
       <div class="grid">
@@ -174,14 +174,14 @@
         </div>
       </div>
 
-      <DbInfoRecordsEditView
+      <DbInfoRecordsEditComponent
         v-if="isAddDialogVisible"
         :dbInfoRecord="dbInfoRecord"
         @cancel="isAddDialogVisible = false"
         @save="saveDbInfoRecord"
       />
 
-      <ConfirmationDialog
+      <ConfirmationDialogComponent
         v-if="isDeleteItemDialogVisible"
         confirmText="Are you sure you want to delete the selected item?"
         @noClick="isDeleteItemDialogVisible = false"
@@ -195,9 +195,9 @@ import { Options, mixins } from 'vue-class-component';
 import { DbKinds } from '@/enums/dbKinds';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import DbInfoRecordDataProvider from '@/dataProviders/dbInfoRecordDataProvider';
-import ViewTitle from '@/components/ViewTitle.vue';
-import DbInfoRecordsEditView from '@/components/DbInfoRecordsEditView.vue';
-import ConfirmationDialog from '@/components/ConfirmationDialog.vue';
+import ViewTitleComponent from '@/components/ViewTitleComponent.vue';
+import DbInfoRecordsEditComponent from '@/components/DbInfoRecordsEditComponent.vue';
+import ConfirmationDialogComponent from '@/components/ConfirmationDialogComponent.vue';
 import DbInfoRecord from '@/models/dbInfoRecord';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
@@ -213,9 +213,9 @@ import { ResizeWindow } from '@/mixins/resizeWindow';
 
 @Options({
   components: {
-    ViewTitle,
-    DbInfoRecordsEditView,
-    ConfirmationDialog,
+    ViewTitleComponent,
+    DbInfoRecordsEditComponent,
+    ConfirmationDialogComponent,
     Button,
     SplitButton,
     DataTable,

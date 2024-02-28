@@ -2,7 +2,7 @@
     <div>
       <div class="grid">
         <div class="col">
-          <ViewTitle title="Applications" :is-modified="false" :is-waiting="false" />
+          <ViewTitleComponent title="Applications" :is-modified="false" :is-waiting="false" />
         </div>
       </div>
       <div class="grid">
@@ -121,12 +121,12 @@
         </div>
       </div>
 
-      <AppRecordsEditView v-if="isAddDialogVisible"
+      <AppRecordsEditComponent v-if="isAddDialogVisible"
                           @cancel="isAddDialogVisible = false"
                           @save="saveAppRecord"
                           :appRecord="appRecord"/>
 
-      <ConfirmationDialog
+      <ConfirmationDialogComponent
         v-if="isDeleteItemDialogVisible"
         confirmText="Are you sure you want to delete the selected item?"
         @noClick="isDeleteItemDialogVisible = false"
@@ -139,9 +139,9 @@
 import { Options, mixins } from 'vue-class-component';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import AppRecordDataProvider from '@/dataProviders/appRecordDataProvider';
-import ViewTitle from '@/components/ViewTitle.vue';
-import AppRecordsEditView from '@/components/AppRecordsEditView.vue';
-import ConfirmationDialog from '@/components/ConfirmationDialog.vue';
+import ViewTitleComponent from '@/components/ViewTitleComponent.vue';
+import AppRecordsEditComponent from '@/components/AppRecordsEditComponent.vue';
+import ConfirmationDialogComponent from '@/components/ConfirmationDialogComponent.vue';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import DataTable from 'primevue/datatable';
@@ -154,9 +154,9 @@ import { ResizeWindow } from '@/mixins/resizeWindow';
 
 @Options({
   components: {
-    ViewTitle,
-    AppRecordsEditView,
-    ConfirmationDialog,
+    ViewTitleComponent,
+    AppRecordsEditComponent,
+    ConfirmationDialogComponent,
     Button,
     SplitButton,
     DataTable,
