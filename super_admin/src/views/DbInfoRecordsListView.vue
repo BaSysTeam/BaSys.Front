@@ -259,9 +259,12 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     { name: DbKinds[DbKinds.SqlServer], identifier: DbKinds.SqlServer },
   ]);
 
+  beforeMount() {
+    this.initFilters();
+  }
+
   mounted() {
     this.actionUpdate();
-    this.initFilters();
   }
 
   get isSelectedRecordEmpty() {
@@ -299,7 +302,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       },
       dbKind:
       {
-        operator: FilterOperator.OR,
+        operator: FilterOperator.AND,
         constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }],
       },
       connectionString:

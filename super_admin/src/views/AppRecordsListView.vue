@@ -192,9 +192,12 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
 
   appRecords: AppRecord[] = [];
 
+  beforeMount() {
+    this.initFilters();
+  }
+
   mounted() {
     this.actionUpdate();
-    this.initFilters();
   }
 
   get isSelectedRecordEmpty() {
