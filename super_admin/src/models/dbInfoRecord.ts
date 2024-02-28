@@ -2,17 +2,11 @@ import { DbKinds } from '@/enums/dbKinds';
 
 export default class DbInfoRecord {
     id: number;
-
     appId: string;
-
     title: string;
-
     dbKind: DbKinds;
-
     connectionString: string;
-
     memo: string;
-
     isDeleted: boolean;
 
     constructor(options: { [key: string]: any }) {

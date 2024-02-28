@@ -20,6 +20,11 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'linebreak-style': ['off', 'windows'],
     '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
+    'lines-between-class-members': [
+      'error',
+      'always',
+      { exceptAfterSingleLine: true },
+    ],
   },
   overrides: [
     {

@@ -168,15 +168,10 @@ import { ResizeWindow } from '@/mixins/resizeWindow';
 })
 export default class AppRecordsListView extends mixins(ResizeWindow) {
   isAddDialogVisible = false;
-
   appRecord = new AppRecord({});
-
   selectedRecord = {};
-
   isDeleteItemDialogVisible = false;
-
   dataProvider = new AppRecordDataProvider();
-
   filters = {};
 
   actions = [
