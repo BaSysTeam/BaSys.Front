@@ -25,6 +25,7 @@ module.exports = {
       'always',
       { exceptAfterSingleLine: true },
     ],
+    'import/no-extraneous-dependencies': 'off',
   },
   overrides: [
     {

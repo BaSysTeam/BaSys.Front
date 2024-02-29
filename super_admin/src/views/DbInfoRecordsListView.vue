@@ -1,5 +1,6 @@
 <template>
     <div>
+      <Toast/>
       <div class="grid">
         <div class="col">
           <ViewTitleComponent title="Db connections" :is-waiting="false" />
@@ -14,7 +15,7 @@
               size="small"
               outlined
               icon="pi pi-plus"
-              @click="addDbInfoRecord"
+              @click="addDialogOpen"
             />
             <Button
               label="Edit"
@@ -23,7 +24,7 @@
               outlined
               icon="pi pi-pencil"
               :disabled="isSelectedRecordEmpty"
-              @click="editDbInfoRecord"
+              @click="editDialogOpen"
             />
             <Button
               label="Delete"
@@ -67,7 +68,7 @@
               :value="dbInfoRecords"
               :metaKeySelection="true"
               :style="dataTableStyle"
-              @row-dblclick="editDbInfoRecord"
+              @row-dblclick="editDialogOpen"
               showGridlines
               filterDisplay="menu"
               selectionMode="single"
@@ -194,6 +195,8 @@
 import { Options, mixins } from 'vue-class-component';
 import { DbKinds } from '@/enums/dbKinds';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
+import { useToast } from 'primevue/usetoast';
+import { ResizeWindow } from '@/mixins/resizeWindow';
 import DbInfoRecordDataProvider from '@/dataProviders/dbInfoRecordDataProvider';
 import ViewTitleComponent from '@/components/ViewTitleComponent.vue';
 import DbInfoRecordsEditComponent from '@/components/DbInfoRecordsEditComponent.vue';
@@ -209,7 +212,7 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import Dropdown from 'primevue/dropdown';
-import { ResizeWindow } from '@/mixins/resizeWindow';
+import Toast from 'primevue/toast';
 
 @Options({
   components: {
@@ -226,16 +229,19 @@ import { ResizeWindow } from '@/mixins/resizeWindow';
     InputText,
     TriStateCheckbox,
     Dropdown,
+    Toast,
   },
 })
 export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dbInfoRecord = new DbInfoRecord({});
-  dataService = new DbInfoRecordDataProvider();
+  dataProvider = new DbInfoRecordDataProvider();
   isAddDialogVisible = false;
   isDeleteItemDialogVisible = false;
+  isModelAdding = false;
   selectedRecord = {};
   filters = {};
   dbInfoRecords: DbInfoRecord[] = [];
+  toast = useToast();
 
   actions = [
     {
@@ -271,10 +277,11 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     };
   }
 
-  actionUpdate(): void {
-    this.dataService.getDbInfoRecords().then((result) => {
-      this.dbInfoRecords = result;
-    });
+  async actionUpdate(): Promise<void> {
+    const response = await this.dataProvider.getDbInfoRecords();
+    if (response.isOK) {
+      this.dbInfoRecords = response.data;
+    }
   }
 
   initFilters(): void {
@@ -313,61 +320,51 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     };
   }
 
-  addDbInfoRecord(): void {
-    this.dbInfoRecord = new DbInfoRecord({});
-    this.isAddDialogVisible = true;
-  }
-
-  editDbInfoRecord(): void {
+  async deleteDbInfoRecord(): Promise<void> {
     if (!this.isSelectedRecordEmpty) {
-      this.dbInfoRecord = new DbInfoRecord(this.selectedRecord);
-      this.isAddDialogVisible = true;
-    }
-  }
-
-  deleteDbInfoRecord(): void {
-    if (!this.isSelectedRecordEmpty) {
-      this.dataService.deleteDbInfoRecord(new DbInfoRecord(this.selectedRecord))
-        .then((result) => {
-          if (result === true) {
-            this.actionUpdate();
-            this.selectedRecord = {};
-          }
-        });
+      const deletedItem = new DbInfoRecord(this.selectedRecord);
+      const response = await this.dataProvider.deleteDbInfoRecord(deletedItem.id);
+      if (response.isOK) {
+        this.actionUpdate();
+        this.selectedRecord = {};
+        this.showToastSuccess('The item was deleted successfully');
+      } else {
+        this.showToastError(response.message);
+      }
     }
 
     this.isDeleteItemDialogVisible = false;
   }
 
-  copyDbInfoRecord(): void {
+  async copyDbInfoRecord(): Promise<void> {
     if (!this.isSelectedRecordEmpty) {
       const copiedItem = new DbInfoRecord(this.selectedRecord);
-      this.dataService.addDbInfoRecord(copiedItem).then((result) => {
-        if (result === true) {
-          this.actionUpdate();
-        }
-      });
+      const response = await this.dataProvider.addDbInfoRecord(copiedItem);
+      if (response.isOK) {
+        this.actionUpdate();
+        this.showToastSuccess('The item was copied successfully');
+      } else {
+        this.showToastError(response.message);
+      }
     }
   }
 
-  saveDbInfoRecord(args: DbInfoRecord): void {
+  async saveDbInfoRecord(args: DbInfoRecord): Promise<void> {
     this.isAddDialogVisible = false;
+    let response = null;
 
-    if (args.id === undefined) {
-      this.dataService.addDbInfoRecord(args).then((result) => {
-        if (result === true) {
-          this.actionUpdate();
-        }
-      });
+    if (this.isModelAdding) {
+      response = await this.dataProvider.addDbInfoRecord(args);
     } else {
-      const item = this.dbInfoRecords.find((x) => x.id === args.id);
-      if (item) {
-        this.dataService.updateDbInfoRecord(args).then((result) => {
-          if (result === true) {
-            this.actionUpdate();
-          }
-        });
-      }
+      response = await this.dataProvider.updateDbInfoRecord(args);
+    }
+
+    if (response.isOK) {
+      const msg = this.isModelAdding ? 'The item was added successfully' : 'The item was updated successfully';
+      this.showToastSuccess(msg);
+      this.actionUpdate();
+    } else {
+      this.showToastError(response.message);
     }
   }
 
@@ -375,10 +372,46 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     return DbKinds[kind];
   }
 
+  addDialogOpen(): void {
+    this.dbInfoRecord = new DbInfoRecord({});
+    this.isAddDialogVisible = true;
+    this.isModelAdding = true;
+  }
+
+  editDialogOpen(): void {
+    if (!this.isSelectedRecordEmpty) {
+      this.dbInfoRecord = new DbInfoRecord(this.selectedRecord);
+      this.isAddDialogVisible = true;
+      this.isModelAdding = false;
+    }
+  }
+
   deleteDialogOpen(): void {
     if (!this.isSelectedRecordEmpty) {
       this.isDeleteItemDialogVisible = true;
     }
+  }
+
+  showToastError(msg: string): void {
+    this.toast.add(
+      {
+        severity: 'error',
+        summary: 'Error',
+        detail: msg,
+        life: 3000,
+      },
+    );
+  }
+
+  showToastSuccess(msg: string): void {
+    this.toast.add(
+      {
+        severity: 'success',
+        summary: 'Success ',
+        detail: msg,
+        life: 3000,
+      },
+    );
   }
 }
 </script>

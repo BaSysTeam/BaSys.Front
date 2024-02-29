@@ -1,5 +1,6 @@
 <template>
     <div>
+      <Toast/>
       <div class="grid">
         <div class="col">
           <ViewTitleComponent title="Applications" :is-modified="false" :is-waiting="false" />
@@ -14,7 +15,7 @@
               size="small"
               outlined
               icon="pi pi-plus"
-              @click="addAppRecord"
+              @click="addDialogOpen"
             />
             <Button
               label="Edit"
@@ -23,7 +24,7 @@
               outlined
               icon="pi pi-pencil"
               :disabled="isSelectedRecordEmpty"
-              @click="editAppRecord"
+              @click="editDialogOpen"
             />
             <Button
               label="Delete"
@@ -67,7 +68,7 @@
               :value="appRecords"
               :metaKeySelection="true"
               :style="dataTableStyle"
-              @row-dblclick="editAppRecord"
+              @row-dblclick="editDialogOpen"
               showGridlines
               filterDisplay="menu"
               selectionMode="single"
@@ -138,6 +139,8 @@
 <script lang="ts">
 import { Options, mixins } from 'vue-class-component';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
+import { useToast } from 'primevue/usetoast';
+import { ResizeWindow } from '@/mixins/resizeWindow';
 import AppRecordDataProvider from '@/dataProviders/appRecordDataProvider';
 import ViewTitleComponent from '@/components/ViewTitleComponent.vue';
 import AppRecordsEditComponent from '@/components/AppRecordsEditComponent.vue';
@@ -149,8 +152,8 @@ import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
+import Toast from 'primevue/toast';
 import AppRecord from '@/models/appRecord';
-import { ResizeWindow } from '@/mixins/resizeWindow';
 
 @Options({
   components: {
@@ -164,15 +167,18 @@ import { ResizeWindow } from '@/mixins/resizeWindow';
     Divider,
     Dialog,
     InputText,
+    Toast,
   },
 })
 export default class AppRecordsListView extends mixins(ResizeWindow) {
   isAddDialogVisible = false;
+  isModelAdding = false;
   appRecord = new AppRecord({});
   selectedRecord = {};
   isDeleteItemDialogVisible = false;
   dataProvider = new AppRecordDataProvider();
   filters = {};
+  toast = useToast();
 
   actions = [
     {
@@ -205,10 +211,11 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     };
   }
 
-  actionUpdate(): void {
-    this.dataProvider.getAppRecords().then((result) => {
-      this.appRecords = result;
-    });
+  async actionUpdate(): Promise<void> {
+    const response = await this.dataProvider.getAppRecords();
+    if (response.isOK) {
+      this.appRecords = response.data;
+    }
   }
 
   initFilters(): void {
@@ -231,60 +238,67 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     };
   }
 
-  addAppRecord(): void {
-    this.appRecord = new AppRecord({});
-    this.isAddDialogVisible = true;
-  }
-
-  editAppRecord(): void {
+  async deleteAppRecord(): Promise<void> {
     if (!this.isSelectedRecordEmpty) {
-      this.appRecord = new AppRecord(this.selectedRecord);
-      this.isAddDialogVisible = true;
-    }
-  }
-
-  deleteAppRecord(): void {
-    if (!this.isSelectedRecordEmpty) {
-      this.dataProvider.deleteAppRecord(new AppRecord(this.selectedRecord)).then((result) => {
-        if (result === true) {
-          this.actionUpdate();
-          this.selectedRecord = {};
-        }
-      });
+      const deletedItem = new AppRecord(this.selectedRecord);
+      const response = await this.dataProvider.deleteAppRecord(deletedItem.id);
+      if (response.isOK) {
+        this.actionUpdate();
+        this.selectedRecord = {};
+        this.showToastSuccess('The item was deleted successfully');
+      } else {
+        this.showToastError(response.message);
+      }
     }
 
     this.isDeleteItemDialogVisible = false;
   }
 
-  copyAppRecord(): void {
+  async copyAppRecord(): Promise<void> {
     if (!this.isSelectedRecordEmpty) {
       const copiedItem = new AppRecord(this.selectedRecord);
-      this.dataProvider.addAppRecord(copiedItem).then((result) => {
-        if (result === true) {
-          this.actionUpdate();
-        }
-      });
+      copiedItem.id = '';
+
+      const response = await this.dataProvider.addAppRecord(copiedItem);
+      if (response.isOK) {
+        this.actionUpdate();
+        this.showToastSuccess('The item was copied successfully');
+      } else {
+        this.showToastError(response.message);
+      }
     }
   }
 
-  saveAppRecord(args: AppRecord): void {
+  async saveAppRecord(args: AppRecord): Promise<void> {
     this.isAddDialogVisible = false;
+    let response = null;
 
-    if (args.id === undefined) {
-      this.dataProvider.addAppRecord(args).then((result) => {
-        if (result === true) {
-          this.actionUpdate();
-        }
-      });
+    if (this.isModelAdding) {
+      response = await this.dataProvider.addAppRecord(args);
     } else {
-      const item = this.appRecords.find((x) => x.id === args.id);
-      if (item) {
-        this.dataProvider.updateAppRecord(args).then((result) => {
-          if (result === true) {
-            this.actionUpdate();
-          }
-        });
-      }
+      response = await this.dataProvider.updateAppRecord(args);
+    }
+
+    if (response.isOK) {
+      const msg = this.isModelAdding ? 'The item was added successfully' : 'The item was updated successfully';
+      this.showToastSuccess(msg);
+      this.actionUpdate();
+    } else {
+      this.showToastError(response.message);
+    }
+  }
+
+  addDialogOpen(): void {
+    this.appRecord = new AppRecord({});
+    this.isAddDialogVisible = true;
+    this.isModelAdding = true;
+  }
+
+  editDialogOpen(): void {
+    if (!this.isSelectedRecordEmpty) {
+      this.appRecord = new AppRecord(this.selectedRecord);
+      this.isAddDialogVisible = true;
+      this.isModelAdding = false;
     }
   }
 
@@ -292,6 +306,28 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     if (!this.isSelectedRecordEmpty) {
       this.isDeleteItemDialogVisible = true;
     }
+  }
+
+  showToastError(msg: string): void {
+    this.toast.add(
+      {
+        severity: 'error',
+        summary: 'Error',
+        detail: msg,
+        life: 3000,
+      },
+    );
+  }
+
+  showToastSuccess(msg: string): void {
+    this.toast.add(
+      {
+        severity: 'success',
+        summary: 'Success ',
+        detail: msg,
+        life: 3000,
+      },
+    );
   }
 }
 </script>
