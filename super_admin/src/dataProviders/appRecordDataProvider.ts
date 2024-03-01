@@ -1,64 +1,72 @@
 import AppRecord from '@/models/appRecord';
+import ResultWrapper from '@/models/resultWrapper';
+import axios from 'axios';
 
 export default class AppRecordService {
-    private records: Array<AppRecord> = [
-      new AppRecord({
-        id: 'appRecord_1',
-        memo: 'item1',
-        title: 'item1',
-      }),
-      new AppRecord({
-        id: 'appRecord_2',
-        memo: 'item2',
-        title: 'item2',
-      }),
-      new AppRecord({
-        id: 'appRecord_3',
-        memo: 'item3',
-        title: 'item3',
-      }),
-      new AppRecord({
-        id: 'appRecord_4',
-        memo: 'item4',
-        title: 'item4',
-      }),
-      new AppRecord({
-        id: 'appRecord_5',
-        memo: 'item5',
-        title: 'item5',
-      }),
-    ];
+  readonly BASE_URL = '/api/sa/v1/AppRecords';
 
-    getAppRecords(): Promise<AppRecord[]> {
-      return Promise.resolve(this.records);
+  async getAppRecords(): Promise<ResultWrapper<AppRecord[]>> {
+    let result: ResultWrapper<AppRecord[]> = new ResultWrapper<AppRecord[]>();
+
+    try {
+      const { data } = await axios.get(this.BASE_URL);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
     }
 
-    addAppRecord(param: AppRecord): Promise<boolean> {
-      const newItem = param;
-      newItem.id = this.records[this.records.length - 1].id + 1;
-      this.records.push(param);
-      return Promise.resolve(true);
+    return result;
+  }
+
+  async getAppRecordById(id: string): Promise<ResultWrapper<AppRecord>> {
+    let result: ResultWrapper<AppRecord> = new ResultWrapper<AppRecord>();
+
+    try {
+      const { data } = await axios.get(`${this.BASE_URL}/${id}`);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
     }
 
-    updateAppRecord(param: AppRecord): Promise<boolean> {
-      const item = this.records.find((x) => x.id === param.id);
-      if (item) {
-        item.title = param.title;
-        item.memo = param.memo;
+    return result;
+  }
 
-        return Promise.resolve(true);
-      }
-      return Promise.resolve(false);
+  async addAppRecord(appRecord: AppRecord): Promise<ResultWrapper<AppRecord>> {
+    let result: ResultWrapper<AppRecord> = new ResultWrapper<AppRecord>();
+
+    try {
+      const { data } = await axios.post(this.BASE_URL, appRecord);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
     }
 
-    deleteAppRecord(param: AppRecord): Promise<boolean> {
-      const item = this.records.find((x) => x.id === param.id);
-      if (item) {
-        const index = this.records.indexOf(item);
-        this.records.splice(index, 1);
+    return result;
+  }
 
-        return Promise.resolve(true);
-      }
-      return Promise.resolve(false);
+  async updateAppRecord(appRecord: AppRecord): Promise<ResultWrapper<AppRecord>> {
+    let result: ResultWrapper<AppRecord> = new ResultWrapper<AppRecord>();
+
+    try {
+      const { data } = await axios.put(this.BASE_URL, appRecord);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
     }
+
+    return result;
+  }
+
+  async deleteAppRecord(id: string): Promise<ResultWrapper<number>> {
+    let result: ResultWrapper<number> = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.delete(`${this.BASE_URL}/${id}`);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
+    }
+
+    return result;
+  }
 }

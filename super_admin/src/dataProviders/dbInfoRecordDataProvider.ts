@@ -1,71 +1,72 @@
 import DbInfoRecord from '@/models/dbInfoRecord';
-import { DbKinds } from '@/enums/dbKinds';
+import ResultWrapper from '@/models/resultWrapper';
+import axios from 'axios';
 
 export default class DbInfoRecordService {
-    private dbInfoRecords: DbInfoRecord[] = [
-      new DbInfoRecord({
-        id: 1,
-        appId: 'appRecord_1',
-        title: 'title_1',
-        dbKind: DbKinds.Postgres,
-        connectionString: 'connectionString_1',
-        memo: 'memo_1',
-        isDeleted: false,
-      }),
-      new DbInfoRecord({
-        id: 2,
-        appId: 'appRecord_2',
-        title: 'title_2',
-        dbKind: DbKinds.Postgres,
-        connectionString: 'connectionString_2',
-        memo: 'memo_2',
-        isDeleted: true,
-      }),
-      new DbInfoRecord({
-        id: 3,
-        appId: 'appRecord_3',
-        title: 'title_3',
-        dbKind: DbKinds.SqlServer,
-        connectionString: 'connectionString_3',
-        memo: 'memo_3',
-        isDeleted: false,
-      }),
-    ];
+  readonly BASE_URL = '/api/sa/v1/DbInfoRecords';
 
-    getDbInfoRecords(): Promise<DbInfoRecord[]> {
-      return Promise.resolve(this.dbInfoRecords);
+  async getDbInfoRecords(): Promise<ResultWrapper<DbInfoRecord[]>> {
+    let result: ResultWrapper<DbInfoRecord[]> = new ResultWrapper<DbInfoRecord[]>();
+
+    try {
+      const { data } = await axios.get(this.BASE_URL);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
     }
 
-    addDbInfoRecord(param: DbInfoRecord): Promise<boolean> {
-      const newItem = param;
-      newItem.id = this.dbInfoRecords[this.dbInfoRecords.length - 1].id + 1;
-      this.dbInfoRecords.push(param);
+    return result;
+  }
 
-      return Promise.resolve(true);
+  async getDbInfoRecordById(id: number): Promise<ResultWrapper<DbInfoRecord>> {
+    let result: ResultWrapper<DbInfoRecord> = new ResultWrapper<DbInfoRecord>();
+
+    try {
+      const { data } = await axios.get(`${this.BASE_URL}/${id}`);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
     }
 
-    deleteDbInfoRecord(param: DbInfoRecord): Promise<boolean> {
-      const item = this.dbInfoRecords.find((x) => x.id === param.id);
-      if (item) {
-        const index = this.dbInfoRecords.indexOf(item);
-        this.dbInfoRecords.splice(index, 1);
+    return result;
+  }
 
-        return Promise.resolve(true);
-      }
-      return Promise.resolve(false);
+  async addDbInfoRecord(dbInfoRecord: DbInfoRecord): Promise<ResultWrapper<DbInfoRecord>> {
+    let result: ResultWrapper<DbInfoRecord> = new ResultWrapper<DbInfoRecord>();
+
+    try {
+      const { data } = await axios.post(this.BASE_URL, dbInfoRecord);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
     }
 
-    updateDbInfoRecord(param: DbInfoRecord): Promise<boolean> {
-      const item = this.dbInfoRecords.find((x) => x.id === param.id);
-      if (item) {
-        item.appId = param.appId;
-        item.title = param.title;
-        item.dbKind = param.dbKind;
-        item.connectionString = param.connectionString;
-        item.memo = param.memo;
+    return result;
+  }
 
-        return Promise.resolve(true);
-      }
-      return Promise.resolve(false);
+  async updateDbInfoRecord(dbInfoRecord: DbInfoRecord): Promise<ResultWrapper<DbInfoRecord>> {
+    let result: ResultWrapper<DbInfoRecord> = new ResultWrapper<DbInfoRecord>();
+
+    try {
+      const { data } = await axios.put(this.BASE_URL, dbInfoRecord);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
     }
+
+    return result;
+  }
+
+  async deleteDbInfoRecord(id: number): Promise<ResultWrapper<number>> {
+    let result: ResultWrapper<number> = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.delete(`${this.BASE_URL}/${id}`);
+      result = data;
+    } catch (error) {
+      console.log('error', error);
+    }
+
+    return result;
+  }
 }

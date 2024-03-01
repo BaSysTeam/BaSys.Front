@@ -124,7 +124,7 @@ export default class DbInfoRecordsEditView extends Vue {
 
     selectedDbKind = ref();
 
-    dataService = new AppRecordDataProvider();
+    dataProvider = new AppRecordDataProvider();
 
     dbKinds = ([
       { name: DbKinds[DbKinds.Postgres], identifier: DbKinds.Postgres },
@@ -141,9 +141,14 @@ export default class DbInfoRecordsEditView extends Vue {
         }
       }
 
-      this.dataService.getAppRecords().then((result) => {
-        this.appIds = result.map(({ id }) => id);
-      });
+      this.loadData();
+    }
+
+    async loadData(): Promise<void> {
+      const response = await this.dataProvider.getAppRecords();
+      if (response.isOK) {
+        this.appIds = response.data.map(({ id }) => id);
+      }
     }
 
     cancelClick(): void {
