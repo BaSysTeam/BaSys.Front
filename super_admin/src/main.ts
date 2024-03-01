@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import PrimeVue from 'primevue/config';
 import Tooltip from 'primevue/tooltip';
+import Ripple from 'primevue/ripple';
 import ToastService from 'primevue/toastservice';
 import App from './App.vue';
 import router from './router';
@@ -12,8 +13,9 @@ import 'primeicons/primeicons.css'; // icons
 import 'primeflex/primeflex.css';
 
 const app = createApp(App);
-app.use(PrimeVue);
+app.use(PrimeVue, { ripple: true });
 app.use(router);
 app.use(ToastService);
 app.directive('tooltip', Tooltip);
+app.directive('ripple', Ripple);
 app.mount('#app');

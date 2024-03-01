@@ -77,6 +77,7 @@
               scrollable
               scrollHeight="flex"
             >
+              <template #empty> No items found. </template>
               <Column field="id" header="Id" dataType="numeric">
                 <template #body="{ data }">
                     {{ data.id }}

@@ -12,7 +12,7 @@ export default class DbInfoRecordService {
       const { data } = await axios.get(this.BASE_URL);
       result = data;
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
 
     return result;
@@ -25,7 +25,7 @@ export default class DbInfoRecordService {
       const { data } = await axios.get(`${this.BASE_URL}/${id}`);
       result = data;
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
 
     return result;
@@ -38,7 +38,7 @@ export default class DbInfoRecordService {
       const { data } = await axios.post(this.BASE_URL, dbInfoRecord);
       result = data;
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
 
     return result;
@@ -51,7 +51,7 @@ export default class DbInfoRecordService {
       const { data } = await axios.put(this.BASE_URL, dbInfoRecord);
       result = data;
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
 
     return result;
@@ -64,7 +64,7 @@ export default class DbInfoRecordService {
       const { data } = await axios.delete(`${this.BASE_URL}/${id}`);
       result = data;
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
 
     return result;
