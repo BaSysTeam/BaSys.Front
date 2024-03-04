@@ -44,7 +44,7 @@
             icon="pi pi-copy"
             v-tooltip.top="'Copy'"
             :disabled="isSelectedRecordEmpty"
-            @click="copyAppRecord"
+            @click="copyDialogOpen"
           />
           <SplitButton
             label="Actions"
@@ -172,7 +172,7 @@ import AppRecord from '@/models/appRecord';
 })
 export default class AppRecordsListView extends mixins(ResizeWindow) {
   isAddDialogVisible = false;
-  isModelAdding = false;
+  isModelActionEdit = false;
   appRecord = new AppRecord({});
   selectedRecord = {};
   isDeleteItemDialogVisible = false;
@@ -254,33 +254,18 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     this.isDeleteItemDialogVisible = false;
   }
 
-  async copyAppRecord(): Promise<void> {
-    if (!this.isSelectedRecordEmpty) {
-      const copiedItem = new AppRecord(this.selectedRecord);
-      copiedItem.id = '';
-
-      const response = await this.dataProvider.addAppRecord(copiedItem);
-      if (response.isOK) {
-        this.actionUpdate();
-        this.showToastSuccess('The item was copied successfully');
-      } else {
-        this.showToastError(response.message);
-      }
-    }
-  }
-
   async saveAppRecord(args: AppRecord): Promise<void> {
     this.isAddDialogVisible = false;
     let response = null;
 
-    if (this.isModelAdding) {
-      response = await this.dataProvider.addAppRecord(args);
-    } else {
+    if (this.isModelActionEdit) {
       response = await this.dataProvider.updateAppRecord(args);
+    } else {
+      response = await this.dataProvider.addAppRecord(args);
     }
 
     if (response.isOK) {
-      const msg = this.isModelAdding ? 'The item was added successfully' : 'The item was updated successfully';
+      const msg = this.isModelActionEdit ? 'The item was updated successfully' : 'The item was added successfully';
       this.showToastSuccess(msg);
       this.actionUpdate();
     } else {
@@ -291,14 +276,24 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
   addDialogOpen(): void {
     this.appRecord = new AppRecord({});
     this.isAddDialogVisible = true;
-    this.isModelAdding = true;
+    this.isModelActionEdit = false;
   }
 
   editDialogOpen(): void {
     if (!this.isSelectedRecordEmpty) {
       this.appRecord = new AppRecord(this.selectedRecord);
       this.isAddDialogVisible = true;
-      this.isModelAdding = false;
+      this.isModelActionEdit = true;
+    }
+  }
+
+  copyDialogOpen(): void {
+    if (!this.isSelectedRecordEmpty) {
+      this.appRecord = new AppRecord(this.selectedRecord);
+      this.appRecord.id = '';
+      this.appRecord.title += ' - COPY';
+      this.isAddDialogVisible = true;
+      this.isModelActionEdit = false;
     }
   }
 

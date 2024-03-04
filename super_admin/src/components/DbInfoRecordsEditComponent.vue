@@ -5,7 +5,7 @@
         :style="{width: '55rem'}"
         :closable="false"
         :draggable="false"
-        header="DbInfoRecord"
+        :header="headerText"
         class="pb-0"
         modal
       >
@@ -121,10 +121,9 @@ import DbInfoRecord from '@/models/dbInfoRecord';
 })
 export default class DbInfoRecordsEditView extends Vue {
     dbInfoRecord!: DbInfoRecord;
-
     selectedDbKind = ref();
-
     dataProvider = new AppRecordDataProvider();
+    headerText = 'DbInfoRecord';
 
     dbKinds = ([
       { name: DbKinds[DbKinds.Postgres], identifier: DbKinds.Postgres },
@@ -134,7 +133,9 @@ export default class DbInfoRecordsEditView extends Vue {
     appIds:string[] = [];
 
     mounted(): void {
-      if (this.dbInfoRecord.id !== undefined) {
+      if (this.dbInfoRecord.id === 0 || this.dbInfoRecord.id === undefined) {
+        this.headerText += ' (New)';
+      } else {
         const dbKind = this.dbKinds.find((x) => x.identifier === this.dbInfoRecord.dbKind);
         if (dbKind) {
           this.selectedDbKind = ref(dbKind);
