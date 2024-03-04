@@ -44,7 +44,7 @@
             icon="pi pi-copy"
             v-tooltip.top="'Copy'"
             :disabled="isSelectedRecordEmpty"
-            @click="copyDbInfoRecord"
+            @click="copyDialogOpen"
           />
           <SplitButton
             label="Actions"
@@ -238,7 +238,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dataProvider = new DbInfoRecordDataProvider();
   isAddDialogVisible = false;
   isDeleteItemDialogVisible = false;
-  isModelAdding = false;
+  isModelActionEdit = false;
   selectedRecord = {};
   filters = {};
   dbInfoRecords: DbInfoRecord[] = [];
@@ -337,31 +337,18 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     this.isDeleteItemDialogVisible = false;
   }
 
-  async copyDbInfoRecord(): Promise<void> {
-    if (!this.isSelectedRecordEmpty) {
-      const copiedItem = new DbInfoRecord(this.selectedRecord);
-      const response = await this.dataProvider.addDbInfoRecord(copiedItem);
-      if (response.isOK) {
-        this.actionUpdate();
-        this.showToastSuccess('The item was copied successfully');
-      } else {
-        this.showToastError(response.message);
-      }
-    }
-  }
-
   async saveDbInfoRecord(args: DbInfoRecord): Promise<void> {
     this.isAddDialogVisible = false;
     let response = null;
 
-    if (this.isModelAdding) {
-      response = await this.dataProvider.addDbInfoRecord(args);
-    } else {
+    if (this.isModelActionEdit) {
       response = await this.dataProvider.updateDbInfoRecord(args);
+    } else {
+      response = await this.dataProvider.addDbInfoRecord(args);
     }
 
     if (response.isOK) {
-      const msg = this.isModelAdding ? 'The item was added successfully' : 'The item was updated successfully';
+      const msg = this.isModelActionEdit ? 'The item was updated successfully' : 'The item was added successfully';
       this.showToastSuccess(msg);
       this.actionUpdate();
     } else {
@@ -376,20 +363,30 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   addDialogOpen(): void {
     this.dbInfoRecord = new DbInfoRecord({});
     this.isAddDialogVisible = true;
-    this.isModelAdding = true;
+    this.isModelActionEdit = false;
   }
 
   editDialogOpen(): void {
     if (!this.isSelectedRecordEmpty) {
       this.dbInfoRecord = new DbInfoRecord(this.selectedRecord);
       this.isAddDialogVisible = true;
-      this.isModelAdding = false;
+      this.isModelActionEdit = true;
     }
   }
 
   deleteDialogOpen(): void {
     if (!this.isSelectedRecordEmpty) {
       this.isDeleteItemDialogVisible = true;
+    }
+  }
+
+  copyDialogOpen(): void {
+    if (!this.isSelectedRecordEmpty) {
+      this.dbInfoRecord = new DbInfoRecord(this.selectedRecord);
+      this.dbInfoRecord.id = 0;
+      this.dbInfoRecord.title += ' - COPY';
+      this.isAddDialogVisible = true;
+      this.isModelActionEdit = false;
     }
   }
 

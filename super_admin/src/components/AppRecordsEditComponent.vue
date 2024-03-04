@@ -5,7 +5,7 @@
         :style="{width: '25rem'}"
         :closable="false"
         :draggable="false"
-        header="AppRecord"
+        :header="headerText"
         class="pb-0"
         modal
       >
@@ -90,6 +90,13 @@ import AppRecord from '@/models/appRecord';
 })
 export default class AppRecordsEditView extends Vue {
     appRecord!: AppRecord;
+    headerText = 'AppRecord';
+
+    mounted(): void {
+      if (!this.appRecord.id) {
+        this.headerText += ' (New)';
+      }
+    }
 
     cancelClick(): void {
       this.$emit('cancel');
