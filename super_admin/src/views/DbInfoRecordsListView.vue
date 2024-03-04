@@ -337,19 +337,6 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     this.isDeleteItemDialogVisible = false;
   }
 
-  async copyDbInfoRecord(): Promise<void> {
-    if (!this.isSelectedRecordEmpty) {
-      const copiedItem = new DbInfoRecord(this.selectedRecord);
-      const response = await this.dataProvider.addDbInfoRecord(copiedItem);
-      if (response.isOK) {
-        this.actionUpdate();
-        this.showToastSuccess('The item was copied successfully');
-      } else {
-        this.showToastError(response.message);
-      }
-    }
-  }
-
   async saveDbInfoRecord(args: DbInfoRecord): Promise<void> {
     this.isAddDialogVisible = false;
     let response = null;
