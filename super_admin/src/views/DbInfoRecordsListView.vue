@@ -1,6 +1,5 @@
 <template>
     <div>
-      <Toast/>
       <div class="grid">
         <div class="col">
           <ViewTitleComponent title="Db connections" :is-waiting="false" />
@@ -197,11 +196,8 @@ import { Options, mixins } from 'vue-class-component';
 import { DbKinds } from '@/enums/dbKinds';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
-import { ResizeWindow } from '@/mixins/resizeWindow';
 import DbInfoRecordDataProvider from '@/dataProviders/dbInfoRecordDataProvider';
-import ViewTitleComponent from '@/components/ViewTitleComponent.vue';
 import DbInfoRecordsEditComponent from '@/components/DbInfoRecordsEditComponent.vue';
-import ConfirmationDialogComponent from '@/components/ConfirmationDialogComponent.vue';
 import DbInfoRecord from '@/models/dbInfoRecord';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
@@ -213,7 +209,10 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import Dropdown from 'primevue/dropdown';
-import Toast from 'primevue/toast';
+import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
+import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import ConfirmationDialogComponent from '../../../shared/src/components/ConfirmationDialogComponent.vue';
+import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
@@ -230,19 +229,18 @@ import Toast from 'primevue/toast';
     InputText,
     TriStateCheckbox,
     Dropdown,
-    Toast,
   },
 })
 export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dbInfoRecord = new DbInfoRecord({});
   dataProvider = new DbInfoRecordDataProvider();
+  toastHelper = new ToastHelper(useToast());
   isAddDialogVisible = false;
   isDeleteItemDialogVisible = false;
   isModelActionEdit = false;
   selectedRecord = {};
   filters = {};
   dbInfoRecords: DbInfoRecord[] = [];
-  toast = useToast();
 
   actions = [
     {
@@ -328,9 +326,9 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       if (response.isOK) {
         this.actionUpdate();
         this.selectedRecord = {};
-        this.showToastSuccess('The item was deleted successfully');
+        this.toastHelper.success('The item was deleted successfully');
       } else {
-        this.showToastError(response.message);
+        this.toastHelper.error(response.message);
       }
     }
 
@@ -349,10 +347,10 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
 
     if (response.isOK) {
       const msg = this.isModelActionEdit ? 'The item was updated successfully' : 'The item was added successfully';
-      this.showToastSuccess(msg);
+      this.toastHelper.success(msg);
       this.actionUpdate();
     } else {
-      this.showToastError(response.message);
+      this.toastHelper.error(response.message);
     }
   }
 
@@ -388,28 +386,6 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       this.isAddDialogVisible = true;
       this.isModelActionEdit = false;
     }
-  }
-
-  showToastError(msg: string): void {
-    this.toast.add(
-      {
-        severity: 'error',
-        summary: 'Error',
-        detail: msg,
-        life: 3000,
-      },
-    );
-  }
-
-  showToastSuccess(msg: string): void {
-    this.toast.add(
-      {
-        severity: 'success',
-        summary: 'Success ',
-        detail: msg,
-        life: 3000,
-      },
-    );
   }
 }
 </script>
