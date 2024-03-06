@@ -1,10 +1,24 @@
 <template>
+  <Toast/>
   <nav>
     <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-link to="/about">About</router-link> |
+    <router-link to="/test">Test</router-link>
   </nav>
   <router-view/>
 </template>
+
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component';
+import Toast from 'primevue/toast';
+
+@Options({
+  components: {
+    Toast,
+  },
+})
+export default class App extends Vue {}
+</script>
 
 <style>
 #app {

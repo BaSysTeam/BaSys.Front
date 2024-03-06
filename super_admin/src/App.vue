@@ -1,8 +1,11 @@
 <template>
+  <Toast/>
   <AppHeaderComponent
     title="BaSys: DB manage"
-    @burgerClicked="onBurgerClicked">
-  </AppHeaderComponent>
+    :locale="currentLocale"
+    @burgerClicked="onBurgerClicked"
+    @localeChanged="onLocaleChanged"
+  />
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0" :style="{'width': navPanelWidth + 'px'}">
       <nav>
@@ -41,18 +44,28 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { ref } from 'vue';
+import { usePrimeVue } from 'primevue/config';
+import { useToast } from 'primevue/usetoast';
 import Menu from 'primevue/menu';
-import AppHeaderComponent from './components/AppHeaderComponent.vue';
+import Toast from 'primevue/toast';
+import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
+import ToastHelper from '../../shared/src/helpers/toastHelper';
+import ru from '../../shared/src/locales/ru.json';
+import en from '../../shared/src/locales/en.json';
 
 @Options({
   components: {
     AppHeaderComponent,
     Menu,
+    Toast,
   },
 })
 export default class App extends Vue {
   isMenuMinimized = false;
   navPanelWidth = 200;
+  currentLocale = 'En';
+  primeVue = usePrimeVue();
+  toastHelper = new ToastHelper(useToast());
 
   menuItems: any = ref([
     { label: 'Home', icon: 'pi pi-home', route: '/' },
@@ -72,6 +85,17 @@ export default class App extends Vue {
     } else {
       this.navPanelWidth = 200;
     }
+  }
+
+  onLocaleChanged(selectedLocale: string): void {
+    if (selectedLocale === 'En') {
+      this.primeVue.config.locale = en.primevue;
+    } else {
+      this.primeVue.config.locale = ru.primevue;
+    }
+
+    this.currentLocale = selectedLocale;
+    this.toastHelper.info(`The locale has changed to ${this.currentLocale}`);
   }
 }
 </script>

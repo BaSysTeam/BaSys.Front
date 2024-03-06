@@ -1,6 +1,5 @@
 <template>
     <div class="grid bs-app-header">
-        <Toast/>
         <div
             class="col-fixed flex justify-content-center align-content-center flex-wrap"
             style="width:50px"
@@ -17,7 +16,7 @@
         <div class="col flex justify-content-end flex-wrap h-full">
           <SplitButton
             class="h-full bs-locale-btn"
-            :label="currentLocale"
+            :label="locale"
             :model="localeItems"
             text
           />
@@ -27,63 +26,38 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { usePrimeVue } from 'primevue/config';
-import { useToast } from 'primevue/usetoast';
 import SplitButton from 'primevue/splitbutton';
-import Toast from 'primevue/toast';
-import ru from '../locales/ru.json';
-import en from '../locales/en.json';
 
 @Options({
   props: {
     title: String,
+    locale: String,
   },
   components: {
     SplitButton,
-    Toast,
   },
   emits: {
     burgerClicked: null,
+    localeChanged: null,
   },
 })
 export default class AppHeader extends Vue {
     title!:string;
-    currentLocale = 'En';
-    primeVue = usePrimeVue();
-    toast = useToast();
+    locale!:string;
 
     localeItems = [
       {
         label: 'En',
-        command: () => this.changeLocale('En'),
+        command: () => this.$emit('localeChanged', 'En'),
       },
       {
         label: 'Ru',
-        command: () => this.changeLocale('Ru'),
+        command: () => this.$emit('localeChanged', 'Ru'),
       },
     ]
 
     burgerClick(): void {
       this.$emit('burgerClicked');
-    }
-
-    changeLocale(locale: string): void {
-      this.currentLocale = locale;
-
-      if (locale === 'En') {
-        this.primeVue.config.locale = en.primevue;
-      } else {
-        this.primeVue.config.locale = ru.primevue;
-      }
-
-      this.toast.add(
-        {
-          severity: 'info',
-          summary: 'Info ',
-          detail: `The locale has changed to ${this.currentLocale}`,
-          life: 3000,
-        },
-      );
     }
 }
 

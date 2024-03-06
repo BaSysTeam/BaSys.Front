@@ -6,7 +6,6 @@
             <span>&nbsp;</span>
             <i v-if="isWaiting" class="pi pi-spin pi-spinner bs-view-title__spinner"></i>
         </h2>
-
     </div>
 </template>
 
@@ -22,9 +21,7 @@ import { Options, Vue } from 'vue-class-component';
 })
 export default class ViewTitle extends Vue {
     title!:string;
-
     isWaiting!:boolean;
-
     isModified!:boolean;
 }
 
