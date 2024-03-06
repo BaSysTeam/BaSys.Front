@@ -1,6 +1,6 @@
 import AppRecord from '@/models/appRecord';
-import ResultWrapper from '@/models/resultWrapper';
 import axios from 'axios';
+import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class AppRecordService {
   readonly BASE_URL = '/api/sa/v1/AppRecords';
