@@ -1,5 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
+import UserListView from '../views/UserListView.vue';
+import UserEditView from '../views/UserEditView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -10,15 +12,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/users',
     name: 'users',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/UserListView.vue'),
+    component: UserListView,
   },
   {
     path: '/edit/user',
     name: 'editUser',
-    component: () => import(/* webpackChunkName: "about" */ '../views/UserEditView.vue'),
+    component: UserEditView,
   },
 ];
 
