@@ -2,7 +2,7 @@ import axios from 'axios';
 import User from '../models/user';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class UserDataprovider {
+export default class UserProvider {
     readonly BASE_URL = '/api/admin/v1/Users';
 
     async getAllUsers(): Promise<ResultWrapper<User[]>> {

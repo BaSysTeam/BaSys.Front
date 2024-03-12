@@ -2,7 +2,7 @@ import DbInfoRecord from '@/models/dbInfoRecord';
 import axios from 'axios';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class DbInfoRecordService {
+export default class DbInfoRecordProvider {
   readonly BASE_URL = '/api/sa/v1/DbInfoRecords';
 
   async getDbInfoRecords(): Promise<ResultWrapper<DbInfoRecord[]>> {

@@ -74,7 +74,6 @@ export default class App extends Vue {
     { label: 'Databases', icon: 'pi pi-database', route: '/databases' },
     { separator: true },
     { label: 'Logout', icon: 'pi pi-sign-out' },
-    { separator: true },
   ]);
 
   onBurgerClicked(): void {

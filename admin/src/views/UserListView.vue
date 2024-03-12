@@ -121,7 +121,7 @@ import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import InputSwitch from 'primevue/inputswitch';
 import User from '../models/user';
-import UserDataprovider from '../dataProviders/userDataProvider';
+import UserProvider from '../dataProviders/userProvider';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ConfirmationDialogComponent from '../../../shared/src/components/ConfirmationDialogComponent.vue';
@@ -145,7 +145,7 @@ export default class UserListView extends mixins(ResizeWindow) {
   isDeleteRecordDialogVisible = false;
   selectedRecord = {};
   filters = {};
-  dataProvider = new UserDataprovider();
+  dataProvider = new UserProvider();
   users:User[] = [];
   router = useRouter();
   toastHelper = new ToastHelper(useToast());
@@ -194,6 +194,7 @@ export default class UserListView extends mixins(ResizeWindow) {
       this.users = response.data;
     } else {
       this.toastHelper.error(response.message);
+      this.toastHelper.error(response.presentation);
     }
   }
 
@@ -238,9 +239,10 @@ export default class UserListView extends mixins(ResizeWindow) {
       if (response.isOK) {
         this.actionUpdate();
         this.selectedRecord = {};
-        this.toastHelper.success('The user was deleted successfully');
+        this.toastHelper.success(response.message);
       } else {
         this.toastHelper.error(response.message);
+        this.toastHelper.error(response.presentation);
       }
     }
 
@@ -263,10 +265,10 @@ export default class UserListView extends mixins(ResizeWindow) {
     }
 
     if (response.isOK) {
-      const msg = data.isActive ? 'enabled' : 'disabled';
-      this.toastHelper.success(`The user was ${msg} successfully`);
+      this.toastHelper.success(response.message);
     } else {
       this.toastHelper.error(response.message);
+      this.toastHelper.error(response.presentation);
     }
   }
 }

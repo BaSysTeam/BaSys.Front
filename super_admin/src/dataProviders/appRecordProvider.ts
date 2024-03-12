@@ -2,7 +2,7 @@ import AppRecord from '@/models/appRecord';
 import axios from 'axios';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class AppRecordService {
+export default class AppRecordProvider {
   readonly BASE_URL = '/api/sa/v1/AppRecords';
 
   async getAppRecords(): Promise<ResultWrapper<AppRecord[]>> {
