@@ -17,12 +17,20 @@
             @click="router.push('/users')"
           />
           <Button
+            label="Save & Close"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-save"
+            @click="saveAndClose"
+          />
+          <Button
             label="Save"
             severity="primary"
             size="small"
             outlined
             icon="pi pi-save"
-            @click="saveUser"
+            @click="save"
           />
         </span>
       </div>
@@ -34,7 +42,7 @@
       <div class="col-3">
         <div class="grid">
           <div class="col">
-            <span id="userName">User name</span>
+            <span id="userName" class="bs-required">User name</span>
             <InputText
               v-model="user.userName"
               size="small"
@@ -45,7 +53,7 @@
         </div>
         <div class="grid">
           <div class="col">
-            <span id="email">Email</span>
+            <span id="email" class="bs-required">Email</span>
             <InputText
               v-model="user.email"
               size="small"
@@ -57,34 +65,30 @@
         <div class="grid" v-if="!user.id">
           <div class="col">
             <span id="password">Password</span>
-            <InputText
+            <Password
               v-model="user.password"
-              size="small"
               aria-labelledby="password"
-              class="w-full"
+              class="w-full bs-password-input"
+              toggleMask
             />
           </div>
         </div>
         <div class="grid">
           <div class="col">
-            <Card>
-              <template #title>Roles</template>
-              <template #content>
-                <div class="flex flex-column gap-3">
-                  <div
-                    v-for="role of roles"
-                    :key="role.key"
-                    class="flex align-items-center">
-                      <Checkbox
-                        v-model="selectedRoles"
-                        name="role"
-                        :value="role.name"
-                      />
-                      <span class="ml-1">{{ role.name }}</span>
-                  </div>
-                </div>
-              </template>
-          </Card>
+            <span>Roles</span>
+            <div class="flex flex-column gap-3 mt-1">
+              <div
+                v-for="role of roles"
+                :key="role.key"
+                class="flex align-items-center">
+                  <Checkbox
+                    v-model="selectedRoles"
+                    name="role"
+                    :value="role.name"
+                  />
+                  <span class="ml-1">{{ role.name }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -99,8 +103,8 @@ import { useToast } from 'primevue/usetoast';
 import Divider from 'primevue/divider';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import Card from 'primevue/card';
 import Checkbox from 'primevue/checkbox';
+import Password from 'primevue/password';
 import User from '@/models/user';
 import UserDataprovider from '@/dataProviders/userDataProvider';
 import { RoleKinds } from '@/enums/roleKinds';
@@ -113,12 +117,12 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Divider,
     InputText,
     Button,
-    Card,
     Checkbox,
+    Password,
   },
 })
 export default class HomeView extends Vue {
-  title = 'User';
+  title = 'User:';
   route = useRoute();
   router = useRouter();
   user = new User();
@@ -147,22 +151,23 @@ export default class HomeView extends Vue {
         this.selectedRoles = this.roles.filter(
           (x) => checkedRoles.includes(x.name.toLowerCase()),
         ).map((x) => x.name);
-        this.title += ` (${this.user.userName})`;
+        this.title += ` ${this.user.userName}`;
       } else {
         this.toastHelper.error(response.message);
       }
     } else {
       this.title += ' (New)';
+      this.selectedRoles = [RoleKinds[RoleKinds.User]];
       this.user.roles = [
-        { name: 'administrator', isChecked: false },
-        { name: 'designer', isChecked: false },
-        { name: 'user', isChecked: false },
-        { name: 'readonly', isChecked: false },
+        { name: RoleKinds[RoleKinds.Administrator].toLowerCase(), isChecked: false },
+        { name: RoleKinds[RoleKinds.Designer].toLowerCase(), isChecked: false },
+        { name: RoleKinds[RoleKinds.User].toLowerCase(), isChecked: false },
+        { name: RoleKinds[RoleKinds.Readonly].toLowerCase(), isChecked: false },
       ];
     }
   }
 
-  async saveUser(): Promise<void> {
+  async save(): Promise<boolean> {
     this.user.roles.forEach((x) => { x.isChecked = false; });
     this.selectedRoles.forEach((selectedRole) => {
       const result = this.user.roles.find(
@@ -188,9 +193,32 @@ export default class HomeView extends Vue {
       if (!this.user.id) {
         this.user.id = response.data.id;
       }
-    } else {
-      this.toastHelper.error(response.message);
+
+      return true;
+    }
+
+    this.toastHelper.error(response.message);
+    return false;
+  }
+
+  async saveAndClose(): Promise<void> {
+    if (await this.save()) {
+      this.router.push('/users');
     }
   }
 }
 </script>
+
+<style>
+  .bs-password-input {
+    .p-password-input {
+      width: 100%;
+    }
+  }
+
+  .bs-required:after {
+    content: "*";
+    color: red;
+    font-size: 12pt;
+}
+</style>
