@@ -139,7 +139,7 @@
 import { Options, mixins } from 'vue-class-component';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
-import AppRecordDataProvider from '@/dataProviders/appRecordDataProvider';
+import AppRecordProvider from '@/dataProviders/appRecordProvider';
 import AppRecordsEditComponent from '@/components/AppRecordsEditComponent.vue';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
@@ -174,7 +174,7 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
   appRecord = new AppRecord({});
   selectedRecord = {};
   isDeleteItemDialogVisible = false;
-  dataProvider = new AppRecordDataProvider();
+  dataProvider = new AppRecordProvider();
   filters = {};
   toastHelper = new ToastHelper(useToast());
 
@@ -213,6 +213,9 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     const response = await this.dataProvider.getAppRecords();
     if (response.isOK) {
       this.appRecords = response.data;
+    } else {
+      this.toastHelper.error(response.message);
+      this.toastHelper.error(response.presentation);
     }
   }
 
@@ -243,9 +246,10 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
       if (response.isOK) {
         this.actionUpdate();
         this.selectedRecord = {};
-        this.toastHelper.success('The item was deleted successfully');
+        this.toastHelper.success(response.message);
       } else {
         this.toastHelper.error(response.message);
+        this.toastHelper.error(response.presentation);
       }
     }
 
@@ -263,11 +267,11 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     }
 
     if (response.isOK) {
-      const msg = this.isModelActionEdit ? 'The item was updated successfully' : 'The item was added successfully';
-      this.toastHelper.success(msg);
+      this.toastHelper.success(response.message);
       this.actionUpdate();
     } else {
       this.toastHelper.error(response.message);
+      this.toastHelper.error(response.presentation);
     }
   }
 

@@ -106,7 +106,7 @@ import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import Password from 'primevue/password';
 import User from '@/models/user';
-import UserDataprovider from '@/dataProviders/userDataProvider';
+import UserProvider from '@/dataProviders/userProvider';
 import { RoleKinds } from '@/enums/roleKinds';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -126,7 +126,7 @@ export default class HomeView extends Vue {
   route = useRoute();
   router = useRouter();
   user = new User();
-  dataProvider = new UserDataprovider();
+  dataProvider = new UserProvider();
   toastHelper = new ToastHelper(useToast());
   selectedRoles:string[] = [];
 
@@ -154,6 +154,7 @@ export default class HomeView extends Vue {
         this.title += ` ${this.user.userName}`;
       } else {
         this.toastHelper.error(response.message);
+        this.toastHelper.error(response.presentation);
       }
     } else {
       this.title += ' (New)';
@@ -187,8 +188,7 @@ export default class HomeView extends Vue {
     }
 
     if (response.isOK) {
-      const msg = this.user.id ? 'The user was updated successfully' : 'The user was added successfully';
-      this.toastHelper.success(msg);
+      this.toastHelper.success(response.message);
 
       if (!this.user.id) {
         this.user.id = response.data.id;
@@ -198,6 +198,8 @@ export default class HomeView extends Vue {
     }
 
     this.toastHelper.error(response.message);
+    this.toastHelper.error(response.presentation);
+
     return false;
   }
 

@@ -90,7 +90,8 @@
 import { ref } from 'vue';
 import { Options, Vue } from 'vue-class-component';
 import { DbKinds } from '@/enums/dbKinds';
-import AppRecordDataProvider from '@/dataProviders/appRecordDataProvider';
+import AppRecordProvider from '@/dataProviders/appRecordProvider';
+import { useToast } from 'primevue/usetoast';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -98,6 +99,7 @@ import Textarea from 'primevue/textarea';
 import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
 import DbInfoRecord from '@/models/dbInfoRecord';
+import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
@@ -122,7 +124,8 @@ import DbInfoRecord from '@/models/dbInfoRecord';
 export default class DbInfoRecordsEditView extends Vue {
     dbInfoRecord!: DbInfoRecord;
     selectedDbKind = ref();
-    dataProvider = new AppRecordDataProvider();
+    dataProvider = new AppRecordProvider();
+    toastHelper = new ToastHelper(useToast());
     headerText = 'DbInfoRecord';
 
     dbKinds = ([
@@ -149,6 +152,9 @@ export default class DbInfoRecordsEditView extends Vue {
       const response = await this.dataProvider.getAppRecords();
       if (response.isOK) {
         this.appIds = response.data.map(({ id }) => id);
+      } else {
+        this.toastHelper.error(response.message);
+        this.toastHelper.error(response.presentation);
       }
     }
 

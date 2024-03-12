@@ -196,7 +196,7 @@ import { Options, mixins } from 'vue-class-component';
 import { DbKinds } from '@/enums/dbKinds';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
-import DbInfoRecordDataProvider from '@/dataProviders/dbInfoRecordDataProvider';
+import DbInfoRecordProvider from '@/dataProviders/dbInfoRecordProvider';
 import DbInfoRecordsEditComponent from '@/components/DbInfoRecordsEditComponent.vue';
 import DbInfoRecord from '@/models/dbInfoRecord';
 import Button from 'primevue/button';
@@ -233,7 +233,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dbInfoRecord = new DbInfoRecord({});
-  dataProvider = new DbInfoRecordDataProvider();
+  dataProvider = new DbInfoRecordProvider();
   toastHelper = new ToastHelper(useToast());
   isAddDialogVisible = false;
   isDeleteItemDialogVisible = false;
@@ -280,6 +280,9 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     const response = await this.dataProvider.getDbInfoRecords();
     if (response.isOK) {
       this.dbInfoRecords = response.data;
+    } else {
+      this.toastHelper.error(response.message);
+      this.toastHelper.error(response.presentation);
     }
   }
 
@@ -326,9 +329,10 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       if (response.isOK) {
         this.actionUpdate();
         this.selectedRecord = {};
-        this.toastHelper.success('The item was deleted successfully');
+        this.toastHelper.success(response.message);
       } else {
         this.toastHelper.error(response.message);
+        this.toastHelper.error(response.presentation);
       }
     }
 
@@ -346,11 +350,11 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     }
 
     if (response.isOK) {
-      const msg = this.isModelActionEdit ? 'The item was updated successfully' : 'The item was added successfully';
-      this.toastHelper.success(msg);
+      this.toastHelper.success(response.message);
       this.actionUpdate();
     } else {
       this.toastHelper.error(response.message);
+      this.toastHelper.error(response.presentation);
     }
   }
 
