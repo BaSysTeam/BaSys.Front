@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="VUE 3 Template for BaSys project"/>
+    <h1>BaSys.Constructor</h1>
   </div>
 </template>
 
