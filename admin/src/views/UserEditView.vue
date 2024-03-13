@@ -125,7 +125,7 @@ export default class HomeView extends Vue {
   title = 'User:';
   route = useRoute();
   router = useRouter();
-  user = new User();
+  user = new User({});
   dataProvider = new UserProvider();
   toastHelper = new ToastHelper(useToast());
   selectedRoles:string[] = [];

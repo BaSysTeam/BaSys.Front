@@ -104,6 +104,12 @@
       @noClick="isDeleteRecordDialogVisible = false"
       @yesClick="deleteUser"
     />
+
+    <ChangePasswordComponent
+      v-if="isChangePasswordDialogVisible"
+      :user="currentUser"
+      @close="isChangePasswordDialogVisible = false"
+    />
   </div>
 </template>
 
@@ -121,6 +127,7 @@ import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import InputSwitch from 'primevue/inputswitch';
 import User from '../models/user';
+import ChangePasswordComponent from '../components/ChangePasswordComponent.vue';
 import UserProvider from '../dataProviders/userProvider';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -131,6 +138,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   components: {
     ViewTitleComponent,
     ConfirmationDialogComponent,
+    ChangePasswordComponent,
     Divider,
     Button,
     SplitButton,
@@ -143,10 +151,12 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class UserListView extends mixins(ResizeWindow) {
   isDeleteRecordDialogVisible = false;
+  isChangePasswordDialogVisible = false;
   selectedRecord = {};
   filters = {};
   dataProvider = new UserProvider();
   users:User[] = [];
+  currentUser:User = new User({});
   router = useRouter();
   toastHelper = new ToastHelper(useToast());
 
@@ -166,7 +176,7 @@ export default class UserListView extends mixins(ResizeWindow) {
     },
     {
       label: 'Change Password',
-      command: () => this.changePassword(),
+      command: () => this.changePasswordDialogOpen(),
     },
   ];
 
@@ -214,14 +224,15 @@ export default class UserListView extends mixins(ResizeWindow) {
     };
   }
 
-  changePassword(): void {
+  changePasswordDialogOpen(): void {
     if (!this.isSelectedRecordEmpty) {
-      console.log('changePassword');
+      this.currentUser = new User(this.selectedRecord);
+      this.isChangePasswordDialogVisible = true;
     }
   }
 
   addUser(): void {
-    const user = new User();
+    const user = new User({});
     this.router.push({ name: 'editUser', query: { id: user.id } });
   }
 

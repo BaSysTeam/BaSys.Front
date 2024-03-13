@@ -95,4 +95,19 @@ export default class UserProvider {
 
       return result;
     }
+
+    async changePassword(id: string, newPassword: string): Promise<ResultWrapper<number>> {
+      let result: ResultWrapper<number> = new ResultWrapper<number>();
+
+      try {
+        const { data } = await axios.patch(`${this.BASE_URL}/${id}/password`, {
+          newPassword,
+        });
+        result = data;
+      } catch (error) {
+        console.error('error', error);
+      }
+
+      return result;
+    }
 }
