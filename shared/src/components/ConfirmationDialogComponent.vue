@@ -27,7 +27,6 @@
                   icon="pi pi-check"
                   size="small"
                   @click="$emit('yesClick')"
-                  outlined
                 />
             </template>
       </Dialog>

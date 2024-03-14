@@ -1,13 +1,13 @@
 <template>
   <div>
     <Dialog
+      modal
+      class="pb-0"
       :visible="true"
-      :closable="false"
       :draggable="false"
       :header="header"
       :style="{width: '25rem'}"
-      class="pb-0"
-      modal
+      @update:visible="updateVisible"
     >
       <div>
         <div class="grid">
@@ -34,13 +34,13 @@
             <div class="col">
               <div class="flex justify-content-end gap-2">
                 <Button
-                  label="Cancel"
+                  label="Close"
                   size="small"
                   severity="secondary"
-                  @click="cancelClick"
+                  @click="closeClick"
                   outlined
                 />
-                <Button label="Change" size="small" @click="changeClick" outlined />
+                <Button label="Change" size="small" @click="changeClick" />
               </div>
             </div>
           </div>
@@ -96,7 +96,7 @@ export default class ChangePasswordComponent extends Vue {
     this.password = PasswordGenerator.generate(this.passwordLength);
   }
 
-  cancelClick(): void {
+  closeClick(): void {
     this.$emit('close');
   }
 
@@ -104,10 +104,15 @@ export default class ChangePasswordComponent extends Vue {
     const response = await this.dataProvider.changePassword(this.user.id, this.password);
     if (response.isOK) {
       this.toastHelper.success(response.message);
-      this.$emit('close');
     } else {
       this.toastHelper.error(response.message);
       this.toastHelper.error(response.presentation);
+    }
+  }
+
+  updateVisible(value: boolean): void {
+    if (!value) {
+      this.$emit('close');
     }
   }
 }

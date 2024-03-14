@@ -3,11 +3,11 @@
         <Dialog
         :visible="true"
         :style="{width: '25rem'}"
-        :closable="false"
         :draggable="false"
         :header="headerText"
         class="pb-0"
         modal
+        @update:visible="updateVisible"
       >
         <div>
           <div class="grid">
@@ -53,7 +53,7 @@
                   outlined
                   @click="cancelClick"
                 />
-                <Button label="Save" size="small" outlined @click="saveClick" />
+                <Button label="Save" size="small" @click="saveClick" />
               </div>
             </div>
           </div>
@@ -89,22 +89,28 @@ import AppRecord from '@/models/appRecord';
   },
 })
 export default class AppRecordsEditView extends Vue {
-    appRecord!: AppRecord;
-    headerText = 'AppRecord';
+  appRecord!: AppRecord;
+  headerText = 'AppRecord';
 
-    mounted(): void {
-      if (!this.appRecord.id) {
-        this.headerText += ' (New)';
-      }
+  mounted(): void {
+    if (!this.appRecord.id) {
+      this.headerText += ' (New)';
     }
+  }
 
-    cancelClick(): void {
+  cancelClick(): void {
+    this.$emit('cancel');
+  }
+
+  saveClick(): void {
+    this.$emit('save', this.appRecord);
+  }
+
+  updateVisible(value: boolean): void {
+    if (!value) {
       this.$emit('cancel');
     }
-
-    saveClick(): void {
-      this.$emit('save', this.appRecord);
-    }
+  }
 }
 </script>
 
