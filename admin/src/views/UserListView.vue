@@ -100,26 +100,20 @@
         <Card class="mt-1">
           <template #content>
             <div class="grid">
-              <div class="col-3 font-bold flex align-items-center">
-                Total
-              </div>
-              <div class="col">
+              <div class="col flex justify-content-between flex-wrap">
+                <b>Total</b>
                 <Badge :value="users.length" severity="primary"></Badge>
               </div>
             </div>
             <div class="grid">
-              <div class="col-3 font-bold flex align-items-center">
-                Enabled
-              </div>
-              <div class="col">
+              <div class="col flex justify-content-between flex-wrap">
+                <b>Enabled</b>
                 <Badge :value="usersEnabled" severity="success"></Badge>
               </div>
             </div>
             <div class="grid">
-              <div class="col-3 font-bold flex align-items-center">
-                Disabled
-              </div>
-              <div class="col">
+              <div class="col flex justify-content-between flex-wrap">
+                <b>Disabled</b>
                 <Badge :value="usersDisabled" severity="danger"></Badge>
               </div>
             </div>
