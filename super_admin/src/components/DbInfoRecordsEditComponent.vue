@@ -1,13 +1,13 @@
 <template>
     <div>
-        <Dialog
+      <Dialog
         :visible="true"
         :style="{width: '55rem'}"
-        :closable="false"
         :draggable="false"
         :header="headerText"
         class="pb-0"
         modal
+        @update:visible="updateVisible"
       >
         <div>
           <div class="grid">
@@ -77,7 +77,7 @@
                   outlined
                   @click="cancelClick"
                 />
-                <Button label="Save" size="small" outlined @click="saveClick" />
+                <Button label="Save" size="small" @click="saveClick" />
               </div>
             </div>
           </div>
@@ -122,49 +122,55 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   },
 })
 export default class DbInfoRecordsEditView extends Vue {
-    dbInfoRecord!: DbInfoRecord;
-    selectedDbKind = ref();
-    dataProvider = new AppRecordProvider();
-    toastHelper = new ToastHelper(useToast());
-    headerText = 'DbInfoRecord';
+  dbInfoRecord!: DbInfoRecord;
+  selectedDbKind = ref();
+  dataProvider = new AppRecordProvider();
+  toastHelper = new ToastHelper(useToast());
+  headerText = 'DbInfoRecord';
 
-    dbKinds = ([
-      { name: DbKinds[DbKinds.Postgres], identifier: DbKinds.Postgres },
-      { name: DbKinds[DbKinds.SqlServer], identifier: DbKinds.SqlServer },
-    ]);
+  dbKinds = ([
+    { name: DbKinds[DbKinds.Postgres], identifier: DbKinds.Postgres },
+    { name: DbKinds[DbKinds.SqlServer], identifier: DbKinds.SqlServer },
+  ]);
 
-    appIds:string[] = [];
+  appIds:string[] = [];
 
-    mounted(): void {
-      if (this.dbInfoRecord.id === 0 || this.dbInfoRecord.id === undefined) {
-        this.headerText += ' (New)';
-      } else {
-        const dbKind = this.dbKinds.find((x) => x.identifier === this.dbInfoRecord.dbKind);
-        if (dbKind) {
-          this.selectedDbKind = ref(dbKind);
-        }
-      }
-
-      this.loadData();
-    }
-
-    async loadData(): Promise<void> {
-      const response = await this.dataProvider.getAppRecords();
-      if (response.isOK) {
-        this.appIds = response.data.map(({ id }) => id);
-      } else {
-        this.toastHelper.error(response.message);
-        this.toastHelper.error(response.presentation);
+  mounted(): void {
+    if (this.dbInfoRecord.id === 0 || this.dbInfoRecord.id === undefined) {
+      this.headerText += ' (New)';
+    } else {
+      const dbKind = this.dbKinds.find((x) => x.identifier === this.dbInfoRecord.dbKind);
+      if (dbKind) {
+        this.selectedDbKind = ref(dbKind);
       }
     }
 
-    cancelClick(): void {
+    this.loadData();
+  }
+
+  async loadData(): Promise<void> {
+    const response = await this.dataProvider.getAppRecords();
+    if (response.isOK) {
+      this.appIds = response.data.map(({ id }) => id);
+    } else {
+      this.toastHelper.error(response.message);
+      this.toastHelper.error(response.presentation);
+    }
+  }
+
+  cancelClick(): void {
+    this.$emit('cancel');
+  }
+
+  saveClick(): void {
+    this.$emit('save', this.dbInfoRecord);
+  }
+
+  updateVisible(value: boolean): void {
+    if (!value) {
       this.$emit('cancel');
     }
-
-    saveClick(): void {
-      this.$emit('save', this.dbInfoRecord);
-    }
+  }
 }
 </script>
 

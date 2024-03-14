@@ -96,6 +96,36 @@
           </DataTable>
         </div>
       </div>
+      <div class="col-3">
+        <Card class="mt-1">
+          <template #content>
+            <div class="grid">
+              <div class="col-3 font-bold flex align-items-center">
+                Total
+              </div>
+              <div class="col">
+                <Badge :value="users.length" severity="primary"></Badge>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="col-3 font-bold flex align-items-center">
+                Enabled
+              </div>
+              <div class="col">
+                <Badge :value="usersEnabled" severity="success"></Badge>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="col-3 font-bold flex align-items-center">
+                Disabled
+              </div>
+              <div class="col">
+                <Badge :value="usersDisabled" severity="danger"></Badge>
+              </div>
+            </div>
+          </template>
+        </Card>
+      </div>
     </div>
 
     <ConfirmationDialogComponent
@@ -126,6 +156,8 @@ import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import InputSwitch from 'primevue/inputswitch';
+import Badge from 'primevue/badge';
+import Card from 'primevue/card';
 import User from '../models/user';
 import ChangePasswordComponent from '../components/ChangePasswordComponent.vue';
 import UserProvider from '../dataProviders/userProvider';
@@ -147,6 +179,8 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputText,
     TriStateCheckbox,
     InputSwitch,
+    Badge,
+    Card,
   },
 })
 export default class UserListView extends mixins(ResizeWindow) {
@@ -188,6 +222,14 @@ export default class UserListView extends mixins(ResizeWindow) {
     return {
       height: `${this.windowHeight - 150}px`,
     };
+  }
+
+  get usersEnabled(): number {
+    return this.users.filter((x) => x.isActive).length;
+  }
+
+  get usersDisabled(): number {
+    return this.users.filter((x) => !x.isActive).length;
   }
 
   beforeMount(): void {
