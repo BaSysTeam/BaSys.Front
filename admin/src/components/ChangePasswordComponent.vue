@@ -82,7 +82,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class ChangePasswordComponent extends Vue {
   header = 'Change Password: ';
-  passwordLength = 5;
+  passwordLength = 6;
   password = '';
   user!:User;
   dataProvider = new UserProvider();
