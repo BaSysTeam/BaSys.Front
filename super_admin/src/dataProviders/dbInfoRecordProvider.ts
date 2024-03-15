@@ -69,4 +69,17 @@ export default class DbInfoRecordProvider {
 
     return result;
   }
+
+  async switchActivity(id: number): Promise<ResultWrapper<DbInfoRecord>> {
+    let result: ResultWrapper<DbInfoRecord> = new ResultWrapper<DbInfoRecord>();
+
+    try {
+      const { data } = await axios.patch(`${this.BASE_URL}/${id}/switchactivity`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
 }

@@ -86,7 +86,7 @@
             </Column>
             <Column field="isActive" header="IsActive" dataType="boolean" bodyClass="text-center">
               <template #body="{ data }">
-                <InputSwitch v-model="data.isActive" @change="isActiveChanged(data)" />
+                <InputSwitch v-model="data.isActive" @change="isActiveChange(data)" />
               </template>
               <template #filter="{ filterModel }">
                 <span for="isActive-filter" class="font-bold"> IsActive </span>
@@ -302,7 +302,7 @@ export default class UserListView extends mixins(ResizeWindow) {
     }
   }
 
-  async isActiveChanged(data: User): Promise<void> {
+  async isActiveChange(data: User): Promise<void> {
     let response = null;
 
     if (data.isActive) {

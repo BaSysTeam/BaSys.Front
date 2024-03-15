@@ -158,16 +158,16 @@
               </Column>
               <Column
                 field="isDeleted"
-                header="IsDeleted"
+                header="IsActive"
                 dataType="boolean"
                 bodyClass="text-center"
               >
                 <template #body="{ data }">
-                    <i v-if="data.isDeleted" class="pi pi-check-circle text-green-500"></i>
+                  <InputSwitch :modelValue="!data.isDeleted" @change="isActiveChange(data)" />
                 </template>
                 <template #filter="{ filterModel }">
-                    <span for="isDeleted-filter" class="font-bold"> IsDeleted </span>
-                    <TriStateCheckbox v-model="filterModel.value" inputId="isDeleted-filter" />
+                  <span for="isActive-filter" class="font-bold"> IsActive </span>
+                  <TriStateCheckbox v-model="filterModel.value" inputId="isActive-filter" />
                 </template>
               </Column>
             </DataTable>
@@ -208,6 +208,7 @@ import Dialog from 'primevue/dialog';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
+import InputSwitch from 'primevue/inputswitch';
 import Dropdown from 'primevue/dropdown';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -229,6 +230,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputText,
     TriStateCheckbox,
     Dropdown,
+    InputSwitch,
   },
 })
 export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
@@ -318,7 +320,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
         operator: FilterOperator.AND,
         constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
       },
-      isDeleted: { value: null, matchMode: FilterMatchMode.EQUALS },
+      isDeleted: { value: null, matchMode: FilterMatchMode.NOT_EQUALS },
     };
   }
 
@@ -389,6 +391,21 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       this.dbInfoRecord.title += ' - COPY';
       this.isAddDialogVisible = true;
       this.isModelActionEdit = false;
+    }
+  }
+
+  async isActiveChange(data: DbInfoRecord): Promise<void> {
+    const item = data;
+    item.isDeleted = !item.isDeleted;
+
+    const response = await this.dataProvider.switchActivity(item.id);
+
+    if (response.isOK) {
+      this.toastHelper.success(response.message);
+      this.actionUpdate();
+    } else {
+      this.toastHelper.error(response.message);
+      this.toastHelper.error(response.presentation);
     }
   }
 }
