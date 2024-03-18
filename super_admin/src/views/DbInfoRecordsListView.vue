@@ -111,6 +111,19 @@
                     />
                 </template>
               </Column>
+              <Column field="name" header="Name">
+                <template #body="{ data }">
+                    {{ data.name }}
+                </template>
+                <template #filter="{ filterModel }">
+                    <InputText
+                      v-model="filterModel.value"
+                      type="text"
+                      class="p-column-filter"
+                      placeholder="Search by Name"
+                    />
+                </template>
+              </Column>
               <Column field="dbKind" header="DbKind">
                 <template #body="{ data }">
                     {{ formatDbKind(data.dbKind) }}
@@ -301,6 +314,11 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
         constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
       },
       title:
+      {
+        operator: FilterOperator.AND,
+        constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+      },
+      name:
       {
         operator: FilterOperator.AND,
         constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
