@@ -106,7 +106,7 @@ export default class ChangePasswordComponent extends Vue {
       this.toastHelper.success(response.message);
     } else {
       this.toastHelper.error(response.message);
-      this.toastHelper.error(response.presentation);
+      console.error(response.presentation);
     }
   }
 

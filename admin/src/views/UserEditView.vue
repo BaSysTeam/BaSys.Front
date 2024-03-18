@@ -154,7 +154,7 @@ export default class HomeView extends Vue {
         this.title += ` ${this.user.userName}`;
       } else {
         this.toastHelper.error(response.message);
-        this.toastHelper.error(response.presentation);
+        console.error(response.presentation);
       }
     } else {
       this.title += ' (New)';
@@ -198,7 +198,7 @@ export default class HomeView extends Vue {
     }
 
     this.toastHelper.error(response.message);
-    this.toastHelper.error(response.presentation);
+    console.error(response.presentation);
 
     return false;
   }

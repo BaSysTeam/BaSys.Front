@@ -284,7 +284,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       this.dbInfoRecords = response.data;
     } else {
       this.toastHelper.error(response.message);
-      this.toastHelper.error(response.presentation);
+      console.error(response.presentation);
     }
   }
 
@@ -334,7 +334,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
         this.toastHelper.success(response.message);
       } else {
         this.toastHelper.error(response.message);
-        this.toastHelper.error(response.presentation);
+        console.error(response.presentation);
       }
     }
 
@@ -356,7 +356,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       this.actionUpdate();
     } else {
       this.toastHelper.error(response.message);
-      this.toastHelper.error(response.presentation);
+      console.error(response.presentation);
     }
   }
 
@@ -405,7 +405,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       this.actionUpdate();
     } else {
       this.toastHelper.error(response.message);
-      this.toastHelper.error(response.presentation);
+      console.error(response.presentation);
     }
   }
 }
