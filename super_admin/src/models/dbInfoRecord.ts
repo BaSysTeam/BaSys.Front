@@ -4,6 +4,7 @@ export default class DbInfoRecord {
     id: number;
     appId: string;
     title: string;
+    name: string;
     dbKind: DbKinds;
     connectionString: string;
     memo: string;
@@ -13,6 +14,7 @@ export default class DbInfoRecord {
       this.id = options.id;
       this.appId = options.appId || '';
       this.title = options.title || '';
+      this.name = options.name || '';
       this.dbKind = options.dbKind || DbKinds.SqlServer;
       this.connectionString = options.connectionString || '';
       this.memo = options.memo || '';
