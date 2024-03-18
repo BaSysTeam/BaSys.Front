@@ -154,7 +154,7 @@ export default class DbInfoRecordsEditView extends Vue {
       this.appIds = response.data.map(({ id }) => id);
     } else {
       this.toastHelper.error(response.message);
-      this.toastHelper.error(response.presentation);
+      console.error(response.presentation);
     }
   }
 

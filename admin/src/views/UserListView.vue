@@ -240,7 +240,7 @@ export default class UserListView extends mixins(ResizeWindow) {
       this.users = response.data;
     } else {
       this.toastHelper.error(response.message);
-      this.toastHelper.error(response.presentation);
+      console.error(response.presentation);
     }
   }
 
@@ -289,7 +289,7 @@ export default class UserListView extends mixins(ResizeWindow) {
         this.toastHelper.success(response.message);
       } else {
         this.toastHelper.error(response.message);
-        this.toastHelper.error(response.presentation);
+        console.error(response.presentation);
       }
     }
 
@@ -315,7 +315,7 @@ export default class UserListView extends mixins(ResizeWindow) {
       this.toastHelper.success(response.message);
     } else {
       this.toastHelper.error(response.message);
-      this.toastHelper.error(response.presentation);
+      console.error(response.presentation);
     }
   }
 }
