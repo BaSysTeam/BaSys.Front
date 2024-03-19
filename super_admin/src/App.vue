@@ -1,13 +1,11 @@
 <template>
-  <Toast/>
-  <AppHeaderComponent
-    title="BaSys: DB manage"
-    :locale="currentLocale"
+  <Toast />
+  <AppHeaderComponent title="BaSys: DB manage" :locale="currentLocale"
     @burgerClicked="onBurgerClicked"
-    @localeChanged="onLocaleChanged"
-  />
+    @localeChanged="onLocaleChanged" />
   <div class="grid h-screen" style="margin:0">
-    <div class="bs-nav-panel col-fixed" style="padding:0" :style="{'width': navPanelWidth + 'px'}">
+    <div class="bs-nav-panel col-fixed" style="padding:0"
+    :style="{ 'width': navPanelWidth + 'px' }">
       <nav>
         <Menu :model="menuItems" style="min-width: 0; border: 0;">
           <template #item="{ item, props }">
@@ -48,6 +46,7 @@ import { usePrimeVue } from 'primevue/config';
 import { useToast } from 'primevue/usetoast';
 import Menu from 'primevue/menu';
 import Toast from 'primevue/toast';
+import AccountProvider from '@/dataProviders/accountProvider';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import ToastHelper from '../../shared/src/helpers/toastHelper';
 import pvLocaleRu from '../../shared/src/i18n/primevueLocales/ru.json';
@@ -73,7 +72,20 @@ export default class App extends Vue {
     { label: 'Apps', icon: 'pi pi-desktop', route: '/apps' },
     { label: 'Databases', icon: 'pi pi-database', route: '/databases' },
     { separator: true },
-    { label: 'Logout', icon: 'pi pi-sign-out' },
+    {
+      label: 'Logout',
+      icon: 'pi pi-sign-out',
+      command: async () => {
+        console.log('Log out clicked');
+        const accountProvider = new AccountProvider();
+        const response = await accountProvider.logout();
+        if (response.isOK) {
+          window.location.href = window.location.origin;
+        } else {
+          this.toastHelper.error(response.message);
+        }
+      },
+    },
   ]);
 
   onBurgerClicked(): void {

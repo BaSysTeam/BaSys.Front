@@ -34,6 +34,17 @@
           </div>
           <div class="grid">
             <div class="col">
+              <span id="dbInfoRecordName">Name</span>
+              <InputText
+                v-model="dbInfoRecord.name"
+                size="small"
+                aria-labelledby="dbInfoRecordName"
+                class="w-full"
+              />
+            </div>
+          </div>
+          <div class="grid">
+            <div class="col">
               <span id="dbInfoRecordDbKind">DbKind</span>
               <Dropdown
                 v-model="dbInfoRecord.dbKind"
