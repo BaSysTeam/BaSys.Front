@@ -65,11 +65,11 @@
         <div class="grid" v-if="!user.id">
           <div class="col">
             <span id="password">Password</span>
-            <Password
+            <InputText
               v-model="user.password"
+              size="small"
               aria-labelledby="password"
-              class="w-full bs-password-input"
-              toggleMask
+              class="w-full"
             />
           </div>
         </div>
@@ -104,7 +104,6 @@ import Divider from 'primevue/divider';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
-import Password from 'primevue/password';
 import User from '@/models/user';
 import UserProvider from '@/dataProviders/userProvider';
 import { RoleKinds } from '@/enums/roleKinds';
@@ -118,7 +117,6 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputText,
     Button,
     Checkbox,
-    Password,
   },
 })
 export default class HomeView extends Vue {
@@ -212,12 +210,6 @@ export default class HomeView extends Vue {
 </script>
 
 <style>
-  .bs-password-input {
-    .p-password-input {
-      width: 100%;
-    }
-  }
-
   .bs-required:after {
     content: "*";
     color: red;
