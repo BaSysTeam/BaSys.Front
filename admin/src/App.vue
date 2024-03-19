@@ -48,6 +48,7 @@ import { usePrimeVue } from 'primevue/config';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import Menu from 'primevue/menu';
+import AccountProvider from '@/dataProviders/accountProvider';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import ToastHelper from '../../shared/src/helpers/toastHelper';
 import pvLocaleRu from '../../shared/src/i18n/primevueLocales/ru.json';
@@ -71,6 +72,21 @@ export default class App extends Vue {
     { label: 'Home', icon: 'pi pi-home', route: '/' },
     { separator: true },
     { label: 'Users', icon: 'pi pi-user', route: '/users' },
+    { separator: true },
+    {
+      label: 'Logout',
+      icon: 'pi pi-sign-out',
+      command: async () => {
+        console.log('Log out clicked');
+        const accountProvider = new AccountProvider();
+        const response = await accountProvider.logout();
+        if (response.isOK) {
+          window.location.href = window.location.origin;
+        } else {
+          this.toastHelper.error(response.message);
+        }
+      },
+    },
   ]);
 
   onBurgerClicked(): void {
