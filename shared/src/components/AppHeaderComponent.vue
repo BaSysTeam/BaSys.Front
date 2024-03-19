@@ -1,32 +1,33 @@
 <template>
-    <div class="grid bs-app-header">
-        <div
-            class="col-fixed flex justify-content-center align-content-center flex-wrap"
-            style="width:50px"
-        >
-            <span
-                class="pi pi-bars"
-                style="font-size: 1.5rem; cursor: pointer;"
-                :onclick="burgerClick">
-            </span>
-        </div>
-        <div class="col">
-            <span> {{ title }}</span>
-        </div>
-        <div class="col flex justify-content-end flex-wrap h-full">
-          <SplitButton
-            class="h-full bs-locale-btn"
-            :label="locale"
-            :model="localeItems"
-            text
-          />
-        </div>
+  <div class="grid bs-app-header">
+    <div
+      class="col-fixed flex justify-content-center align-content-center flex-wrap"
+      style="width:50px"
+    >
+      <span
+        class="pi pi-bars"
+        style="font-size: 1.5rem; cursor: pointer;"
+        :onclick="burgerClick">
+      </span>
     </div>
+    <div class="col">
+      <span> {{ title }}</span>
+    </div>
+    <div class="col flex justify-content-end flex-wrap h-full">
+      <SplitButton
+        class="h-full bs-locale-btn"
+        :label="locale"
+        :model="localeItems"
+        text
+      />
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import SplitButton from 'primevue/splitbutton';
+import I18nManager from '../i18n/i18nManager';
 
 @Options({
   props: {
@@ -42,23 +43,28 @@ import SplitButton from 'primevue/splitbutton';
   },
 })
 export default class AppHeader extends Vue {
-    title!:string;
-    locale!:string;
+  title!:string;
+  locale!:string;
 
-    localeItems = [
-      {
-        label: 'En',
-        command: () => this.$emit('localeChanged', 'En'),
-      },
-      {
-        label: 'Ru',
-        command: () => this.$emit('localeChanged', 'Ru'),
-      },
-    ]
+  localeItems = [
+    {
+      label: 'En',
+      command: () => this.changeLocale('En'),
+    },
+    {
+      label: 'Ru',
+      command: () => this.changeLocale('Ru'),
+    },
+  ]
 
-    burgerClick(): void {
-      this.$emit('burgerClicked');
-    }
+  burgerClick(): void {
+    this.$emit('burgerClicked');
+  }
+
+  changeLocale(locale: string): void {
+    I18nManager.setLocale(locale.toLowerCase());
+    this.$emit('localeChanged', locale);
+  }
 }
 
 </script>
