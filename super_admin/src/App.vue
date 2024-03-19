@@ -49,8 +49,8 @@ import Toast from 'primevue/toast';
 import AccountProvider from '@/dataProviders/accountProvider';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import ToastHelper from '../../shared/src/helpers/toastHelper';
-import ru from '../../shared/src/locales/ru.json';
-import en from '../../shared/src/locales/en.json';
+import pvLocaleRu from '../../shared/src/i18n/primevueLocales/ru.json';
+import pvLocaleEn from '../../shared/src/i18n/primevueLocales/en.json';
 
 @Options({
   components: {
@@ -100,9 +100,9 @@ export default class App extends Vue {
 
   onLocaleChanged(selectedLocale: string): void {
     if (selectedLocale === 'En') {
-      this.primeVue.config.locale = en.primevue;
+      this.primeVue.config.locale = pvLocaleEn;
     } else {
-      this.primeVue.config.locale = ru.primevue;
+      this.primeVue.config.locale = pvLocaleRu;
     }
 
     this.currentLocale = selectedLocale;
