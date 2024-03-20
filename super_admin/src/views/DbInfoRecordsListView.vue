@@ -183,6 +183,17 @@
                   <TriStateCheckbox v-model="filterModel.value" inputId="isActive-filter" />
                 </template>
               </Column>
+              <Column header="Create" bodyClass="text-center">
+                <template #body="{ data }">
+                  <Button
+                    severity="primary"
+                    size="small"
+                    icon="pi pi-database"
+                    v-tooltip.left="'Create DB'"
+                    @click="createDbDialogOpen(data)"
+                  />
+                </template>
+              </Column>
             </DataTable>
           </div>
         </div>
@@ -201,6 +212,12 @@
         @noClick="isDeleteItemDialogVisible = false"
         @yesClick="deleteDbInfoRecord"
       />
+
+      <DbCreateComponent
+        v-if="isDbCreateDialogVisible"
+        :dbInfoRecord="dbInfoRecord"
+        @close="isDbCreateDialogVisible = false"
+      />
     </div>
 </template>
 
@@ -211,6 +228,7 @@ import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
 import DbInfoRecordProvider from '@/dataProviders/dbInfoRecordProvider';
 import DbInfoRecordsEditComponent from '@/components/DbInfoRecordsEditComponent.vue';
+import DbCreateComponent from '@/components/DbCreateComponent.vue';
 import DbInfoRecord from '@/models/dbInfoRecord';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
@@ -232,6 +250,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   components: {
     ViewTitleComponent,
     DbInfoRecordsEditComponent,
+    DbCreateComponent,
     ConfirmationDialogComponent,
     Button,
     SplitButton,
@@ -251,6 +270,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dataProvider = new DbInfoRecordProvider();
   toastHelper = new ToastHelper(useToast());
   isAddDialogVisible = false;
+  isDbCreateDialogVisible = false;
   isDeleteItemDialogVisible = false;
   isModelActionEdit = false;
   selectedRecord = {};
@@ -410,6 +430,11 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       this.isAddDialogVisible = true;
       this.isModelActionEdit = false;
     }
+  }
+
+  createDbDialogOpen(data: DbInfoRecord): void {
+    this.dbInfoRecord = new DbInfoRecord(data);
+    this.isDbCreateDialogVisible = true;
   }
 
   async isActiveChange(data: DbInfoRecord): Promise<void> {
