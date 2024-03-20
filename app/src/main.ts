@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
+import { useI18n } from 'vue-i18n';
 import Ripple from 'primevue/ripple';
 import App from './App.vue';
 import router from './router';
