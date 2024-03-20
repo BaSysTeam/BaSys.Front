@@ -6,8 +6,8 @@
     @burgerClicked="onBurgerClicked"
     @localeChanged="onLocaleChanged"
   />
-  <div class="grid h-screen" style="margin:0">
-    <div class="col">
+  <div class="grid h-screen" style="margin:0; padding: 10px">
+    <div class="col-12">
       <router-view />
     </div>
   </div>
