@@ -3,6 +3,7 @@ import PrimeVue from 'primevue/config';
 import Tooltip from 'primevue/tooltip';
 import Ripple from 'primevue/ripple';
 import ToastService from 'primevue/toastservice';
+import { useI18n } from 'vue-i18n';
 import App from './App.vue';
 import router from './router';
 
