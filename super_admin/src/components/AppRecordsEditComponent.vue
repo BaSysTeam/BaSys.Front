@@ -43,21 +43,17 @@
               />
             </div>
           </div>
-          <div class="grid">
-            <div class="col">
-              <div class="flex justify-content-end gap-2">
-                <Button
-                  label="Cancel"
-                  severity="secondary"
-                  size="small"
-                  outlined
-                  @click="cancelClick"
-                />
-                <Button label="Save" size="small" @click="saveClick" />
-              </div>
-            </div>
-          </div>
         </div>
+        <template #footer>
+          <Button
+            label="Cancel"
+            severity="secondary"
+            size="small"
+            outlined
+            @click="cancelClick"
+          />
+          <Button label="Save" size="small" @click="saveClick" />
+        </template>
       </Dialog>
     </div>
 </template>

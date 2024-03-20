@@ -30,21 +30,17 @@
             </InputGroup>
           </div>
         </div>
-        <div class="grid">
-            <div class="col">
-              <div class="flex justify-content-end gap-2">
-                <Button
-                  label="Close"
-                  size="small"
-                  severity="secondary"
-                  @click="closeClick"
-                  outlined
-                />
-                <Button label="Change" size="small" @click="changeClick" />
-              </div>
-            </div>
-          </div>
       </div>
+      <template #footer>
+        <Button
+          label="Close"
+          size="small"
+          severity="secondary"
+          @click="closeClick"
+          outlined
+        />
+        <Button label="Change" size="small" @click="changeClick" />
+      </template>
     </Dialog>
   </div>
 </template>
