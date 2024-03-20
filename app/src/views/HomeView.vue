@@ -1,7 +1,7 @@
 <template>
   <div class="grid">
     <div class="col-12"></div>
-    <h2>Wellcome</h2>
+    <h2>Wellcome, {{ userName }}!</h2>
   </div>
   <Divider></Divider>
   <div class="grid">
@@ -28,6 +28,8 @@ import AccountProvider from '@/dataProviders/accountProvider';
   },
 })
 export default class HomeView extends Vue {
+  userName = 'Unknown';
+
   async onLogoutClick():Promise<void> {
     console.log('Logout');
     const accountProvider = new AccountProvider();
@@ -36,6 +38,16 @@ export default class HomeView extends Vue {
       window.location.href = window.location.origin;
     } else {
       console.error(response.message);
+    }
+  }
+
+  async mounted():Promise<void> {
+    const accountProvider = new AccountProvider();
+    const response = await accountProvider.currentUser();
+    if (response.isOK) {
+      this.userName = response.data.userName;
+    } else {
+      console.error(response.presentation);
     }
   }
 }
