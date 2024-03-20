@@ -1,7 +1,7 @@
 <template>
   <div class="grid">
     <div class="col-12"></div>
-    <h2>Wellcome, {{ userName }}!</h2>
+    <h3>Wellcome, {{ userName }}!</h3>
   </div>
   <Divider></Divider>
   <div class="grid">
