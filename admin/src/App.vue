@@ -2,10 +2,12 @@
   <Toast/>
   <AppHeaderComponent
     title="BaSys: Admin"
-    :locale="currentLocale"
     @burgerClicked="onBurgerClicked"
-    @localeChanged="onLocaleChanged"
-  />
+  >
+    <template #languageSwitcher>
+      <LanguageSwitcherComponent/>
+    </template>
+  </AppHeaderComponent>
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0" :style="{'width': navPanelWidth + 'px'}">
       <nav>
@@ -44,19 +46,18 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { ref } from 'vue';
-import { usePrimeVue } from 'primevue/config';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import Menu from 'primevue/menu';
 import AccountProvider from '@/dataProviders/accountProvider';
+import LanguageSwitcherComponent from '@/components/LanguageSwitcherComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import ToastHelper from '../../shared/src/helpers/toastHelper';
-import pvLocaleRu from '../../shared/src/i18n/primevueLocales/ru.json';
-import pvLocaleEn from '../../shared/src/i18n/primevueLocales/en.json';
 
 @Options({
   components: {
     AppHeaderComponent,
+    LanguageSwitcherComponent,
     Toast,
     Menu,
   },
@@ -64,8 +65,6 @@ import pvLocaleEn from '../../shared/src/i18n/primevueLocales/en.json';
 export default class App extends Vue {
   isMenuMinimized = false;
   navPanelWidth = 200;
-  currentLocale = 'En';
-  primeVue = usePrimeVue();
   toastHelper = new ToastHelper(useToast());
 
   menuItems: any = ref([
@@ -76,16 +75,7 @@ export default class App extends Vue {
     {
       label: 'Logout',
       icon: 'pi pi-sign-out',
-      command: async () => {
-        console.log('Log out clicked');
-        const accountProvider = new AccountProvider();
-        const response = await accountProvider.logout();
-        if (response.isOK) {
-          window.location.href = window.location.origin;
-        } else {
-          this.toastHelper.error(response.message);
-        }
-      },
+      command: () => this.logOut(),
     },
   ]);
 
@@ -99,15 +89,16 @@ export default class App extends Vue {
     }
   }
 
-  onLocaleChanged(selectedLocale: string): void {
-    if (selectedLocale === 'En') {
-      this.primeVue.config.locale = pvLocaleEn;
+  async logOut(): Promise<void> {
+    console.log('Log out clicked');
+    const accountProvider = new AccountProvider();
+    const response = await accountProvider.logout();
+    if (response.isOK) {
+      window.location.href = window.location.origin;
     } else {
-      this.primeVue.config.locale = pvLocaleRu;
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
     }
-
-    this.currentLocale = selectedLocale;
-    this.toastHelper.info(`The locale has changed to ${this.currentLocale}`);
   }
 }
 </script>

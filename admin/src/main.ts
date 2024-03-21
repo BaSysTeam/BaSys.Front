@@ -6,6 +6,7 @@ import ToastService from 'primevue/toastservice';
 import { useI18n } from 'vue-i18n';
 import App from './App.vue';
 import router from './router';
+import I18nManager from '../../shared/src/i18n/i18nManager';
 
 // Importing PrimeVue styles
 import 'primevue/resources/themes/aura-light-blue/theme.css'; // theme
@@ -13,10 +14,13 @@ import 'primevue/resources/primevue.min.css'; // core css
 import 'primeicons/primeicons.css'; // icons
 import 'primeflex/primeflex.css';
 
+I18nManager.setup();
+
 const app = createApp(App);
 app.use(router);
 app.use(ToastService);
 app.use(PrimeVue, { ripple: true });
+app.use(I18nManager.vueI18n);
 app.directive('ripple', Ripple);
 app.directive('tooltip', Tooltip);
 app.mount('#app');

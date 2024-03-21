@@ -7,64 +7,31 @@
       <span
         class="pi pi-bars"
         style="font-size: 1.5rem; cursor: pointer;"
-        :onclick="burgerClick">
+        :onclick="() => $emit('burgerClicked')">
       </span>
     </div>
     <div class="col">
       <span> {{ title }}</span>
     </div>
     <div class="col flex justify-content-end flex-wrap h-full">
-      <SplitButton
-        class="h-full bs-locale-btn"
-        :label="locale"
-        :model="localeItems"
-        text
-      />
+      <slot name="languageSwitcher"></slot>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import SplitButton from 'primevue/splitbutton';
-import I18nManager from '../i18n/i18nManager';
 
 @Options({
   props: {
     title: String,
-    locale: String,
-  },
-  components: {
-    SplitButton,
   },
   emits: {
     burgerClicked: null,
-    localeChanged: null,
   },
 })
 export default class AppHeader extends Vue {
   title!:string;
-  locale!:string;
-
-  localeItems = [
-    {
-      label: 'En',
-      command: () => this.changeLocale('En'),
-    },
-    {
-      label: 'Ru',
-      command: () => this.changeLocale('Ru'),
-    },
-  ]
-
-  burgerClick(): void {
-    this.$emit('burgerClicked');
-  }
-
-  changeLocale(locale: string): void {
-    I18nManager.setLocale(locale.toLowerCase());
-    this.$emit('localeChanged', locale);
-  }
 }
 
 </script>
@@ -77,14 +44,5 @@ export default class AppHeader extends Vue {
     font-size: 1.5rem;
     color: white;
     background-color: var(--primary-800);
-}
-
-.bs-locale-btn {
-  .p-splitbutton-defaultbutton {
-    color: white;
-  }
-  .p-splitbutton-menubutton {
-    color: white;
-  }
 }
 </style>
