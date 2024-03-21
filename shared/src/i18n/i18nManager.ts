@@ -1,12 +1,13 @@
 import { I18n, createI18n } from 'vue-i18n';
+import { LocaleKinds } from '../enums/localeKinds';
 import en from './locales/en.json';
 import ru from './locales/ru.json';
 
 export default class I18nManager {
   private static i18nInstance: I18n;
 
-  static readonly DEFAULT_LOCALE = 'en';
-  static readonly SUPPORT_LOCALES = ['en', 'ru'];
+  static readonly DEFAULT_LOCALE = LocaleKinds[LocaleKinds.EN];
+  static readonly SUPPORT_LOCALES = Object.values(LocaleKinds).filter((x) => typeof x === 'string');
 
   static get vueI18n(): I18n {
     return this.i18nInstance;
@@ -31,8 +32,8 @@ export default class I18nManager {
   // Sets the active locale.
   static setLocale(newLocale: string): void {
     if (this.i18nInstance) {
-      this.i18nInstance.global.locale = newLocale;
-      document.querySelector('html')?.setAttribute('lang', newLocale);
+      this.i18nInstance.global.locale = newLocale.toLowerCase();
+      document.querySelector('html')?.setAttribute('lang', newLocale.toLowerCase());
     }
   }
 }

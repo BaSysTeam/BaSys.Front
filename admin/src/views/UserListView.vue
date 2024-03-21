@@ -9,7 +9,7 @@
       <div class="col-6">
         <span class="p-buttonset">
           <Button
-            label="Add"
+            :label="$t('add')"
             severity="primary"
             size="small"
             outlined
@@ -17,7 +17,7 @@
             @click="addUser"
           />
           <Button
-            label="Edit"
+            :label="$t('edit')"
             severity="primary"
             size="small"
             outlined
