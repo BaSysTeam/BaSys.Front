@@ -215,7 +215,7 @@
 
       <DbCreateComponent
         v-if="isDbCreateDialogVisible"
-        :dbInfoRecord="dbInfoRecord"
+        :id="dbInfoRecord.id"
         @close="isDbCreateDialogVisible = false"
       />
     </div>

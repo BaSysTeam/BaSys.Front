@@ -10,11 +10,11 @@
     >
       <div>
         <div class="col">
-          <span id="adminEmail">Admin email</span>
+          <span id="adminLogin">Admin login</span>
           <InputText
-            v-model="model.adminEmail"
+            v-model="model.adminLogin"
             size="small"
-            aria-labelledby="adminEmail"
+            aria-labelledby="adminLogin"
             class="w-full"
           />
         </div>
@@ -48,8 +48,8 @@ import { useToast } from 'primevue/usetoast';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import DbCreateDto from '@/models/dbCreateDto';
-import DbInfoRecord from '@/models/dbInfoRecord';
+import InitDbRequestDto from '../models/initDbRequestDto';
+import WorkDbProvider from '../dataProviders/workDbProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
@@ -59,8 +59,8 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Button,
   },
   props: {
-    dbInfoRecord: {
-      type: DbInfoRecord,
+    id: {
+      type: Number,
       required: true,
     },
   },
@@ -68,18 +68,21 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     close: null,
   },
 })
-export default class HomeView extends Vue {
-  dbInfoRecord!: DbInfoRecord;
-  model = new DbCreateDto();
+export default class DbCreateComponent extends Vue {
+  id!: number;
+  model = new InitDbRequestDto();
+  dataProvider = new WorkDbProvider();
   toastHelper = new ToastHelper(useToast());
 
-  mounted(): void {
-    this.model.dbInfoRecordId = this.dbInfoRecord.id;
-    this.model.dbInfoRecordName = this.dbInfoRecord.name;
-  }
-
-  createClick(): void {
-    console.log('createClick');
+  async createClick(): Promise<void> {
+    const response = await this.dataProvider.initDb(this.id, this.model);
+    if (response.isOK) {
+      this.toastHelper.success(response.message);
+      this.$emit('close');
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
   }
 
   updateVisible(value: boolean): void {
