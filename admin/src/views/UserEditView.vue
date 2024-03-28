@@ -42,22 +42,23 @@
       <div class="col-3">
         <div class="grid">
           <div class="col">
-            <span id="userName" class="bs-required">User name</span>
+            <span id="email" class="bs-required">Email</span>
             <InputText
-              v-model="user.userName"
+              :value="user.email"
+              @input="onEmailInput($event)"
               size="small"
-              aria-labelledby="userName"
+              aria-labelledby="email"
               class="w-full"
             />
           </div>
         </div>
         <div class="grid">
           <div class="col">
-            <span id="email" class="bs-required">Email</span>
+            <span id="userName" class="bs-required">User name</span>
             <InputText
-              v-model="user.email"
+              v-model="user.userName"
               size="small"
-              aria-labelledby="email"
+              aria-labelledby="userName"
               class="w-full"
             />
           </div>
@@ -205,6 +206,12 @@ export default class HomeView extends Vue {
     if (await this.save()) {
       this.router.push('/users');
     }
+  }
+
+  onEmailInput(event: Event): void {
+    const val = (event.target as HTMLTextAreaElement).value;
+    this.user.email = val;
+    this.user.userName = val;
   }
 }
 </script>
