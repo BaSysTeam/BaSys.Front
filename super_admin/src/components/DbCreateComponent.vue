@@ -10,7 +10,7 @@
     >
       <div>
         <div class="col">
-          <span id="adminLogin">Admin login</span>
+          <span id="adminLogin" class="bs-required">Admin login</span>
           <InputText
             v-model="model.adminLogin"
             size="small"
@@ -19,7 +19,7 @@
           />
         </div>
         <div class="col">
-          <span id="adminPassword">Admin password</span>
+          <span id="adminPassword" class="bs-required">Admin password</span>
           <InputText
             v-model="model.adminPassword"
             size="small"
@@ -44,13 +44,10 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { useToast } from 'primevue/usetoast';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import InitDbRequestDto from '../models/initDbRequestDto';
-import WorkDbProvider from '../dataProviders/workDbProvider';
-import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
@@ -58,31 +55,17 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputText,
     Button,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
   emits: {
     close: null,
+    create: null,
   },
 })
 export default class DbCreateComponent extends Vue {
-  id!: number;
   model = new InitDbRequestDto();
-  dataProvider = new WorkDbProvider();
-  toastHelper = new ToastHelper(useToast());
 
   async createClick(): Promise<void> {
-    const response = await this.dataProvider.initDb(this.id, this.model);
-    if (response.isOK) {
-      this.toastHelper.success(response.message);
-      this.$emit('close');
-    } else {
-      this.toastHelper.error(response.message);
-      console.error(response.presentation);
-    }
+    this.$emit('close');
+    this.$emit('create', this.model);
   }
 
   updateVisible(value: boolean): void {
@@ -92,3 +75,11 @@ export default class DbCreateComponent extends Vue {
   }
 }
 </script>
+
+<style>
+  .bs-required:after {
+    content: "*";
+    color: red;
+    font-size: 12pt;
+}
+</style>
