@@ -2,7 +2,7 @@
     <div>
       <div class="grid">
         <div class="col">
-          <ViewTitleComponent title="Db connections" :is-waiting="false" />
+          <ViewTitleComponent title="Db connections" :is-waiting="isWaiting" />
         </div>
       </div>
       <div class="grid">
@@ -215,8 +215,8 @@
 
       <DbCreateComponent
         v-if="isDbCreateDialogVisible"
-        :id="dbInfoRecord.id"
         @close="isDbCreateDialogVisible = false"
+        @create="onCreateDb"
       />
     </div>
 </template>
@@ -241,6 +241,8 @@ import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import InputSwitch from 'primevue/inputswitch';
 import Dropdown from 'primevue/dropdown';
+import InitDbRequestDto from '@/models/initDbRequestDto';
+import WorkDbProvider from '@/dataProviders/workDbProvider';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ConfirmationDialogComponent from '../../../shared/src/components/ConfirmationDialogComponent.vue';
@@ -267,12 +269,14 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dbInfoRecord = new DbInfoRecord({});
-  dataProvider = new DbInfoRecordProvider();
+  dbInfoRecordProvider = new DbInfoRecordProvider();
+  workDbProvider = new WorkDbProvider();
   toastHelper = new ToastHelper(useToast());
   isAddDialogVisible = false;
   isDbCreateDialogVisible = false;
   isDeleteItemDialogVisible = false;
   isModelActionEdit = false;
+  isWaiting = false;
   selectedRecord = {};
   filters = {};
   dbInfoRecords: DbInfoRecord[] = [];
@@ -312,7 +316,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   }
 
   async actionUpdate(): Promise<void> {
-    const response = await this.dataProvider.getDbInfoRecords();
+    const response = await this.dbInfoRecordProvider.getDbInfoRecords();
     if (response.isOK) {
       this.dbInfoRecords = response.data;
     } else {
@@ -365,7 +369,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   async deleteDbInfoRecord(): Promise<void> {
     if (!this.isSelectedRecordEmpty) {
       const deletedItem = new DbInfoRecord(this.selectedRecord);
-      const response = await this.dataProvider.deleteDbInfoRecord(deletedItem.id);
+      const response = await this.dbInfoRecordProvider.deleteDbInfoRecord(deletedItem.id);
       if (response.isOK) {
         this.actionUpdate();
         this.selectedRecord = {};
@@ -384,9 +388,9 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     let response = null;
 
     if (this.isModelActionEdit) {
-      response = await this.dataProvider.updateDbInfoRecord(args);
+      response = await this.dbInfoRecordProvider.updateDbInfoRecord(args);
     } else {
-      response = await this.dataProvider.addDbInfoRecord(args);
+      response = await this.dbInfoRecordProvider.addDbInfoRecord(args);
     }
 
     if (response.isOK) {
@@ -441,7 +445,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     const item = data;
     item.isDeleted = !item.isDeleted;
 
-    const response = await this.dataProvider.switchActivity(item.id);
+    const response = await this.dbInfoRecordProvider.switchActivity(item.id);
 
     if (response.isOK) {
       this.toastHelper.success(response.message);
@@ -450,6 +454,21 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
+  }
+
+  async onCreateDb(model: InitDbRequestDto): Promise<void> {
+    this.isWaiting = true;
+
+    const response = await this.workDbProvider.initDb(this.dbInfoRecord.id, model);
+    if (response.isOK) {
+      this.toastHelper.success(response.message);
+      this.$emit('close');
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+
+    this.isWaiting = false;
   }
 }
 </script>
