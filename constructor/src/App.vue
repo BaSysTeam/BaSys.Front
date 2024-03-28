@@ -8,12 +8,8 @@
     <div class="bs-nav-panel col-fixed" style="padding:0"
       :style="{ 'width': navPanelWidth + 'px' }">
       <MetadataTreeComponent v-show="!isMenuMinimized"/>
-      <div
-        v-if="isMenuMinimized"
-        style="writing-mode: vertical-rl;"
-        class="w-full flex justify-content-center flex-wrap"
-      >
-        <b class="flex align-items-center justify-content-center mt-3">Metadata Tree</b>
+      <div v-if="isMenuMinimized">
+        <h4 class="bs-metadatatree-text">Metadata Tree</h4>
       </div>
     </div>
     <div class="col">
@@ -66,5 +62,14 @@ body {
 
 .bs-nav-panel {
   border-right: 1px solid var(--surface-200);
+}
+
+.bs-metadatatree-text {
+  transform: rotate(-90deg);
+  width: auto;
+  position: fixed;
+  left: -30px;
+  top: 100px;
+  margin: 0;
 }
 </style>
