@@ -40,6 +40,7 @@
                 size="small"
                 aria-labelledby="dbInfoRecordName"
                 class="w-full"
+                :disabled="dbInfoRecord.isExists === true"
               />
             </div>
           </div>

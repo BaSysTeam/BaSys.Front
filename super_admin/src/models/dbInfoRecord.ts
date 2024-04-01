@@ -9,6 +9,7 @@ export default class DbInfoRecord {
     connectionString: string;
     memo: string;
     isDeleted: boolean;
+    isExists?: boolean;
 
     constructor(options: { [key: string]: any }) {
       this.id = options.id;
@@ -19,6 +20,7 @@ export default class DbInfoRecord {
       this.connectionString = options.connectionString || '';
       this.memo = options.memo || '';
       this.isDeleted = options.isDeleted || false;
+      this.isExists = options.isExists;
     }
 
     equals(obj: any): boolean {
