@@ -1,5 +1,6 @@
 import DbInfoRecord from '@/models/dbInfoRecord';
 import axios from 'axios';
+import ExistsDbResponse from '@/models/existsDbResponse';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class DbInfoRecordProvider {
@@ -75,6 +76,19 @@ export default class DbInfoRecordProvider {
 
     try {
       const { data } = await axios.patch(`${this.BASE_URL}/${id}/switchactivity`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async checkDbExistsByIds(dbInfoRecordIds: number[]): Promise<ResultWrapper<ExistsDbResponse[]>> {
+    let result: ResultWrapper<ExistsDbResponse[]> = new ResultWrapper<ExistsDbResponse[]>();
+
+    try {
+      const { data } = await axios.post(`${this.BASE_URL}/CheckDbExistsByDbInfoRecordIds`, dbInfoRecordIds);
       result = data;
     } catch (error) {
       console.error('error', error);

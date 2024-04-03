@@ -185,13 +185,20 @@
               </Column>
               <Column header="Create" bodyClass="text-center">
                 <template #body="{ data }">
-                  <Button
-                    severity="primary"
-                    size="small"
-                    icon="pi pi-database"
-                    v-tooltip.left="'Create DB'"
-                    @click="createDbDialogOpen(data)"
-                  />
+                  <template v-if="data.isExists === true">
+                    <i class="pi pi-check-circle text-green-500" v-tooltip.left="'Created'"></i>
+                  </template>
+                  <template v-else-if="data.isExists === false">
+                    <Button
+                      severity="primary"
+                      size="small"
+                      icon="pi pi-database"
+                      v-tooltip.left="'Create DB'"
+                      @click="createDbDialogOpen(data)"
+                    />
+                  </template>
+                  <template v-else>
+                  </template>
                 </template>
               </Column>
             </DataTable>
@@ -319,6 +326,23 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     const response = await this.dbInfoRecordProvider.getDbInfoRecords();
     if (response.isOK) {
       this.dbInfoRecords = response.data;
+      this.checkDbExists();
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+  }
+
+  async checkDbExists(): Promise<void> {
+    const ids: number[] = this.dbInfoRecords.map((x) => x.id);
+    const response = await this.dbInfoRecordProvider.checkDbExistsByIds(ids);
+    if (response.isOK) {
+      response.data.forEach((item) => {
+        const result = this.dbInfoRecords.find((x) => x.id === item.dbInfoRecordId);
+        if (result) {
+          result.isExists = item.isExists;
+        }
+      });
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -461,8 +485,8 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
 
     const response = await this.workDbProvider.initDb(this.dbInfoRecord.id, model);
     if (response.isOK) {
+      this.checkDbExists();
       this.toastHelper.success(response.message);
-      this.$emit('close');
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
