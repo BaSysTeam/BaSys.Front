@@ -455,6 +455,7 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
       this.dbInfoRecord = new DbInfoRecord(this.selectedRecord);
       this.dbInfoRecord.id = 0;
       this.dbInfoRecord.title += ' - COPY';
+      this.dbInfoRecord.isExists = false;
       this.isAddDialogVisible = true;
       this.isModelActionEdit = false;
     }
