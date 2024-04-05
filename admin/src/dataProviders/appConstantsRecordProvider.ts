@@ -18,19 +18,6 @@ export default class AppConstantsRecordProvider {
     return result;
   }
 
-  async createAppConstantsRecord(param: AppConstantsRecord): Promise<ResultWrapper<number>> {
-    let result: ResultWrapper<number> = new ResultWrapper<number>();
-
-    try {
-      const { data } = await axios.post(this.BASE_URL, param);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
-  }
-
   async updateAppConstantsRecord(param: AppConstantsRecord): Promise<ResultWrapper<number>> {
     let result: ResultWrapper<number> = new ResultWrapper<number>();
 

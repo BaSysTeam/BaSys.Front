@@ -2,7 +2,11 @@
   <div>
     <div class="grid">
       <div class="col">
-        <ViewTitleComponent title="Settings: Logging" :is-modified="false" :is-waiting="false" />
+        <ViewTitleComponent
+          title="Settings: Logging"
+          :is-modified="false"
+          :is-waiting="isWaiting"
+        />
       </div>
     </div>
     <div class="grid">
@@ -14,6 +18,14 @@
           <template #content>
             <div class="grid">
               <div class="col-3 flex align-items-center">
+                <span>Is enabled</span>
+              </div>
+              <div class="col">
+                <InputSwitch v-model="model.isEnabled" @change="isEnabledChange(model)"/>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="col-3 flex align-items-center">
                 <span class="bs-required">Logger type</span>
               </div>
               <div class="col">
@@ -23,6 +35,20 @@
                   optionValue="identifier"
                   class="w-full"
                   :options="loggerKinds"
+                />
+              </div>
+            </div>
+            <div class="grid" v-if="model.loggerType === mongoKind">
+              <div class="col-3 flex align-items-center">
+                <span>Auto cleaning interval</span>
+              </div>
+              <div class="col">
+                <Dropdown
+                  v-model="model.autoClearInterval"
+                  optionLabel="name"
+                  optionValue="identifier"
+                  class="w-full"
+                  :options="autoClearIntervalKinds"
                 />
               </div>
             </div>
@@ -53,7 +79,7 @@
                 />
               </div>
             </div>
-            <div class="grid">
+            <!-- <div class="grid">
               <div class="col-3 flex align-items-center">
                 <span class="bs-required">Table name</span>
               </div>
@@ -65,7 +91,7 @@
                   class="w-full"
                 />
               </div>
-            </div>
+            </div> -->
           </template>
         </Card>
       </div>
@@ -77,11 +103,13 @@
 import { Options, Vue } from 'vue-class-component';
 import { LoggerKinds } from '@/enums/loggerKinds';
 import { EventTypeLevelKinds } from '@/enums/eventTypeLevelKinds';
+import { AutoClearIntervalKinds } from '@/enums/autoClearIntervalKinds';
 import LoggerConfig from '@/models/loggerConfig';
 import Divider from 'primevue/divider';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
+import InputSwitch from 'primevue/inputswitch';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 
 @Options({
@@ -91,9 +119,12 @@ import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponen
     Card,
     InputText,
     Dropdown,
+    InputSwitch,
   },
 })
 export default class LoggingSettingView extends Vue {
+  isWaiting = false;
+  mongoKind = LoggerKinds.MongoDb;
   model = new LoggerConfig();
 
   loggerKinds = ([
@@ -128,6 +159,32 @@ export default class LoggingSettingView extends Vue {
       identifier: EventTypeLevelKinds.Critical,
     },
   ]);
+
+  autoClearIntervalKinds = ([
+    {
+      name: AutoClearIntervalKinds[AutoClearIntervalKinds.None],
+      identifier: AutoClearIntervalKinds.None,
+    },
+    {
+      name: AutoClearIntervalKinds[AutoClearIntervalKinds.Week],
+      identifier: AutoClearIntervalKinds.Week,
+    },
+    {
+      name: AutoClearIntervalKinds[AutoClearIntervalKinds.Month],
+      identifier: AutoClearIntervalKinds.Month,
+    },
+    {
+      name: AutoClearIntervalKinds[AutoClearIntervalKinds.Quarter],
+      identifier: AutoClearIntervalKinds.Quarter,
+    },
+    {
+      name: AutoClearIntervalKinds[AutoClearIntervalKinds.Year],
+      identifier: AutoClearIntervalKinds.Year,
+    },
+  ]);
+
+  isEnabledChange(arg: LoggerConfig): void {
+    console.log('isEnabledChange');
+  }
 }
 </script>
-@/enums/eventTypeLevelKinds

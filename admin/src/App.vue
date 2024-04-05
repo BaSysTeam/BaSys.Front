@@ -17,23 +17,30 @@
           class="bs-tieredmenu-submenu-list">
           <template #item="{ item, props, hasSubmenu }">
             <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
-              <a v-ripple :href="href" v-bind="props.action" @click="navigate">
-                <div v-if="isMenuMinimized">
+              <a v-ripple :href="href" v-bind="props.action" @click="navigate" class="p-2 pr-0">
+                <div v-if="isMenuMinimized" class="flex align-items-center" style="height: 20px;">
                   <span :class="item.icon" v-tooltip.right="item.label" />
                   <span v-if="item.key === 'settings-submenu'" class="ml-2">{{ item.label }}</span>
                 </div>
-                <div v-else>
+                <div v-else class="flex align-items-center" style="height: 20px;">
                   <span :class="item.icon" />
                   <span class="ml-2">{{ item.label }}</span>
                 </div>
               </a>
             </router-link>
-            <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
-              <div v-if="isMenuMinimized">
+            <a v-else
+              v-ripple
+              :href="item.url"
+              :target="item.target"
+              v-bind="props.action"
+              class="p-2 pr-0"
+            >
+              <div v-if="isMenuMinimized" class="flex align-items-center" style="height: 20px;">
                 <span :class="item.icon" v-tooltip.right="item.label" />
                 <span v-if="item.key === 'settings-submenu'" class="ml-2">{{ item.label }}</span>
+                <span v-if="hasSubmenu" class="pi pi-angle-right" />
               </div>
-              <div v-else>
+              <div v-else class="flex align-items-center" style="height: 20px;">
                 <span :class="item.icon" />
                 <span class="ml-2">{{ item.label }}</span>
                 <span v-if="hasSubmenu" class="pi pi-angle-right ml-7 vertical-align-text-bottom" />
