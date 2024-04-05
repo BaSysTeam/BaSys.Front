@@ -3,7 +3,7 @@ import ResultWrapper from '../../../shared/src/models/resultWrapper';
 import User from '../models/user';
 
 export default class AppRecordProvider {
-    readonly BASE_URL = '/api/v1/Account';
+    private readonly BASE_URL = '/api/v1/Account';
 
     async logout(): Promise<ResultWrapper<boolean>> {
       let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();

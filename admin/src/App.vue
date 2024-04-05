@@ -11,12 +11,16 @@
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0" :style="{'width': navPanelWidth + 'px'}">
       <nav>
-        <Menu :model="menuItems" style="min-width: 0; border: 0;">
-          <template #item="{ item, props }">
+        <TieredMenu
+          :model="menuItems"
+          style="min-width: 0; border: 0;"
+          class="bs-tieredmenu-submenu-list">
+          <template #item="{ item, props, hasSubmenu }">
             <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
               <a v-ripple :href="href" v-bind="props.action" @click="navigate">
                 <div v-if="isMenuMinimized">
                   <span :class="item.icon" v-tooltip.right="item.label" />
+                  <span v-if="item.key === 'settings-submenu'" class="ml-2">{{ item.label }}</span>
                 </div>
                 <div v-else>
                   <span :class="item.icon" />
@@ -27,14 +31,16 @@
             <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
               <div v-if="isMenuMinimized">
                 <span :class="item.icon" v-tooltip.right="item.label" />
+                <span v-if="item.key === 'settings-submenu'" class="ml-2">{{ item.label }}</span>
               </div>
               <div v-else>
                 <span :class="item.icon" />
                 <span class="ml-2">{{ item.label }}</span>
+                <span v-if="hasSubmenu" class="pi pi-angle-right ml-7 vertical-align-text-bottom" />
               </div>
             </a>
           </template>
-        </Menu>
+        </TieredMenu>
       </nav>
     </div>
     <div class="col">
@@ -48,7 +54,7 @@ import { Options, Vue } from 'vue-class-component';
 import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
-import Menu from 'primevue/menu';
+import TieredMenu from 'primevue/tieredmenu';
 import AccountProvider from '@/dataProviders/accountProvider';
 import LanguageSwitcherComponent from '@/components/LanguageSwitcherComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
@@ -59,7 +65,7 @@ import ToastHelper from '../../shared/src/helpers/toastHelper';
     AppHeaderComponent,
     LanguageSwitcherComponent,
     Toast,
-    Menu,
+    TieredMenu,
   },
 })
 export default class App extends Vue {
@@ -68,9 +74,33 @@ export default class App extends Vue {
   toastHelper = new ToastHelper(useToast());
 
   menuItems: any = ref([
-    { label: 'Home', icon: 'pi pi-home', route: '/' },
+    {
+      label: 'Home',
+      icon: 'pi pi-home',
+      route: '/',
+    },
     { separator: true },
-    { label: 'Users', icon: 'pi pi-user', route: '/users' },
+    {
+      label: 'Users',
+      icon: 'pi pi-user',
+      route: '/users',
+    },
+    {
+      label: 'Settings',
+      icon: 'pi pi-cog',
+      items: [
+        {
+          label: 'Main',
+          route: '/settings/main',
+          key: 'settings-submenu',
+        },
+        {
+          label: 'Logging',
+          route: '/settings/logging',
+          key: 'settings-submenu',
+        },
+      ],
+    },
     { separator: true },
     {
       label: 'Logout',
@@ -119,5 +149,12 @@ body {
 
 .bs-nav-panel {
   border-right: 1px solid var(--surface-200);
+}
+
+.bs-tieredmenu-submenu-list {
+  .p-submenu-list {
+    z-index: 2;
+    min-width: 200px;
+  }
 }
 </style>
