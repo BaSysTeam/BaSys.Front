@@ -3,7 +3,7 @@ import User from '../models/user';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class UserProvider {
-    readonly BASE_URL = '/api/admin/v1/Users';
+    private readonly BASE_URL = '/api/admin/v1/Users';
 
     async getAllUsers(): Promise<ResultWrapper<User[]>> {
       let result: ResultWrapper<User[]> = new ResultWrapper<User[]>();
