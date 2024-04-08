@@ -1,4 +1,4 @@
-export default class AppConstantsRecord {
+export default class AppConstants {
   uid!: string;
   dataBaseUid!: string;
   applicationTitle!: string;

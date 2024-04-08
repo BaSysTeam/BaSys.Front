@@ -1,12 +1,12 @@
 import axios from 'axios';
-import AppConstantsRecord from '@/models/appConstantsRecord';
+import AppConstants from '@/models/appConstants';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class AppConstantsRecordProvider {
-  private readonly BASE_URL = '/api/admin/v1/AppConstantsRecords';
+export default class AppConstantsProvider {
+  private readonly BASE_URL = '/api/admin/v1/AppConstants';
 
-  async getAppConstantsRecord(): Promise<ResultWrapper<AppConstantsRecord>> {
-    let result: ResultWrapper<AppConstantsRecord> = new ResultWrapper<AppConstantsRecord>();
+  async getAppConstants(): Promise<ResultWrapper<AppConstants>> {
+    let result: ResultWrapper<AppConstants> = new ResultWrapper<AppConstants>();
 
     try {
       const { data } = await axios.get(this.BASE_URL);
@@ -18,7 +18,7 @@ export default class AppConstantsRecordProvider {
     return result;
   }
 
-  async updateAppConstantsRecord(param: AppConstantsRecord): Promise<ResultWrapper<number>> {
+  async updateAppConstants(param: AppConstants): Promise<ResultWrapper<number>> {
     let result: ResultWrapper<number> = new ResultWrapper<number>();
 
     try {

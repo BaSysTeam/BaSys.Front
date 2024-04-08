@@ -18,7 +18,7 @@
               </div>
               <div class="col">
                 <InputText
-                  v-model="appConstantsRecord.applicationTitle"
+                  v-model="appConstants.applicationTitle"
                   @keyup.enter="save"
                   @focusout="save"
                   type="text"
@@ -36,7 +36,7 @@
                 <InputGroup>
                   <InputMask
                     id="basic"
-                    v-model="appConstantsRecord.dataBaseUid"
+                    v-model="appConstants.dataBaseUid"
                     @keyup.enter="save"
                     @focusout="save"
                     mask="********-****-****-****-************"
@@ -52,7 +52,7 @@
                 <span>App version</span>
               </div>
               <div class="col">
-                <b>{{ appConstantsRecord.appVersion }}</b>
+                <b>{{ appConstants.appVersion }}</b>
               </div>
             </div>
           </template>
@@ -73,8 +73,8 @@ import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Button from 'primevue/button';
 import InputMask from 'primevue/inputmask';
-import AppConstantsRecord from '@/models/appConstantsRecord';
-import AppConstantsRecordProvider from '../dataProviders/appConstantsRecordProvider';
+import AppConstants from '@/models/appConstants';
+import AppConstantsProvider from '../dataProviders/appConstantsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -92,18 +92,18 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class MainSettingView extends Vue {
   isWaiting = false;
-  appConstantsRecord = new AppConstantsRecord();
-  appConstantsRecordCached = new AppConstantsRecord();
+  appConstants = new AppConstants();
+  appConstantsCached = new AppConstants();
   toastHelper = new ToastHelper(useToast());
-  dataProvider = new AppConstantsRecordProvider();
+  dataProvider = new AppConstantsProvider();
 
   async mounted(): Promise<void> {
     this.isWaiting = true;
 
-    const response = await this.dataProvider.getAppConstantsRecord();
+    const response = await this.dataProvider.getAppConstants();
     if (response.isOK) {
-      this.appConstantsRecord = response.data;
-      this.appConstantsRecordCached = { ...response.data };
+      this.appConstants = response.data;
+      this.appConstantsCached = { ...response.data };
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -113,26 +113,26 @@ export default class MainSettingView extends Vue {
   }
 
   async onGenerateUid(): Promise<void> {
-    this.appConstantsRecord.dataBaseUid = Guid.create().toString();
+    this.appConstants.dataBaseUid = Guid.create().toString();
     await this.save();
   }
 
   async save(): Promise<void> {
     const appTitleInput = document.getElementById('appTitleInput');
 
-    if (JSON.stringify(this.appConstantsRecord) === JSON.stringify(this.appConstantsRecordCached)) {
+    if (JSON.stringify(this.appConstants) === JSON.stringify(this.appConstantsCached)) {
       appTitleInput?.blur();
       return;
     }
 
     this.isWaiting = true;
 
-    const response = await this.dataProvider.updateAppConstantsRecord(this.appConstantsRecord);
+    const response = await this.dataProvider.updateAppConstants(this.appConstants);
     if (response.isOK) {
       this.toastHelper.success(response.message);
-      this.appConstantsRecordCached = { ...this.appConstantsRecord };
+      this.appConstantsCached = { ...this.appConstants };
     } else {
-      this.appConstantsRecord = { ...this.appConstantsRecordCached };
+      this.appConstants = { ...this.appConstantsCached };
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
