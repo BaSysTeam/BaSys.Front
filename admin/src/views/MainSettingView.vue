@@ -2,7 +2,7 @@
   <div>
     <div class="grid">
       <div class="col">
-        <ViewTitleComponent title="Settings: Main" :is-modified="false" :is-waiting="false"/>
+        <ViewTitleComponent title="Settings: Main" :is-modified="false" :is-waiting="isWaiting"/>
       </div>
     </div>
     <div class="grid">
@@ -24,6 +24,7 @@
                   type="text"
                   size="small"
                   class="w-full"
+                  id="appTitleInput"
                 />
               </div>
             </div>
@@ -33,15 +34,25 @@
               </div>
               <div class="col">
                 <InputGroup>
-                  <InputText
+                  <InputMask
+                    id="basic"
                     v-model="appConstantsRecord.dataBaseUid"
                     @keyup.enter="save"
                     @focusout="save"
-                    type="text"
-                    size="small"
+                    mask="********-****-****-****-************"
+                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                    class="text-sm"
                   />
-                  <Button label="Generate" size="small" @click="onGenerateUid" />
+                  <Button label="Generate ?" size="small" @click="onGenerateUid" />
                 </InputGroup>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="col-3 flex align-items-center">
+                <span>App version</span>
+              </div>
+              <div class="col">
+                <b>{{ appConstantsRecord.appVersion }}</b>
               </div>
             </div>
           </template>
@@ -53,7 +64,6 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Guid } from 'guid-typescript';
 import { useToast } from 'primevue/usetoast';
 import Divider from 'primevue/divider';
@@ -62,11 +72,11 @@ import InputText from 'primevue/inputtext';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Button from 'primevue/button';
+import InputMask from 'primevue/inputmask';
 import AppConstantsRecord from '@/models/appConstantsRecord';
 import AppConstantsRecordProvider from '../dataProviders/appConstantsRecordProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
-import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 @Options({
   components: {
@@ -77,15 +87,19 @@ import ResultWrapper from '../../../shared/src/models/resultWrapper';
     InputGroup,
     InputGroupAddon,
     Button,
+    InputMask,
   },
 })
 export default class MainSettingView extends Vue {
+  isWaiting = false;
   appConstantsRecord = new AppConstantsRecord();
   appConstantsRecordCached = new AppConstantsRecord();
   toastHelper = new ToastHelper(useToast());
   dataProvider = new AppConstantsRecordProvider();
 
   async mounted(): Promise<void> {
+    this.isWaiting = true;
+
     const response = await this.dataProvider.getAppConstantsRecord();
     if (response.isOK) {
       this.appConstantsRecord = response.data;
@@ -94,6 +108,8 @@ export default class MainSettingView extends Vue {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
+
+    this.isWaiting = false;
   }
 
   async onGenerateUid(): Promise<void> {
@@ -102,29 +118,28 @@ export default class MainSettingView extends Vue {
   }
 
   async save(): Promise<void> {
-    console.log('save');
+    const appTitleInput = document.getElementById('appTitleInput');
 
     if (JSON.stringify(this.appConstantsRecord) === JSON.stringify(this.appConstantsRecordCached)) {
+      appTitleInput?.blur();
       return;
     }
 
-    let response = new ResultWrapper<number>();
+    this.isWaiting = true;
 
-    if (this.appConstantsRecord.uid) {
-      response = await this.dataProvider.updateAppConstantsRecord(this.appConstantsRecord);
-    } else {
-      response = await this.dataProvider.createAppConstantsRecord(this.appConstantsRecord);
-    }
-
-    console.log('response', response);
-
+    const response = await this.dataProvider.updateAppConstantsRecord(this.appConstantsRecord);
     if (response.isOK) {
       this.toastHelper.success(response.message);
       this.appConstantsRecordCached = { ...this.appConstantsRecord };
     } else {
+      this.appConstantsRecord = { ...this.appConstantsRecordCached };
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
+
+    appTitleInput?.blur();
+
+    this.isWaiting = false;
   }
 }
 </script>
