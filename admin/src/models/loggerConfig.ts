@@ -4,10 +4,10 @@ import { AutoClearIntervalKinds } from '@/enums/autoClearIntervalKinds';
 
 export default class LoggerConfig {
   isEnabled!: boolean;
-  loggerType!: LoggerKinds;
+  loggerType?: LoggerKinds;
   autoClearInterval: AutoClearIntervalKinds = AutoClearIntervalKinds.Month;
   minimumLogLevel!: EventTypeLevelKinds;
-  connectionString!: string;
+  connectionString?: string;
   dbUid!: string;
   tableName?: string;
 }
