@@ -21,7 +21,7 @@
                 <span>Is enabled</span>
               </div>
               <div class="col">
-                <InputSwitch v-model="model.isEnabled" @change="save"/>
+                <InputSwitch v-model="model.isEnabled" @change="isEnabledChanged"/>
               </div>
             </div>
             <div class="grid">
@@ -209,12 +209,13 @@ export default class LoggingSettingView extends Vue {
     this.isWaiting = false;
   }
 
-  async save(): Promise<void> {
+  async save(): Promise<boolean> {
+    let result = false;
     const connectionStringInput = document.getElementById('connectionStringInput');
 
     if (JSON.stringify(this.model) === JSON.stringify(this.modelCached)) {
       connectionStringInput?.blur();
-      return;
+      return false;
     }
 
     this.isWaiting = true;
@@ -223,8 +224,8 @@ export default class LoggingSettingView extends Vue {
     if (response.isOK) {
       this.toastHelper.success(response.message);
       this.modelCached = { ...this.model };
+      result = true;
     } else {
-      this.model = { ...this.modelCached };
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
@@ -232,6 +233,13 @@ export default class LoggingSettingView extends Vue {
     connectionStringInput?.blur();
 
     this.isWaiting = false;
+
+    return result;
+  }
+
+  async isEnabledChanged(): Promise<void> {
+    const result = await this.save();
+    if (!result) this.model.isEnabled = !this.model.isEnabled;
   }
 }
 </script>
