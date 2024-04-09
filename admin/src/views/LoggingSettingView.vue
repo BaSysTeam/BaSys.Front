@@ -21,7 +21,7 @@
                 <span>Is enabled</span>
               </div>
               <div class="col">
-                <InputSwitch v-model="model.isEnabled" @change="isEnabledChange(model)"/>
+                <InputSwitch v-model="model.isEnabled" @change="isEnabledChanged"/>
               </div>
             </div>
             <div class="grid">
@@ -35,6 +35,7 @@
                   optionValue="identifier"
                   class="w-full"
                   :options="loggerKinds"
+                  @update:model-value="save"
                 />
               </div>
             </div>
@@ -49,6 +50,7 @@
                   optionValue="identifier"
                   class="w-full"
                   :options="autoClearIntervalKinds"
+                  @update:model-value="save"
                 />
               </div>
             </div>
@@ -73,9 +75,12 @@
               <div class="col">
                 <InputText
                   v-model="model.connectionString"
+                  @keyup.enter="save"
+                  @focusout="save"
                   type="text"
                   size="small"
                   class="w-full"
+                  id="connectionStringInput"
                 />
               </div>
             </div>
@@ -104,13 +109,16 @@ import { Options, Vue } from 'vue-class-component';
 import { LoggerKinds } from '@/enums/loggerKinds';
 import { EventTypeLevelKinds } from '@/enums/eventTypeLevelKinds';
 import { AutoClearIntervalKinds } from '@/enums/autoClearIntervalKinds';
+import { useToast } from 'primevue/usetoast';
 import LoggerConfig from '@/models/loggerConfig';
 import Divider from 'primevue/divider';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import InputSwitch from 'primevue/inputswitch';
+import LoggerConfigProvider from '../dataProviders/loggerConfigProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
@@ -126,6 +134,9 @@ export default class LoggingSettingView extends Vue {
   isWaiting = false;
   mongoKind = LoggerKinds.MongoDb;
   model = new LoggerConfig();
+  modelCached = new LoggerConfig();
+  dataProvider = new LoggerConfigProvider();
+  toastHelper = new ToastHelper(useToast());
 
   loggerKinds = ([
     { name: LoggerKinds[LoggerKinds.MsSql], identifier: LoggerKinds.MsSql },
@@ -183,8 +194,52 @@ export default class LoggingSettingView extends Vue {
     },
   ]);
 
-  isEnabledChange(arg: LoggerConfig): void {
-    console.log('isEnabledChange');
+  async mounted(): Promise<void> {
+    this.isWaiting = true;
+
+    const response = await this.dataProvider.getLoggerConfig();
+    if (response.isOK) {
+      this.model = response.data;
+      this.modelCached = { ...response.data };
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+
+    this.isWaiting = false;
+  }
+
+  async save(): Promise<boolean> {
+    let result = false;
+    const connectionStringInput = document.getElementById('connectionStringInput');
+
+    if (JSON.stringify(this.model) === JSON.stringify(this.modelCached)) {
+      connectionStringInput?.blur();
+      return false;
+    }
+
+    this.isWaiting = true;
+
+    const response = await this.dataProvider.updateLoggerConfig(this.model);
+    if (response.isOK) {
+      this.toastHelper.success(response.message);
+      this.modelCached = { ...this.model };
+      result = true;
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+
+    connectionStringInput?.blur();
+
+    this.isWaiting = false;
+
+    return result;
+  }
+
+  async isEnabledChanged(): Promise<void> {
+    const result = await this.save();
+    if (!result) this.model.isEnabled = !this.model.isEnabled;
   }
 }
 </script>
