@@ -43,7 +43,11 @@
                     placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                     class="text-sm"
                   />
-                  <Button label="Generate ?" size="small" @click="onGenerateUid" />
+                  <Button
+                    label="Generate"
+                    size="small"
+                    @click="() => isGenerateUidDialogVisible = true"
+                  />
                 </InputGroup>
               </div>
             </div>
@@ -59,6 +63,13 @@
         </Card>
       </div>
     </div>
+
+    <ConfirmationDialogComponent
+      v-if="isGenerateUidDialogVisible"
+      confirmText="A new database Uid will be generated. Continue?"
+      @noClick="isGenerateUidDialogVisible = false"
+      @yesClick="onGenerateUid"
+    />
   </div>
 </template>
 
@@ -76,11 +87,13 @@ import InputMask from 'primevue/inputmask';
 import AppConstants from '@/models/appConstants';
 import AppConstantsProvider from '../dataProviders/appConstantsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import ConfirmationDialogComponent from '../../../shared/src/components/ConfirmationDialogComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
     ViewTitleComponent,
+    ConfirmationDialogComponent,
     Divider,
     Card,
     InputText,
@@ -92,6 +105,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class MainSettingView extends Vue {
   isWaiting = false;
+  isGenerateUidDialogVisible = false;
   appConstants = new AppConstants();
   appConstantsCached = new AppConstants();
   toastHelper = new ToastHelper(useToast());
@@ -113,6 +127,7 @@ export default class MainSettingView extends Vue {
   }
 
   async onGenerateUid(): Promise<void> {
+    this.isGenerateUidDialogVisible = false;
     this.appConstants.dataBaseUid = Guid.create().toString();
     await this.save();
   }
