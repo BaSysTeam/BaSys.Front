@@ -32,7 +32,7 @@
               outlined
               icon="pi pi-trash"
               :disabled="isSelectedRecordEmpty"
-              @click="deleteDialogOpen"
+              @click="showConfirmDialog"
             />
           </span>
           <Button
@@ -213,12 +213,7 @@
         @save="saveDbInfoRecord"
       />
 
-      <ConfirmationDialogComponent
-        v-if="isDeleteItemDialogVisible"
-        confirmText="Are you sure you want to delete the selected item?"
-        @noClick="isDeleteItemDialogVisible = false"
-        @yesClick="deleteDbInfoRecord"
-      />
+      <ConfirmDialog :draggable="false"></ConfirmDialog>
 
       <DbCreateComponent
         v-if="isDbCreateDialogVisible"
@@ -233,6 +228,7 @@ import { Options, mixins } from 'vue-class-component';
 import { DbKinds } from '@/enums/dbKinds';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 import DbInfoRecordProvider from '@/dataProviders/dbInfoRecordProvider';
 import DbInfoRecordsEditComponent from '@/components/DbInfoRecordsEditComponent.vue';
 import DbCreateComponent from '@/components/DbCreateComponent.vue';
@@ -248,11 +244,11 @@ import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import InputSwitch from 'primevue/inputswitch';
 import Dropdown from 'primevue/dropdown';
+import ConfirmDialog from 'primevue/confirmdialog';
 import InitDbRequestDto from '@/models/initDbRequestDto';
 import WorkDbProvider from '@/dataProviders/workDbProvider';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
-import ConfirmationDialogComponent from '../../../shared/src/components/ConfirmationDialogComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
@@ -260,7 +256,6 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     ViewTitleComponent,
     DbInfoRecordsEditComponent,
     DbCreateComponent,
-    ConfirmationDialogComponent,
     Button,
     SplitButton,
     DataTable,
@@ -272,6 +267,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     TriStateCheckbox,
     Dropdown,
     InputSwitch,
+    ConfirmDialog,
   },
 })
 export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
@@ -279,9 +275,9 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   dbInfoRecordProvider = new DbInfoRecordProvider();
   workDbProvider = new WorkDbProvider();
   toastHelper = new ToastHelper(useToast());
+  confirm = useConfirm();
   isAddDialogVisible = false;
   isDbCreateDialogVisible = false;
-  isDeleteItemDialogVisible = false;
   isModelActionEdit = false;
   isWaiting = false;
   selectedRecord = {};
@@ -403,8 +399,6 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
         console.error(response.presentation);
       }
     }
-
-    this.isDeleteItemDialogVisible = false;
   }
 
   async saveDbInfoRecord(args: DbInfoRecord): Promise<void> {
@@ -444,10 +438,16 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
     }
   }
 
-  deleteDialogOpen(): void {
-    if (!this.isSelectedRecordEmpty) {
-      this.isDeleteItemDialogVisible = true;
-    }
+  showConfirmDialog(): void {
+    this.confirm.require({
+      message: 'Are you sure you want to delete the selected item?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      accept: () => this.deleteDbInfoRecord(),
+    });
   }
 
   copyDialogOpen(): void {

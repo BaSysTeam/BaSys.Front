@@ -32,7 +32,7 @@
               outlined
               icon="pi pi-trash"
               :disabled="isSelectedRecordEmpty"
-              @click="deleteDialogOpen"
+              @click="showConfirmDialog"
             />
           </span>
           <Button
@@ -126,12 +126,7 @@
                           @save="saveAppRecord"
                           :appRecord="appRecord"/>
 
-      <ConfirmationDialogComponent
-        v-if="isDeleteItemDialogVisible"
-        confirmText="Are you sure you want to delete the selected item?"
-        @noClick="isDeleteItemDialogVisible = false"
-        @yesClick="deleteAppRecord"
-      />
+      <ConfirmDialog :draggable="false"></ConfirmDialog>
     </div>
 </template>
 
@@ -139,6 +134,7 @@
 import { Options, mixins } from 'vue-class-component';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 import AppRecordProvider from '@/dataProviders/appRecordProvider';
 import AppRecordsEditComponent from '@/components/AppRecordsEditComponent.vue';
 import Button from 'primevue/button';
@@ -148,17 +144,16 @@ import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
+import ConfirmDialog from 'primevue/confirmdialog';
 import AppRecord from '@/models/appRecord';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
-import ConfirmationDialogComponent from '../../../shared/src/components/ConfirmationDialogComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
     ViewTitleComponent,
     AppRecordsEditComponent,
-    ConfirmationDialogComponent,
     Button,
     SplitButton,
     DataTable,
@@ -166,6 +161,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Divider,
     Dialog,
     InputText,
+    ConfirmDialog,
   },
 })
 export default class AppRecordsListView extends mixins(ResizeWindow) {
@@ -173,10 +169,10 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
   isModelActionEdit = false;
   appRecord = new AppRecord({});
   selectedRecord = {};
-  isDeleteItemDialogVisible = false;
   dataProvider = new AppRecordProvider();
   filters = {};
   toastHelper = new ToastHelper(useToast());
+  confirm = useConfirm();
 
   actions = [
     {
@@ -252,8 +248,6 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
         console.error(response.presentation);
       }
     }
-
-    this.isDeleteItemDialogVisible = false;
   }
 
   async saveAppRecord(args: AppRecord): Promise<void> {
@@ -299,10 +293,16 @@ export default class AppRecordsListView extends mixins(ResizeWindow) {
     }
   }
 
-  deleteDialogOpen(): void {
-    if (!this.isSelectedRecordEmpty) {
-      this.isDeleteItemDialogVisible = true;
-    }
+  showConfirmDialog(): void {
+    this.confirm.require({
+      message: 'Are you sure you want to delete the selected item?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      accept: () => this.deleteAppRecord(),
+    });
   }
 }
 </script>
