@@ -73,12 +73,12 @@
                 <span class="bs-required">Connection string</span>
               </div>
               <div class="col">
-                <InputText
+                <Textarea
                   v-model="model.connectionString"
                   @keyup.enter="save"
                   @focusout="save"
-                  type="text"
-                  size="small"
+                  rows="5"
+                  aria-labelledby="modelConnectionString"
                   class="w-full"
                   id="connectionStringInput"
                 />
@@ -116,6 +116,7 @@ import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import InputSwitch from 'primevue/inputswitch';
+import Textarea from 'primevue/textarea';
 import LoggerConfigProvider from '../dataProviders/loggerConfigProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -128,6 +129,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputText,
     Dropdown,
     InputSwitch,
+    Textarea,
   },
 })
 export default class LoggingSettingView extends Vue {
