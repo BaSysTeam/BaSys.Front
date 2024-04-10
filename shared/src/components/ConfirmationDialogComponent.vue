@@ -3,13 +3,13 @@
         <Dialog
             :visible="true"
             :style="{width: '450px'}"
-            :closable="false"
             :draggable="false"
             header="Confirm"
             class="pb-0"
             modal
+            @update:visible="updateVisible"
         >
-            <div class="confirmation-content">
+            <div class="confirmation-content flex align-items-center">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
                 <span>{{ confirmText }}</span>
             </div>
@@ -53,6 +53,12 @@ import Button from 'primevue/button';
 })
 export default class ConfirmationDialog extends Vue {
   confirmText!: string;
+
+  updateVisible(value: boolean): void {
+    if (!value) {
+      this.$emit('noClick');
+    }
+  }
 }
 </script>
 
