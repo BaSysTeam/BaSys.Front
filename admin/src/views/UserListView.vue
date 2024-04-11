@@ -291,6 +291,10 @@ export default class UserListView extends mixins(ResizeWindow) {
   }
 
   showConfirmDialog(): void {
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
+
     this.confirm.require({
       message: 'Are you sure you want to delete the selected item?',
       header: 'Confirmation',

@@ -46,7 +46,7 @@
                   <Button
                     label="Generate"
                     size="small"
-                    @click="showConfirmDialog"
+                    @click="isGenerateUidDialogVisible = true"
                   />
                 </InputGroup>
               </div>
@@ -64,7 +64,11 @@
       </div>
     </div>
 
-    <ConfirmDialog :draggable="false"></ConfirmDialog>
+    <GenerateUidDialogComponent
+      v-if="isGenerateUidDialogVisible"
+      @reject="isGenerateUidDialogVisible = false"
+      @accept="generateUid"
+    />
   </div>
 </template>
 
@@ -80,8 +84,9 @@ import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Button from 'primevue/button';
 import InputMask from 'primevue/inputmask';
-import ConfirmDialog from 'primevue/confirmdialog';
+import Checkbox from 'primevue/checkbox';
 import AppConstants from '@/models/appConstants';
+import GenerateUidDialogComponent from '@/components/GenerateUidDialogComponent.vue';
 import AppConstantsProvider from '../dataProviders/appConstantsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -89,6 +94,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 @Options({
   components: {
     ViewTitleComponent,
+    GenerateUidDialogComponent,
     Divider,
     Card,
     InputText,
@@ -96,16 +102,18 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputGroupAddon,
     Button,
     InputMask,
-    ConfirmDialog,
+    Checkbox,
   },
 })
 export default class MainSettingView extends Vue {
+  isGenerateUidDialogVisible = false;
   isWaiting = false;
   appConstants = new AppConstants();
   appConstantsCached = new AppConstants();
   toastHelper = new ToastHelper(useToast());
   confirm = useConfirm();
   dataProvider = new AppConstantsProvider();
+  checked = false;
 
   async mounted(): Promise<void> {
     this.isWaiting = true;
@@ -123,20 +131,9 @@ export default class MainSettingView extends Vue {
   }
 
   async generateUid(): Promise<void> {
+    this.isGenerateUidDialogVisible = false;
     this.appConstants.dataBaseUid = Guid.create().toString();
     await this.save();
-  }
-
-  showConfirmDialog(): void {
-    this.confirm.require({
-      message: 'A new database Uid will be generated. Continue?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      rejectClass: 'p-button-secondary p-button-outlined',
-      rejectLabel: 'Cancel',
-      acceptLabel: 'Generate',
-      accept: () => this.generateUid(),
-    });
   }
 
   async save(): Promise<void> {
