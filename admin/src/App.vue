@@ -7,6 +7,9 @@
     <template #languageSwitcher>
       <LanguageSwitcherComponent/>
     </template>
+    <template #userActions>
+      <UserActionsComponent @profileClicked="router.push('/usersettings')"/>
+    </template>
   </AppHeaderComponent>
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0" :style="{'width': navPanelWidth + 'px'}">
@@ -60,10 +63,12 @@
 import { Options, Vue } from 'vue-class-component';
 import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { useRouter } from 'vue-router';
 import Toast from 'primevue/toast';
 import TieredMenu from 'primevue/tieredmenu';
 import AccountProvider from '@/dataProviders/accountProvider';
 import LanguageSwitcherComponent from '@/components/LanguageSwitcherComponent.vue';
+import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import ToastHelper from '../../shared/src/helpers/toastHelper';
 
@@ -71,6 +76,7 @@ import ToastHelper from '../../shared/src/helpers/toastHelper';
   components: {
     AppHeaderComponent,
     LanguageSwitcherComponent,
+    UserActionsComponent,
     Toast,
     TieredMenu,
   },
@@ -79,6 +85,7 @@ export default class App extends Vue {
   isMenuMinimized = false;
   navPanelWidth = 200;
   toastHelper = new ToastHelper(useToast());
+  router = useRouter();
 
   menuItems: any = ref([
     {

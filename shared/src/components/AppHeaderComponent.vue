@@ -15,6 +15,7 @@
     </div>
     <div class="col flex justify-content-end flex-wrap h-full">
       <slot name="languageSwitcher"></slot>
+      <slot name="userActions"></slot>
     </div>
   </div>
 </template>
