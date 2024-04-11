@@ -46,7 +46,7 @@
                   <Button
                     label="Generate"
                     size="small"
-                    @click="() => isGenerateUidDialogVisible = true"
+                    @click="isGenerateUidDialogVisible = true"
                   />
                 </InputGroup>
               </div>
@@ -64,11 +64,10 @@
       </div>
     </div>
 
-    <ConfirmationDialogComponent
+    <GenerateUidDialogComponent
       v-if="isGenerateUidDialogVisible"
-      confirmText="A new database Uid will be generated. Continue?"
-      @noClick="isGenerateUidDialogVisible = false"
-      @yesClick="onGenerateUid"
+      @reject="isGenerateUidDialogVisible = false"
+      @accept="generateUid"
     />
   </div>
 </template>
@@ -77,6 +76,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Guid } from 'guid-typescript';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 import Divider from 'primevue/divider';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
@@ -84,16 +84,17 @@ import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Button from 'primevue/button';
 import InputMask from 'primevue/inputmask';
+import Checkbox from 'primevue/checkbox';
 import AppConstants from '@/models/appConstants';
+import GenerateUidDialogComponent from '@/components/GenerateUidDialogComponent.vue';
 import AppConstantsProvider from '../dataProviders/appConstantsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
-import ConfirmationDialogComponent from '../../../shared/src/components/ConfirmationDialogComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
     ViewTitleComponent,
-    ConfirmationDialogComponent,
+    GenerateUidDialogComponent,
     Divider,
     Card,
     InputText,
@@ -101,15 +102,18 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputGroupAddon,
     Button,
     InputMask,
+    Checkbox,
   },
 })
 export default class MainSettingView extends Vue {
-  isWaiting = false;
   isGenerateUidDialogVisible = false;
+  isWaiting = false;
   appConstants = new AppConstants();
   appConstantsCached = new AppConstants();
   toastHelper = new ToastHelper(useToast());
+  confirm = useConfirm();
   dataProvider = new AppConstantsProvider();
+  checked = false;
 
   async mounted(): Promise<void> {
     this.isWaiting = true;
@@ -126,7 +130,7 @@ export default class MainSettingView extends Vue {
     this.isWaiting = false;
   }
 
-  async onGenerateUid(): Promise<void> {
+  async generateUid(): Promise<void> {
     this.isGenerateUidDialogVisible = false;
     this.appConstants.dataBaseUid = Guid.create().toString();
     await this.save();

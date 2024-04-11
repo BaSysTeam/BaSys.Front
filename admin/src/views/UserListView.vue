@@ -122,12 +122,7 @@
       </div>
     </div>
 
-    <ConfirmationDialogComponent
-      v-if="isDeleteRecordDialogVisible"
-      confirmText="Are you sure you want to delete the selected item?"
-      @noClick="isDeleteRecordDialogVisible = false"
-      @yesClick="deleteUser"
-    />
+    <ConfirmDialog :draggable="false"></ConfirmDialog>
 
     <ChangePasswordComponent
       v-if="isChangePasswordDialogVisible"
@@ -142,6 +137,7 @@ import { Options, mixins } from 'vue-class-component';
 import { useRouter } from 'vue-router';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
@@ -152,18 +148,17 @@ import TriStateCheckbox from 'primevue/tristatecheckbox';
 import InputSwitch from 'primevue/inputswitch';
 import Badge from 'primevue/badge';
 import Card from 'primevue/card';
+import ConfirmDialog from 'primevue/confirmdialog';
 import User from '../models/user';
 import ChangePasswordComponent from '../components/ChangePasswordComponent.vue';
 import UserProvider from '../dataProviders/userProvider';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
-import ConfirmationDialogComponent from '../../../shared/src/components/ConfirmationDialogComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
     ViewTitleComponent,
-    ConfirmationDialogComponent,
     ChangePasswordComponent,
     Divider,
     Button,
@@ -175,10 +170,10 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputSwitch,
     Badge,
     Card,
+    ConfirmDialog,
   },
 })
 export default class UserListView extends mixins(ResizeWindow) {
-  isDeleteRecordDialogVisible = false;
   isChangePasswordDialogVisible = false;
   selectedRecord = {};
   filters = {};
@@ -187,6 +182,7 @@ export default class UserListView extends mixins(ResizeWindow) {
   currentUser:User = new User({});
   router = useRouter();
   toastHelper = new ToastHelper(useToast());
+  confirm = useConfirm();
 
   actions = [
     {
@@ -200,7 +196,7 @@ export default class UserListView extends mixins(ResizeWindow) {
     { separator: true },
     {
       label: 'Delete',
-      command: () => this.deleteDialogOpen(),
+      command: () => this.showConfirmDialog(),
     },
     {
       label: 'Change Password',
@@ -292,14 +288,22 @@ export default class UserListView extends mixins(ResizeWindow) {
         console.error(response.presentation);
       }
     }
-
-    this.isDeleteRecordDialogVisible = false;
   }
 
-  deleteDialogOpen(): void {
-    if (!this.isSelectedRecordEmpty) {
-      this.isDeleteRecordDialogVisible = true;
+  showConfirmDialog(): void {
+    if (this.isSelectedRecordEmpty) {
+      return;
     }
+
+    this.confirm.require({
+      message: 'Are you sure you want to delete the selected item?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      accept: () => this.deleteUser(),
+    });
   }
 
   async isActiveChange(data: User): Promise<void> {
