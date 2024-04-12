@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import DataTypesComponent from '../components/DataTypesComponent.vue';
+import MetadataKindsComponent from '../components/MetadataKindsComponent.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -12,6 +13,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/datatypes',
     name: 'datatypes',
     component: DataTypesComponent,
+  },
+  {
+    path: '/metadatakinds',
+    name: 'metadatakinds',
+    component: MetadataKindsComponent,
   },
 ];
 
