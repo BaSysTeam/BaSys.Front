@@ -19,6 +19,7 @@ import Tree from 'primevue/tree';
 import { useToast } from 'primevue/usetoast';
 import MetadataTreeProvider from '@/dataProviders/metadataTreeProvider';
 import MetadataTreeNode from '@/models/metadataTreeNode';
+import { MetadataTreeNodeTypes } from '@/enums/metadataTreeNodeTypes';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
@@ -44,8 +45,14 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   onNodeSelect(node: MetadataTreeNode): void {
-    if (node.label === 'DataTypes') {
-      this.router.push({ name: 'datatypes' });
+    if (node.nodeType === MetadataTreeNodeTypes.Element) {
+      if (node.label?.toLocaleLowerCase() === 'datatypes') {
+        this.router.push({ name: 'datatypes' });
+        return;
+      }
+      if (node.label?.toLocaleLowerCase() === 'metadatakinds') {
+        this.router.push({ name: 'metadatakinds' });
+      }
     }
   }
 }
