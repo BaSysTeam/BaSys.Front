@@ -5,7 +5,11 @@
     :locale="currentLocale"
     @burgerClicked="onBurgerClicked"
     @localeChanged="onLocaleChanged"
-  />
+  >
+    <template #userActions>
+      <UserActionsComponent @profileClicked="router.push('/usersettings')"/>
+    </template>
+  </AppHeaderComponent>
   <div class="grid h-screen" style="margin:0; padding: 10px">
     <div class="col-12">
       <router-view />
@@ -15,6 +19,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { usePrimeVue } from 'primevue/config';
 import { useToast } from 'primevue/usetoast';
@@ -24,10 +29,12 @@ import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.v
 import ToastHelper from '../../shared/src/helpers/toastHelper';
 import pvLocaleRu from '../../shared/src/i18n/primevueLocales/ru.json';
 import pvLocaleEn from '../../shared/src/i18n/primevueLocales/en.json';
+import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
 
 @Options({
   components: {
     AppHeaderComponent,
+    UserActionsComponent,
     Toast,
     Menu,
   },
@@ -37,6 +44,7 @@ export default class App extends Vue {
   navPanelWidth = 200;
   currentLocale = 'En';
   primeVue = usePrimeVue();
+  router = useRouter();
   toastHelper = new ToastHelper(useToast());
 
   menuItems: any = ref([

@@ -3,7 +3,11 @@
   <AppHeaderComponent
     title="BaSys: Constructor"
     @burgerClicked="onBurgerClicked"
-  />
+  >
+    <template #userActions>
+      <UserActionsComponent @profileClicked="router.push('/usersettings')"/>
+    </template>
+  </AppHeaderComponent>
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0"
       :style="{ 'width': navPanelWidth + 'px' }">
@@ -20,13 +24,16 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { useRouter } from 'vue-router';
 import Toast from 'primevue/toast';
 import MetadataTreeComponent from '@/components/MetadataTreeComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
+import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
 
 @Options({
   components: {
     AppHeaderComponent,
+    UserActionsComponent,
     MetadataTreeComponent,
     Toast,
   },
@@ -34,6 +41,7 @@ import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.v
 export default class App extends Vue {
   isMenuMinimized = false;
   navPanelWidth = 200;
+  router = useRouter();
 
   onBurgerClicked(): void {
     this.isMenuMinimized = !this.isMenuMinimized;

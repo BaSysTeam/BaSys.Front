@@ -120,7 +120,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Checkbox,
   },
 })
-export default class HomeView extends Vue {
+export default class UserEditView extends Vue {
   title = 'User:';
   route = useRoute();
   router = useRouter();
