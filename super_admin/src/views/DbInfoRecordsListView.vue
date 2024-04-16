@@ -198,6 +198,7 @@
                     />
                   </template>
                   <template v-else>
+                    <span class="font-bold text-red-500">!</span>
                   </template>
                 </template>
               </Column>
