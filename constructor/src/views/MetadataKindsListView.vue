@@ -44,7 +44,7 @@
           <DataTable
             v-model:selection="selectedRow"
             v-model:value="metadataKinds"
-            :metaKeySelection="false"
+            :metaKeySelection="true"
             showGridlines
             size="small"
             selectionMode="single"
@@ -92,6 +92,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { useRouter } from 'vue-router';
 import Divider from 'primevue/divider';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -116,6 +117,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 export default class MetadataKindsListView extends Vue {
   dataProvider = new MetadataKindProvider();
   toastHelper = new ToastHelper(useToast());
+  router = useRouter();
   selectedRow = {};
   metadataKinds:MetadataKind[] = [];
   isWaiting = true;
@@ -130,24 +132,30 @@ export default class MetadataKindsListView extends Vue {
 
   onEditClicked():void {
     console.log('Edit clicked');
+    this.navigateToEdit();
   }
 
   onDeleteClicked():void {
     console.log('Delete clicked');
   }
 
-  onRowDblClick():void {
-    console.log('Row dbl click');
+  onRowDblClick(args:any):void {
+    console.log('Row dbl click', args);
     console.log('isSelectedRowEmpty', this.isSelectedRowEmpty);
+    this.navigateToEdit();
+  }
+
+  onRowSelect(args:any):void {
+    console.log('Row select', args);
+  }
+
+  navigateToEdit():void {
     if (this.isSelectedRowEmpty) {
       return;
     }
     const selectedKind = this.selectedRow as MetadataKind;
     console.log('selected row', selectedKind);
-  }
-
-  onRowSelect(args:any):void {
-    console.log('Row select', args);
+    this.router.push({ name: 'metadata_kinds_edit', params: { name: selectedKind.name } });
   }
 
   async mounted(): Promise<void> {
