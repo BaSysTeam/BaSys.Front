@@ -42,9 +42,15 @@
       <div class="col-12">
         <div class="card m-1">
           <DataTable
-            :value="metadataKinds"
+            v-model:selection="selectedRow"
+            v-model:value="metadataKinds"
+            :metaKeySelection="false"
             showGridlines
             size="small"
+            selectionMode="single"
+            dataKey="uid"
+            @row-dblclick="onRowDblClick"
+            @row-select="onRowSelect"
           >
             <template #empty> No items found. </template>
             <Column header="#" style="width: 50px">
@@ -110,8 +116,13 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 export default class MetadataKindsListView extends Vue {
   dataProvider = new MetadataKindProvider();
   toastHelper = new ToastHelper(useToast());
+  selectedRow = {};
   metadataKinds:MetadataKind[] = [];
   isWaiting = true;
+
+  get isSelectedRowEmpty(): boolean {
+    return Object.keys(this.selectedRow).length === 0;
+  }
 
   onAddClicked():void {
     console.log('Add clicked');
@@ -125,13 +136,30 @@ export default class MetadataKindsListView extends Vue {
     console.log('Delete clicked');
   }
 
+  onRowDblClick():void {
+    console.log('Row dbl click');
+    console.log('isSelectedRowEmpty', this.isSelectedRowEmpty);
+    if (this.isSelectedRowEmpty) {
+      return;
+    }
+    const selectedKind = this.selectedRow as MetadataKind;
+    console.log('selected row', selectedKind);
+  }
+
+  onRowSelect(args:any):void {
+    console.log('Row select', args);
+  }
+
   async mounted(): Promise<void> {
+    this.actionUpdate();
+  }
+
+  async actionUpdate(): Promise<void> {
     this.isWaiting = true;
     const response = await this.dataProvider.getCollection();
     if (response.isOK) {
+      console.log('Get Metadata kinds', response);
       this.metadataKinds = response.data;
-      console.log('Metadata kinds');
-      console.log(response);
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
