@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import DataTypesComponent from '../components/DataTypesComponent.vue';
 import UserSettingsView from '../../../app/src/views/UserSettingsView.vue';
-import MetadataKindsComponent from '../components/MetadataKindsComponent.vue';
+import MetadataKindsListView from '../views/MetadataKindsListView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -23,7 +23,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/metadatakinds',
     name: 'metadatakinds',
-    component: MetadataKindsComponent,
+    component: MetadataKindsListView,
   },
 ];
 
