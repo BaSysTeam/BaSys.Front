@@ -89,7 +89,6 @@ export default class MetadataKindsEditView extends Vue {
     }
 
     formatDate(inputDate:Date): string {
-    // Using date-fns to format the date, e.g., to 'MMMM dd, yyyy' format
       return format(inputDate, 'yyyy-MMMM-dd');
     }
 }
