@@ -22,7 +22,7 @@
             filterDisplay="menu"
             selectionMode="single"
             dataKey="id"
-            size="small"
+            size="normal"
             scrollable
             scrollHeight="flex"
           >
@@ -75,9 +75,9 @@
                   <Button
                     severity="success"
                     size="small"
-                    icon="pi pi-download"
+                    icon="pi pi-angle-double-right"
                     v-tooltip.left="'Apply migration'"
-                    @click="removeMigration()"
+                    @click="applyMigration(data.uid)"
                   />
                 </template>
               </template>
@@ -94,10 +94,11 @@ import { mixins, Options } from 'vue-class-component';
 import Divider from 'primevue/divider';
 import Migration from '@/models/migration';
 import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import MigrationProvider from '@/dataProviders/migrationProvider';
+import MigrationsProvider from '@/dataProviders/migrationsProvider';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
+import Column from 'primevue/column';
+import { format } from 'date-fns';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -113,7 +114,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class MigrationsView extends mixins(ResizeWindow) {
   migrations: Migration[] = [];
-  migrationProvider = new MigrationProvider();
+  migrationsProvider = new MigrationsProvider();
   toastHelper = new ToastHelper(useToast());
   isWaiting = false;
 
@@ -129,7 +130,7 @@ export default class MigrationsView extends mixins(ResizeWindow) {
 
   async actionUpdate(): Promise<void> {
     this.isWaiting = true;
-    const response = await this.migrationProvider.getMigrationList();
+    const response = await this.migrationsProvider.getMigrationList();
     if (response.isOK) {
       this.migrations = response.data;
     } else {
@@ -141,16 +142,35 @@ export default class MigrationsView extends mixins(ResizeWindow) {
 
   async removeMigration(): Promise<void> {
     this.isWaiting = true;
+    const response = await this.migrationsProvider.removeMigration();
+    if (response.isOK) {
+      this.processMigration();
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+    this.isWaiting = false;
+  }
 
+  async applyMigration(uid: string): Promise<void> {
+    this.isWaiting = true;
+    console.log(`uid = ${uid}`);
+    const response = await this.migrationsProvider.applyMigration(uid);
+    if (response.isOK) {
+      this.processMigration();
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
     this.isWaiting = false;
   }
 
   formatDate(date: Date): string {
-    // const day = date.getDate().toString();
-    // const month = date.getMonth().toString();
-    // const year = date.getFullYear().toString();
-    // return `${year}-${month}-${day}`;
-    return date.toString();
+    return format(date, 'dd.MM.yyyy HH:mm');
+  }
+
+  processMigration(): void {
+    console.log('foo');
   }
 }
 </script>
