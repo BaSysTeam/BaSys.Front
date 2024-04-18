@@ -28,7 +28,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/metadata-kinds/edit/:name',
-    name: 'metadata_kinds_edit',
+    name: 'metadata-kinds-edit',
     component: MetadataKindsEditView,
     props: true,
   },

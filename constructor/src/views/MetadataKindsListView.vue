@@ -155,7 +155,7 @@ export default class MetadataKindsListView extends Vue {
     }
     const selectedKind = this.selectedRow as MetadataKind;
     console.log('selected row', selectedKind);
-    this.router.push({ name: 'metadata_kinds_edit', params: { name: selectedKind.name } });
+    this.router.push({ name: 'metadata-kinds-edit', params: { name: selectedKind.name } });
   }
 
   async mounted(): Promise<void> {

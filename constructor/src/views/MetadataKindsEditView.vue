@@ -5,6 +5,13 @@
         <ViewTitleComponent title="Metadata kinds" :is-modified="false" :is-waiting="false" />
       </div>
     </div>
+    <div class="grid">
+      <div class="col">
+        <span>{{ name }}</span>
+        <span>&nbsp;</span>
+        <span>{{ formatDate(dateField) }}</span>
+      </div>
+    </div>
     <div class="col-12">
       <span class="p-buttonset">
         <Button
@@ -48,6 +55,7 @@ import Column from 'primevue/column';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
+import { format } from 'date-fns';
 import MetadataKind from '../models/metadataKind';
 import MetadataKindProvider from '../dataProviders/metadataKindProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -55,7 +63,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   props: {
-    name: String,
+    name: { type: String, require: true },
   },
   components: {
     ViewTitleComponent,
@@ -70,12 +78,19 @@ export default class MetadataKindsEditView extends Vue {
     name!:string;
     router = useRouter();
 
+    dateField: Date = new Date();
+
     onSaveCloseClick():void {
       console.log('Save close click');
     }
 
     onSaveClick():void {
       console.log('Save click');
+    }
+
+    formatDate(inputDate:Date): string {
+    // Using date-fns to format the date, e.g., to 'MMMM dd, yyyy' format
+      return format(inputDate, 'yyyy-MMMM-dd');
     }
 }
 
