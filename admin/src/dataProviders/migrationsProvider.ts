@@ -50,4 +50,18 @@ export default class MigrationsProvider {
 
     return result;
   }
+
+  async isMigrationRun(): Promise<boolean> {
+    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
+
+    try {
+      const url = `${this.BASE_URL}/IsMigrationRun`;
+      const { data } = await axios.get(url);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result.data;
+  }
 }

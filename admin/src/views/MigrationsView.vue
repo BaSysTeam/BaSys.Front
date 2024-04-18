@@ -66,6 +66,7 @@
                   <Button
                     severity="danger"
                     size="small"
+                    :disabled="isMigrationButtonsDisabled"
                     icon="pi pi-undo"
                     v-tooltip.left="'Remove migration'"
                     @click="removeMigration()"
@@ -75,6 +76,7 @@
                   <Button
                     severity="success"
                     size="small"
+                    :disabled="isMigrationButtonsDisabled"
                     icon="pi pi-angle-double-right"
                     v-tooltip.left="'Apply migration'"
                     @click="applyMigration(data.uid)"
@@ -117,6 +119,7 @@ export default class MigrationsView extends mixins(ResizeWindow) {
   migrationsProvider = new MigrationsProvider();
   toastHelper = new ToastHelper(useToast());
   isWaiting = false;
+  isMigrationButtonsDisabled = false;
 
   get dataTableStyle(): object {
     return {
@@ -126,10 +129,13 @@ export default class MigrationsView extends mixins(ResizeWindow) {
 
   mounted(): void {
     this.actionUpdate();
+    this.processMigration();
   }
 
-  async actionUpdate(): Promise<void> {
-    this.isWaiting = true;
+  async actionUpdate(useIsWaiting = true): Promise<void> {
+    if (useIsWaiting) {
+      this.isWaiting = true;
+    }
     const response = await this.migrationsProvider.getMigrationList();
     if (response.isOK) {
       this.migrations = response.data;
@@ -137,19 +143,20 @@ export default class MigrationsView extends mixins(ResizeWindow) {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
-    this.isWaiting = false;
+    if (useIsWaiting) {
+      this.isWaiting = false;
+    }
   }
 
   async removeMigration(): Promise<void> {
     this.isWaiting = true;
     const response = await this.migrationsProvider.removeMigration();
     if (response.isOK) {
-      this.processMigration();
+      await this.processMigration();
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
-    this.isWaiting = false;
   }
 
   async applyMigration(uid: string): Promise<void> {
@@ -157,20 +164,40 @@ export default class MigrationsView extends mixins(ResizeWindow) {
     console.log(`uid = ${uid}`);
     const response = await this.migrationsProvider.applyMigration(uid);
     if (response.isOK) {
-      this.processMigration();
+      await this.processMigration();
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
-    this.isWaiting = false;
   }
 
   formatDate(date: Date): string {
     return format(date, 'dd.MM.yyyy HH:mm');
   }
 
-  processMigration(): void {
-    console.log('foo');
+  async processMigration(): Promise<void> {
+    let isMigrationRun = await this.migrationsProvider.isMigrationRun();
+    if (!isMigrationRun) {
+      return;
+    }
+    this.isWaiting = true;
+    this.isMigrationButtonsDisabled = true;
+    /* eslint-disable no-await-in-loop */
+    do {
+      await this.delay();
+      await this.actionUpdate(false);
+      isMigrationRun = await this.migrationsProvider.isMigrationRun();
+    }
+    while (isMigrationRun);
+    /* eslint-enable no-await-in-loop */
+    this.isWaiting = false;
+    this.isMigrationButtonsDisabled = false;
+  }
+
+  delay(): Promise<void> {
+    return new Promise((r) => {
+      setTimeout(r, 1000);
+    });
   }
 }
 </script>
