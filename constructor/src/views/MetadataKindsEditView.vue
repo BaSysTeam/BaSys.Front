@@ -1,17 +1,14 @@
 <template>
   <div>
+
     <div class="grid">
       <div class="col">
-        <ViewTitleComponent title="Metadata kinds" :is-modified="false" :is-waiting="false" />
+        <ViewTitleComponent title="Metadata kinds"
+         :is-modified="isModified"
+         :is-waiting="isWaiting" />
       </div>
     </div>
-    <div class="grid">
-      <div class="col">
-        <span>{{ name }}</span>
-        <span>&nbsp;</span>
-        <span>{{ formatDate(dateField) }}</span>
-      </div>
-    </div>
+
     <div class="col-12">
       <span class="p-buttonset">
         <Button
@@ -40,9 +37,21 @@
           />
       </span>
     </div>
+
     <div class="grid">
       <Divider class="m-2" />
     </div>
+
+    <div class="grid">
+      <div class="col-12">
+        <Textarea v-model="settingsJson"
+        rows="15"
+        spellcheck="false"
+        class="w-full"
+        @input="onSettingsInput"></Textarea>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -50,14 +59,12 @@
 import { Options, Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
 import Divider from 'primevue/divider';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
-import { format } from 'date-fns';
-import MetadataKind from '../models/metadataKind';
-import MetadataKindProvider from '../dataProviders/metadataKindProvider';
+import Textarea from 'primevue/textarea';
+import MetadataKindSettings from '../models/metadataKindSettings';
+import MetadataKindsProvider from '../dataProviders/metadataKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -68,17 +75,21 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   components: {
     ViewTitleComponent,
     Divider,
-    DataTable,
-    Column,
     Button,
     SplitButton,
+    Textarea,
   },
 })
 export default class MetadataKindsEditView extends Vue {
     name!:string;
+    settings = new MetadataKindSettings();
     router = useRouter();
+    provider = new MetadataKindsProvider();
+    toastHelper = new ToastHelper(useToast());
 
-    dateField: Date = new Date();
+    settingsJson = '';
+    isWaiting = true;
+    isModified = false;
 
     onSaveCloseClick():void {
       console.log('Save close click');
@@ -88,8 +99,32 @@ export default class MetadataKindsEditView extends Vue {
       console.log('Save click');
     }
 
-    formatDate(inputDate:Date): string {
-      return format(inputDate, 'yyyy-MMMM-dd');
+    onSettingsInput(): void {
+      console.log('settings input');
+      this.isModified = true;
+    }
+
+    async update(): Promise<void> {
+      console.log('Update', this.name);
+
+      this.isWaiting = true;
+      const response = await this.provider.getSettingsItemByName(this.name);
+      this.isWaiting = false;
+
+      if (response.isOK) {
+        this.settings = response.data;
+        this.settingsJson = JSON.stringify(this.settings, null, 2);
+        console.log('Settings loaded', this.settings);
+        console.log(this.settingsJson);
+      } else {
+        this.toastHelper.error(response.message);
+        console.error(response.presentation);
+      }
+    }
+
+    mounted(): void {
+      console.log('mounted', this.name);
+      this.$nextTick(() => { console.log('nextTick, name', this.name); this.update(); });
     }
 }
 

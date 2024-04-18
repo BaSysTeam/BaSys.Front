@@ -100,7 +100,7 @@ import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import MetadataKind from '../models/metadataKind';
-import MetadataKindProvider from '../dataProviders/metadataKindProvider';
+import MetadataKindsProvider from '../dataProviders/metadataKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -115,7 +115,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   },
 })
 export default class MetadataKindsListView extends Vue {
-  dataProvider = new MetadataKindProvider();
+  dataProvider = new MetadataKindsProvider();
   toastHelper = new ToastHelper(useToast());
   router = useRouter();
   selectedRow = {};
