@@ -5,7 +5,6 @@ import HomeView from '../views/HomeView.vue';
 import UserListView from '../views/UserListView.vue';
 import UserEditView from '../views/UserEditView.vue';
 import MigrationsView from '../views/MigrationsView.vue';
-import UserSettingsView from '../../../app/src/views/UserSettingsView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -32,11 +31,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/settings/logging',
     name: 'loggingSetting',
     component: LoggingSettingView,
-  },
-  {
-    path: '/usersettings',
-    name: 'usersettings',
-    component: UserSettingsView,
   },
   {
     path: '/migrations',
