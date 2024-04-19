@@ -129,7 +129,14 @@ export default class MigrationsView extends mixins(ResizeWindow) {
 
   mounted(): void {
     this.actionUpdate();
-    this.processMigration();
+    this.checkRunningMigrations();
+  }
+
+  async checkRunningMigrations(): Promise<void> {
+    const isMigrationRun = await this.migrationsProvider.isMigrationRun();
+    if (isMigrationRun) {
+      await this.processMigration();
+    }
   }
 
   async actionUpdate(useIsWaiting = true): Promise<void> {
@@ -148,24 +155,27 @@ export default class MigrationsView extends mixins(ResizeWindow) {
     }
   }
 
-  async removeMigration(): Promise<void> {
+  async applyMigration(uid: string): Promise<void> {
     this.isWaiting = true;
-    const response = await this.migrationsProvider.removeMigration();
+    this.isMigrationButtonsDisabled = true;
+    const response = await this.migrationsProvider.applyMigration(uid);
     if (response.isOK) {
       await this.processMigration();
     } else {
+      this.isMigrationButtonsDisabled = false;
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
   }
 
-  async applyMigration(uid: string): Promise<void> {
+  async removeMigration(): Promise<void> {
     this.isWaiting = true;
-    console.log(`uid = ${uid}`);
-    const response = await this.migrationsProvider.applyMigration(uid);
+    this.isMigrationButtonsDisabled = true;
+    const response = await this.migrationsProvider.removeMigration();
     if (response.isOK) {
       await this.processMigration();
     } else {
+      this.isMigrationButtonsDisabled = false;
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
@@ -176,27 +186,25 @@ export default class MigrationsView extends mixins(ResizeWindow) {
   }
 
   async processMigration(): Promise<void> {
-    let isMigrationRun = await this.migrationsProvider.isMigrationRun();
-    if (!isMigrationRun) {
-      return;
-    }
     this.isWaiting = true;
     this.isMigrationButtonsDisabled = true;
+    let isMigrationRun = false;
     /* eslint-disable no-await-in-loop */
     do {
-      await this.delay();
+      await this.delay(500);
       await this.actionUpdate(false);
       isMigrationRun = await this.migrationsProvider.isMigrationRun();
     }
     while (isMigrationRun);
     /* eslint-enable no-await-in-loop */
+    await this.actionUpdate(false);
     this.isWaiting = false;
     this.isMigrationButtonsDisabled = false;
   }
 
-  delay(): Promise<void> {
+  delay(milliseconds: number): Promise<void> {
     return new Promise((r) => {
-      setTimeout(r, 1000);
+      setTimeout(r, milliseconds);
     });
   }
 }
