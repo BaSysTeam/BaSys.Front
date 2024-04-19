@@ -5,7 +5,7 @@
     @burgerClicked="onBurgerClicked"
   >
     <template #userActions>
-      <UserActionsComponent @profileClicked="router.push('/usersettings')"/>
+      <UserActionsComponent @profileClicked="onProfileClicked"/>
     </template>
   </AppHeaderComponent>
   <div class="grid h-screen" style="margin:0">
@@ -50,6 +50,10 @@ export default class App extends Vue {
     } else {
       this.navPanelWidth = 200;
     }
+  }
+
+  onProfileClicked(): void {
+    window.location.href = '/app#/usersettings';
   }
 }
 </script>
