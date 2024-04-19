@@ -11,7 +11,7 @@
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0"
       :style="{ 'width': navPanelWidth + 'px' }">
-      <MetadataTreeComponent v-show="!isMenuMinimized"/>
+      <MetadataTreeComponent :isMenuMinimized="isMenuMinimized"/>
       <div v-if="isMenuMinimized">
         <h4 class="bs-metadatatree-text">Metadata Tree</h4>
       </div>
