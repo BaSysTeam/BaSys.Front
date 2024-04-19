@@ -21,6 +21,6 @@ module.exports = defineConfig({
   },
   outputDir: path.resolve(__dirname, '../../BaSys.Back/src/BaSys.Host/wwwroot/app/admin'),
   devServer: {
-    proxy: 'https://localhost:7053',
+    proxy: 'http://localhost:5231',
   },
 });

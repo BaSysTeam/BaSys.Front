@@ -1,7 +1,9 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
-import MetadataKindsView from '../views/MetadataKindsView.vue';
+import UserSettingsView from '../../../app/src/views/UserSettingsView.vue';
+import MetadataKindsListView from '../views/MetadataKindsListView.vue';
+import MetadataKindsEditView from '../views/MetadataKindsEditView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -15,9 +17,20 @@ const routes: Array<RouteRecordRaw> = [
     component: DataTypesView,
   },
   {
-    path: '/metadatakinds',
-    name: 'metadatakinds',
-    component: MetadataKindsView,
+    path: '/usersettings',
+    name: 'usersettings',
+    component: UserSettingsView,
+  },
+  {
+    path: '/metadata-kinds',
+    name: 'metadata-kinds',
+    component: MetadataKindsListView,
+  },
+  {
+    path: '/metadata-kinds/edit/:name',
+    name: 'metadata-kinds-edit',
+    component: MetadataKindsEditView,
+    props: true,
   },
 ];
 
