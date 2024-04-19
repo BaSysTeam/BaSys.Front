@@ -110,6 +110,11 @@ export default class App extends Vue {
         },
       ],
     },
+    {
+      label: 'Migrations',
+      icon: 'pi pi-database',
+      route: '/migrations',
+    },
     { separator: true },
     {
       label: 'Logout',
