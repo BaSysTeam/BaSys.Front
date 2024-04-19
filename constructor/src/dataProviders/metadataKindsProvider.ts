@@ -31,4 +31,30 @@ export default class MetadataKindsProvider {
 
     return result;
   }
+
+  async insert(settings: MetadataKindSettings): Promise<ResultWrapper<MetadataKindSettings>> {
+    let result = new ResultWrapper<MetadataKindSettings>();
+
+    try {
+      const { data } = await axios.post(this.BASE_URL, settings);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async update(settings: MetadataKindSettings): Promise<ResultWrapper<number>> {
+    let result = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.put(this.BASE_URL, settings);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
 }

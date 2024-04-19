@@ -1,3 +1,5 @@
+import { Guid } from 'guid-typescript';
+
 export default class MetadataKindStandardColumn {
     uid: string;
     name:string;
@@ -11,7 +13,7 @@ export default class MetadataKindStandardColumn {
       if (params != null) {
         initialData = params;
       }
-      this.uid = initialData.uid || '';
+      this.uid = initialData.uid || Guid.create().toString();
       this.name = initialData.name || '';
       this.title = initialData.title || '';
       this.dataTypeUid = initialData.dataTypeUid || '';

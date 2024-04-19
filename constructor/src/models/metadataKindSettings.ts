@@ -1,3 +1,4 @@
+import { Guid } from 'guid-typescript';
 import MetadataKindStandardColumn from './metadataKindStandardColumn';
 
 export default class MetadataKindSettings {
@@ -16,7 +17,7 @@ export default class MetadataKindSettings {
       if (params != null) {
         initialData = params;
       }
-      this.uid = initialData.uid || '';
+      this.uid = initialData.uid || Guid.EMPTY;
       this.name = initialData.name || '';
       this.title = initialData.title || '';
       this.prefix = initialData.prefix || '';
@@ -27,5 +28,13 @@ export default class MetadataKindSettings {
 
       this.standardColumns = initialData.standardColumns
         ? initialData.standardColumns.map((item: any) => new MetadataKindStandardColumn(item)) : [];
+    }
+
+    isNew():boolean {
+      return this.stringIsNullOrEmpty(this.uid) || this.uid === Guid.EMPTY;
+    }
+
+    stringIsNullOrEmpty(value: string | null | undefined): boolean {
+      return value === null || value === undefined || value === '';
     }
 }

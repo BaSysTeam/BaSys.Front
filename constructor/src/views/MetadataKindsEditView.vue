@@ -17,7 +17,7 @@
             size="small"
             outlined
             icon="pi pi-arrow-left"
-            @click="router.push('/metadata-kinds')"
+            @click="onBackClick"
           />
           <Button
             label="Save & Close"
@@ -88,15 +88,24 @@ export default class MetadataKindsEditView extends Vue {
     toastHelper = new ToastHelper(useToast());
 
     settingsJson = '';
-    isWaiting = true;
+    isWaiting = false;
     isModified = false;
 
-    onSaveCloseClick():void {
+    onBackClick(): void {
+      this.navigateToList();
+    }
+
+    async onSaveCloseClick(): Promise<void> {
       console.log('Save close click');
+      const saveResult = await this.save();
+      if (saveResult) {
+        this.navigateToList();
+      }
     }
 
     onSaveClick():void {
       console.log('Save click');
+      this.save();
     }
 
     onSettingsInput(): void {
@@ -104,8 +113,47 @@ export default class MetadataKindsEditView extends Vue {
       this.isModified = true;
     }
 
+    async save(): Promise<boolean> {
+      console.log('save');
+      let result = false;
+      this.isWaiting = true;
+      this.settings = new MetadataKindSettings(JSON.parse(this.settingsJson));
+
+      if (this.settings.isNew()) {
+        const responseInsert = await this.provider.insert(this.settings);
+        if (responseInsert.isOK) {
+          this.isModified = false;
+          this.toastHelper.success(responseInsert.message);
+          result = true;
+          this.settings = responseInsert.data;
+          this.settingsJson = JSON.stringify(this.settings, null, 2);
+        } else {
+          this.toastHelper.error(responseInsert.message);
+          console.error(responseInsert.presentation);
+        }
+      } else {
+        const responseUpdate = await this.provider.update(this.settings);
+        if (responseUpdate.isOK) {
+          this.isModified = false;
+          this.toastHelper.success(responseUpdate.message);
+          result = true;
+        } else {
+          this.toastHelper.error(responseUpdate.message);
+          console.error(responseUpdate.presentation);
+        }
+      }
+      this.isWaiting = false;
+      return result;
+    }
+
     async update(): Promise<void> {
       console.log('Update', this.name);
+
+      if (this.name === '_new') {
+        this.settings = new MetadataKindSettings();
+        this.settingsJson = JSON.stringify(this.settings, null, 2);
+        return;
+      }
 
       this.isWaiting = true;
       const response = await this.provider.getSettingsItemByName(this.name);
@@ -120,6 +168,10 @@ export default class MetadataKindsEditView extends Vue {
         this.toastHelper.error(response.message);
         console.error(response.presentation);
       }
+    }
+
+    navigateToList(): void {
+      this.router.push('/metadata-kinds');
     }
 
     mounted(): void {

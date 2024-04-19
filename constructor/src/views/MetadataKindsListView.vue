@@ -128,6 +128,7 @@ export default class MetadataKindsListView extends Vue {
 
   onAddClicked():void {
     console.log('Add clicked');
+    this.navigateToAdd();
   }
 
   onEditClicked():void {
@@ -156,6 +157,10 @@ export default class MetadataKindsListView extends Vue {
     const selectedKind = this.selectedRow as MetadataKind;
     console.log('selected row', selectedKind);
     this.router.push({ name: 'metadata-kinds-edit', params: { name: selectedKind.name } });
+  }
+
+  navigateToAdd():void {
+    this.router.push({ name: 'metadata-kinds-edit', params: { name: '_new' } });
   }
 
   async mounted(): Promise<void> {
