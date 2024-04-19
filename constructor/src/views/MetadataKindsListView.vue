@@ -127,17 +127,32 @@ export default class MetadataKindsListView extends Vue {
   }
 
   onAddClicked():void {
-    console.log('Add clicked');
     this.navigateToAdd();
   }
 
   onEditClicked():void {
-    console.log('Edit clicked');
     this.navigateToEdit();
   }
 
-  onDeleteClicked():void {
-    console.log('Delete clicked');
+  async onDeleteClicked():Promise<void> {
+    if (this.isSelectedRowEmpty) {
+      return;
+    }
+
+    // eslint-disable-next-line no-restricted-globals
+    const answer = confirm('Delete item?');
+
+    if (answer) {
+      const selectedKind = this.selectedRow as MetadataKind;
+      const response = await this.dataProvider.delete(selectedKind.uid);
+      if (response.isOK) {
+        this.toastHelper.success(response.message);
+        await this.actionUpdate();
+      } else {
+        this.toastHelper.error(response.message);
+        console.error(response.presentation);
+      }
+    }
   }
 
   onRowDblClick(args:any):void {

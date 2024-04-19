@@ -57,4 +57,17 @@ export default class MetadataKindsProvider {
 
     return result;
   }
+
+  async delete(uid: string): Promise<ResultWrapper<number>> {
+    let result = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.delete(`${this.BASE_URL}/${uid}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
 }

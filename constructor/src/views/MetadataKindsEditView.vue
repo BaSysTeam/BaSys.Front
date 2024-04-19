@@ -1,6 +1,6 @@
 <template>
   <div>
-
+<!--View title-->
     <div class="grid">
       <div class="col">
         <ViewTitleComponent title="Metadata kinds"
@@ -8,7 +8,7 @@
          :is-waiting="isWaiting" />
       </div>
     </div>
-
+<!--Buttons-->
     <div class="col-12">
       <span class="p-buttonset">
         <Button
@@ -41,7 +41,7 @@
     <div class="grid">
       <Divider class="m-2" />
     </div>
-
+<!--Settings edit-->
     <div class="grid">
       <div class="col-12">
         <Textarea v-model="settingsJson"
