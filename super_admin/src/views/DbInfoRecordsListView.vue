@@ -331,8 +331,8 @@ export default class DbInfoRecordsListView extends mixins(ResizeWindow) {
   }
 
   async checkDbExists(): Promise<void> {
-    const ids: number[] = this.dbInfoRecords.map((x) => x.id);
-    const response = await this.dbInfoRecordProvider.checkDbExistsByIds(ids);
+    const queryParams: string = this.dbInfoRecords.map((x) => `ids=${x.id}`).join('&');
+    const response = await this.dbInfoRecordProvider.checkDbExists(queryParams);
     if (response.isOK) {
       response.data.forEach((item) => {
         const result = this.dbInfoRecords.find((x) => x.id === item.dbInfoRecordId);
