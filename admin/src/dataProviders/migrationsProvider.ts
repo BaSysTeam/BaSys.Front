@@ -64,4 +64,18 @@ export default class MigrationsProvider {
 
     return result.data;
   }
+
+  async cancelMigration(): Promise<ResultWrapper<boolean>> {
+    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
+
+    try {
+      const url = `${this.BASE_URL}/CancelMigration`;
+      const { data } = await axios.get(url);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
 }

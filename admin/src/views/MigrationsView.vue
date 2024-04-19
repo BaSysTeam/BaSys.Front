@@ -60,7 +60,19 @@
                 {{ formatDate(data.migrationUtcIdentifier) }}
               </template>
             </Column>
-            <Column header=" " bodyClass="text-center">
+            <Column header=" " bodyClass="center">
+              <template #header>
+                <template v-if="isCancelButtonsVisible">
+                  <Button
+                    severity="danger"
+                    size="small"
+                    :disabled="isCancelMigrationButtonsDisabled"
+                    icon="pi pi-times-circle"
+                    v-tooltip.left="'Cancel migration'"
+                    @click="cancelMigration()"
+                  />
+                </template>
+              </template>
               <template #body="{ data }">
                 <template v-if="data.isPossibleRemove === true">
                   <Button
@@ -120,6 +132,9 @@ export default class MigrationsView extends mixins(ResizeWindow) {
   toastHelper = new ToastHelper(useToast());
   isWaiting = false;
   isMigrationButtonsDisabled = false;
+  isCancelMigrationButtonsDisabled = false;
+  isCancelButtonsVisible = false;
+  isCancelMigration = false;
 
   get dataTableStyle(): object {
     return {
@@ -156,6 +171,7 @@ export default class MigrationsView extends mixins(ResizeWindow) {
   }
 
   async applyMigration(uid: string): Promise<void> {
+    this.isCancelButtonsVisible = true;
     this.isWaiting = true;
     this.isMigrationButtonsDisabled = true;
     const response = await this.migrationsProvider.applyMigration(uid);
@@ -169,6 +185,7 @@ export default class MigrationsView extends mixins(ResizeWindow) {
   }
 
   async removeMigration(): Promise<void> {
+    this.isCancelButtonsVisible = true;
     this.isWaiting = true;
     this.isMigrationButtonsDisabled = true;
     const response = await this.migrationsProvider.removeMigration();
@@ -181,11 +198,24 @@ export default class MigrationsView extends mixins(ResizeWindow) {
     }
   }
 
+  async cancelMigration(): Promise<void> {
+    this.isCancelMigrationButtonsDisabled = true;
+    const response = await this.migrationsProvider.cancelMigration();
+    if (response.isOK) {
+      this.isCancelMigration = true;
+    } else {
+      this.isCancelMigrationButtonsDisabled = false;
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+  }
+
   formatDate(date: Date): string {
     return format(date, 'dd.MM.yyyy HH:mm');
   }
 
   async processMigration(): Promise<void> {
+    this.isCancelButtonsVisible = true;
     this.isWaiting = true;
     this.isMigrationButtonsDisabled = true;
     let isMigrationRun = false;
@@ -195,9 +225,11 @@ export default class MigrationsView extends mixins(ResizeWindow) {
       await this.actionUpdate(false);
       isMigrationRun = await this.migrationsProvider.isMigrationRun();
     }
-    while (isMigrationRun);
+    while (isMigrationRun && !this.isCancelMigration);
     /* eslint-enable no-await-in-loop */
     await this.actionUpdate(false);
+    this.isCancelMigration = false;
+    this.isCancelButtonsVisible = false;
     this.isWaiting = false;
     this.isMigrationButtonsDisabled = false;
   }
