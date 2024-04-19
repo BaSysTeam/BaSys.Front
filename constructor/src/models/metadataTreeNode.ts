@@ -2,6 +2,7 @@ import { MetadataTreeNodeTypes } from '@/enums/metadataTreeNodeTypes';
 
 export default class MetadataTreeNode {
     key?: string;
+    parentKey?: string;
     label?: string;
     data?: any;
     type?: string;
@@ -14,6 +15,7 @@ export default class MetadataTreeNode {
     loading?: boolean;
     expandedIcon?: string;
     collapsedIcon?: string;
+    isStandard?: boolean;
     nodeType?: MetadataTreeNodeTypes;
     [key: string]: any;
 }
