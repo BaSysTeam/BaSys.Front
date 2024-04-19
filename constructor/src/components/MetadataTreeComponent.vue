@@ -134,7 +134,7 @@ export default class MetadataTreeComponent extends Vue {
         return;
       }
       if (node.label?.toLocaleLowerCase() === 'metadatakinds') {
-        this.router.push({ name: 'metadatakinds' });
+        this.router.push({ name: 'metadata-kinds' });
       }
     }
   }
