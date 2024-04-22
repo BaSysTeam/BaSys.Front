@@ -21,7 +21,7 @@
               </div>
               <div class="col">
                 <InputText
-                  v-model="userName"
+                  v-model="userSettings.userName"
                   @keyup.enter="save"
                   @focusout="save"
                   type="text"
@@ -38,7 +38,7 @@
               </div>
               <div class="col">
                 <Dropdown
-                  v-model="selectedLanguage"
+                  v-model="userSettings.language"
                   :options="languages"
                   @change="save"
                   optionLabel="name"
@@ -63,10 +63,12 @@ import InputText from 'primevue/inputtext';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Button from 'primevue/button';
+import { watch } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import Dropdown from 'primevue/dropdown';
 import UserSettingsProvider from '@/dataProviders/userSettingsProvider';
 import Language from '@/models/language';
+import UserSettings from '@/models/userSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -84,9 +86,9 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class UserSettingsView extends Vue {
   userSettingsProvider = new UserSettingsProvider();
+  userSettings = new UserSettings();
+  userSettingsCached = new UserSettings();
   toastHelper = new ToastHelper(useToast());
-  userName = '';
-  selectedLanguage = -1;
   isWaiting = false;
   languages: Language[] = [];
 
@@ -114,8 +116,8 @@ export default class UserSettingsView extends Vue {
 
     const response = await this.userSettingsProvider.getUserSettings();
     if (response.isOK) {
-      this.userName = response.data.userName;
-      this.selectedLanguage = response.data.language;
+      this.userSettings = response.data;
+      this.userSettingsCached = { ...response.data };
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -125,7 +127,20 @@ export default class UserSettingsView extends Vue {
   }
 
   async save(): Promise<void> {
-    console.log('save');
+    if (JSON.stringify(this.userSettings) === JSON.stringify(this.userSettingsCached)) {
+      console.log('dont save');
+      return;
+    }
+
+    const response = await this.userSettingsProvider.updateUserSettings(this.userSettings);
+    if (response.isOK) {
+      console.log('save');
+      this.toastHelper.success('');
+      this.userSettingsCached = { ...this.userSettings };
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
   }
 }
 </script>

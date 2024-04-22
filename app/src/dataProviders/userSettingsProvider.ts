@@ -32,4 +32,17 @@ export default class UserSettingsProvider {
 
     return result;
   }
+
+  async updateUserSettings(userSettings: UserSettings): Promise<ResultWrapper<boolean>> {
+    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
+
+    try {
+      const { data } = await axios.post(this.BASE_URL, userSettings);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
 }

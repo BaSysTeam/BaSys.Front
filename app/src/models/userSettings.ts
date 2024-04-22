@@ -1,4 +1,4 @@
-export default class User {
+export default class UserSettings {
   uid = '';
   userUid = '';
   userName = '';
