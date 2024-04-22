@@ -84,11 +84,11 @@ export default class DbInfoRecordProvider {
     return result;
   }
 
-  async checkDbExistsByIds(dbInfoRecordIds: number[]): Promise<ResultWrapper<ExistsDbResponse[]>> {
+  async checkDbExists(queryParams: string): Promise<ResultWrapper<ExistsDbResponse[]>> {
     let result: ResultWrapper<ExistsDbResponse[]> = new ResultWrapper<ExistsDbResponse[]>();
 
     try {
-      const { data } = await axios.post(`${this.BASE_URL}/CheckDbExistsByDbInfoRecordIds`, dbInfoRecordIds);
+      const { data } = await axios.get(`${this.BASE_URL}/CheckDbExists?${queryParams}`);
       result = data;
     } catch (error) {
       console.error('error', error);
