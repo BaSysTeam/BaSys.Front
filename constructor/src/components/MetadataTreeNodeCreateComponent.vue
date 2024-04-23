@@ -12,33 +12,33 @@
       <div>
         <div class="grid">
           <div class="col">
-            <span id="metadataGroupTitle">Title</span>
+            <span id="metadataLabel" class="bs-required">Label</span>
             <InputText
-              v-model="model.title"
+              v-model="model.label"
               size="small"
-              aria-labelledby="metadataGroupTitle"
+              aria-labelledby="metadataLabel"
               class="w-full"
             />
           </div>
         </div>
         <div class="grid">
           <div class="col">
-            <span id="metadataGroupIconClass">Icon class</span>
+            <span id="metadataIcon">Icon class</span>
             <InputText
-              v-model="model.iconClass"
+              v-model="model.icon"
               size="small"
-              aria-labelledby="metadataGroupIconClass"
+              aria-labelledby="metadataIconClass"
               class="w-full"
             />
           </div>
         </div>
         <div class="grid">
           <div class="col">
-            <span id="metadataGroupMemo">Memo</span>
+            <span id="metadataMemo">Memo</span>
             <Textarea
               v-model="model.memo"
               rows="5"
-              aria-labelledby="metadataGroupMemo"
+              aria-labelledby="metadataMemo"
               class="w-full"
             />
           </div>
@@ -65,13 +65,13 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
-import MetadataGroup from '@/models/metadataGroup';
-import MetadataTreeProvider from '@/dataProviders/metadataTreeProvider';
+import MetadataTreeNode from '@/models/metadataTreeNode';
+import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   props: {
-    parentUid: {
+    parentKey: {
       type: String,
       required: true,
     },
@@ -87,14 +87,14 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     groupAdded: null,
   },
 })
-export default class MetadataGroupAddComponent extends Vue {
-  parentUid!: string;
-  model = new MetadataGroup();
-  dataProvider = new MetadataTreeProvider();
+export default class MetadataTreeNodeCreateComponent extends Vue {
+  parentKey!: string;
+  model = new MetadataTreeNode();
+  dataProvider = new MetadataTreeNodesProvider()
   toastHelper = new ToastHelper(useToast());
 
   mounted(): void {
-    this.model.parentUid = this.parentUid;
+    this.model.parentKey = this.parentKey;
   }
 
   updateVisible(value: boolean): void {
@@ -104,7 +104,9 @@ export default class MetadataGroupAddComponent extends Vue {
   }
 
   async add(): Promise<void> {
-    const response = await this.dataProvider.addMetadataGroup(this.model);
+    this.model.isGroup = true;
+
+    const response = await this.dataProvider.create(this.model);
     if (response.isOK) {
       this.$emit('groupAdded');
     } else {
@@ -114,3 +116,11 @@ export default class MetadataGroupAddComponent extends Vue {
   }
 }
 </script>
+
+<style>
+  .bs-required:after {
+    content: "*";
+    color: red;
+    font-size: 12pt;
+}
+</style>

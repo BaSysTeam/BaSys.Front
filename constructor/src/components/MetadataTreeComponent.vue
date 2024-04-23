@@ -52,9 +52,9 @@
     </div>
   </div>
   <ConfirmDialog :draggable="false"></ConfirmDialog>
-  <MetadataGroupAddComponent
+  <MetadataTreeNodeCreateComponent
     v-if="isGroupCreateDialogVisible"
-    :parentUid="selectedNode.key"
+    :parentKey="selectedNode.key"
     @cancel="isGroupCreateDialogVisible = false"
     @groupAdded="onGroupAdded"
   />
@@ -69,15 +69,14 @@ import { useConfirm } from 'primevue/useconfirm';
 import Tree from 'primevue/tree';
 import Button from 'primevue/button';
 import ConfirmDialog from 'primevue/confirmdialog';
-import MetadataTreeProvider from '@/dataProviders/metadataTreeProvider';
 import MetadataTreeNode from '@/models/metadataTreeNode';
-import { MetadataTreeNodeTypes } from '@/enums/metadataTreeNodeTypes';
-import MetadataGroupAddComponent from '@/components/MetadataGroupAddComponent.vue';
+import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
+import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
-    MetadataGroupAddComponent,
+    MetadataTreeNodeCreateComponent,
     Tree,
     Button,
     ConfirmDialog,
@@ -89,17 +88,20 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 export default class MetadataTreeComponent extends Vue {
   isMenuMinimized!:boolean;
   isGroupCreateDialogVisible = false;
-  dataProvider = new MetadataTreeProvider();
+  dataProvider = new MetadataTreeNodesProvider();
   toastHelper = new ToastHelper(useToast());
   treeNodes:MetadataTreeNode[] = [];
   selectedKey = ref(null);
-  selectedNode:MetadataTreeNode = ref(null);
+  selectedNode:MetadataTreeNode = {};
   router = useRouter();
   confirm = useConfirm();
 
+  get isSelectedNodeEmpty(): boolean {
+    return !this.selectedNode || Object.keys(this.selectedNode).length === 0;
+  }
+
   get isDeleteBtnDisabled(): boolean {
-    console.log(this.selectedNode);
-    if (!this.selectedNode || this.selectedNode.isStandard || !this.selectedNode.leaf) {
+    if (this.isSelectedNodeEmpty || this.selectedNode.isStandard || !this.selectedNode.leaf) {
       return true;
     }
 
@@ -107,7 +109,7 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   get isAddGroupBtnDisabled(): boolean {
-    if (!this.selectedNode
+    if (this.isSelectedNodeEmpty
     || (this.selectedNode.label?.toLowerCase() !== 'metadata' && this.selectedNode.isStandard)) {
       return true;
     }
@@ -116,7 +118,7 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   async mounted(): Promise<void> {
-    const response = await this.dataProvider.getDefaultNodes();
+    const response = await this.dataProvider.getStandard();
     if (response.isOK) {
       this.treeNodes = response.data;
     } else {
@@ -128,7 +130,7 @@ export default class MetadataTreeComponent extends Vue {
   onNodeSelect(node: MetadataTreeNode): void {
     this.selectedNode = node;
 
-    if (node.nodeType === MetadataTreeNodeTypes.Element) {
+    if (!node.isGroup) {
       if (node.label?.toLocaleLowerCase() === 'datatypes') {
         this.router.push({ name: 'datatypes' });
         return;
@@ -175,7 +177,7 @@ export default class MetadataTreeComponent extends Vue {
       return;
     }
 
-    const response = await this.dataProvider.deleteMetadataGroup(this.selectedNode.key);
+    const response = await this.dataProvider.delete(this.selectedNode.key);
     if (response.isOK) {
       const parentNode = this.findParentNode(this.treeNodes, this.selectedNode.key);
       if (parentNode === null) {
@@ -193,7 +195,7 @@ export default class MetadataTreeComponent extends Vue {
         }
       }
 
-      this.selectedNode = ref(null);
+      this.selectedNode = {};
       this.toastHelper.success(response.message);
     } else {
       this.toastHelper.error(response.message);

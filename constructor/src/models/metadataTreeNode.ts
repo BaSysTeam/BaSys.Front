@@ -1,8 +1,8 @@
-import { MetadataTreeNodeTypes } from '@/enums/metadataTreeNodeTypes';
-
 export default class MetadataTreeNode {
     key?: string;
     parentKey?: string;
+    metadataKindUid?: string;
+    metadataObjectUid?: string;
     label?: string;
     data?: any;
     type?: string;
@@ -16,6 +16,6 @@ export default class MetadataTreeNode {
     expandedIcon?: string;
     collapsedIcon?: string;
     isStandard?: boolean;
-    nodeType?: MetadataTreeNodeTypes;
+    isGroup?: boolean;
     [key: string]: any;
 }
