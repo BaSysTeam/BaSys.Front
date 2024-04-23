@@ -1,6 +1,7 @@
 import axios from 'axios';
 import UserSettings from '@/models/userSettings';
 import Language from '@/models/language';
+import ChangePasswordDto from '@/models/changePassword';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class UserSettingsProvider {
@@ -38,6 +39,20 @@ export default class UserSettingsProvider {
 
     try {
       const { data } = await axios.post(this.BASE_URL, userSettings);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async changePassword(dto: ChangePasswordDto): Promise<ResultWrapper<boolean>> {
+    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
+
+    try {
+      const url = `${this.BASE_URL}/ChangePassword`;
+      const { data } = await axios.post(url, dto);
       result = data;
     } catch (error) {
       console.error('error', error);
