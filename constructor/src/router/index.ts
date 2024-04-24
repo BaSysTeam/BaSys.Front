@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
-import UserSettingsView from '../../../app/src/views/UserSettingsView.vue';
 import MetadataKindsListView from '../views/MetadataKindsListView.vue';
 import MetadataKindsEditView from '../views/MetadataKindsEditView.vue';
 
@@ -15,11 +14,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/datatypes',
     name: 'datatypes',
     component: DataTypesView,
-  },
-  {
-    path: '/usersettings',
-    name: 'usersettings',
-    component: UserSettingsView,
   },
   {
     path: '/metadata-kinds',
