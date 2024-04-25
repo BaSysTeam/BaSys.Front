@@ -3,15 +3,15 @@
     <div class="grid">
       <div class="col flex justify-content-center flex-wrap">
         <span class="p-buttonset mt-3">
-          <Button
+          <SplitButton
             icon="pi pi-plus"
             size="small"
-            severity="primary"
-            outlined
             label="M"
-            v-tooltip="'Add metadata object'"
+            :model="metadataKindMenuItems"
+            v-tooltip="'Add metadata'"
             @click="addMetadataObject"
-          />
+            outlined
+          ></SplitButton>
           <Button
             icon="pi pi-plus"
             size="small"
@@ -68,10 +68,13 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import Tree from 'primevue/tree';
 import Button from 'primevue/button';
+import SplitButton from 'primevue/splitbutton';
 import ConfirmDialog from 'primevue/confirmdialog';
+import EventEmitter from '@/utils/eventEmitter';
 import MetadataTreeNode from '@/models/metadataTreeNode';
 import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
+import MetadataKindsProvider from '@/dataProviders/metadataKindsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
@@ -79,6 +82,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     MetadataTreeNodeCreateComponent,
     Tree,
     Button,
+    SplitButton,
     ConfirmDialog,
   },
   props: {
@@ -89,12 +93,14 @@ export default class MetadataTreeComponent extends Vue {
   isMenuMinimized!:boolean;
   isGroupCreateDialogVisible = false;
   dataProvider = new MetadataTreeNodesProvider();
+  metadataKindsProvider = new MetadataKindsProvider();
   toastHelper = new ToastHelper(useToast());
   treeNodes:MetadataTreeNode[] = [];
   selectedKey = ref(null);
   selectedNode:MetadataTreeNode = {};
   router = useRouter();
   confirm = useConfirm();
+  metadataKindMenuItems:object[] = [];
 
   get isSelectedNodeEmpty(): boolean {
     return !this.selectedNode || Object.keys(this.selectedNode).length === 0;
@@ -118,9 +124,38 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   async mounted(): Promise<void> {
+    await this.updateTreeNodes();
+    await this.updateMetadataKindsMenuItems();
+
+    EventEmitter.on('metadata-kinds-changed', this.onMetadataKindsChanged);
+  }
+
+  unmounted(): void {
+    EventEmitter.off('metadata-kinds-changed', this.onMetadataKindsChanged);
+  }
+
+  onMetadataKindsChanged(): void {
+    this.updateMetadataKindsMenuItems();
+  }
+
+  async updateTreeNodes(): Promise<void> {
     const response = await this.dataProvider.getStandard();
     if (response.isOK) {
       this.treeNodes = response.data;
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+  }
+
+  async updateMetadataKindsMenuItems(): Promise<void> {
+    const response = await this.metadataKindsProvider.getCollection();
+    if (response.isOK) {
+      this.metadataKindMenuItems = response.data.map((x) => (
+        {
+          label: x.title,
+          command: () => this.router.push({ name: 'metadata-instance' }),
+        }));
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
