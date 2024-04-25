@@ -2,36 +2,22 @@
   <div :style="{'display': isMenuMinimized ? 'none' : ''}">
     <div class="grid">
       <div class="col flex justify-content-center flex-wrap">
-        <span class="p-buttonset mt-3">
-          <SplitButton
-            icon="pi pi-plus"
-            size="small"
-            label="M"
-            :model="metadataKindMenuItems"
-            v-tooltip="'Add metadata'"
-            @click="addMetadataObject"
-            outlined
-          ></SplitButton>
-          <Button
-            icon="pi pi-plus"
-            size="small"
-            severity="primary"
-            outlined
-            label="G"
-            v-tooltip="'Add metadata group'"
-            :disabled="isAddGroupBtnDisabled"
-            @click="isGroupCreateDialogVisible = true"
-          />
-          <Button
-            icon="pi pi-times"
-            size="small"
-            severity="danger"
-            outlined
-            v-tooltip="'Delete'"
-            :disabled="isDeleteBtnDisabled"
-            @click="showDeleteConfirm"
-          />
-        </span>
+        <div class="card mt-2">
+          <Menubar :model="items">
+            <template #item="{ item, props, hasSubmenu, root }">
+                <a v-ripple class="flex align-items-center" v-bind="props.action">
+                    <span :class="item.icon" v-tooltip="item['tooltipMsg']" />
+                    <span class="ml-2">{{ item.label }}</span>
+                    <i
+                      v-if="hasSubmenu"
+                      :class="[
+                        'pi pi-angle-down',
+                        { 'pi-angle-down ml-2': root, 'pi-angle-right ml-auto': !root }]"
+                    ></i>
+                </a>
+            </template>
+          </Menubar>
+        </div>
       </div>
     </div>
     <div class="grid">
@@ -68,8 +54,8 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import Tree from 'primevue/tree';
 import Button from 'primevue/button';
-import SplitButton from 'primevue/splitbutton';
 import ConfirmDialog from 'primevue/confirmdialog';
+import Menubar from 'primevue/menubar';
 import EventEmitter from '@/utils/eventEmitter';
 import MetadataTreeNode from '@/models/metadataTreeNode';
 import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
@@ -82,8 +68,8 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     MetadataTreeNodeCreateComponent,
     Tree,
     Button,
-    SplitButton,
     ConfirmDialog,
+    Menubar,
   },
   props: {
     isMenuMinimized: Boolean,
@@ -102,11 +88,28 @@ export default class MetadataTreeComponent extends Vue {
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
 
+  items = [
+    {
+      label: 'Add metadata',
+      items: this.metadataKindMenuItems,
+    },
+    {
+      icon: 'pi pi-plus',
+      command: () => this.showGroupCreateDialog(),
+      tooltipMsg: 'Add metadata group',
+    },
+    {
+      icon: 'pi pi-times',
+      command: () => this.showDeleteConfirm(),
+      tooltipMsg: 'Remove metadata item',
+    },
+  ]
+
   get isSelectedNodeEmpty(): boolean {
     return !this.selectedNode || Object.keys(this.selectedNode).length === 0;
   }
 
-  get isDeleteBtnDisabled(): boolean {
+  get isUnavailableForDelete(): boolean {
     if (this.isSelectedNodeEmpty || this.selectedNode.isStandard || !this.selectedNode.leaf) {
       return true;
     }
@@ -114,7 +117,7 @@ export default class MetadataTreeComponent extends Vue {
     return false;
   }
 
-  get isAddGroupBtnDisabled(): boolean {
+  get isUnavailableForAddGroup(): boolean {
     if (this.isSelectedNodeEmpty
     || (this.selectedNode.label?.toLowerCase() !== 'metadata' && this.selectedNode.isStandard)) {
       return true;
@@ -156,6 +159,8 @@ export default class MetadataTreeComponent extends Vue {
           label: x.title,
           command: () => this.router.push({ name: 'metadata-instance' }),
         }));
+
+      this.items[0].items = this.metadataKindMenuItems;
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -238,8 +243,16 @@ export default class MetadataTreeComponent extends Vue {
     }
   }
 
+  showGroupCreateDialog(): void {
+    if (this.isUnavailableForAddGroup) {
+      return;
+    }
+
+    this.isGroupCreateDialogVisible = true;
+  }
+
   showDeleteConfirm(): void {
-    if (!this.selectedNode) {
+    if (this.isUnavailableForDelete) {
       return;
     }
 

@@ -40,7 +40,7 @@ import UserActionsComponent from '../../shared/src/components/UserActionsCompone
 })
 export default class App extends Vue {
   isMenuMinimized = false;
-  navPanelWidth = 200;
+  navPanelWidth = 300;
   router = useRouter();
 
   onBurgerClicked(): void {
@@ -48,7 +48,7 @@ export default class App extends Vue {
     if (this.isMenuMinimized) {
       this.navPanelWidth = 50;
     } else {
-      this.navPanelWidth = 200;
+      this.navPanelWidth = 300;
     }
   }
 
