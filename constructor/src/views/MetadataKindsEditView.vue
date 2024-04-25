@@ -58,11 +58,12 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
-import Divider from 'primevue/divider';
 import { useToast } from 'primevue/usetoast';
+import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import Textarea from 'primevue/textarea';
+import EventEmitter from '@/utils/eventEmitter';
 import MetadataKindSettings from '../models/metadataKindSettings';
 import MetadataKindsProvider from '../dataProviders/metadataKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -143,6 +144,11 @@ export default class MetadataKindsEditView extends Vue {
         }
       }
       this.isWaiting = false;
+
+      if (result) {
+        EventEmitter.emit('metadata-kinds-changed');
+      }
+
       return result;
     }
 

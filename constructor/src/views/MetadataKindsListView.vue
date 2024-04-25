@@ -99,6 +99,7 @@ import Column from 'primevue/column';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
+import EventEmitter from '@/utils/eventEmitter';
 import MetadataKind from '../models/metadataKind';
 import MetadataKindsProvider from '../dataProviders/metadataKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -148,6 +149,7 @@ export default class MetadataKindsListView extends Vue {
       if (response.isOK) {
         this.toastHelper.success(response.message);
         await this.actionUpdate();
+        EventEmitter.emit('metadata-kinds-changed');
       } else {
         this.toastHelper.error(response.message);
         console.error(response.presentation);

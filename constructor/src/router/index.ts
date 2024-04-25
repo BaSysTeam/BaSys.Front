@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
 import MetadataKindsListView from '../views/MetadataKindsListView.vue';
 import MetadataKindsEditView from '../views/MetadataKindsEditView.vue';
+import MetadataInstanceView from '../views/MetadataInstanceView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -25,6 +26,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'metadata-kinds-edit',
     component: MetadataKindsEditView,
     props: true,
+  },
+  {
+    path: '/metadata-instance',
+    name: 'metadata-instance',
+    component: MetadataInstanceView,
   },
 ];
 
