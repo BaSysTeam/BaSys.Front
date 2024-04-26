@@ -44,6 +44,11 @@
     @cancel="isGroupCreateDialogVisible = false"
     @groupAdded="onGroupAdded"
   />
+  <MetaObjectCreateComponent
+    v-if="isMetaObjectCreateDialogVisible"
+    :title="selectedMetadataKindTitle"
+    @cancel="isMetaObjectCreateDialogVisible = false"
+  />
 </template>
 
 <script lang="ts">
@@ -61,11 +66,14 @@ import MetadataTreeNode from '@/models/metadataTreeNode';
 import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import MetadataKindsProvider from '@/dataProviders/metadataKindsProvider';
+import MetadataKind from '@/models/metadataKind';
+import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
     MetadataTreeNodeCreateComponent,
+    MetaObjectCreateComponent,
     Tree,
     Button,
     ConfirmDialog,
@@ -78,12 +86,14 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 export default class MetadataTreeComponent extends Vue {
   isMenuMinimized!:boolean;
   isGroupCreateDialogVisible = false;
+  isMetaObjectCreateDialogVisible = false;
   dataProvider = new MetadataTreeNodesProvider();
   metadataKindsProvider = new MetadataKindsProvider();
   toastHelper = new ToastHelper(useToast());
   treeNodes:MetadataTreeNode[] = [];
   selectedKey = ref(null);
   selectedNode:MetadataTreeNode = {};
+  selectedMetadataKindTitle = '';
   router = useRouter();
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
@@ -157,7 +167,8 @@ export default class MetadataTreeComponent extends Vue {
       this.metadataKindMenuItems = response.data.map((x) => (
         {
           label: x.title,
-          command: () => this.router.push({ name: 'metadata-instance' }),
+          // command: () => this.router.push({ name: 'metadata-instance' }),
+          command: () => this.onMetadataKindMenuItemClick(x),
         }));
 
       this.items[0].items = this.metadataKindMenuItems;
@@ -165,6 +176,11 @@ export default class MetadataTreeComponent extends Vue {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
+  }
+
+  onMetadataKindMenuItemClick(arg: MetadataKind): void {
+    this.selectedMetadataKindTitle = arg.title;
+    this.isMetaObjectCreateDialogVisible = true;
   }
 
   onNodeSelect(node: MetadataTreeNode): void {
