@@ -7,4 +7,5 @@ export default class MetadataKind {
     isReference!:boolean;
     isStandard!:boolean;
     memo!:string;
+    version!:number;
 }
