@@ -58,7 +58,6 @@
                 {{ currentRow.index + 1 }}
               </template>
             </Column>
-            <Column field="uid" header="Uid"></Column>
             <Column field="title" header="Title"></Column>
             <Column field="name" header="Name"></Column>
             <Column field="prefix" header="Prefix"></Column>

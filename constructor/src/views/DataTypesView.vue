@@ -2,14 +2,14 @@
   <div>
     <div class="grid">
       <div class="col">
-        <ViewTitleComponent title="BaSys: DataTypes" :is-modified="false" :is-waiting="false" />
+        <ViewTitleComponent title="Data types" :is-modified="false" :is-waiting="false" />
       </div>
     </div>
     <div class="grid">
       <Divider class="m-2" />
     </div>
     <div class="grid">
-      <div class="col-6">
+      <div class="col-12">
         <div class="card m-1">
           <DataTable
             :value="dataTypes"

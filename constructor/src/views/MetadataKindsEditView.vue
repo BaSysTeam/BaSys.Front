@@ -36,6 +36,14 @@
             @click="onSaveClick"
           />
       </span>
+      <SplitButton
+            label="Actions"
+            severity="primary"
+            size="small"
+            class="ml-1"
+            outlined
+            :model="actions"
+          />
     </div>
 
     <div class="grid">
@@ -104,12 +112,20 @@ export default class MetadataKindsEditView extends Vue {
   codemirrorExtensions = [jsonLang(), githubLight];
   codemirrorEditor: any = null;
 
+  actions = [
+    {
+      label: 'json',
+      icon: 'pi pi-download',
+      command: () => this.downloadJson(),
+    },
+
+  ];
+
   onBackClick(): void {
     this.navigateToList();
   }
 
   async onSaveCloseClick(): Promise<void> {
-    console.log('Save close click');
     const saveResult = await this.save();
     if (saveResult) {
       this.navigateToList();
@@ -117,13 +133,28 @@ export default class MetadataKindsEditView extends Vue {
   }
 
   onSaveClick():void {
-    console.log('Save click');
     this.save();
   }
 
   onSettingsInput(): void {
     console.log('settings input');
     this.isModified = true;
+  }
+
+  downloadJson(): void {
+    const blob = new Blob([this.settingsJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link and trigger the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.settings.title}.json`; // Name of the file to be downloaded
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up by removing the link and revoking the URL
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   async save(): Promise<boolean> {
