@@ -12,6 +12,7 @@ export default class MetadataKindSettings {
     isStandard:boolean;
     memo:string;
     version:number;
+    iconClass:string;
     standardColumns: MetadataKindStandardColumn[];
 
     constructor(params: any = {}) {
@@ -29,6 +30,7 @@ export default class MetadataKindSettings {
       this.isStandard = initialData.isStandard || false;
       this.memo = initialData.memo || '';
       this.version = initialData.version || 0;
+      this.iconClass = initialData.iconClass || '';
 
       this.standardColumns = initialData.standardColumns
         ? initialData.standardColumns.map((item: any) => new MetadataKindStandardColumn(item)) : [];
