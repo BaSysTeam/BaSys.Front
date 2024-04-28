@@ -137,8 +137,10 @@ export default class MetadataKindsEditView extends Vue {
   }
 
   onSettingsInput(): void {
-    console.log('settings input');
     this.isModified = true;
+    // this.settings = new MetadataKindSettings(JSON.parse(this.settingsJson));
+    // this.settings.onNameChanged();
+    // this.settingsJson = this.toJSON(this.settings);
   }
 
   downloadJson(): void {
@@ -158,7 +160,6 @@ export default class MetadataKindsEditView extends Vue {
   }
 
   async save(): Promise<boolean> {
-    console.log('save');
     let result = false;
     this.isWaiting = true;
     this.settings = new MetadataKindSettings(JSON.parse(this.settingsJson));
@@ -196,11 +197,9 @@ export default class MetadataKindsEditView extends Vue {
   }
 
   async update(): Promise<void> {
-    console.log('Update', this.name);
-
     if (this.name === '_new') {
       this.settings = new MetadataKindSettings();
-      this.settingsJson = JSON.stringify(this.settings, null, 2);
+      this.settingsJson = this.toJSON(this.settings);
       return;
     }
 
@@ -221,6 +220,18 @@ export default class MetadataKindsEditView extends Vue {
 
   navigateToList(): void {
     this.router.push('/metadata-kinds');
+  }
+
+  toJSON(object:any): string {
+    const replacer = (key: string, value: any): any => {
+      const excludedKeys = ['_name']; // Add any internal/private properties to exclude
+      if (excludedKeys.includes(key)) {
+        return undefined;
+      }
+      return value;
+    };
+
+    return JSON.stringify(object, replacer, 2);
   }
 
   mounted(): void {
