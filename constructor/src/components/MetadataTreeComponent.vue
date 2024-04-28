@@ -46,7 +46,8 @@
   />
   <MetaObjectCreateComponent
     v-if="isMetaObjectCreateDialogVisible"
-    :title="selectedMetadataKindTitle"
+    :metadata-kind-title="selectedMetadataKind.title"
+    :metadata-kind-uid="selectedMetadataKind.uid"
     @cancel="isMetaObjectCreateDialogVisible = false"
   />
 </template>
@@ -93,7 +94,7 @@ export default class MetadataTreeComponent extends Vue {
   treeNodes:MetadataTreeNode[] = [];
   selectedKey = ref(null);
   selectedNode:MetadataTreeNode = {};
-  selectedMetadataKindTitle = '';
+  selectedMetadataKind:MetadataKind = new MetadataKind();
   router = useRouter();
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
@@ -179,7 +180,7 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   onMetadataKindMenuItemClick(arg: MetadataKind): void {
-    this.selectedMetadataKindTitle = arg.title;
+    this.selectedMetadataKind = arg;
     this.isMetaObjectCreateDialogVisible = true;
   }
 

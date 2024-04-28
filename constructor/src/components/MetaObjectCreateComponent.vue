@@ -45,7 +45,7 @@
         <div class="field grid">
           <span
             for="comment"
-            class="col-fixed bs-required"
+            class="col-fixed"
             style="width:110px"
           >
             Comment
@@ -91,18 +91,22 @@ import Textarea from 'primevue/textarea';
     cancel: null,
   },
   props: {
-    title: {
+    metadataKindTitle: {
+      type: String,
+      required: true,
+    },
+    metadataKindUid: {
       type: String,
       required: true,
     },
   },
 })
 export default class MetaObjectCreateComponent extends Vue {
-  title!:string;
-  header = 'MetaObjectKind';
+  metadataKindTitle!:string;
+  header = 'New';
 
   mounted(): void {
-    this.header = `${this.title} ${this.header}`;
+    this.header = `${this.header} ${this.metadataKindTitle}`;
   }
 
   updateVisible(value: boolean): void {
