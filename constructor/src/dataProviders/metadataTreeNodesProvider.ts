@@ -1,5 +1,6 @@
 import axios from 'axios';
 import MetadataTreeNode from '@/models/metadataTreeNode';
+import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class MetadataTreeNodesProvider {
@@ -41,6 +42,19 @@ export default class MetadataTreeNodesProvider {
       console.error('error', error);
     }
 
+    return result;
+  }
+
+  async createMetaObject(dto: MetaObjectCreateDto): Promise<ResultWrapper<number>> {
+    let result: ResultWrapper<number> = new ResultWrapper<number>();
+
+    try {
+      const url = `${this.BASE_URL}/MetaObject`;
+      const { data } = await axios.post(url, dto);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
     return result;
   }
 

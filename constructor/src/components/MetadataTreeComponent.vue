@@ -2,7 +2,7 @@
   <div :style="{'display': isMenuMinimized ? 'none' : ''}">
     <div class="grid">
       <div class="col flex justify-content-center flex-wrap">
-        <div class="card mt-2">
+        <div class="card mt-1">
           <Menubar :model="items">
             <template #item="{ item, props, hasSubmenu, root }">
                 <a v-ripple class="flex align-items-center" v-bind="props.action">
@@ -31,7 +31,6 @@
           @node-expand="onNodeExpand"
           loadingMode="icon"
           class="p-0"
-          style="max-width: 199px;"
         >
         </Tree>
       </div>
@@ -46,8 +45,10 @@
   />
   <MetaObjectCreateComponent
     v-if="isMetaObjectCreateDialogVisible"
-    :title="selectedMetadataKindTitle"
+    :metadata-kind-title="selectedMetadataKind.title"
+    :metadata-kind-uid="selectedMetadataKind.uid"
     @cancel="isMetaObjectCreateDialogVisible = false"
+    @create="onMetaObjectCreateDialogClosed"
   />
 </template>
 
@@ -63,10 +64,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import Menubar from 'primevue/menubar';
 import EventEmitter from '@/utils/eventEmitter';
 import MetadataTreeNode from '@/models/metadataTreeNode';
+import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import MetadataKindsProvider from '@/dataProviders/metadataKindsProvider';
 import MetadataKind from '@/models/metadataKind';
+import MetaObject from '@/models/metaObject';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -93,14 +96,15 @@ export default class MetadataTreeComponent extends Vue {
   treeNodes:MetadataTreeNode[] = [];
   selectedKey = ref(null);
   selectedNode:MetadataTreeNode = {};
-  selectedMetadataKindTitle = '';
+  selectedMetadataKind:MetadataKind = new MetadataKind();
   router = useRouter();
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
 
   items = [
     {
-      label: 'Add metadata',
+      label: 'item',
+      icon: 'pi pi-plus',
       items: this.metadataKindMenuItems,
     },
     {
@@ -179,7 +183,7 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   onMetadataKindMenuItemClick(arg: MetadataKind): void {
-    this.selectedMetadataKindTitle = arg.title;
+    this.selectedMetadataKind = arg;
     this.isMetaObjectCreateDialogVisible = true;
   }
 
@@ -221,6 +225,21 @@ export default class MetadataTreeComponent extends Vue {
 
   addMetadataObject(): void {
     console.log('addMetadataObject');
+  }
+
+  async onMetaObjectCreateDialogClosed(args: MetaObject): Promise<void> {
+    this.isMetaObjectCreateDialogVisible = false;
+    const dto = new MetaObjectCreateDto(args);
+
+    if (this.isSelectedNodeEmpty) {
+      const firstNode = this.treeNodes[0];
+      dto.parentUid = firstNode.key;
+    } else {
+      dto.parentUid = this.selectedNode.key;
+    }
+    console.log('MetaObjectCreateDto', dto);
+
+    await this.dataProvider.createMetaObject(dto);
   }
 
   async onGroupAdded(): Promise<void> {
