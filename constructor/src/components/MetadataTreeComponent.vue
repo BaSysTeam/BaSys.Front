@@ -49,6 +49,7 @@
     :metadata-kind-title="selectedMetadataKind.title"
     :metadata-kind-uid="selectedMetadataKind.uid"
     @cancel="isMetaObjectCreateDialogVisible = false"
+    @create="onMetaObjectCreate"
   />
 </template>
 
@@ -68,6 +69,7 @@ import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreate
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import MetadataKindsProvider from '@/dataProviders/metadataKindsProvider';
 import MetadataKind from '@/models/metadataKind';
+import MetaObject from '@/models/metaObject';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -222,6 +224,11 @@ export default class MetadataTreeComponent extends Vue {
 
   addMetadataObject(): void {
     console.log('addMetadataObject');
+  }
+
+  onMetaObjectCreate(args: MetaObject):void {
+    this.isMetaObjectCreateDialogVisible = false;
+    console.log('onMetaObjectCreate', args);
   }
 
   async onGroupAdded(): Promise<void> {

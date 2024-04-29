@@ -23,6 +23,8 @@
               id="title"
               size="small"
               class="w-full"
+              autocomplete="off"
+              v-model="metaObject.title"
             />
           </div>
         </div>
@@ -39,6 +41,8 @@
               id="name"
               size="small"
               class="w-full"
+              autocomplete="off"
+              v-model="metaObject.name"
             />
           </div>
         </div>
@@ -55,6 +59,7 @@
               id="comment"
               rows="5"
               class="w-full"
+              v-model="metaObject.memo"
             />
           </div>
         </div>
@@ -67,7 +72,7 @@
           outlined
           @click="$emit('cancel')"
         />
-        <Button label="Create" size="small" @click="create" />
+        <Button label="Create" size="small" @click="onCreateClick" />
       </template>
     </Dialog>
   </div>
@@ -79,6 +84,7 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
+import MetaObject from '@/models/metaObject';
 
 @Options({
   components: {
@@ -89,6 +95,7 @@ import Textarea from 'primevue/textarea';
   },
   emits: {
     cancel: null,
+    create: null,
   },
   props: {
     metadataKindTitle: {
@@ -103,7 +110,9 @@ import Textarea from 'primevue/textarea';
 })
 export default class MetaObjectCreateComponent extends Vue {
   metadataKindTitle!:string;
+  metadataKindUid!:string;
   header = 'New';
+  metaObject = new MetaObject(null);
 
   mounted(): void {
     this.header = `${this.header} ${this.metadataKindTitle}`;
@@ -115,8 +124,9 @@ export default class MetaObjectCreateComponent extends Vue {
     }
   }
 
-  create(): void {
-    console.log('add');
+  onCreateClick(): void {
+    this.metaObject.metadataKindUid = this.metadataKindUid;
+    this.$emit('create', this.metaObject);
   }
 }
 </script>
