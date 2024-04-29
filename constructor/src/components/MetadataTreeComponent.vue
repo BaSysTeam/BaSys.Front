@@ -2,7 +2,7 @@
   <div :style="{'display': isMenuMinimized ? 'none' : ''}">
     <div class="grid">
       <div class="col flex justify-content-center flex-wrap">
-        <div class="card mt-2">
+        <div class="card mt-1">
           <Menubar :model="items">
             <template #item="{ item, props, hasSubmenu, root }">
                 <a v-ripple class="flex align-items-center" v-bind="props.action">
@@ -103,7 +103,8 @@ export default class MetadataTreeComponent extends Vue {
 
   items = [
     {
-      label: 'Add metadata',
+      label: 'item',
+      icon: 'pi pi-plus',
       items: this.metadataKindMenuItems,
     },
     {
