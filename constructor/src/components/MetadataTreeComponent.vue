@@ -31,7 +31,6 @@
           @node-expand="onNodeExpand"
           loadingMode="icon"
           class="p-0"
-          style="max-width: 199px;"
         >
         </Tree>
       </div>
@@ -49,7 +48,7 @@
     :metadata-kind-title="selectedMetadataKind.title"
     :metadata-kind-uid="selectedMetadataKind.uid"
     @cancel="isMetaObjectCreateDialogVisible = false"
-    @create="onMetaObjectCreate"
+    @create="onMetaObjectCreateDialogClosed"
   />
 </template>
 
@@ -65,6 +64,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import Menubar from 'primevue/menubar';
 import EventEmitter from '@/utils/eventEmitter';
 import MetadataTreeNode from '@/models/metadataTreeNode';
+import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import MetadataKindsProvider from '@/dataProviders/metadataKindsProvider';
@@ -226,9 +226,19 @@ export default class MetadataTreeComponent extends Vue {
     console.log('addMetadataObject');
   }
 
-  onMetaObjectCreate(args: MetaObject):void {
+  async onMetaObjectCreateDialogClosed(args: MetaObject): Promise<void> {
     this.isMetaObjectCreateDialogVisible = false;
-    console.log('onMetaObjectCreate', args);
+    const dto = new MetaObjectCreateDto(args);
+
+    if (this.isSelectedNodeEmpty) {
+      const firstNode = this.treeNodes[0];
+      dto.parentUid = firstNode.key;
+    } else {
+      dto.parentUid = this.selectedNode.key;
+    }
+    console.log('MetaObjectCreateDto', dto);
+
+    await this.dataProvider.createMetaObject(dto);
   }
 
   async onGroupAdded(): Promise<void> {
