@@ -2,7 +2,9 @@ export default class MetadataTreeNode {
     key?: string;
     parentKey?: string;
     metadataKindUid?: string;
+    metaObjectKindName?:string;
     metadataObjectUid?: string;
+    metaObjectName?:string;
     label?: string;
     data?: any;
     type?: string;

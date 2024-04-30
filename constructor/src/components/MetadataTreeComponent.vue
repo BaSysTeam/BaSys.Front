@@ -70,6 +70,7 @@ import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider
 import MetadataKindsProvider from '@/dataProviders/metadataKindsProvider';
 import MetadataKind from '@/models/metadataKind';
 import MetaObject from '@/models/metaObject';
+import { json } from '@codemirror/lang-json';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -191,12 +192,23 @@ export default class MetadataTreeComponent extends Vue {
     this.selectedNode = node;
 
     if (!node.isGroup) {
+      // TODO: Очень ненадежно закладываться на заголовки, лучше на идентификаторы.
       if (node.label?.toLocaleLowerCase() === 'datatypes') {
         this.router.push({ name: 'datatypes' });
         return;
       }
       if (node.label?.toLocaleLowerCase() === 'metadatakinds') {
         this.router.push({ name: 'metadata-kinds' });
+        return;
+      }
+      if (node.metaObjectKindName && node.metaObjectName) {
+        this.router.push({
+          name: 'meta-object-edit',
+          params: {
+            kind: node.metaObjectKindName,
+            name: node.metaObjectName,
+          },
+        });
       }
     }
   }
@@ -214,6 +226,7 @@ export default class MetadataTreeComponent extends Vue {
     }
 
     const response = await this.dataProvider.getChildren(node.key);
+    console.log('getChildren', response);
     if (response.isOK) {
       node.children = response.data;
       node.loading = false;
@@ -221,10 +234,6 @@ export default class MetadataTreeComponent extends Vue {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
-  }
-
-  addMetadataObject(): void {
-    console.log('addMetadataObject');
   }
 
   async onMetaObjectCreateDialogClosed(args: MetaObject): Promise<void> {

@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import MetaObjectEditView from '@/views/MetaObjectEditView.vue';
 import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
 import MetadataKindsListView from '../views/MetadataKindsListView.vue';
@@ -25,6 +26,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/metadata-kinds/edit/:name',
     name: 'metadata-kinds-edit',
     component: MetadataKindsEditView,
+    props: true,
+  },
+  {
+    path: '/meta-object/edit/:kind/:name',
+    name: 'meta-object-edit',
+    component: MetaObjectEditView,
     props: true,
   },
   {
