@@ -191,12 +191,17 @@ export default class MetadataTreeComponent extends Vue {
     this.selectedNode = node;
 
     if (!node.isGroup) {
+      // TODO: Очень ненадежно закладываться на заголовки, лучше на идентификаторы.
       if (node.label?.toLocaleLowerCase() === 'datatypes') {
         this.router.push({ name: 'datatypes' });
         return;
       }
       if (node.label?.toLocaleLowerCase() === 'metadatakinds') {
         this.router.push({ name: 'metadata-kinds' });
+        return;
+      }
+      if (node.metadataKindUid && node.metadataObjectUid) {
+        this.router.push({ name: 'meta-object-edit', params: { kind: node.metadataKindUid, name: node.metadataObjectUid } });
       }
     }
   }
