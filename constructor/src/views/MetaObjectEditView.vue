@@ -6,8 +6,11 @@ import { githubLight } from '@ddietr/codemirror-themes/github-light';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
-
+import MetaObjectSettings from '@/models/metaObjectSettings';
+import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
+import { useToast } from 'primevue/usetoast';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
@@ -24,10 +27,14 @@ import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponen
 })
 export default class MetaObjectEditView extends Vue {
   isModified = false;
-  isWaiting = false;
+  isWaiting = true;
   name!: string;
   kind!: string;
   settingsJson = '';
+  provider = new MetaObjectProvider();
+  settings = new MetaObjectSettings({});
+  toastHelper = new ToastHelper(useToast());
+  formTitle = '';
 
   codemirrorExtensions = [jsonLang(), githubLight];
   codemirrorEditor: any = null;
@@ -39,6 +46,27 @@ export default class MetaObjectEditView extends Vue {
   onSettingsInput():void {
     this.isModified = true;
   }
+
+  async update(): Promise<void> {
+    this.isWaiting = true;
+    const response = await this.provider.getMetaObjectSettings(this.kind, this.name);
+    this.isWaiting = false;
+
+    if (response.isOK) {
+      this.settings = new MetaObjectSettings(response.data);
+      this.formTitle = `${response.data.metaObjectKindTitle}.${this.settings.title}`;
+      this.settingsJson = JSON.stringify(this.settings, null, 2);
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+    console.log('update', response);
+  }
+
+  mounted(): void {
+    console.log('mounted');
+    this.update();
+  }
 }
 </script>
 
@@ -47,7 +75,7 @@ export default class MetaObjectEditView extends Vue {
     <!--View title-->
     <div class="grid">
       <div class="col">
-        <ViewTitleComponent title="MetaObject"
+        <ViewTitleComponent :title="formTitle"
                             :is-modified="isModified"
                             :is-waiting="isWaiting"/>
       </div>
