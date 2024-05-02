@@ -58,11 +58,11 @@ export default class MetadataTreeNodesProvider {
     return result;
   }
 
-  async delete(uid: string): Promise<ResultWrapper<number>> {
+  async delete(node: MetadataTreeNode): Promise<ResultWrapper<number>> {
     let result: ResultWrapper<number> = new ResultWrapper<number>();
 
     try {
-      const { data } = await axios.delete(`${this.BASE_URL}/${uid}`);
+      const { data } = await axios.delete(this.BASE_URL, { data: node });
       result = data;
     } catch (error) {
       console.error('error', error);
