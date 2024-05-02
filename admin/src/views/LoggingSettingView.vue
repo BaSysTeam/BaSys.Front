@@ -35,7 +35,7 @@
                   optionValue="identifier"
                   class="w-full"
                   :options="loggerKinds"
-                  @update:model-value="save"
+                  @update:model-value="changeLoggerType"
                 />
               </div>
             </div>
@@ -211,14 +211,34 @@ export default class LoggingSettingView extends Vue {
     this.isWaiting = false;
   }
 
+  async changeLoggerType(): Promise<boolean> {
+    const response = await this.dataProvider
+      .getLoggerConfigByType(this.model.loggerType ?? LoggerKinds.MsSql);
+    if (response.isOK) {
+      this.model = response.data;
+      this.modelCached = { ...response.data };
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+
+    await this.forceSave();
+    return false;
+  }
+
   async save(): Promise<boolean> {
-    let result = false;
     const connectionStringInput = document.getElementById('connectionStringInput');
 
     if (JSON.stringify(this.model) === JSON.stringify(this.modelCached)) {
       connectionStringInput?.blur();
       return false;
     }
+    connectionStringInput?.blur();
+    return this.forceSave();
+  }
+
+  async forceSave(): Promise<boolean> {
+    let result = false;
 
     this.isWaiting = true;
 
@@ -231,8 +251,6 @@ export default class LoggingSettingView extends Vue {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
-
-    connectionStringInput?.blur();
 
     this.isWaiting = false;
 
