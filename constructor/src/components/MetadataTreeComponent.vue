@@ -67,8 +67,8 @@ import MetadataTreeNode from '@/models/metadataTreeNode';
 import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
-import MetadataKindsProvider from '@/dataProviders/metadataKindsProvider';
-import MetadataKind from '@/models/metadataKind';
+import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
+import MetaObjectKind from '@/models/metaObjectKind';
 import MetaObject from '@/models/metaObject';
 import { json } from '@codemirror/lang-json';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
@@ -92,12 +92,12 @@ export default class MetadataTreeComponent extends Vue {
   isGroupCreateDialogVisible = false;
   isMetaObjectCreateDialogVisible = false;
   dataProvider = new MetadataTreeNodesProvider();
-  metadataKindsProvider = new MetadataKindsProvider();
+  metadataKindsProvider = new MetaObjectKindsProvider();
   toastHelper = new ToastHelper(useToast());
   treeNodes:MetadataTreeNode[] = [];
   selectedKey = ref(null);
   selectedNode:MetadataTreeNode = {};
-  selectedMetadataKind:MetadataKind = new MetadataKind();
+  selectedMetadataKind:MetaObjectKind = new MetaObjectKind();
   router = useRouter();
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
@@ -182,7 +182,7 @@ export default class MetadataTreeComponent extends Vue {
     }
   }
 
-  onMetadataKindMenuItemClick(arg: MetadataKind): void {
+  onMetadataKindMenuItemClick(arg: MetaObjectKind): void {
     this.selectedMetadataKind = arg;
     this.isMetaObjectCreateDialogVisible = true;
   }

@@ -1,13 +1,13 @@
 import axios from 'axios';
-import MetadataKind from '../models/metadataKind';
-import MetadataKindSettings from '../models/metadataKindSettings';
+import MetaObjectKind from '../models/metaObjectKind';
+import MetaObjectKindSettings from '../models/metaObjectKindSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class MetadataKindsProvider {
-  private readonly BASE_URL = '/api/constructor/v1/MetadataKinds';
+export default class MetaObjectKindsProvider {
+  private readonly BASE_URL = '/api/constructor/v1/MetaObjectKinds';
 
-  async getCollection(): Promise<ResultWrapper<MetadataKind[]>> {
-    let result: ResultWrapper<MetadataKind[]> = new ResultWrapper<MetadataKind[]>();
+  async getCollection(): Promise<ResultWrapper<MetaObjectKind[]>> {
+    let result: ResultWrapper<MetaObjectKind[]> = new ResultWrapper<MetaObjectKind[]>();
 
     try {
       const { data } = await axios.get(this.BASE_URL);
@@ -19,8 +19,8 @@ export default class MetadataKindsProvider {
     return result;
   }
 
-  async getSettingsItemByName(name: string): Promise<ResultWrapper<MetadataKindSettings>> {
-    let result: ResultWrapper<MetadataKindSettings> = new ResultWrapper<MetadataKindSettings>();
+  async getSettingsItemByName(name: string): Promise<ResultWrapper<MetaObjectKindSettings>> {
+    let result: ResultWrapper<MetaObjectKindSettings> = new ResultWrapper<MetaObjectKindSettings>();
 
     try {
       const { data } = await axios.get(`${this.BASE_URL}/${name}`);
@@ -32,8 +32,8 @@ export default class MetadataKindsProvider {
     return result;
   }
 
-  async insert(settings: MetadataKindSettings): Promise<ResultWrapper<MetadataKindSettings>> {
-    let result = new ResultWrapper<MetadataKindSettings>();
+  async insert(settings: MetaObjectKindSettings): Promise<ResultWrapper<MetaObjectKindSettings>> {
+    let result = new ResultWrapper<MetaObjectKindSettings>();
 
     try {
       const { data } = await axios.post(this.BASE_URL, settings);
@@ -45,7 +45,7 @@ export default class MetadataKindsProvider {
     return result;
   }
 
-  async update(settings: MetadataKindSettings): Promise<ResultWrapper<number>> {
+  async update(settings: MetaObjectKindSettings): Promise<ResultWrapper<number>> {
     let result = new ResultWrapper<number>();
 
     try {

@@ -2,8 +2,8 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import MetaObjectEditView from '@/views/MetaObjectEditView.vue';
 import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
-import MetadataKindsListView from '../views/MetadataKindsListView.vue';
-import MetadataKindsEditView from '../views/MetadataKindsEditView.vue';
+import MetadataKindsListView from '../views/MetaObjectKindsListView.vue';
+import MetadataKindsEditView from '../views/MetaObjectKindsEditView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
