@@ -1,5 +1,5 @@
 export default class MetaObject {
-  metadataKindUid!:string;
+  metaObjectKindUid!:string;
   name!:string;
   title!:string;
   memo!:string;
@@ -9,7 +9,7 @@ export default class MetaObject {
     if (params != null) {
       initialData = params;
     }
-    this.metadataKindUid = initialData.metadataKindUid || '';
+    this.metaObjectKindUid = initialData.metaObjectKindUid || '';
     this.title = initialData.title || '';
     this.name = initialData.name || '';
     this.memo = initialData.memo || '';

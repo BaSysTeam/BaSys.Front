@@ -238,6 +238,7 @@ export default class MetadataTreeComponent extends Vue {
   async onMetaObjectCreateDialogClosed(args: MetaObject): Promise<void> {
     this.isMetaObjectCreateDialogVisible = false;
     const dto = new MetaObjectCreateDto(args);
+    console.log('MetaObjectCreateDto', dto);
 
     if (this.isSelectedNodeEmpty) {
       const firstNode = this.treeNodes[0];
@@ -245,7 +246,6 @@ export default class MetadataTreeComponent extends Vue {
     } else {
       dto.parentUid = this.selectedNode.key;
     }
-    console.log('MetaObjectCreateDto', dto);
 
     await this.dataProvider.createMetaObject(dto);
   }
