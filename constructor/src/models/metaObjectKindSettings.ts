@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
-import MetadataKindStandardColumn from './metadataKindStandardColumn';
+import MetaObjectKindStandardColumn from './metaObjectKindStandardColumn';
 
-export default class MetadataKindSettings {
+export default class MetaObjectKindSettings {
     uid: string;
     name: string;
     title: string;
@@ -12,7 +12,7 @@ export default class MetadataKindSettings {
     memo:string;
     version:number;
     iconClass:string;
-    standardColumns: MetadataKindStandardColumn[];
+    standardColumns: MetaObjectKindStandardColumn[];
 
     constructor(params: any = {}) {
       let initialData: any = {};
@@ -31,7 +31,9 @@ export default class MetadataKindSettings {
       this.iconClass = initialData.iconClass || '';
 
       this.standardColumns = initialData.standardColumns
-        ? initialData.standardColumns.map((item: any) => new MetadataKindStandardColumn(item)) : [];
+        ? initialData.standardColumns.map(
+          (item: any) => new MetaObjectKindStandardColumn(item),
+        ) : [];
     }
 
     isNew():boolean {

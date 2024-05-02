@@ -9,7 +9,7 @@ import Divider from 'primevue/divider';
 import MetaObjectSettings from '@/models/metaObjectSettings';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import { useToast } from 'primevue/usetoast';
-import MetadataKindSettings from '@/models/metadataKindSettings';
+import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 

@@ -1,6 +1,6 @@
 import { Guid } from 'guid-typescript';
 
-export default class MetadataKindStandardColumn {
+export default class MetaObjectKindStandardColumn {
     uid: string;
     name:string;
     title: string;

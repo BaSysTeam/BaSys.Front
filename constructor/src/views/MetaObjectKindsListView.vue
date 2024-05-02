@@ -2,7 +2,7 @@
   <div>
     <div class="grid">
       <div class="col">
-        <ViewTitleComponent title="Metadata kinds" :is-modified="false" :is-waiting="false" />
+        <ViewTitleComponent title="Meta object kinds" :is-modified="false" :is-waiting="false" />
       </div>
     </div>
     <div class="grid">
@@ -99,8 +99,8 @@ import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import EventEmitter from '@/utils/eventEmitter';
-import MetadataKind from '../models/metadataKind';
-import MetadataKindsProvider from '../dataProviders/metadataKindsProvider';
+import MetaObjectKind from '../models/metaObjectKind';
+import MetaObjectKindsProvider from '../dataProviders/metaObjectKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -115,11 +115,11 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   },
 })
 export default class MetadataKindsListView extends Vue {
-  dataProvider = new MetadataKindsProvider();
+  dataProvider = new MetaObjectKindsProvider();
   toastHelper = new ToastHelper(useToast());
   router = useRouter();
   selectedRow = {};
-  metadataKinds:MetadataKind[] = [];
+  metadataKinds:MetaObjectKind[] = [];
   isWaiting = true;
 
   get isSelectedRowEmpty(): boolean {
@@ -143,7 +143,7 @@ export default class MetadataKindsListView extends Vue {
     const answer = confirm('Delete item?');
 
     if (answer) {
-      const selectedKind = this.selectedRow as MetadataKind;
+      const selectedKind = this.selectedRow as MetaObjectKind;
       const response = await this.dataProvider.delete(selectedKind.uid);
       if (response.isOK) {
         this.toastHelper.success(response.message);
@@ -170,7 +170,7 @@ export default class MetadataKindsListView extends Vue {
     if (this.isSelectedRowEmpty) {
       return;
     }
-    const selectedKind = this.selectedRow as MetadataKind;
+    const selectedKind = this.selectedRow as MetaObjectKind;
     console.log('selected row', selectedKind);
     this.router.push({ name: 'metadata-kinds-edit', params: { name: selectedKind.name } });
   }
