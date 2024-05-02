@@ -56,7 +56,7 @@
          ref="codemirrorEditor"
          v-model="settingsJson"
          placeholder="Code goes here..."
-         :style="{ height: '500px' }"
+         :style="codemirrorStyle"
          :indent-with-tab="true"
          :tab-size="2"
          :extensions="codemirrorExtensions"
@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { Options, mixins } from 'vue-class-component';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { Codemirror } from 'vue-codemirror';
@@ -84,6 +84,7 @@ import MetadataKindSettings from '../models/metadataKindSettings';
 import MetadataKindsProvider from '../dataProviders/metadataKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 
 @Options({
   props: {
@@ -98,7 +99,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Codemirror,
   },
 })
-export default class MetadataKindsEditView extends Vue {
+export default class MetadataKindsEditView extends mixins(ResizeWindow) {
   name!:string;
   settings = new MetadataKindSettings();
   router = useRouter();
@@ -120,6 +121,12 @@ export default class MetadataKindsEditView extends Vue {
     },
 
   ];
+
+  get codemirrorStyle(): object {
+    return {
+      height: `${this.windowHeight - 150}px`,
+    };
+  }
 
   onBackClick(): void {
     this.navigateToList();
