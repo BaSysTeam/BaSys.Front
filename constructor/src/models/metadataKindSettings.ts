@@ -4,7 +4,6 @@ import MetadataKindStandardColumn from './metadataKindStandardColumn';
 export default class MetadataKindSettings {
     uid: string;
     name: string;
-    namePlural:string;
     title: string;
     prefix:string;
     storeData:boolean;
@@ -21,7 +20,6 @@ export default class MetadataKindSettings {
         initialData = params;
       }
       this.uid = initialData.uid || Guid.EMPTY;
-      this.namePlural = initialData.namePlural || '';
       this.name = initialData.name || '';
       this.title = initialData.title || '';
       this.prefix = initialData.prefix || '';
@@ -42,11 +40,5 @@ export default class MetadataKindSettings {
 
     stringIsNullOrEmpty(value: string | null | undefined): boolean {
       return value === null || value === undefined || value === '';
-    }
-
-    onNameChanged(): void {
-      if (!this.namePlural && !this.name) {
-        this.namePlural = `${this.name}s`;
-      }
     }
 }
