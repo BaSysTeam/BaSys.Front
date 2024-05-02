@@ -172,7 +172,6 @@ export default class MetadataTreeComponent extends Vue {
       this.metadataKindMenuItems = response.data.map((x) => (
         {
           label: x.title,
-          // command: () => this.router.push({ name: 'metadata-instance' }),
           command: () => this.onMetadataKindMenuItemClick(x),
         }));
 
@@ -261,7 +260,7 @@ export default class MetadataTreeComponent extends Vue {
       return;
     }
 
-    const response = await this.dataProvider.delete(this.selectedNode.key);
+    const response = await this.dataProvider.delete(this.selectedNode);
     if (response.isOK) {
       const parentNode = this.findParentNode(this.treeNodes, this.selectedNode.key);
       if (parentNode === null) {
