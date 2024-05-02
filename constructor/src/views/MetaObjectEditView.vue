@@ -9,6 +9,7 @@ import Divider from 'primevue/divider';
 import MetaObjectSettings from '@/models/metaObjectSettings';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import { useToast } from 'primevue/usetoast';
+import MetadataKindSettings from '@/models/metadataKindSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -41,10 +42,31 @@ export default class MetaObjectEditView extends Vue {
 
   onSaveClick():void {
     console.log('Save click');
+    this.save();
   }
 
   onSettingsInput():void {
     this.isModified = true;
+  }
+
+  async save(): Promise<boolean> {
+    let result = false;
+    this.isWaiting = true;
+
+    this.settings = new MetaObjectSettings(JSON.parse(this.settingsJson));
+    const response = await this.provider.update(this.settings);
+    this.isWaiting = false;
+
+    if (response.isOK) {
+      this.isModified = false;
+      this.toastHelper.success(response.message);
+      result = true;
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+
+    return result;
   }
 
   async update(): Promise<void> {
