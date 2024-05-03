@@ -7,7 +7,7 @@
       </div>
       <div class="grid">
         <div class="col-6">
-          <span class="p-buttonset">
+          <ButtonGroup>
             <Button
               :label="$t('add')"
               severity="primary"
@@ -34,7 +34,7 @@
               :disabled="isSelectedRecordEmpty"
               @click="showConfirmDialog"
             />
-          </span>
+          </ButtonGroup>
           <Button
             severity="primary"
             size="small"
@@ -138,6 +138,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import AppRecordProvider from '@/dataProviders/appRecordProvider';
 import AppRecordsEditComponent from '@/components/AppRecordsEditComponent.vue';
 import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -155,6 +156,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     ViewTitleComponent,
     AppRecordsEditComponent,
     Button,
+    ButtonGroup,
     SplitButton,
     DataTable,
     Column,

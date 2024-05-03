@@ -10,32 +10,32 @@
     </div>
 <!--Buttons-->
     <div class="col-12">
-      <span class="p-buttonset">
+      <ButtonGroup>
         <Button
-            label="Back"
-            severity="primary"
-            size="small"
-            outlined
-            icon="pi pi-arrow-left"
-            @click="onBackClick"
-          />
-          <Button
-            label="Save & Close"
-            severity="primary"
-            size="small"
-            outlined
-            icon="pi pi-save"
-            @click="onSaveCloseClick"
-          />
-          <Button
-            label="Save"
-            severity="primary"
-            size="small"
-            outlined
-            icon="pi pi-save"
-            @click="onSaveClick"
-          />
-      </span>
+          label="Back"
+          severity="primary"
+          size="small"
+          outlined
+          icon="pi pi-arrow-left"
+          @click="onBackClick"
+        />
+        <Button
+          label="Save & Close"
+          severity="primary"
+          size="small"
+          outlined
+          icon="pi pi-save"
+          @click="onSaveCloseClick"
+        />
+        <Button
+          label="Save"
+          severity="primary"
+          size="small"
+          outlined
+          icon="pi pi-save"
+          @click="onSaveClick"
+        />
+      </ButtonGroup>
       <SplitButton
             label="Actions"
             severity="primary"
@@ -77,6 +77,7 @@ import { json as jsonLang } from '@codemirror/lang-json';
 import { githubLight } from '@ddietr/codemirror-themes/github-light';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import Textarea from 'primevue/textarea';
 import EventEmitter from '@/utils/eventEmitter';
@@ -94,6 +95,7 @@ import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
     ViewTitleComponent,
     Divider,
     Button,
+    ButtonGroup,
     SplitButton,
     Textarea,
     Codemirror,

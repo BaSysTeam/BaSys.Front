@@ -7,7 +7,7 @@
     </div>
     <div class="grid">
       <div class="col">
-        <span class="p-buttonset">
+        <ButtonGroup>
           <Button
             label="Back"
             severity="primary"
@@ -32,7 +32,7 @@
             icon="pi pi-save"
             @click="save"
           />
-        </span>
+        </ButtonGroup>
       </div>
     </div>
     <div class="grid">
@@ -104,6 +104,7 @@ import { useToast } from 'primevue/usetoast';
 import Divider from 'primevue/divider';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
 import Checkbox from 'primevue/checkbox';
 import User from '@/models/user';
 import UserProvider from '@/dataProviders/userProvider';
@@ -117,6 +118,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Divider,
     InputText,
     Button,
+    ButtonGroup,
     Checkbox,
   },
 })
