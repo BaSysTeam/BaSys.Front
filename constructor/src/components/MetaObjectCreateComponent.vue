@@ -125,7 +125,7 @@ export default class MetaObjectCreateComponent extends Vue {
   }
 
   onCreateClick(): void {
-    this.metaObject.metadataKindUid = this.metadataKindUid;
+    this.metaObject.metaObjectKindUid = this.metadataKindUid;
     this.$emit('create', this.metaObject);
   }
 }

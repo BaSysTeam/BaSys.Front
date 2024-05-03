@@ -45,8 +45,8 @@
   />
   <MetaObjectCreateComponent
     v-if="isMetaObjectCreateDialogVisible"
-    :metadata-kind-title="selectedMetadataKindSettings.title"
-    :metadata-kind-uid="selectedMetadataKindSettings.uid"
+    :metadata-kind-title="selectedMetaObjectKindSettings.title"
+    :metadata-kind-uid="selectedMetaObjectKindSettings.uid"
     @cancel="isMetaObjectCreateDialogVisible = false"
     @create="onMetaObjectCreateDialogClosed"
   />
@@ -67,9 +67,10 @@ import MetadataTreeNode from '@/models/metadataTreeNode';
 import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
-import MetadataKindsProvider from '@/dataProviders/metadataKindsProvider';
+import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
+import MetaObjectKind from '@/models/metaObjectKind';
 import MetaObject from '@/models/metaObject';
-import MetadataKindSettings from '@/models/metadataKindSettings';
+import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -91,12 +92,12 @@ export default class MetadataTreeComponent extends Vue {
   isGroupCreateDialogVisible = false;
   isMetaObjectCreateDialogVisible = false;
   dataProvider = new MetadataTreeNodesProvider();
-  metadataKindsProvider = new MetadataKindsProvider();
+  metadataKindsProvider = new MetaObjectKindsProvider();
   toastHelper = new ToastHelper(useToast());
   treeNodes:MetadataTreeNode[] = [];
   selectedKey = ref(null);
   selectedNode:MetadataTreeNode = {};
-  selectedMetadataKindSettings:MetadataKindSettings = new MetadataKindSettings();
+  selectedMetaObjectKindSettings = new MetaObjectKindSettings();
   router = useRouter();
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
@@ -243,6 +244,7 @@ export default class MetadataTreeComponent extends Vue {
   async onMetaObjectCreateDialogClosed(args: MetaObject): Promise<void> {
     this.isMetaObjectCreateDialogVisible = false;
     const dto = new MetaObjectCreateDto(args);
+    console.log('MetaObjectCreateDto', dto);
 
     if (this.isSelectedNodeEmpty) {
       const firstNode = this.treeNodes[0];
@@ -299,12 +301,12 @@ export default class MetadataTreeComponent extends Vue {
     }
   }
 
-  showElementCreateDialog(arg: MetadataKindSettings): void {
+  showElementCreateDialog(arg: MetaObjectKindSettings): void {
     if (this.isUnavailableForAddItem) {
       return;
     }
 
-    this.selectedMetadataKindSettings = arg;
+    this.selectedMetaObjectKindSettings = arg;
     this.isMetaObjectCreateDialogVisible = true;
   }
 

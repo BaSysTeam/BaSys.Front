@@ -1,4 +1,5 @@
 import axios from 'axios';
+import MetaObjectSettings from '@/models/metaObjectSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class MetaObjectProvider {
@@ -9,6 +10,19 @@ export default class MetaObjectProvider {
 
     try {
       const { data } = await axios.get(`${this.BASE_URL}/${kindName}/${objectName}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async update(settings: MetaObjectSettings): Promise<ResultWrapper<number>> {
+    let result = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.put(this.BASE_URL, settings);
       result = data;
     } catch (error) {
       console.error('error', error);

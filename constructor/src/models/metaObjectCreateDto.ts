@@ -1,6 +1,6 @@
 export default class MetaObjectCreateDto {
   parentUid?:string;
-  metadataKindUid:string;
+  metaObjectKindUid:string;
   name:string;
   title:string;
   memo:string;
@@ -12,7 +12,7 @@ export default class MetaObjectCreateDto {
     }
 
     this.parentUid = initialData.parentUid || '';
-    this.metadataKindUid = initialData.metadataKindUid || '';
+    this.metaObjectKindUid = initialData.metaObjectKindUid || '';
     this.title = initialData.title || '';
     this.name = initialData.name || '';
     this.memo = initialData.memo || '';

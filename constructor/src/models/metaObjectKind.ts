@@ -1,4 +1,4 @@
-export default class MetadataKind {
+export default class MetaObjectKind {
     uid!: string;
     name!:string;
     title!: string;

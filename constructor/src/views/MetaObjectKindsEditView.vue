@@ -3,7 +3,7 @@
 <!--View title-->
     <div class="grid">
       <div class="col">
-        <ViewTitleComponent title="Metadata kinds"
+        <ViewTitleComponent title="Meta object kind"
          :is-modified="isModified"
          :is-waiting="isWaiting" />
       </div>
@@ -80,8 +80,8 @@ import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import Textarea from 'primevue/textarea';
 import EventEmitter from '@/utils/eventEmitter';
-import MetadataKindSettings from '../models/metadataKindSettings';
-import MetadataKindsProvider from '../dataProviders/metadataKindsProvider';
+import MetaObjectKindSettings from '../models/metaObjectKindSettings';
+import MetaObjectKindsProvider from '../dataProviders/metaObjectKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
@@ -101,9 +101,9 @@ import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 })
 export default class MetadataKindsEditView extends mixins(ResizeWindow) {
   name!:string;
-  settings = new MetadataKindSettings();
+  settings = new MetaObjectKindSettings();
   router = useRouter();
-  provider = new MetadataKindsProvider();
+  provider = new MetaObjectKindsProvider();
   toastHelper = new ToastHelper(useToast());
 
   settingsJson = '';
@@ -145,7 +145,7 @@ export default class MetadataKindsEditView extends mixins(ResizeWindow) {
 
   onSettingsInput(): void {
     this.isModified = true;
-    // this.settings = new MetadataKindSettings(JSON.parse(this.settingsJson));
+    // this.settings = new MetaObjectKindSettings(JSON.parse(this.settingsJson));
     // this.settings.onNameChanged();
     // this.settingsJson = this.toJSON(this.settings);
   }
@@ -169,7 +169,7 @@ export default class MetadataKindsEditView extends mixins(ResizeWindow) {
   async save(): Promise<boolean> {
     let result = false;
     this.isWaiting = true;
-    this.settings = new MetadataKindSettings(JSON.parse(this.settingsJson));
+    this.settings = new MetaObjectKindSettings(JSON.parse(this.settingsJson));
 
     if (this.settings.isNew()) {
       const responseInsert = await this.provider.insert(this.settings);
@@ -205,7 +205,7 @@ export default class MetadataKindsEditView extends mixins(ResizeWindow) {
 
   async update(): Promise<void> {
     if (this.name === '_new') {
-      this.settings = new MetadataKindSettings();
+      this.settings = new MetaObjectKindSettings();
       this.settingsJson = this.toJSON(this.settings);
       return;
     }

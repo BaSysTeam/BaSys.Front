@@ -1,10 +1,9 @@
 import { Guid } from 'guid-typescript';
-import MetadataKindStandardColumn from './metadataKindStandardColumn';
+import MetaObjectKindStandardColumn from './metaObjectKindStandardColumn';
 
-export default class MetadataKindSettings {
+export default class MetaObjectKindSettings {
     uid: string;
     name: string;
-    namePlural:string;
     title: string;
     prefix:string;
     storeData:boolean;
@@ -13,7 +12,7 @@ export default class MetadataKindSettings {
     memo:string;
     version:number;
     iconClass:string;
-    standardColumns: MetadataKindStandardColumn[];
+    standardColumns: MetaObjectKindStandardColumn[];
 
     constructor(params: any = {}) {
       let initialData: any = {};
@@ -21,7 +20,6 @@ export default class MetadataKindSettings {
         initialData = params;
       }
       this.uid = initialData.uid || Guid.EMPTY;
-      this.namePlural = initialData.namePlural || '';
       this.name = initialData.name || '';
       this.title = initialData.title || '';
       this.prefix = initialData.prefix || '';
@@ -33,7 +31,9 @@ export default class MetadataKindSettings {
       this.iconClass = initialData.iconClass || '';
 
       this.standardColumns = initialData.standardColumns
-        ? initialData.standardColumns.map((item: any) => new MetadataKindStandardColumn(item)) : [];
+        ? initialData.standardColumns.map(
+          (item: any) => new MetaObjectKindStandardColumn(item),
+        ) : [];
     }
 
     isNew():boolean {
@@ -42,11 +42,5 @@ export default class MetadataKindSettings {
 
     stringIsNullOrEmpty(value: string | null | undefined): boolean {
       return value === null || value === undefined || value === '';
-    }
-
-    onNameChanged(): void {
-      if (!this.namePlural && !this.name) {
-        this.namePlural = `${this.name}s`;
-      }
     }
 }
