@@ -43,4 +43,8 @@ export default class MetaObjectKindSettings {
     stringIsNullOrEmpty(value: string | null | undefined): boolean {
       return value === null || value === undefined || value === '';
     }
+
+    newStandardColumn(): void {
+      this.standardColumns.push(new MetaObjectKindStandardColumn({}));
+    }
 }
