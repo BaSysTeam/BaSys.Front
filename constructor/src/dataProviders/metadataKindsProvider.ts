@@ -19,6 +19,19 @@ export default class MetadataKindsProvider {
     return result;
   }
 
+  async getSettingsCollection(): Promise<ResultWrapper<MetadataKindSettings[]>> {
+    let result: ResultWrapper<MetadataKindSettings[]> = new ResultWrapper<MetadataKindSettings[]>();
+
+    try {
+      const { data } = await axios.get(`${this.BASE_URL}/Settings`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
   async getSettingsItemByName(name: string): Promise<ResultWrapper<MetadataKindSettings>> {
     let result: ResultWrapper<MetadataKindSettings> = new ResultWrapper<MetadataKindSettings>();
 

@@ -8,4 +8,5 @@ export default class MetadataKind {
     isStandard!:boolean;
     memo!:string;
     version!:number;
+    settingsStorage!:string;
 }

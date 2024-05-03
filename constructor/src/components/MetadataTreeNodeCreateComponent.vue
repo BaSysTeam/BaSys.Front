@@ -95,6 +95,7 @@ export default class MetadataTreeNodeCreateComponent extends Vue {
 
   mounted(): void {
     this.model.parentKey = this.parentKey;
+    this.model.icon = 'pi pi-folder';
   }
 
   updateVisible(value: boolean): void {
