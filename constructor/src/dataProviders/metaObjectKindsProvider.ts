@@ -19,6 +19,19 @@ export default class MetaObjectKindsProvider {
     return result;
   }
 
+  async getSettingsCollection(): Promise<ResultWrapper<MetaObjectKindSettings[]>> {
+    let result = new ResultWrapper<MetaObjectKindSettings[]>();
+
+    try {
+      const { data } = await axios.get(`${this.BASE_URL}/Settings`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
   async getSettingsItemByName(name: string): Promise<ResultWrapper<MetaObjectKindSettings>> {
     let result: ResultWrapper<MetaObjectKindSettings> = new ResultWrapper<MetaObjectKindSettings>();
 

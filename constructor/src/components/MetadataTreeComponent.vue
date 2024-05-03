@@ -39,14 +39,14 @@
   <ConfirmDialog :draggable="false"></ConfirmDialog>
   <MetadataTreeNodeCreateComponent
     v-if="isGroupCreateDialogVisible"
-    :parentKey="selectedNode.key"
+    :parentKey="selectedNode.isGroup ? selectedNode.key : selectedNode.parentKey"
     @cancel="isGroupCreateDialogVisible = false"
     @groupAdded="onGroupAdded"
   />
   <MetaObjectCreateComponent
     v-if="isMetaObjectCreateDialogVisible"
-    :metadata-kind-title="selectedMetadataKind.title"
-    :metadata-kind-uid="selectedMetadataKind.uid"
+    :metadata-kind-title="selectedMetaObjectKindSettings.title"
+    :metadata-kind-uid="selectedMetaObjectKindSettings.uid"
     @cancel="isMetaObjectCreateDialogVisible = false"
     @create="onMetaObjectCreateDialogClosed"
   />
@@ -70,7 +70,7 @@ import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
 import MetaObjectKind from '@/models/metaObjectKind';
 import MetaObject from '@/models/metaObject';
-import { json } from '@codemirror/lang-json';
+import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -97,7 +97,7 @@ export default class MetadataTreeComponent extends Vue {
   treeNodes:MetadataTreeNode[] = [];
   selectedKey = ref(null);
   selectedNode:MetadataTreeNode = {};
-  selectedMetadataKind:MetaObjectKind = new MetaObjectKind();
+  selectedMetaObjectKindSettings = new MetaObjectKindSettings();
   router = useRouter();
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
@@ -132,9 +132,9 @@ export default class MetadataTreeComponent extends Vue {
     return false;
   }
 
-  get isUnavailableForAddGroup(): boolean {
+  get isUnavailableForAddItem(): boolean {
     if (this.isSelectedNodeEmpty
-    || (this.selectedNode.label?.toLowerCase() !== 'metadata' && this.selectedNode.isStandard)) {
+      || (this.selectedNode.key !== '60738680-dafd-42c0-8923-585fc7985176' && this.selectedNode.isStandard)) {
       return true;
     }
 
@@ -167,12 +167,13 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   async updateMetadataKindsMenuItems(): Promise<void> {
-    const response = await this.metadataKindsProvider.getCollection();
+    const response = await this.metadataKindsProvider.getSettingsCollection();
     if (response.isOK) {
       this.metadataKindMenuItems = response.data.map((x) => (
         {
           label: x.title,
-          command: () => this.onMetadataKindMenuItemClick(x),
+          icon: x.iconClass,
+          command: () => this.showElementCreateDialog(x),
         }));
 
       this.items[0].items = this.metadataKindMenuItems;
@@ -182,21 +183,15 @@ export default class MetadataTreeComponent extends Vue {
     }
   }
 
-  onMetadataKindMenuItemClick(arg: MetaObjectKind): void {
-    this.selectedMetadataKind = arg;
-    this.isMetaObjectCreateDialogVisible = true;
-  }
-
   onNodeSelect(node: MetadataTreeNode): void {
     this.selectedNode = node;
 
     if (!node.isGroup) {
-      // TODO: Очень ненадежно закладываться на заголовки, лучше на идентификаторы.
-      if (node.label?.toLocaleLowerCase() === 'datatypes') {
+      if (node.key === '416c4b6c-48f7-426c-aa5a-774717c9984e') {
         this.router.push({ name: 'datatypes' });
         return;
       }
-      if (node.label?.toLocaleLowerCase() === 'metadatakinds') {
+      if (node.key === 'cb930422-e50a-4c14-942f-b45df8c23de0') {
         this.router.push({ name: 'metadata-kinds' });
         return;
       }
@@ -214,25 +209,36 @@ export default class MetadataTreeComponent extends Vue {
 
   async onNodeExpand(node: MetadataTreeNode): Promise<void> {
     if (!node.children || node.children.length === 0) {
-      node.loading = true;
       await this.getChildren(node);
     }
   }
 
-  async getChildren(node: MetadataTreeNode): Promise<void> {
+  async getChildren(arg: MetadataTreeNode): Promise<void> {
+    let node = arg;
     if (!node.key) {
       return;
     }
 
+    if (!node.isGroup) {
+      const parentNode = this.findParentNode(this.treeNodes, node.key);
+      if (parentNode) {
+        node = parentNode;
+      }
+    }
+
+    node.loading = true;
+    if (!node.key) {
+      return;
+    }
     const response = await this.dataProvider.getChildren(node.key);
-    console.log('getChildren', response);
     if (response.isOK) {
       node.children = response.data;
-      node.loading = false;
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
+
+    node.loading = false;
   }
 
   async onMetaObjectCreateDialogClosed(args: MetaObject): Promise<void> {
@@ -243,11 +249,20 @@ export default class MetadataTreeComponent extends Vue {
     if (this.isSelectedNodeEmpty) {
       const firstNode = this.treeNodes[0];
       dto.parentUid = firstNode.key;
-    } else {
+    } else if (this.selectedNode.isGroup) {
       dto.parentUid = this.selectedNode.key;
+    } else {
+      dto.parentUid = this.selectedNode.parentKey;
     }
+    console.log('MetaObjectCreateDto', dto);
 
-    await this.dataProvider.createMetaObject(dto);
+    const response = await this.dataProvider.createMetaObject(dto);
+    if (response.isOK) {
+      await this.getChildren(this.selectedNode);
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
   }
 
   async onGroupAdded(): Promise<void> {
@@ -286,8 +301,17 @@ export default class MetadataTreeComponent extends Vue {
     }
   }
 
+  showElementCreateDialog(arg: MetaObjectKindSettings): void {
+    if (this.isUnavailableForAddItem) {
+      return;
+    }
+
+    this.selectedMetaObjectKindSettings = arg;
+    this.isMetaObjectCreateDialogVisible = true;
+  }
+
   showGroupCreateDialog(): void {
-    if (this.isUnavailableForAddGroup) {
+    if (this.isUnavailableForAddItem) {
       return;
     }
 
