@@ -7,15 +7,15 @@
     </div>
     <div class="grid">
       <div class="col-12">
-        <span class="p-buttonset">
-         <Button
-              label="Add"
-              severity="primary"
-              size="small"
-              outlined
-              icon="pi pi-plus"
-              @click="onAddClicked"
-            />
+        <ButtonGroup>
+          <Button
+            label="Add"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-plus"
+            @click="onAddClicked"
+          />
           <Button
             label="Edit"
             severity="primary"
@@ -23,7 +23,7 @@
             outlined
             icon="pi pi-pencil"
             @click="onEditClicked"
-            />
+          />
           <Button
             label="Delete"
             severity="danger"
@@ -31,8 +31,8 @@
             outlined
             icon="pi pi-trash"
             @click="onDeleteClicked"
-            />
-          </span>
+          />
+        </ButtonGroup>
       </div>
     </div>
     <div class="grid">
@@ -97,6 +97,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import EventEmitter from '@/utils/eventEmitter';
 import MetaObjectKind from '../models/metaObjectKind';
@@ -111,6 +112,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     DataTable,
     Column,
     Button,
+    ButtonGroup,
     SplitButton,
   },
 })

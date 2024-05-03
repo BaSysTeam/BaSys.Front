@@ -7,7 +7,7 @@
     </div>
     <div class="grid">
       <div class="col-6">
-        <span class="p-buttonset">
+        <ButtonGroup>
           <Button
             :label="$t('add')"
             severity="primary"
@@ -25,7 +25,7 @@
             :disabled="isSelectedRecordEmpty"
             @click="editUser"
           />
-        </span>
+        </ButtonGroup>
         <SplitButton
           label="Actions"
           severity="primary"
@@ -140,6 +140,7 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -162,6 +163,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     ChangePasswordComponent,
     Divider,
     Button,
+    ButtonGroup,
     SplitButton,
     DataTable,
     Column,

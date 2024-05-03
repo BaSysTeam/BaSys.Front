@@ -4,6 +4,7 @@ import { Codemirror } from 'vue-codemirror';
 import { json as jsonLang } from '@codemirror/lang-json';
 import { githubLight } from '@ddietr/codemirror-themes/github-light';
 import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
 import MetaObjectSettings from '@/models/metaObjectSettings';
@@ -17,6 +18,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   components: {
     ViewTitleComponent,
     Button,
+    ButtonGroup,
     SplitButton,
     Divider,
     Codemirror,
@@ -106,7 +108,7 @@ export default class MetaObjectEditView extends Vue {
     <!--Buttons-->
     <div class="grid">
       <div class="col-12">
-        <span class="p-buttonset">
+        <ButtonGroup>
           <Button
             label="Save"
             severity="primary"
@@ -115,7 +117,7 @@ export default class MetaObjectEditView extends Vue {
             icon="pi pi-save"
             @click="onSaveClick"
           />
-        </span>
+        </ButtonGroup>
 
       </div>
     </div>
