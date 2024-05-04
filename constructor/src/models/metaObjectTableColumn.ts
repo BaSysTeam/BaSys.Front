@@ -9,7 +9,12 @@ export default class MetaObjectTableColumn {
   required:boolean;
   unique:boolean;
 
-  constructor(data: any) {
+  constructor(params: any) {
+    let data: any = {};
+    if (params != null) {
+      data = params;
+    }
+
     this.uid = data.uid || '';
     this.title = data.title || '';
     this.name = data.name || '';
@@ -18,6 +23,6 @@ export default class MetaObjectTableColumn {
     this.numberDigits = data.numberDigits || 2;
     this.primaryKey = data.primaryKey || false;
     this.required = data.required || false;
-    this.unique = data.isUnique || false;
+    this.unique = data.unique || false;
   }
 }

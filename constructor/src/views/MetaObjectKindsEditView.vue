@@ -121,6 +121,11 @@ export default class MetadataKindsEditView extends mixins(ResizeWindow) {
       icon: 'pi pi-download',
       command: () => this.downloadJson(),
     },
+    {
+      label: 'Standard column',
+      icon: 'pi pi-plus',
+      command: () => this.addStandardColumn(),
+    },
 
   ];
 
@@ -166,6 +171,14 @@ export default class MetadataKindsEditView extends mixins(ResizeWindow) {
     // Clean up by removing the link and revoking the URL
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  addStandardColumn(): void {
+    this.isModified = true;
+    this.settings = new MetaObjectKindSettings(JSON.parse(this.settingsJson));
+    this.settings.newStandardColumn();
+
+    this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
   async save(): Promise<boolean> {
