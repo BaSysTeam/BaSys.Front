@@ -7,17 +7,24 @@ export default class MetaObjectSettings {
   name:string;
   memo:string;
   isActive:boolean;
-  tables: Array<MetaObjectTable>
+  header: MetaObjectTable;
+  tableParts: Array<MetaObjectTable>
 
-  constructor(data: any) {
+  constructor(params: any) {
+    let data: any = {};
+    if (params != null) {
+      data = params;
+    }
+
     this.uid = data.uid || '';
     this.metaObjectKindUid = data.metaObjectKindUid || '';
     this.title = data.title || '';
     this.name = data.name || '';
     this.memo = data.memo || '';
     this.isActive = data.isActive || false;
+    this.header = new MetaObjectTable(data.header);
 
-    this.tables = data.tables
-      ? data.tables.map((item: any) => new MetaObjectTable(item)) : [];
+    this.tableParts = data.tableParts
+      ? data.tableParts.map((item: any) => new MetaObjectTable(item)) : [];
   }
 }

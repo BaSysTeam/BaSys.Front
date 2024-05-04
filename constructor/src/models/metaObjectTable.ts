@@ -5,15 +5,18 @@ export default class MetaObjectTable {
   title:string;
   name:string;
   memo:string;
-  isHeader:boolean;
   columns:Array<MetaObjectTableColumn>;
 
-  constructor(data: any) {
+  constructor(params: any) {
+    let data: any = {};
+    if (params != null) {
+      data = params;
+    }
+
     this.uid = data.uid || '';
     this.title = data.title || '';
     this.name = data.name || '';
     this.memo = data.memo || '';
-    this.isHeader = data.isHeader || false;
 
     this.columns = data.columns
       ? data.columns.map((item: any) => new MetaObjectTableColumn(item)) : [];
