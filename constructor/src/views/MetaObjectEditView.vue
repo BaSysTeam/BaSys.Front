@@ -42,6 +42,20 @@ export default class MetaObjectEditView extends Vue {
   codemirrorExtensions = [jsonLang(), githubLight];
   codemirrorEditor: any = null;
 
+  actions = [
+    {
+      label: 'json',
+      icon: 'pi pi-download',
+      command: () => this.downloadJson(),
+    },
+    {
+      label: 'Standard column',
+      icon: 'pi pi-plus',
+      command: () => this.addHeaderColumn(),
+    },
+
+  ];
+
   onSaveClick():void {
     console.log('Save click');
     this.save();
@@ -49,6 +63,26 @@ export default class MetaObjectEditView extends Vue {
 
   onSettingsInput():void {
     this.isModified = true;
+  }
+
+  downloadJson():void {
+    const blob = new Blob([this.settingsJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link and trigger the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.settings.title}.json`; // Name of the file to be downloaded
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up by removing the link and revoking the URL
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  addHeaderColumn(): void {
+    console.log('addHeaderColumn');
   }
 
   async save(): Promise<boolean> {
@@ -118,7 +152,14 @@ export default class MetaObjectEditView extends Vue {
             @click="onSaveClick"
           />
         </ButtonGroup>
-
+        <SplitButton
+          label="Actions"
+          severity="primary"
+          size="small"
+          class="ml-1"
+          outlined
+          :model="actions"
+        />
       </div>
     </div>
 
