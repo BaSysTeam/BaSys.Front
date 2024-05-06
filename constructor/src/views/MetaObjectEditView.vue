@@ -1,5 +1,8 @@
 <script lang="ts">
-import { mixins, Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
+import {
+  Vue, Component, Prop, Watch,
+} from 'vue-property-decorator';
 import { Codemirror } from 'vue-codemirror';
 import { json as jsonLang } from '@codemirror/lang-json';
 import { githubLight } from '@ddietr/codemirror-themes/github-light';
@@ -10,7 +13,6 @@ import Divider from 'primevue/divider';
 import MetaObjectSettings from '@/models/metaObjectSettings';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import { useToast } from 'primevue/usetoast';
-import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
@@ -24,16 +26,13 @@ import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
     Divider,
     Codemirror,
   },
-  props: {
-    kind: { type: String },
-    name: { type: String },
-  },
 })
 export default class MetaObjectEditView extends mixins(ResizeWindow) {
+  @Prop({ type: String }) name!: string;
+  @Prop({ type: String }) kind!: string;
   isModified = false;
   isWaiting = true;
-  name!: string;
-  kind!: string;
+
   settingsJson = '';
   provider = new MetaObjectProvider();
   settings = new MetaObjectSettings({});
@@ -61,6 +60,13 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     return {
       height: `${this.windowHeight - 150}px`,
     };
+  }
+
+  @Watch('kind')
+  @Watch('name')
+  onPropChange(newVal: string, oldVal: string): void {
+    console.log(`Prop changed from ${oldVal} to ${newVal}`);
+    this.update();
   }
 
   onSaveClick():void {
