@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options, Vue } from 'vue-class-component';
 import { Codemirror } from 'vue-codemirror';
 import { json as jsonLang } from '@codemirror/lang-json';
 import { githubLight } from '@ddietr/codemirror-themes/github-light';
@@ -13,6 +13,7 @@ import { useToast } from 'primevue/usetoast';
 import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 
 @Options({
   components: {
@@ -28,7 +29,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     name: { type: String },
   },
 })
-export default class MetaObjectEditView extends Vue {
+export default class MetaObjectEditView extends mixins(ResizeWindow) {
   isModified = false;
   isWaiting = true;
   name!: string;
@@ -55,6 +56,12 @@ export default class MetaObjectEditView extends Vue {
     },
 
   ];
+
+  get codemirrorStyle(): object {
+    return {
+      height: `${this.windowHeight - 150}px`,
+    };
+  }
 
   onSaveClick():void {
     console.log('Save click');
@@ -174,7 +181,7 @@ export default class MetaObjectEditView extends Vue {
           ref="codemirrorEditor"
           v-model="settingsJson"
           placeholder="Code goes here..."
-          :style="{ height: '500px' }"
+          :style="codemirrorStyle"
           :indent-with-tab="true"
           :tab-size="2"
           :extensions="codemirrorExtensions"
