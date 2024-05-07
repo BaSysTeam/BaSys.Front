@@ -8,6 +8,7 @@ export default class MetaObjectKindSettings {
     prefix:string;
     storeData:boolean;
     isReference:boolean;
+    allowAttachedFiles:boolean;
     isStandard:boolean;
     memo:string;
     version:number;
@@ -25,6 +26,7 @@ export default class MetaObjectKindSettings {
       this.prefix = initialData.prefix || '';
       this.storeData = initialData.storeData || false;
       this.isReference = initialData.isReference || false;
+      this.allowAttachedFiles = initialData.allowAttachedFiles || false;
       this.isStandard = initialData.isStandard || false;
       this.memo = initialData.memo || '';
       this.version = initialData.version || 0;
