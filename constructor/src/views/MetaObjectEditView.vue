@@ -49,9 +49,14 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       command: () => this.downloadJson(),
     },
     {
-      label: 'Standard column',
+      label: 'header column',
       icon: 'pi pi-plus',
       command: () => this.addHeaderColumn(),
+    },
+    {
+      label: 'update',
+      icon: 'pi pi-sync',
+      command: () => this.onUpdateClick(),
     },
 
   ];
@@ -95,7 +100,13 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   }
 
   addHeaderColumn(): void {
-    console.log('addHeaderColumn');
+    this.isModified = true;
+    this.settings.header.newColumn();
+    this.settingsJson = JSON.stringify(this.settings, null, 2);
+  }
+
+  onUpdateClick(): void {
+    this.update();
   }
 
   async save(): Promise<boolean> {
@@ -119,6 +130,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   }
 
   async update(): Promise<void> {
+    console.log('meta-object-update', this.kind, this.name);
     this.isWaiting = true;
     const response = await this.provider.getMetaObjectSettings(this.kind, this.name);
     this.isWaiting = false;
