@@ -7,9 +7,9 @@ module.exports = defineConfig({
     extract: false,
   },
   configureWebpack: {
-    output: {
-      filename: 'constructor.js',
-    },
+    // output: {
+    //   filename: 'constructor.js',
+    // },
     optimization: {
       splitChunks: false,
     },
