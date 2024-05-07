@@ -7,9 +7,9 @@ module.exports = defineConfig({
     extract: false,
   },
   configureWebpack: {
-    output: {
-      filename: 'admin.js',
-    },
+    // output: {
+    //   filename: 'admin.js',
+    // },
     optimization: {
       splitChunks: false,
     },
