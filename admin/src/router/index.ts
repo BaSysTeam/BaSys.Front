@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import MainSettingView from '@/views/MainSettingView.vue';
 import LoggingSettingView from '@/views/LoggingSettingView.vue';
+import FileStorageSettingsView from '@/views/FileStorageSettingsView.vue';
 import HomeView from '../views/HomeView.vue';
 import UserListView from '../views/UserListView.vue';
 import UserEditView from '../views/UserEditView.vue';
@@ -36,6 +37,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/migrations',
     name: 'migrations',
     component: MigrationsView,
+  },
+  {
+    path: '/settings/fileStorage',
+    name: 'fileStorageSetting',
+    component: FileStorageSettingsView,
   },
 ];
 
