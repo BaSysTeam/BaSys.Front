@@ -30,7 +30,7 @@
             <!--                StorageKind-->
             <div class="grid">
               <div class="col-3 flex align-items-center">
-                <span class="bs-required">Language</span>
+                <span class="bs-required">Storage kind</span>
               </div>
               <div class="col">
                 <Dropdown
@@ -39,7 +39,7 @@
                   @change="save"
                   optionLabel="name"
                   optionValue="id"
-                  placeholder="Select language"
+                  placeholder="Select storage kind"
                   class="w-full md:w-14rem"
                 />
               </div>
