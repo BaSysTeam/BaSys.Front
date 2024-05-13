@@ -108,6 +108,11 @@ export default class App extends Vue {
           route: '/settings/logging',
           key: 'settings-submenu',
         },
+        {
+          label: 'File storage',
+          route: '/settings/fileStorage',
+          key: 'settings-submenu',
+        },
       ],
     },
     {
