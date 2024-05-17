@@ -6,4 +6,6 @@ export default class FileInfo {
   mimeType!: string;
   isImage!: boolean;
   isMainImage!: boolean;
+  uploadDate!: Date;
+  base64String!: string;
 }
