@@ -29,6 +29,7 @@
           selectionMode="single"
           @nodeSelect="onNodeSelect"
           @node-expand="onNodeExpand"
+          @contextmenu="onTreeRightClick"
           loadingMode="icon"
           class="p-0"
         >
@@ -39,9 +40,11 @@
   <ConfirmDialog :draggable="false"></ConfirmDialog>
   <MetadataTreeNodeCreateComponent
     v-if="isGroupCreateDialogVisible"
-    :parentKey="selectedNode.isGroup ? selectedNode.key : selectedNode.parentKey"
+    :node="selectedNode"
+    :regime="treeNodeCreateDialogRegime"
     @cancel="isGroupCreateDialogVisible = false"
     @groupAdded="onGroupAdded"
+    @accept="onTreeNodeCreateDialogClosed"
   />
   <MetaObjectCreateComponent
     v-if="isMetaObjectCreateDialogVisible"
@@ -50,6 +53,13 @@
     @cancel="isMetaObjectCreateDialogVisible = false"
     @create="onMetaObjectCreateDialogClosed"
   />
+  <MoveToGroupComponent
+    v-if="isMoveToGroupDialogVisible"
+    :moved-node="selectedNode"
+    @cancel="isMoveToGroupDialogVisible = false"
+    @nodeMoved="onNodeMoved"
+  />
+  <ContextMenu ref="treeContextMenu" :model="treeContextMenuItems" />
 </template>
 
 <script lang="ts">
@@ -62,26 +72,29 @@ import Tree from 'primevue/tree';
 import Button from 'primevue/button';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Menubar from 'primevue/menubar';
+import ContextMenu from 'primevue/contextmenu';
 import EventEmitter from '@/utils/eventEmitter';
 import MetadataTreeNode from '@/models/metadataTreeNode';
 import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreateComponent.vue';
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
-import MetaObjectKind from '@/models/metaObjectKind';
 import MetaObject from '@/models/metaObject';
 import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
+import MoveToGroupComponent from './MoveToGroupComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
     MetadataTreeNodeCreateComponent,
     MetaObjectCreateComponent,
+    MoveToGroupComponent,
     Tree,
     Button,
     ConfirmDialog,
     Menubar,
+    ContextMenu,
   },
   props: {
     isMenuMinimized: Boolean,
@@ -91,6 +104,7 @@ export default class MetadataTreeComponent extends Vue {
   isMenuMinimized!:boolean;
   isGroupCreateDialogVisible = false;
   isMetaObjectCreateDialogVisible = false;
+  isMoveToGroupDialogVisible = false;
   dataProvider = new MetadataTreeNodesProvider();
   metadataKindsProvider = new MetaObjectKindsProvider();
   toastHelper = new ToastHelper(useToast());
@@ -101,6 +115,23 @@ export default class MetadataTreeComponent extends Vue {
   router = useRouter();
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
+  treeContextMenu:any = null;
+  treeNodeCreateDialogRegime = 'create';
+
+  treeContextMenuItems = [
+    {
+      label: 'Delete',
+      command: () => this.showDeleteConfirm(),
+    },
+    {
+      label: 'Edit group',
+      command: () => this.showGroupEditDialog(),
+    },
+    {
+      label: 'Move to group',
+      command: () => this.showMoveToGroupDialog(),
+    },
+  ];
 
   items = [
     {
@@ -124,21 +155,56 @@ export default class MetadataTreeComponent extends Vue {
     return !this.selectedNode || Object.keys(this.selectedNode).length === 0;
   }
 
-  get isUnavailableForDelete(): boolean {
-    if (this.isSelectedNodeEmpty || this.selectedNode.isStandard || !this.selectedNode.leaf) {
-      return true;
+  checkBeforeDelete(): boolean {
+    if (this.isSelectedNodeEmpty) {
+      this.toastHelper.warning('The item is not selected');
+      return false;
     }
 
-    return false;
+    if (this.selectedNode.isStandard) {
+      this.toastHelper.warning('The standard item cannot be deleted');
+      return false;
+    }
+
+    if (this.selectedNode.isGroup && !this.selectedNode.leaf) {
+      this.toastHelper.warning('The selected item has child elements');
+      return false;
+    }
+
+    return true;
   }
 
-  get isUnavailableForAddItem(): boolean {
-    if (this.isSelectedNodeEmpty
-      || (this.selectedNode.key !== '60738680-dafd-42c0-8923-585fc7985176' && this.selectedNode.isStandard)) {
-      return true;
+  checkBeforeAdd(): boolean {
+    if (this.isSelectedNodeEmpty) {
+      this.toastHelper.warning('The item is not selected');
+      return false;
     }
 
-    return false;
+    if (this.selectedNode.key !== '60738680-dafd-42c0-8923-585fc7985176' && this.selectedNode.isStandard) {
+      this.toastHelper.warning('A new item cannot be added here');
+      return false;
+    }
+
+    return true;
+  }
+
+  checkBeforeEdit(): boolean {
+    if (this.isSelectedNodeEmpty) {
+      this.toastHelper.warning('The item is not selected');
+      return false;
+    }
+
+    if (this.selectedNode.isStandard) {
+      this.toastHelper.warning('The standard item cannot be edited');
+      return false;
+    }
+
+    if (!this.selectedNode.isGroup) {
+      this.toastHelper.warning('The item is not a group');
+      return false;
+    }
+
+    return true;
   }
 
   async mounted(): Promise<void> {
@@ -184,7 +250,7 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   onNodeSelect(node: MetadataTreeNode): void {
-    this.selectedNode = node;
+    this.selectedNode = new MetadataTreeNode(node);
 
     if (!node.isGroup) {
       if (node.key === '416c4b6c-48f7-426c-aa5a-774717c9984e') {
@@ -211,6 +277,10 @@ export default class MetadataTreeComponent extends Vue {
     if (!node.children || node.children.length === 0) {
       await this.getChildren(node);
     }
+  }
+
+  onTreeRightClick(event: Event): void {
+    this.treeContextMenu.show(event);
   }
 
   async getChildren(arg: MetadataTreeNode): Promise<void> {
@@ -258,6 +328,7 @@ export default class MetadataTreeComponent extends Vue {
 
     const response = await this.dataProvider.createMetaObject(dto);
     if (response.isOK) {
+      this.selectedNode.leaf = false;
       await this.getChildren(this.selectedNode);
     } else {
       this.toastHelper.error(response.message);
@@ -270,29 +341,15 @@ export default class MetadataTreeComponent extends Vue {
     await this.getChildren(this.selectedNode);
   }
 
-  async delete(): Promise<void> {
-    if (!this.selectedNode.key) {
-      return;
-    }
+  async onTreeNodeCreateDialogClosed(): Promise<void> {
+    await this.getChildren(this.selectedNode);
+    this.isGroupCreateDialogVisible = false;
+  }
 
+  async delete(): Promise<void> {
     const response = await this.dataProvider.delete(this.selectedNode);
     if (response.isOK) {
-      const parentNode = this.findParentNode(this.treeNodes, this.selectedNode.key);
-      if (parentNode === null) {
-        return;
-      }
-      if (!parentNode.children) {
-        return;
-      }
-
-      const index = parentNode.children?.indexOf(this.selectedNode);
-      if (index > -1) {
-        parentNode.children?.splice(index, 1);
-        if (parentNode.children.length === 0) {
-          parentNode.leaf = true;
-        }
-      }
-
+      this.deleteFromTree(this.selectedNode);
       this.selectedNode = {};
       this.toastHelper.success(response.message);
     } else {
@@ -301,8 +358,31 @@ export default class MetadataTreeComponent extends Vue {
     }
   }
 
+  deleteFromTree(node: MetadataTreeNode): void {
+    console.log('deleteFromTree');
+    console.log('node', node);
+    const parentNode = this.findParentNode(this.treeNodes, node.key);
+    console.log('parentNode', parentNode);
+    if (parentNode === null) {
+      return;
+    }
+    if (!parentNode.children) {
+      return;
+    }
+
+    const current = parentNode.children.find((x) => x.key === node.key);
+    if (current) {
+      const index = parentNode.children?.indexOf(current);
+      parentNode.children?.splice(index, 1);
+      if (parentNode.children.length === 0) {
+        parentNode.leaf = true;
+      }
+    }
+  }
+
   showElementCreateDialog(arg: MetaObjectKindSettings): void {
-    if (this.isUnavailableForAddItem) {
+    const checkResult = this.checkBeforeAdd();
+    if (!checkResult) {
       return;
     }
 
@@ -311,15 +391,36 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   showGroupCreateDialog(): void {
-    if (this.isUnavailableForAddItem) {
+    const checkResult = this.checkBeforeAdd();
+    if (!checkResult) {
       return;
     }
 
+    this.treeNodeCreateDialogRegime = 'create';
     this.isGroupCreateDialogVisible = true;
   }
 
+  showGroupEditDialog(): void {
+    const checkResult = this.checkBeforeEdit();
+    if (!checkResult) {
+      return;
+    }
+
+    this.treeNodeCreateDialogRegime = 'edit';
+    this.isGroupCreateDialogVisible = true;
+  }
+
+  showMoveToGroupDialog(): void {
+    if (this.isSelectedNodeEmpty) {
+      return;
+    }
+
+    this.isMoveToGroupDialogVisible = true;
+  }
+
   showDeleteConfirm(): void {
-    if (this.isUnavailableForDelete) {
+    const checkResult = this.checkBeforeDelete();
+    if (!checkResult) {
       return;
     }
 
@@ -337,7 +438,11 @@ export default class MetadataTreeComponent extends Vue {
     });
   }
 
-  findParentNode(nodes: MetadataTreeNode[], key: string): MetadataTreeNode | null {
+  findParentNode(nodes: MetadataTreeNode[], key: string | undefined): MetadataTreeNode | null {
+    if (!key) {
+      return null;
+    }
+
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < nodes.length; i++) {
       const { children } = nodes[i];
@@ -355,6 +460,41 @@ export default class MetadataTreeComponent extends Vue {
     }
 
     return null;
+  }
+
+  findNode(nodes: MetadataTreeNode[], key: string | undefined): MetadataTreeNode | null {
+    if (!key) {
+      return null;
+    }
+
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (node.key === key) {
+        return node;
+      }
+
+      if (node.children) {
+        const result = this.findNode(node.children, key);
+        if (result) {
+          return result;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  async onNodeMoved(movedNode: MetadataTreeNode): Promise<void> {
+    this.deleteFromTree(this.selectedNode);
+
+    const parentNode = this.findNode(this.treeNodes, movedNode.parentKey);
+    if (parentNode) {
+      await this.getChildren(parentNode);
+    }
+
+    this.selectedNode = {};
+    this.isMoveToGroupDialogVisible = false;
   }
 }
 </script>
