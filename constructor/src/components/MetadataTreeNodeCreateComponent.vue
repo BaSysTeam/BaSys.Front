@@ -88,7 +88,6 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   },
   emits: {
     cancel: null,
-    groupAdded: null,
     accept: null,
   },
 })

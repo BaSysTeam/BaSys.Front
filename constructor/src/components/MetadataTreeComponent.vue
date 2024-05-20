@@ -43,7 +43,6 @@
     :node="selectedNode"
     :regime="treeNodeCreateDialogRegime"
     @cancel="isGroupCreateDialogVisible = false"
-    @groupAdded="onGroupAdded"
     @accept="onTreeNodeCreateDialogClosed"
   />
   <MetaObjectCreateComponent
@@ -59,7 +58,6 @@
     @cancel="isMoveToGroupDialogVisible = false"
     @nodeMoved="onNodeMoved"
   />
-  <ContextMenu ref="treeContextMenu" :model="treeContextMenuItems" />
 </template>
 
 <script lang="ts">
@@ -72,7 +70,6 @@ import Tree from 'primevue/tree';
 import Button from 'primevue/button';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Menubar from 'primevue/menubar';
-import ContextMenu from 'primevue/contextmenu';
 import EventEmitter from '@/utils/eventEmitter';
 import MetadataTreeNode from '@/models/metadataTreeNode';
 import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
@@ -94,7 +91,6 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Button,
     ConfirmDialog,
     Menubar,
-    ContextMenu,
   },
   props: {
     isMenuMinimized: Boolean,
@@ -118,41 +114,48 @@ export default class MetadataTreeComponent extends Vue {
   treeContextMenu:any = null;
   treeNodeCreateDialogRegime = 'create';
 
-  treeContextMenuItems = [
-    {
-      label: 'Delete',
-      command: () => this.showDeleteConfirm(),
-    },
-    {
-      label: 'Edit group',
-      command: () => this.showGroupEditDialog(),
-    },
-    {
-      label: 'Move to group',
-      command: () => this.showMoveToGroupDialog(),
-    },
-  ];
-
   items = [
     {
-      label: 'item',
+      label: 'Add',
       icon: 'pi pi-plus',
       items: this.metadataKindMenuItems,
     },
     {
-      icon: 'pi pi-plus',
-      command: () => this.showGroupCreateDialog(),
-      tooltipMsg: 'Add metadata group',
-    },
-    {
-      icon: 'pi pi-times',
-      command: () => this.showDeleteConfirm(),
-      tooltipMsg: 'Remove metadata item',
+      label: 'Actions',
+      icon: 'pi pi-list',
+      items: [
+        {
+          label: 'Edit',
+          icon: 'pi pi-pencil',
+          command: () => this.showGroupEditDialog(),
+        },
+        {
+          label: 'Delete',
+          icon: 'pi pi-trash',
+          command: () => this.showDeleteConfirm(),
+        },
+        {
+          label: 'Move',
+          icon: 'pi pi-arrow-right-arrow-left',
+          command: () => this.showMoveToGroupDialog(),
+        },
+      ],
     },
   ]
 
   get isSelectedNodeEmpty(): boolean {
     return !this.selectedNode || Object.keys(this.selectedNode).length === 0;
+  }
+
+  async mounted(): Promise<void> {
+    await this.updateTreeNodes();
+    await this.updateMetadataKindsMenuItems();
+
+    EventEmitter.on('metadata-kinds-changed', this.onMetadataKindsChanged);
+  }
+
+  unmounted(): void {
+    EventEmitter.off('metadata-kinds-changed', this.onMetadataKindsChanged);
   }
 
   checkBeforeDelete(): boolean {
@@ -207,17 +210,6 @@ export default class MetadataTreeComponent extends Vue {
     return true;
   }
 
-  async mounted(): Promise<void> {
-    await this.updateTreeNodes();
-    await this.updateMetadataKindsMenuItems();
-
-    EventEmitter.on('metadata-kinds-changed', this.onMetadataKindsChanged);
-  }
-
-  unmounted(): void {
-    EventEmitter.off('metadata-kinds-changed', this.onMetadataKindsChanged);
-  }
-
   onMetadataKindsChanged(): void {
     this.updateMetadataKindsMenuItems();
   }
@@ -241,6 +233,13 @@ export default class MetadataTreeComponent extends Vue {
           icon: x.iconClass,
           command: () => this.showElementCreateDialog(x),
         }));
+
+      this.metadataKindMenuItems.push({ separator: true });
+      this.metadataKindMenuItems.push({
+        label: 'Group',
+        icon: 'pi pi-folder',
+        command: () => this.showGroupCreateDialog(),
+      });
 
       this.items[0].items = this.metadataKindMenuItems;
     } else {
@@ -284,8 +283,8 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   async getChildren(arg: MetadataTreeNode): Promise<void> {
-    let node = arg;
-    if (!node.key) {
+    let node = this.findNode(this.treeNodes, arg.key);
+    if (node === null) {
       return;
     }
 
@@ -300,6 +299,7 @@ export default class MetadataTreeComponent extends Vue {
     if (!node.key) {
       return;
     }
+
     const response = await this.dataProvider.getChildren(node.key);
     if (response.isOK) {
       node.children = response.data;
@@ -336,14 +336,9 @@ export default class MetadataTreeComponent extends Vue {
     }
   }
 
-  async onGroupAdded(): Promise<void> {
-    this.isGroupCreateDialogVisible = false;
-    await this.getChildren(this.selectedNode);
-  }
-
   async onTreeNodeCreateDialogClosed(): Promise<void> {
-    await this.getChildren(this.selectedNode);
     this.isGroupCreateDialogVisible = false;
+    await this.getChildren(this.selectedNode);
   }
 
   async delete(): Promise<void> {
@@ -412,6 +407,7 @@ export default class MetadataTreeComponent extends Vue {
 
   showMoveToGroupDialog(): void {
     if (this.isSelectedNodeEmpty) {
+      this.toastHelper.warning('The item is not selected');
       return;
     }
 
