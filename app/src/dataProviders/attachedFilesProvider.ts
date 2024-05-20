@@ -60,4 +60,21 @@ export default class AttachedFilesProvider {
       })
       .catch(console.error);
   }
+
+  async getImageBase64(fileUid: string): Promise<string> {
+    let result: ResultWrapper<string> = new ResultWrapper<string>();
+
+    try {
+      const url = `${this.BASE_URL}/GetImageBase64?fileUid=${fileUid}`;
+      const { data } = await axios.get(url);
+      result = data;
+      if (!result.isOK) {
+        console.error(result.presentation);
+      }
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result.data;
+  }
 }

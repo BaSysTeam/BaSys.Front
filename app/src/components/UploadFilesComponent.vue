@@ -37,6 +37,15 @@
             ></i>
           </template>
         </Column>
+        <Column header="View" bodyClass="center">
+          <template #body="{ data }">
+            <i class="pi pi-eye"
+               v-if="data.isImage === true"
+               v-tooltip.left="'View file'"
+               @mousedown="_ => onViewClick(data.uid, data.fileName)"
+            ></i>
+          </template>
+        </Column>
         <Column header="Download" bodyClass="center">
           <template #body="{ data }">
             <i class="pi pi-download"
@@ -63,6 +72,12 @@
                     @upload="onUpload"
         />
       </div>
+
+      <ShowImageComponent v-if="isShowImage"
+                          :image-base64="selectedImageBase64"
+                          @close="isShowImage = false"
+      />
+
       <template #footer>
         <Button
           label="Close"
@@ -93,10 +108,12 @@ import Column from 'primevue/column';
 import ColumnGroup from 'primevue/columngroup';
 import Row from 'primevue/row';
 import Image from 'primevue/image';
+import ShowImageComponent from '@/components/ShowImageComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
+    ShowImageComponent,
     Dialog,
     Button,
     InputText,
@@ -135,6 +152,8 @@ export default class UploadFilesComponent extends Vue {
   toastHelper = new ToastHelper(useToast());
   provider = new AttachedFilesProvider();
   filesList: FileInfo[] = [];
+  isShowImage = false;
+  selectedImageBase64!: string;
 
   mounted(): void {
     this.update();
@@ -182,6 +201,11 @@ export default class UploadFilesComponent extends Vue {
     } else {
       this.toastHelper.error('Error delete file');
     }
+  }
+
+  async onViewClick(fileUid: string, fileName: string): Promise<void> {
+    this.selectedImageBase64 = await this.provider.getImageBase64(fileUid);
+    this.isShowImage = true;
   }
 
   async onDownloadClick(fileUid: string, fileName: string): Promise<void> {
