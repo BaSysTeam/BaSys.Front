@@ -22,18 +22,6 @@
         scrollHeight="flex"
       >
         <template #empty> No files found.</template>
-        <Column header="Preview" bodyClass="text-left">
-          <template #body="{ data }">
-            <div>
-              <Image :src="data.base64String"
-                     alt="Image"
-                     width="50"
-                     v-if="data.base64String != ''"
-                     preview
-              />
-            </div>
-          </template>
-        </Column>
         <Column header="File name" bodyClass="text-left">
           <template #body="{ data }">
             <div style="font-size: 0.9em">
@@ -67,14 +55,21 @@
       </DataTable>
       <!--      upload field-->
       <div>
-        <label for="upload">
-          <input
-            type="file"
-            id="upload"
-            @change="onFileChanged($event)"
-            multiple
-          />
-        </label>
+        <!--        <label for="upload">-->
+        <!--          <input-->
+        <!--            type="file"-->
+        <!--            id="upload"-->
+        <!--            @change="onFileChanged($event)"-->
+        <!--            multiple-->
+        <!--          />-->
+        <!--        </label>-->
+        <FileUpload mode="basic"
+                    name="demo[]"
+                    url="/api/v1/AttachedFiles/UploadFiles"
+                    :auto="true"
+                    @before-send="beforeFileSend"
+                    @upload="onUpload"
+        />
       </div>
       <template #footer>
         <Button
@@ -95,7 +90,7 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import Checkbox from 'primevue/checkbox';
-import FileUpload, { FileUploadUploadEvent } from 'primevue/fileupload';
+import FileUpload, { FileUploadBeforeSendEvent, FileUploadUploadEvent } from 'primevue/fileupload';
 import { Options, Vue } from 'vue-class-component';
 import { useToast } from 'primevue/usetoast';
 import { format } from 'date-fns';
@@ -175,26 +170,15 @@ export default class UploadFilesComponent extends Vue {
     }
   }
 
-  async onFileChanged($event: Event): Promise<void> {
-    const target = $event.target as HTMLInputElement;
-    if (target.files == null) {
-      return;
-    }
+  beforeFileSend(event: FileUploadBeforeSendEvent): void {
+    event.formData.set('metaObjectKindUid', this.metaObjectKindUid);
+    event.formData.set('metaObjectUid', this.metaObjectUid);
+    event.formData.set('objectUid', this.objectUid);
+  }
 
-    const result = await this.provider.uploadFiles(
-      target.files,
-      this.metaObjectKindUid,
-      this.metaObjectUid,
-      this.objectUid,
-    );
-
-    if (result) {
-      target.files = null;
-      this.toastHelper.success('Success upload!');
-      await this.update();
-    } else {
-      this.toastHelper.error('Error uploading files');
-    }
+  async onUpload(event: FileUploadUploadEvent): Promise<void> {
+    this.toastHelper.success('Success upload!');
+    await this.update();
   }
 
   async onDeleteClick(fileUid: string): Promise<void> {
@@ -214,10 +198,6 @@ export default class UploadFilesComponent extends Vue {
 
   formatDate(date: Date): string {
     return format(date, 'dd.MM.yyyy HH:mm');
-  }
-
-  onErrorImage(): void {
-    console.log('onErrorImage');
   }
 }
 </script>

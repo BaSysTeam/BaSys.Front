@@ -23,27 +23,6 @@ export default class AttachedFilesProvider {
     return result;
   }
 
-  async uploadFiles(
-    files: FileList,
-    metaObjectKindUid: string,
-    metaObjectUid: string,
-    objectUid: string,
-  )
-    : Promise<boolean> {
-    const url = `${this.BASE_URL}/Upload?metaObjectKindUid=${metaObjectKindUid}&metaObjectUid=${metaObjectUid}&objectUid=${objectUid}`;
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i += 1) {
-      formData.append(`file${i}`, files[i]);
-    }
-    await axios.post(url, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
-    return true;
-  }
-
   async deleteFile(metaObjectKindUid: string, fileUid: string): Promise<boolean> {
     let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
 
