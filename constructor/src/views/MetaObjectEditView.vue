@@ -1,5 +1,8 @@
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
+import {
+  Vue, Component, Prop, Watch,
+} from 'vue-property-decorator';
 import { Codemirror } from 'vue-codemirror';
 import { json as jsonLang } from '@codemirror/lang-json';
 import { githubLight } from '@ddietr/codemirror-themes/github-light';
@@ -10,9 +13,9 @@ import Divider from 'primevue/divider';
 import MetaObjectSettings from '@/models/metaObjectSettings';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import { useToast } from 'primevue/usetoast';
-import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 
 @Options({
   components: {
@@ -23,16 +26,13 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Divider,
     Codemirror,
   },
-  props: {
-    kind: { type: String },
-    name: { type: String },
-  },
 })
-export default class MetaObjectEditView extends Vue {
+export default class MetaObjectEditView extends mixins(ResizeWindow) {
+  @Prop({ type: String }) name!: string;
+  @Prop({ type: String }) kind!: string;
   isModified = false;
   isWaiting = true;
-  name!: string;
-  kind!: string;
+
   settingsJson = '';
   provider = new MetaObjectProvider();
   settings = new MetaObjectSettings({});
@@ -42,6 +42,38 @@ export default class MetaObjectEditView extends Vue {
   codemirrorExtensions = [jsonLang(), githubLight];
   codemirrorEditor: any = null;
 
+  actions = [
+    {
+      label: 'json',
+      icon: 'pi pi-download',
+      command: () => this.downloadJson(),
+    },
+    {
+      label: 'header column',
+      icon: 'pi pi-plus',
+      command: () => this.addHeaderColumn(),
+    },
+    {
+      label: 'update',
+      icon: 'pi pi-sync',
+      command: () => this.onUpdateClick(),
+    },
+
+  ];
+
+  get codemirrorStyle(): object {
+    return {
+      height: `${this.windowHeight - 150}px`,
+    };
+  }
+
+  @Watch('kind')
+  @Watch('name')
+  onPropChange(newVal: string, oldVal: string): void {
+    console.log(`Prop changed from ${oldVal} to ${newVal}`);
+    this.update();
+  }
+
   onSaveClick():void {
     console.log('Save click');
     this.save();
@@ -49,6 +81,32 @@ export default class MetaObjectEditView extends Vue {
 
   onSettingsInput():void {
     this.isModified = true;
+  }
+
+  downloadJson():void {
+    const blob = new Blob([this.settingsJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link and trigger the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.settings.title}.json`; // Name of the file to be downloaded
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up by removing the link and revoking the URL
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  addHeaderColumn(): void {
+    this.isModified = true;
+    this.settings.header.newColumn();
+    this.settingsJson = JSON.stringify(this.settings, null, 2);
+  }
+
+  onUpdateClick(): void {
+    this.update();
   }
 
   async save(): Promise<boolean> {
@@ -72,6 +130,7 @@ export default class MetaObjectEditView extends Vue {
   }
 
   async update(): Promise<void> {
+    console.log('meta-object-update', this.kind, this.name);
     this.isWaiting = true;
     const response = await this.provider.getMetaObjectSettings(this.kind, this.name);
     this.isWaiting = false;
@@ -118,7 +177,14 @@ export default class MetaObjectEditView extends Vue {
             @click="onSaveClick"
           />
         </ButtonGroup>
-
+        <SplitButton
+          label="Actions"
+          severity="primary"
+          size="small"
+          class="ml-1"
+          outlined
+          :model="actions"
+        />
       </div>
     </div>
 
@@ -133,7 +199,7 @@ export default class MetaObjectEditView extends Vue {
           ref="codemirrorEditor"
           v-model="settingsJson"
           placeholder="Code goes here..."
-          :style="{ height: '500px' }"
+          :style="codemirrorStyle"
           :indent-with-tab="true"
           :tab-size="2"
           :extensions="codemirrorExtensions"

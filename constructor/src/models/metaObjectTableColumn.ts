@@ -1,3 +1,5 @@
+import { Guid } from 'guid-typescript';
+
 export default class MetaObjectTableColumn {
   uid:string;
   title:string;
@@ -15,7 +17,7 @@ export default class MetaObjectTableColumn {
       data = params;
     }
 
-    this.uid = data.uid || '';
+    this.uid = data.uid || Guid.create().toString();
     this.title = data.title || '';
     this.name = data.name || '';
     this.dataTypeUid = data.dataTypeUid || '';

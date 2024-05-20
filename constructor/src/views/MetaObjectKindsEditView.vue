@@ -267,10 +267,3 @@ export default class MetadataKindsEditView extends mixins(ResizeWindow) {
 }
 
 </script>
-
-<style>
-.codemirror-wrapper {
-  /* Styling for your editor */
-  height: 500px;
-}
-</style>
