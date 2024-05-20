@@ -10,8 +10,15 @@ export default class AttachedFilesProvider {
     let result: ResultWrapper<FileInfo[]> = new ResultWrapper<FileInfo[]>();
 
     try {
-      const url = `${this.BASE_URL}/GetAttachedFilesList?metaObjectKindUid=${metaObjectKindUid}&metaObjectUid=${metaObjectUid}&objectUid=${objectUid}`;
-      const { data } = await axios.get(url);
+      const url = `${this.BASE_URL}/GetAttachedFilesList`;
+      const { data } = await axios.get(url, {
+        params:
+          {
+            metaObjectKindUid,
+            metaObjectUid,
+            objectUid,
+          },
+      });
       result = data;
       if (!result.isOK) {
         console.error(result.presentation);

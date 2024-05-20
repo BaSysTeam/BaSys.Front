@@ -55,17 +55,9 @@
       </DataTable>
       <!--      upload field-->
       <div>
-        <!--        <label for="upload">-->
-        <!--          <input-->
-        <!--            type="file"-->
-        <!--            id="upload"-->
-        <!--            @change="onFileChanged($event)"-->
-        <!--            multiple-->
-        <!--          />-->
-        <!--        </label>-->
         <FileUpload mode="basic"
                     name="demo[]"
-                    url="/api/v1/AttachedFiles/UploadFiles"
+                    url="/api/v1/AttachedFiles/Upload"
                     :auto="true"
                     @before-send="beforeFileSend"
                     @upload="onUpload"
