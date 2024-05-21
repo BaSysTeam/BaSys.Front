@@ -32,11 +32,37 @@ export default class MetadataTreeNodesProvider {
     return result;
   }
 
+  async getGroups(): Promise<ResultWrapper<MetadataTreeNode[]>> {
+    let result: ResultWrapper<MetadataTreeNode[]> = new ResultWrapper<MetadataTreeNode[]>();
+
+    try {
+      const { data } = await axios.get(`${this.BASE_URL}/Groups`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
   async create(node: MetadataTreeNode): Promise<ResultWrapper<number>> {
     let result: ResultWrapper<number> = new ResultWrapper<number>();
 
     try {
       const { data } = await axios.post(this.BASE_URL, node);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async update(node: MetadataTreeNode): Promise<ResultWrapper<number>> {
+    let result: ResultWrapper<number> = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.put(this.BASE_URL, node);
       result = data;
     } catch (error) {
       console.error('error', error);

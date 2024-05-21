@@ -4,7 +4,7 @@
       :visible="true"
       :style="{width: '25rem'}"
       :draggable="false"
-      header="Add group"
+      :header="header"
       class="pb-0"
       modal
       @update:visible="updateVisible"
@@ -52,7 +52,7 @@
           outlined
           @click="$emit('cancel')"
         />
-        <Button label="Add" size="small" @click="add" />
+        <Button label="Ok" size="small" @click="onOkClicked" />
       </template>
     </Dialog>
   </div>
@@ -71,8 +71,12 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   props: {
-    parentKey: {
+    regime: {
       type: String,
+      required: true,
+    },
+    node: {
+      type: MetadataTreeNode,
       required: true,
     },
   },
@@ -84,18 +88,27 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   },
   emits: {
     cancel: null,
-    groupAdded: null,
+    accept: null,
   },
 })
 export default class MetadataTreeNodeCreateComponent extends Vue {
-  parentKey!: string;
-  model = new MetadataTreeNode();
+  header = '';
+  regime!: string;
+  model = new MetadataTreeNode(null);
+  node!: MetadataTreeNode;
   dataProvider = new MetadataTreeNodesProvider()
   toastHelper = new ToastHelper(useToast());
 
   mounted(): void {
-    this.model.parentKey = this.parentKey;
-    this.model.icon = 'pi pi-folder';
+    if (this.regime === 'create') {
+      this.header = 'Add group';
+      this.model.parentKey = this.node.isGroup ? this.node.key : this.node.parentKey;
+      this.model.icon = 'pi pi-folder';
+      this.model.isGroup = true;
+    } else {
+      this.header = 'Edit group';
+      this.model = this.node;
+    }
   }
 
   updateVisible(value: boolean): void {
@@ -104,12 +117,30 @@ export default class MetadataTreeNodeCreateComponent extends Vue {
     }
   }
 
-  async add(): Promise<void> {
-    this.model.isGroup = true;
+  onOkClicked(): void {
+    if (this.regime === 'create') {
+      this.add();
+    } else {
+      this.edit();
+    }
+  }
 
+  async add(): Promise<void> {
     const response = await this.dataProvider.create(this.model);
     if (response.isOK) {
-      this.$emit('groupAdded');
+      this.toastHelper.success(response.message);
+      this.$emit('accept');
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+  }
+
+  async edit(): Promise<void> {
+    const response = await this.dataProvider.update(this.model);
+    if (response.isOK) {
+      this.toastHelper.success(response.message);
+      this.$emit('accept');
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
