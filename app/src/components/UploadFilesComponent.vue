@@ -29,35 +29,41 @@
             </div>
           </template>
         </Column>
-        <Column header="Delete" bodyClass="center">
-          <template #body="{ data }">
-            <i class="pi pi-trash text-red-500"
-               v-tooltip.left="'Delete file'"
-               @mousedown="_ => onDeleteClick(data.uid)"
-            ></i>
-          </template>
-        </Column>
-        <Column header="View" bodyClass="center">
-          <template #body="{ data }">
-            <i class="pi pi-eye"
-               v-if="data.isImage === true"
-               v-tooltip.left="'View file'"
-               @mousedown="_ => onViewClick(data.uid, data.fileName)"
-            ></i>
-          </template>
-        </Column>
-        <Column header="Download" bodyClass="center">
-          <template #body="{ data }">
-            <i class="pi pi-download"
-               v-tooltip.left="'Download file'"
-               @mousedown="_ => onDownloadClick(data.uid, data.fileName)"
-            ></i>
-          </template>
-        </Column>
-        <Column header="Upload date" bodyClass="text-left">
+        <Column header="Upload date" bodyClass="text-left" style="width: 180px">
           <template #body="{ data }">
             <div style="font-size: 0.9em">
               {{ formatDate(data.uploadDate) }}
+            </div>
+          </template>
+        </Column>
+        <Column header="Actions" bodyClass="text-right" style="width: 180px">
+          <template #body="{ data }">
+            <div class="grid">
+              <div class="col-3">
+                <Button icon="pi pi-eye"
+                        v-if="data.isImage === true"
+                        severity="secondary"
+                        text
+                        rounded
+                        tooltip="'View file'"
+                        @click="_ => onViewClick(data.uid)" />
+              </div>
+              <div class="col-3">
+                <Button icon="pi pi-download"
+                        severity="secondary"
+                        text
+                        rounded
+                        tooltip="'Download file'"
+                        @click="_ => onDownloadClick(data.uid, data.fileName)" />
+              </div>
+              <div class="col-3">
+                <Button icon="pi pi-trash"
+                        severity="danger"
+                        text
+                        rounded
+                        tooltip="'Delete file'"
+                        @click="_ => onDeleteClick(data.uid)" />
+              </div>
             </div>
           </template>
         </Column>
@@ -68,6 +74,7 @@
                     name="demo[]"
                     url="/api/v1/AttachedFiles/Upload"
                     :auto="true"
+                    multiple
                     @before-send="beforeFileSend"
                     @upload="onUpload"
         />
@@ -203,7 +210,7 @@ export default class UploadFilesComponent extends Vue {
     }
   }
 
-  async onViewClick(fileUid: string, fileName: string): Promise<void> {
+  async onViewClick(fileUid: string): Promise<void> {
     this.selectedImageBase64 = await this.provider.getImageBase64(fileUid);
     this.isShowImage = true;
   }
