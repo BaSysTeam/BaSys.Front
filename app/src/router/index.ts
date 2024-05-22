@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import FileStorageTest from '@/views/FileStorageTest.vue';
 import HomeView from '../views/HomeView.vue';
 import UserSettingsView from '../views/UserSettingsView.vue';
 
@@ -20,6 +21,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/usersettings',
     name: 'usersettings',
     component: UserSettingsView,
+  },
+  {
+    path: '/filestoragetest',
+    name: 'filestoragetest',
+    component: FileStorageTest,
   },
 ];
 
