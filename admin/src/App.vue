@@ -61,12 +61,14 @@ import { Options, Vue } from 'vue-class-component';
 import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
+import { usePrimeVue } from 'primevue/config';
 import Toast from 'primevue/toast';
 import TieredMenu from 'primevue/tieredmenu';
 import AccountProvider from '@/dataProviders/accountProvider';
 import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import ToastHelper from '../../shared/src/helpers/toastHelper';
+import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
 
 @Options({
   components: {
@@ -81,6 +83,7 @@ export default class App extends Vue {
   navPanelWidth = 200;
   toastHelper = new ToastHelper(useToast());
   router = useRouter();
+  primeVue = usePrimeVue();
 
   menuItems: any = ref([
     {
@@ -127,6 +130,10 @@ export default class App extends Vue {
       command: () => this.logOut(),
     },
   ]);
+
+  mounted(): void {
+    LocaleSwitcher.setLocale(this.primeVue);
+  }
 
   onBurgerClicked(): void {
     this.isMenuMinimized = !this.isMenuMinimized;
