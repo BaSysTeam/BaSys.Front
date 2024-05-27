@@ -85,11 +85,11 @@ import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
 import { usePrimeVue } from 'primevue/config';
 import Dropdown from 'primevue/dropdown';
-import UserSettingsProvider from '@/dataProviders/userSettingsProvider';
-import Language from '@/models/language';
-import UserSettings from '@/models/userSettings';
-import ChangePasswordDto from '@/models/changePassword';
 import ChangePasswordComponent from '@/components/ChangePasswordComponent.vue';
+import UserSettingsProvider from '../../../shared/src/dataProviders/userSettingsProvider';
+import Language from '../../../shared/src/models/language';
+import UserSettings from '../../../shared/src/models/userSettings';
+import ChangePassword from '../../../shared/src/models/changePassword';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import LocaleSwitcher from '../../../shared/src/i18n/localeSwitcher';
@@ -109,8 +109,8 @@ import LocaleSwitcher from '../../../shared/src/i18n/localeSwitcher';
 })
 export default class UserSettingsView extends Vue {
   userSettingsProvider = new UserSettingsProvider();
-  userSettings = new UserSettings();
-  userSettingsCached = new UserSettings();
+  userSettings = new UserSettings(null);
+  userSettingsCached = new UserSettings(null);
   toastHelper = new ToastHelper(useToast());
   isWaiting = false;
   languages: Language[] = [];
@@ -176,7 +176,7 @@ export default class UserSettingsView extends Vue {
     this.isChangePasswordDialogVisible = true;
   }
 
-  async changePassword(dto: ChangePasswordDto): Promise<void> {
+  async changePassword(dto: ChangePassword): Promise<void> {
     this.isWaiting = true;
 
     const response = await this.userSettingsProvider.changePassword(dto);

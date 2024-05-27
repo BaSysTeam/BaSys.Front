@@ -84,14 +84,13 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import Checkbox from 'primevue/checkbox';
 import { Options, Vue } from 'vue-class-component';
-import ChangePasswordDto from '@/models/changePassword';
+import ChangePassword from '../../../shared/src/models/changePassword';
 
 @Options({
   components: {
@@ -108,7 +107,7 @@ import ChangePasswordDto from '@/models/changePassword';
 })
 export default class ChangePasswordComponent extends Vue {
   headerText = 'Change password';
-  changePasswordModel = new ChangePasswordDto();
+  changePasswordModel = new ChangePassword(null);
   newPasswordConfirm = '';
   isSaveDisabled = true;
   isOldPasswordInvalid = false;
