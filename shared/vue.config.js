@@ -10,4 +10,7 @@ module.exports = defineConfig({
       splitChunks: false,
     },
   },
+  devServer: {
+    proxy: 'http://localhost:5231',
+  },
 });
