@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import FileStorageTest from '@/views/FileStorageTest.vue';
 import HomeView from '../views/HomeView.vue';
 import UserSettingsView from '../views/UserSettingsView.vue';
+import DataObjectsView from '../views/DataObjectsView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -26,6 +27,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/filestoragetest',
     name: 'filestoragetest',
     component: FileStorageTest,
+  },
+  {
+    path: '/data-objects/:kind/:name',
+    name: 'data-objects',
+    props: true,
+    component: DataObjectsView,
   },
 ];
 

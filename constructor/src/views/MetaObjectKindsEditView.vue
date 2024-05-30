@@ -81,7 +81,7 @@ import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import Textarea from 'primevue/textarea';
 import EventEmitter from '@/utils/eventEmitter';
-import MetaObjectKindSettings from '../models/metaObjectKindSettings';
+import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectKindsProvider from '../dataProviders/metaObjectKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
