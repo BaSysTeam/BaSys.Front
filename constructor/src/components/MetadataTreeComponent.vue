@@ -75,7 +75,7 @@ import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreate
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
 import MetaObject from '@/models/metaObject';
-import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
+import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
 import MoveToGroupComponent from './MoveToGroupComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
