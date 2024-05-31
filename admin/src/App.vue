@@ -98,6 +98,11 @@ export default class App extends Vue {
       route: '/users',
     },
     {
+      label: 'User groups',
+      icon: 'pi pi-users',
+      route: '/userGroups',
+    },
+    {
       label: 'Settings',
       icon: 'pi pi-cog',
       items: [
