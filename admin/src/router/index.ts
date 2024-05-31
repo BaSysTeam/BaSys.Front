@@ -2,6 +2,8 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import MainSettingView from '@/views/MainSettingView.vue';
 import LoggingSettingView from '@/views/LoggingSettingView.vue';
 import FileStorageSettingsView from '@/views/FileStorageSettingsView.vue';
+import UserGroupsView from '@/views/UserGroupsView.vue';
+import UserGroupEditView from '@/views/UserGroupEditView.vue';
 import HomeView from '../views/HomeView.vue';
 import UserListView from '../views/UserListView.vue';
 import UserEditView from '../views/UserEditView.vue';
@@ -22,6 +24,16 @@ const routes: Array<RouteRecordRaw> = [
     path: '/edit/user',
     name: 'editUser',
     component: UserEditView,
+  },
+  {
+    path: '/UserGroups',
+    name: 'userGroups',
+    component: UserGroupsView,
+  },
+  {
+    path: '/edit/userGroup',
+    name: 'editUserGroup',
+    component: UserGroupEditView,
   },
   {
     path: '/settings/main',
