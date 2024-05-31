@@ -1,6 +1,6 @@
 import axios from 'axios';
 import MetaObjectKind from '../models/metaObjectKind';
-import MetaObjectKindSettings from '../models/metaObjectKindSettings';
+import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class MetaObjectKindsProvider {

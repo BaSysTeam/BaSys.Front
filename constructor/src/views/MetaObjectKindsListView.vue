@@ -9,7 +9,7 @@
       <div class="col-12">
         <ButtonGroup>
           <Button
-            label="Add"
+            :label="$t('add')"
             severity="primary"
             size="small"
             outlined

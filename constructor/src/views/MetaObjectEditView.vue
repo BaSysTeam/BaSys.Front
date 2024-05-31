@@ -10,9 +10,9 @@ import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
-import MetaObjectSettings from '@/models/metaObjectSettings';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import { useToast } from 'primevue/usetoast';
+import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
@@ -35,7 +35,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   settingsJson = '';
   provider = new MetaObjectProvider();
-  settings = new MetaObjectSettings({});
+  settings = new MetaObjectStorableSettings({});
   toastHelper = new ToastHelper(useToast());
   formTitle = '';
 
@@ -113,7 +113,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     let result = false;
     this.isWaiting = true;
 
-    this.settings = new MetaObjectSettings(JSON.parse(this.settingsJson));
+    this.settings = new MetaObjectStorableSettings(JSON.parse(this.settingsJson));
     const response = await this.provider.update(this.settings);
     this.isWaiting = false;
 
@@ -136,7 +136,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.isWaiting = false;
 
     if (response.isOK) {
-      this.settings = new MetaObjectSettings(response.data);
+      this.settings = new MetaObjectStorableSettings(response.data);
       this.formTitle = `${response.data.metaObjectKindTitle}.${this.settings.title}`;
       this.settingsJson = JSON.stringify(this.settings, null, 2);
     } else {

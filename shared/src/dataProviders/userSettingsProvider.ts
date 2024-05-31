@@ -1,8 +1,8 @@
 import axios from 'axios';
-import UserSettings from '@/models/userSettings';
-import Language from '@/models/language';
-import ChangePasswordDto from '@/models/changePassword';
-import ResultWrapper from '../../../shared/src/models/resultWrapper';
+import ChangePassword from '../models/changePassword';
+import UserSettings from '../models/userSettings';
+import ResultWrapper from '../models/resultWrapper';
+import Language from '../models/language';
 
 export default class UserSettingsProvider {
   private readonly BASE_URL = 'api/v1/UserSettings';
@@ -47,7 +47,7 @@ export default class UserSettingsProvider {
     return result;
   }
 
-  async changePassword(dto: ChangePasswordDto): Promise<ResultWrapper<boolean>> {
+  async changePassword(dto: ChangePassword): Promise<ResultWrapper<boolean>> {
     let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
 
     try {

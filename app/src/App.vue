@@ -2,9 +2,7 @@
   <Toast/>
   <AppHeaderComponent
     title="BaSys: Application"
-    :locale="currentLocale"
     @burgerClicked="onBurgerClicked"
-    @localeChanged="onLocaleChanged"
   >
     <template #userActions>
       <UserActionsComponent @profileClicked="router.push('/usersettings')"/>
@@ -20,16 +18,12 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
 import { usePrimeVue } from 'primevue/config';
-import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import Menu from 'primevue/menu';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
-import ToastHelper from '../../shared/src/helpers/toastHelper';
-import pvLocaleRu from '../../shared/src/i18n/primevueLocales/ru.json';
-import pvLocaleEn from '../../shared/src/i18n/primevueLocales/en.json';
 import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
+import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
 
 @Options({
   components: {
@@ -42,17 +36,12 @@ import UserActionsComponent from '../../shared/src/components/UserActionsCompone
 export default class App extends Vue {
   isMenuMinimized = false;
   navPanelWidth = 200;
-  currentLocale = 'En';
   primeVue = usePrimeVue();
   router = useRouter();
-  toastHelper = new ToastHelper(useToast());
 
-  menuItems: any = ref([
-    { label: 'Home', icon: 'pi pi-home', route: '/' },
-    { separator: true },
-    { label: 'Users', icon: 'pi pi-user', route: '/users' },
-    { separator: true },
-  ]);
+  mounted(): void {
+    LocaleSwitcher.setLocale(this.primeVue);
+  }
 
   onBurgerClicked(): void {
     this.isMenuMinimized = !this.isMenuMinimized;
@@ -62,17 +51,6 @@ export default class App extends Vue {
     } else {
       this.navPanelWidth = 200;
     }
-  }
-
-  onLocaleChanged(selectedLocale: string): void {
-    if (selectedLocale === 'En') {
-      this.primeVue.config.locale = pvLocaleEn;
-    } else {
-      this.primeVue.config.locale = pvLocaleRu;
-    }
-
-    this.currentLocale = selectedLocale;
-    this.toastHelper.info(`The locale has changed to ${this.currentLocale}`);
   }
 }
 </script>
@@ -89,9 +67,5 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-}
-
-.bs-nav-panel {
-  border-right: 1px solid var(--surface-200);
 }
 </style>

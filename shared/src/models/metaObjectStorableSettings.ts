@@ -1,6 +1,6 @@
-import MetaObjectTable from '@/models/metaObjectTable';
+import MetaObjectTable from './metaObjectTable';
 
-export default class MetaObjectSettings {
+export default class MetaObjectStorableSettings {
   uid:string;
   metaObjectKindUid:string;
   title:string;

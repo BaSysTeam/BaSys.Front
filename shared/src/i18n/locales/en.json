@@ -1,5 +1,7 @@
 {
   "add": "Add",
   "edit": "Edit",
-  "generateUidConfirm": "I understand that changing the Uid in the database will result in the creation of new storages for logs and files. Access to the current storages of logs and files will be lost"
+  "generateUidConfirm": "I understand that changing the Uid in the database will result in the creation of new storages for logs and files. Access to the current storages of logs and files will be lost",
+  "changePassword": "Change password",
+  "noItemsFound": "No items found"
 }

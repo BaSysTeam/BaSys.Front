@@ -1,5 +1,5 @@
 import axios from 'axios';
-import MetaObjectSettings from '@/models/metaObjectSettings';
+import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class MetaObjectProvider {
@@ -18,7 +18,7 @@ export default class MetaObjectProvider {
     return result;
   }
 
-  async update(settings: MetaObjectSettings): Promise<ResultWrapper<number>> {
+  async update(settings: MetaObjectStorableSettings): Promise<ResultWrapper<number>> {
     let result = new ResultWrapper<number>();
 
     try {

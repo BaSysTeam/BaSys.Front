@@ -1,9 +1,9 @@
 <template>
   <div :style="{'display': isMenuMinimized ? 'none' : ''}">
     <div class="grid">
-      <div class="col flex justify-content-center flex-wrap">
-        <div class="card mt-1">
-          <Menubar :model="items">
+      <div class="col">
+        <div class="card w-full p-2">
+          <Menubar :model="items" class="bs-menubar justify-content-center">
             <template #item="{ item, props, hasSubmenu, root }">
                 <a v-ripple class="flex align-items-center" v-bind="props.action">
                     <span :class="item.icon" v-tooltip="item['tooltipMsg']" />
@@ -29,7 +29,6 @@
           selectionMode="single"
           @nodeSelect="onNodeSelect"
           @node-expand="onNodeExpand"
-          @contextmenu="onTreeRightClick"
           loadingMode="icon"
           class="p-0"
         >
@@ -61,7 +60,6 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
 import { Options, Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -77,7 +75,7 @@ import MetadataTreeNodeCreateComponent from '@/components/MetadataTreeNodeCreate
 import MetadataTreeNodesProvider from '@/dataProviders/metadataTreeNodesProvider';
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
 import MetaObject from '@/models/metaObject';
-import MetaObjectKindSettings from '@/models/metaObjectKindSettings';
+import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectCreateComponent from './MetaObjectCreateComponent.vue';
 import MoveToGroupComponent from './MoveToGroupComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -105,13 +103,12 @@ export default class MetadataTreeComponent extends Vue {
   metadataKindsProvider = new MetaObjectKindsProvider();
   toastHelper = new ToastHelper(useToast());
   treeNodes:MetadataTreeNode[] = [];
-  selectedKey = ref(null);
+  selectedKey:any = null;
   selectedNode:MetadataTreeNode = {};
   selectedMetaObjectKindSettings = new MetaObjectKindSettings();
   router = useRouter();
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
-  treeContextMenu:any = null;
   treeNodeCreateDialogRegime = 'create';
 
   items = [
@@ -274,25 +271,18 @@ export default class MetadataTreeComponent extends Vue {
 
   async onNodeExpand(node: MetadataTreeNode): Promise<void> {
     if (!node.children || node.children.length === 0) {
-      await this.getChildren(node);
+      await this.getChildren(node.key);
     }
   }
 
-  onTreeRightClick(event: Event): void {
-    this.treeContextMenu.show(event);
-  }
-
-  async getChildren(arg: MetadataTreeNode): Promise<void> {
-    let node = this.findNode(this.treeNodes, arg.key);
-    if (node === null) {
+  async getChildren(key: string | undefined): Promise<void> {
+    if (key === undefined) {
       return;
     }
 
-    if (!node.isGroup) {
-      const parentNode = this.findParentNode(this.treeNodes, node.key);
-      if (parentNode) {
-        node = parentNode;
-      }
+    const node = this.findNode(this.treeNodes, key);
+    if (node === null) {
+      return;
     }
 
     node.loading = true;
@@ -303,6 +293,9 @@ export default class MetadataTreeComponent extends Vue {
     const response = await this.dataProvider.getChildren(node.key);
     if (response.isOK) {
       node.children = response.data;
+      if (node.children.length > 0) {
+        node.leaf = false;
+      }
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -314,22 +307,23 @@ export default class MetadataTreeComponent extends Vue {
   async onMetaObjectCreateDialogClosed(args: MetaObject): Promise<void> {
     this.isMetaObjectCreateDialogVisible = false;
     const dto = new MetaObjectCreateDto(args);
-    console.log('MetaObjectCreateDto', dto);
+    let key: string | undefined = '';
 
     if (this.isSelectedNodeEmpty) {
       const firstNode = this.treeNodes[0];
-      dto.parentUid = firstNode.key;
+      key = firstNode.key;
     } else if (this.selectedNode.isGroup) {
-      dto.parentUid = this.selectedNode.key;
+      key = this.selectedNode.key;
     } else {
-      dto.parentUid = this.selectedNode.parentKey;
+      key = this.selectedNode.parentKey;
     }
-    console.log('MetaObjectCreateDto', dto);
+
+    dto.parentUid = key;
 
     const response = await this.dataProvider.createMetaObject(dto);
     if (response.isOK) {
       this.selectedNode.leaf = false;
-      await this.getChildren(this.selectedNode);
+      await this.getChildren(key);
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -338,7 +332,13 @@ export default class MetadataTreeComponent extends Vue {
 
   async onTreeNodeCreateDialogClosed(): Promise<void> {
     this.isGroupCreateDialogVisible = false;
-    await this.getChildren(this.selectedNode);
+    let { key } = this.selectedNode;
+    if (!this.selectedNode.isGroup
+      || (this.selectedNode.isGroup && this.treeNodeCreateDialogRegime === 'edit')) {
+      key = this.selectedNode.parentKey;
+    }
+
+    await this.getChildren(key);
   }
 
   async delete(): Promise<void> {
@@ -347,6 +347,7 @@ export default class MetadataTreeComponent extends Vue {
       this.deleteFromTree(this.selectedNode);
       this.selectedNode = {};
       this.toastHelper.success(response.message);
+      await this.router.push({ name: 'home' });
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -354,10 +355,7 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   deleteFromTree(node: MetadataTreeNode): void {
-    console.log('deleteFromTree');
-    console.log('node', node);
-    const parentNode = this.findParentNode(this.treeNodes, node.key);
-    console.log('parentNode', parentNode);
+    const parentNode = this.findNode(this.treeNodes, node.parentKey);
     if (parentNode === null) {
       return;
     }
@@ -434,30 +432,6 @@ export default class MetadataTreeComponent extends Vue {
     });
   }
 
-  findParentNode(nodes: MetadataTreeNode[], key: string | undefined): MetadataTreeNode | null {
-    if (!key) {
-      return null;
-    }
-
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < nodes.length; i++) {
-      const { children } = nodes[i];
-      if (children) {
-        const result = children.find((x) => x.key === key);
-        if (result) {
-          return nodes[i];
-        }
-
-        const parentNode = this.findParentNode(children, key);
-        if (parentNode) {
-          return parentNode;
-        }
-      }
-    }
-
-    return null;
-  }
-
   findNode(nodes: MetadataTreeNode[], key: string | undefined): MetadataTreeNode | null {
     if (!key) {
       return null;
@@ -482,15 +456,24 @@ export default class MetadataTreeComponent extends Vue {
   }
 
   async onNodeMoved(movedNode: MetadataTreeNode): Promise<void> {
-    this.deleteFromTree(this.selectedNode);
-
-    const parentNode = this.findNode(this.treeNodes, movedNode.parentKey);
-    if (parentNode) {
-      await this.getChildren(parentNode);
+    const originalNode = this.findNode(this.treeNodes, this.selectedNode.key);
+    if (originalNode) {
+      this.deleteFromTree(originalNode);
     }
 
+    await this.getChildren(movedNode.parentKey);
+
     this.selectedNode = {};
+    this.selectedKey = null;
     this.isMoveToGroupDialogVisible = false;
   }
 }
 </script>
+
+<style>
+  .bs-menubar {
+    .p-menuitem {
+      margin: 0;
+    }
+  }
+</style>

@@ -57,7 +57,7 @@
     <div class="grid">
       <div class="col-2">
         <Button
-          label="Change password"
+          :label="$t('changePassword')"
           size="small"
           outlined
           @click="onChangePasswordClick()"
@@ -83,14 +83,16 @@ import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
+import { usePrimeVue } from 'primevue/config';
 import Dropdown from 'primevue/dropdown';
-import UserSettingsProvider from '@/dataProviders/userSettingsProvider';
-import Language from '@/models/language';
-import UserSettings from '@/models/userSettings';
-import ChangePasswordDto from '@/models/changePassword';
 import ChangePasswordComponent from '@/components/ChangePasswordComponent.vue';
+import UserSettingsProvider from '../../../shared/src/dataProviders/userSettingsProvider';
+import Language from '../../../shared/src/models/language';
+import UserSettings from '../../../shared/src/models/userSettings';
+import ChangePassword from '../../../shared/src/models/changePassword';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import LocaleSwitcher from '../../../shared/src/i18n/localeSwitcher';
 
 @Options({
   components: {
@@ -107,12 +109,13 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 })
 export default class UserSettingsView extends Vue {
   userSettingsProvider = new UserSettingsProvider();
-  userSettings = new UserSettings();
-  userSettingsCached = new UserSettings();
+  userSettings = new UserSettings(null);
+  userSettingsCached = new UserSettings(null);
   toastHelper = new ToastHelper(useToast());
   isWaiting = false;
   languages: Language[] = [];
   isChangePasswordDialogVisible = false;
+  primeVue = usePrimeVue();
 
   async mounted(): Promise<void> {
     await this.getLanguages();
@@ -156,7 +159,12 @@ export default class UserSettingsView extends Vue {
 
     const response = await this.userSettingsProvider.updateUserSettings(this.userSettings);
     if (response.isOK) {
-      this.toastHelper.success('');
+      this.toastHelper.success(response.message);
+
+      if (this.userSettings.language !== this.userSettingsCached.language) {
+        LocaleSwitcher.setLocale(this.primeVue, this.userSettings.language);
+      }
+
       this.userSettingsCached = { ...this.userSettings };
     } else {
       this.toastHelper.error(response.message);
@@ -168,12 +176,12 @@ export default class UserSettingsView extends Vue {
     this.isChangePasswordDialogVisible = true;
   }
 
-  async changePassword(dto: ChangePasswordDto): Promise<void> {
+  async changePassword(dto: ChangePassword): Promise<void> {
     this.isWaiting = true;
 
     const response = await this.userSettingsProvider.changePassword(dto);
     if (response.isOK) {
-      this.toastHelper.success('');
+      this.toastHelper.success(response.message);
       this.isChangePasswordDialogVisible = false;
     } else {
       this.toastHelper.error(response.message);

@@ -14,6 +14,7 @@ export default class MetaObjectKindSettings {
     version:number;
     iconClass:string;
     standardColumns: MetaObjectKindStandardColumn[];
+    availableRoles: Array<string>;
 
     constructor(params: any = {}) {
       let initialData: any = {};
@@ -36,6 +37,8 @@ export default class MetaObjectKindSettings {
         ? initialData.standardColumns.map(
           (item: any) => new MetaObjectKindStandardColumn(item),
         ) : [];
+
+      this.availableRoles = initialData.availableRoles || [];
     }
 
     isNew():boolean {
