@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import FileStorageTest from '@/views/FileStorageTest.vue';
+import DataObjectsEditView from '@/views/DataObjectsEditView.vue';
 import HomeView from '../views/HomeView.vue';
 import UserSettingsView from '../views/UserSettingsView.vue';
 import DataObjectsView from '../views/DataObjectsView.vue';
@@ -33,6 +34,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'data-objects',
     props: true,
     component: DataObjectsView,
+  },
+  {
+    path: '/data-objects/edit/:kind/:name/:uid',
+    name: 'data-objects-edit',
+    props: true,
+    component: DataObjectsEditView,
   },
 ];
 
