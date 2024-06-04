@@ -6,13 +6,13 @@ import {
 @Component
 class DataObjectEditView extends Vue {
   @Prop({ required: true, type: String })
-  kind?: string;
+  kind!: string;
 
   @Prop({ required: true, type: String })
-  name?: string;
+  name!: string;
 
   @Prop({ required: true, type: String })
-  uid?: string;
+  uid!: string;
 }
 export default toNative(DataObjectEditView);
 </script>

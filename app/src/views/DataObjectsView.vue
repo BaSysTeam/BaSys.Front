@@ -12,12 +12,16 @@
       <div class="col">
         <div class="card m-1">
           <DataTable
+            v-model:selection="selectedRecord"
             v-model:filters="filters"
             :style="dataTableStyle"
             :value="dataTableItems"
+            :metaKeySelection="true"
             :rows="15"
             paginator
             showGridlines
+            @row-dblclick="onRowDblClick"
+            selectionMode="single"
             scrollable
             scrollHeight="flex"
             filterDisplay="menu"
@@ -57,6 +61,7 @@
 <script lang="ts">
 import { Options, mixins } from 'vue-class-component';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
+import { useRouter } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
@@ -88,6 +93,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 export default class DataObjectsView extends mixins(ResizeWindow) {
   kind!: string;
   name!: string;
+  router = useRouter();
   isWaiting = false;
   title = 'App:';
   toastHelper = new ToastHelper(useToast());
@@ -96,11 +102,29 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
   dataTableItems:any[] = [];
   columns:any[] = [];
   filters:any = {};
+  selectedRecord:any = {};
 
   get dataTableStyle(): object {
     return {
       height: `${this.windowHeight - 150}px`,
     };
+  }
+
+  onRowDblClick():void {
+    console.log('Row dbl click', this.selectedRecord);
+    console.log('list view model', this.dataObjectList);
+    const kindName = this.dataObjectList.metaObjectKindSettings.name;
+    const objectName = this.dataObjectList.metaObjectSettings.name;
+
+    const filterResult = this.dataObjectList.metaObjectKindSettings.standardColumns
+      .filter((x) => x.isPrimaryKey);
+
+    if (!filterResult.length) return;
+
+    const primaryKey = filterResult[0];
+    const uid = this.selectedRecord[primaryKey.name];
+
+    this.router.push({ name: 'data-objects-edit', params: { kind: kindName, name: objectName, uid } });
   }
 
   mounted(): void {
