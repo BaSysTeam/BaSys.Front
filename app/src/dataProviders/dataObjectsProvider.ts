@@ -1,6 +1,7 @@
 import axios from 'axios';
 import DataObject from '@/models/dataObject';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import DataObjectSaveDto from '@/models/dataObjectSaveDto';
 import DataObjectList from '../models/dataObjectList';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
@@ -26,6 +27,21 @@ export default class DataObjectsProvider {
 
     try {
       const { data } = await axios.get(`${this.BASE_URL}/${kind}/${name}/${uid}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async updateItem(metaObjectKindUid: string, metaObjectUid: string, item: DataObject)
+    : Promise<ResultWrapper<number>> {
+    let result: ResultWrapper<number> = new ResultWrapper<number>();
+
+    try {
+      const payload = new DataObjectSaveDto(metaObjectKindUid, metaObjectUid, item);
+      const { data } = await axios.put(this.BASE_URL, payload);
       result = data;
     } catch (error) {
       console.error('error', error);

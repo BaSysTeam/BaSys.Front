@@ -51,6 +51,25 @@ class DataObjectEditView extends Vue {
 
   onBackClick(): void {
     console.log('Back click');
+    this.returnToList();
+  }
+
+  async onSaveCloseClick(): Promise<void> {
+    console.log('Save&close click');
+    const saved = await this.save();
+    if (saved) this.returnToList();
+  }
+
+  onSaveClick(): void {
+    console.log('Save click');
+    this.save();
+  }
+
+  onHeaderFieldChange(): void {
+    this.isModified = true;
+  }
+
+  returnToList(): void {
     this.router.push({
       name: 'data-objects',
       params: {
@@ -60,16 +79,26 @@ class DataObjectEditView extends Vue {
     });
   }
 
-  onSaveCloseClick(): void {
-    console.log('Save&close click');
-  }
+  async save(): Promise<boolean> {
+    this.isWaiting = true;
 
-  onSaveClick(): void {
-    console.log('Save click');
-  }
+    const response = await this.dataObjectsProvider.updateItem(
+      this.model.metaObjectKindSettings.uid,
+      this.model.metaObjectSettings.uid,
+      this.model.item,
+    );
 
-  onHeaderFieldChange(): void {
-    this.isModified = true;
+    this.isWaiting = false;
+
+    if (response.isOK) {
+      this.isModified = false;
+      this.toastHelper.success(response.message);
+      return true;
+    }
+
+    this.toastHelper.error(response.message);
+    console.error(response.presentation);
+    return false;
   }
 
   async init(): Promise<void> {
@@ -149,6 +178,7 @@ export default toNative(DataObjectEditView);
               :disabled="column.primaryKey"
               :id="column.uid"
               v-model="model.item.header[column.name]"
+              autocomplete="off"
               size="small"
               class="w-full"
               @change="onHeaderFieldChange"
