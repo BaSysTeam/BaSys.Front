@@ -6,6 +6,45 @@
       </div>
     </div>
     <div class="grid">
+      <div class="col">
+        <ButtonGroup>
+          <Button
+            label="Add"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-plus"
+            @click="onAddClick"
+          />
+          <Button
+            label="Edit"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-pencil"
+            @click="onEditClick"
+          />
+          <Button
+            label="Delete"
+            severity="danger"
+            size="small"
+            outlined
+            icon="pi pi-times"
+            @click="onDeleteClick"
+          />
+        </ButtonGroup>
+        <Button
+          class="ml-1"
+          v-tooltip="'Copy'"
+          severity="primary"
+          size="small"
+          outlined
+          icon="pi pi-clone"
+          @click="onCopyClick"
+        />
+      </div>
+    </div>
+    <div class="grid">
       <Divider class="m-2"/>
     </div>
     <div class="grid">
@@ -65,6 +104,8 @@ import { useRouter } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
+import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
@@ -83,6 +124,8 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Divider,
     InputNumber,
     InputText,
+    Button,
+    ButtonGroup,
     TriStateCheckbox,
   },
   props: {
@@ -95,7 +138,7 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
   name!: string;
   router = useRouter();
   isWaiting = false;
-  title = 'App:';
+  title = '';
   toastHelper = new ToastHelper(useToast());
   dataObjectsProvider = new DataObjectsProvider();
   dataObjectList = new DataObjectList(null);
@@ -108,6 +151,22 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     return {
       height: `${this.windowHeight - 150}px`,
     };
+  }
+
+  onAddClick(): void {
+    console.log('Add clicked');
+  }
+
+  onEditClick(): void {
+    console.log('Edit click');
+  }
+
+  onDeleteClick(): void {
+    console.log('Delete click');
+  }
+
+  onCopyClick(): void {
+    console.log('Copy click');
   }
 
   onRowDblClick():void {
@@ -138,7 +197,7 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     if (response.isOK) {
       this.dataObjectList = response.data;
       this.dataTableItems = this.dataObjectList.items.map((x) => x.header);
-      this.title += `${this.dataObjectList.metaObjectKindSettings.title}.${this.dataObjectList.metaObjectSettings.title}`;
+      this.title = `${this.dataObjectList.metaObjectKindSettings.title}.${this.dataObjectList.metaObjectSettings.title}`;
       this.initColumns();
       this.initFilters();
     } else {

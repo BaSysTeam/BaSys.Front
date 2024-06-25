@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import PrimeVue from 'primevue/config';
+import Tooltip from 'primevue/tooltip';
 import ToastService from 'primevue/toastservice';
 import { useI18n } from 'vue-i18n';
 import Ripple from 'primevue/ripple';
@@ -21,4 +22,5 @@ app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 app.use(I18nManager.vueI18n);
 app.directive('ripple', Ripple);
+app.directive('tooltip', Tooltip);
 app.mount('#app');
