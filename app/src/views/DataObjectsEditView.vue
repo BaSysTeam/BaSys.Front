@@ -8,6 +8,7 @@ import { useToast } from 'primevue/usetoast';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
+import InputText from 'primevue/inputtext';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -18,19 +19,30 @@ import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponen
     Divider,
     Button,
     ButtonGroup,
+    InputText,
   },
 })
 class DataObjectEditView extends Vue {
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   kind!: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   name!: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   uid!: string;
 
   isWaiting = false;
+  isModified = false;
   title = '';
   dataObjectsProvider = new DataObjectsProvider();
   model = new DataObjectWithMetadata(null);
@@ -39,7 +51,13 @@ class DataObjectEditView extends Vue {
 
   onBackClick(): void {
     console.log('Back click');
-    this.router.push({ name: 'data-objects', params: { kind: this.kind, name: this.name } });
+    this.router.push({
+      name: 'data-objects',
+      params: {
+        kind: this.kind,
+        name: this.name,
+      },
+    });
   }
 
   onSaveCloseClick(): void {
@@ -48,6 +66,10 @@ class DataObjectEditView extends Vue {
 
   onSaveClick(): void {
     console.log('Save click');
+  }
+
+  onHeaderFieldChange(): void {
+    this.isModified = true;
   }
 
   async init(): Promise<void> {
@@ -67,56 +89,76 @@ class DataObjectEditView extends Vue {
     this.isWaiting = false;
   }
 
-  mounted():void {
+  mounted(): void {
     console.log('mounted');
     this.init();
   }
 }
+
 export default toNative(DataObjectEditView);
 </script>
 
 <template>
-<div>
-  <div class="grid">
-    <div class="col">
-      <ViewTitleComponent :title="title" :is-modified="false" :is-waiting="isWaiting"/>
+  <div>
+    <div class="grid">
+      <div class="col">
+        <ViewTitleComponent :title="title" :is-modified="isModified" :is-waiting="isWaiting"/>
+      </div>
     </div>
-  </div>
-  <div class="grid">
-    <div class="col">
-      <ButtonGroup>
-        <Button
-          label="Back"
-          severity="primary"
-          size="small"
-          outlined
-          icon="pi pi-arrow-left"
-          @click="onBackClick"
-        />
-        <Button
-          label="Save & Close"
-          severity="primary"
-          size="small"
-          outlined
-          icon="pi pi-save"
-          @click="onSaveCloseClick"
-        />
-        <Button
-          label="Save"
-          severity="primary"
-          size="small"
-          outlined
-          icon="pi pi-save"
-          @click="onSaveClick"
-        />
-      </ButtonGroup>
+    <div class="grid">
+      <div class="col">
+        <ButtonGroup>
+          <Button
+            label="Back"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-arrow-left"
+            @click="onBackClick"
+          />
+          <Button
+            label="Save & Close"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-save"
+            @click="onSaveCloseClick"
+          />
+          <Button
+            label="Save"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-save"
+            @click="onSaveClick"
+          />
+        </ButtonGroup>
 
+      </div>
+    </div>
+    <div class="grid">
+      <Divider class="m-2"/>
+    </div>
+    <div class="grid">
+      <div class="col-6">
+        <div class="field grid" v-for="column in model.metaObjectSettings.header.columns"
+             :key="column.uid">
+          <label :for="column.uid" class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
+          <div class="col-12 md:col-8">
+            <InputText
+              :disabled="column.primaryKey"
+              :id="column.uid"
+              v-model="model.item.header[column.name]"
+              size="small"
+              class="w-full"
+              @change="onHeaderFieldChange"
+            />
+
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="grid">
-    <Divider class="m-2"/>
-  </div>
-</div>
 </template>
 
 <style scoped>
