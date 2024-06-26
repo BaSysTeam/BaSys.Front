@@ -159,6 +159,7 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
 
   onAddClick(): void {
     console.log('Add clicked');
+    this.navigateToAdd();
   }
 
   onEditClick(): void {
@@ -200,6 +201,13 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     const uid = this.selectedRecord[primaryKey.name];
 
     this.router.push({ name: 'data-objects-edit', params: { kind: kindName, name: objectName, uid } });
+  }
+
+  navigateToAdd(): void {
+    const kindName = this.dataObjectList.metaObjectKindSettings.name;
+    const objectName = this.dataObjectList.metaObjectSettings.name;
+
+    this.router.push({ name: 'data-objects-edit', params: { kind: kindName, name: objectName, uid: '0' } });
   }
 
   async init(): Promise<void> {

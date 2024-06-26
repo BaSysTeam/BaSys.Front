@@ -35,6 +35,21 @@ export default class DataObjectsProvider {
     return result;
   }
 
+  async createItem(metaObjectKindUid: string, metaObjectUid: string, item: DataObject)
+    : Promise<ResultWrapper<number>> {
+    let result: ResultWrapper<number> = new ResultWrapper<number>();
+
+    try {
+      const payload = new DataObjectSaveDto(metaObjectKindUid, metaObjectUid, item);
+      const { data } = await axios.post(this.BASE_URL, payload);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
   async updateItem(metaObjectKindUid: string, metaObjectUid: string, item: DataObject)
     : Promise<ResultWrapper<number>> {
     let result: ResultWrapper<number> = new ResultWrapper<number>();

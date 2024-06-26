@@ -22,6 +22,15 @@ export default class MetaObjectTable {
       ? data.columns.map((item: any) => new MetaObjectTableColumn(item)) : [];
   }
 
+  getPrimaryKey(): MetaObjectTableColumn | null {
+    const filterResult = this.columns.filter((x) => x.primaryKey);
+    if (filterResult.length) {
+      return filterResult[0];
+    }
+
+    return null;
+  }
+
   newColumn(): MetaObjectTableColumn {
     const column = new MetaObjectTableColumn({});
     this.columns.push(column);

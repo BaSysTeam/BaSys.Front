@@ -82,6 +82,27 @@ class DataObjectEditView extends Vue {
   async save(): Promise<boolean> {
     this.isWaiting = true;
 
+    if (this.model.isNew()) {
+      // Insert new item.
+      const response = await this.dataObjectsProvider.createItem(
+        this.model.metaObjectKindSettings.uid,
+        this.model.metaObjectSettings.uid,
+        this.model.item,
+      );
+
+      this.isWaiting = false;
+
+      if (response.isOK) {
+        this.isModified = false;
+        this.toastHelper.success(response.message);
+        return true;
+      }
+
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+      return false;
+    }
+    // Update existing item.
     const response = await this.dataObjectsProvider.updateItem(
       this.model.metaObjectKindSettings.uid,
       this.model.metaObjectSettings.uid,
@@ -107,7 +128,7 @@ class DataObjectEditView extends Vue {
     const response = await this.dataObjectsProvider.getItem(this.kind, this.name, this.uid);
 
     if (response.isOK) {
-      this.model = response.data;
+      this.model = new DataObjectWithMetadata(response.data);
       this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
       console.log('init', this.model);
     } else {
