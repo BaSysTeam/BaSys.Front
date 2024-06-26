@@ -153,12 +153,20 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     };
   }
 
+  get isSelectedRecordEmpty(): boolean {
+    return Object.keys(this.selectedRecord).length === 0;
+  }
+
   onAddClick(): void {
     console.log('Add clicked');
   }
 
   onEditClick(): void {
     console.log('Edit click');
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
+    this.navigateToEdit();
   }
 
   onDeleteClick(): void {
@@ -172,6 +180,14 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
   onRowDblClick():void {
     console.log('Row dbl click', this.selectedRecord);
     console.log('list view model', this.dataObjectList);
+    this.navigateToEdit();
+  }
+
+  mounted(): void {
+    this.init();
+  }
+
+  navigateToEdit(): void {
     const kindName = this.dataObjectList.metaObjectKindSettings.name;
     const objectName = this.dataObjectList.metaObjectSettings.name;
 
@@ -186,10 +202,6 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     this.router.push({ name: 'data-objects-edit', params: { kind: kindName, name: objectName, uid } });
   }
 
-  mounted(): void {
-    this.init();
-  }
-
   async init(): Promise<void> {
     this.isWaiting = true;
 
@@ -197,6 +209,10 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     if (response.isOK) {
       this.dataObjectList = response.data;
       this.dataTableItems = this.dataObjectList.items.map((x) => x.header);
+      if (this.dataTableItems.length) {
+        // eslint-disable-next-line prefer-destructuring
+        this.selectedRecord = this.dataTableItems[0];
+      }
       this.title = `${this.dataObjectList.metaObjectKindSettings.title}.${this.dataObjectList.metaObjectSettings.title}`;
       this.initColumns();
       this.initFilters();
