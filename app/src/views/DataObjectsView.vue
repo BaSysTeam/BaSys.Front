@@ -94,6 +94,7 @@
         </div>
       </div>
     </div>
+    <ConfirmDialog :draggable="false"></ConfirmDialog>
   </div>
 </template>
 
@@ -101,6 +102,7 @@
 import { Options, mixins } from 'vue-class-component';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useRouter } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
@@ -109,6 +111,7 @@ import ButtonGroup from 'primevue/buttongroup';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
+import ConfirmDialog from 'primevue/confirmdialog';
 import { useToast } from 'primevue/usetoast';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
@@ -128,6 +131,7 @@ import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectK
     Button,
     ButtonGroup,
     TriStateCheckbox,
+    ConfirmDialog,
   },
   props: {
     kind: String,
@@ -147,6 +151,7 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
   columns:any[] = [];
   filters:any = {};
   selectedRecord:any = {};
+  confirm = useConfirm();
 
   get dataTableStyle(): object {
     return {
@@ -177,11 +182,16 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
       return;
     }
 
-    // eslint-disable-next-line no-restricted-globals
-    const answer = confirm('Delete item?');
-    if (answer) {
-      this.deleteItem();
-    }
+    this.confirm.require({
+      message: 'Delete item?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      accept: () => this.deleteItem(),
+    });
   }
 
   onCopyClick(): void {
