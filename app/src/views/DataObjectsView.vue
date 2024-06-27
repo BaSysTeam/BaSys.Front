@@ -9,7 +9,7 @@
       <div class="col">
         <ButtonGroup>
           <Button
-            label="Add"
+            :label="$t('add')"
             severity="primary"
             size="small"
             outlined
@@ -17,7 +17,7 @@
             @click="onAddClick"
           />
           <Button
-            label="Edit"
+            :label="$t('edit')"
             severity="primary"
             size="small"
             outlined
@@ -25,7 +25,7 @@
             @click="onEditClick"
           />
           <Button
-            label="Delete"
+            :label="$t('delete')"
             severity="danger"
             size="small"
             outlined
@@ -35,7 +35,7 @@
         </ButtonGroup>
         <Button
           class="ml-1"
-          v-tooltip="'Copy'"
+          v-tooltip="$t('copy')"
           severity="primary"
           size="small"
           outlined

@@ -171,7 +171,7 @@ export default toNative(DataObjectEditView);
       <div class="col">
         <ButtonGroup>
           <Button
-            label="Back"
+            :label="$t('back')"
             severity="primary"
             size="small"
             outlined
@@ -179,7 +179,7 @@ export default toNative(DataObjectEditView);
             @click="onBackClick"
           />
           <Button
-            label="Save & Close"
+            :label="$t('saveAndClose')"
             severity="primary"
             size="small"
             outlined
@@ -187,7 +187,7 @@ export default toNative(DataObjectEditView);
             @click="onSaveCloseClick"
           />
           <Button
-            label="Save"
+            :label="$t('save')"
             severity="primary"
             size="small"
             outlined
