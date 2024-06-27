@@ -115,6 +115,7 @@ import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectKindStandardColumn';
 
 @Options({
   components: {
@@ -172,6 +173,15 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
 
   onDeleteClick(): void {
     console.log('Delete click');
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
+
+    // eslint-disable-next-line no-restricted-globals
+    const answer = confirm('Delete item?');
+    if (answer) {
+      this.deleteItem();
+    }
   }
 
   onCopyClick(): void {
@@ -186,6 +196,22 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
 
   mounted(): void {
     this.init();
+  }
+
+  getPrimaryKey(): MetaObjectKindStandardColumn | null {
+    const filterResult = this.dataObjectList.metaObjectKindSettings.standardColumns
+      .filter((x) => x.isPrimaryKey);
+
+    if (!filterResult.length) return null;
+
+    return filterResult[0];
+  }
+
+  getCurrentUid(): string {
+    const primaryKey = this.getPrimaryKey();
+    if (!primaryKey) return '';
+
+    return this.selectedRecord[primaryKey.name];
   }
 
   navigateToEdit(): void {
@@ -208,6 +234,34 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     const objectName = this.dataObjectList.metaObjectSettings.name;
 
     this.router.push({ name: 'data-objects-edit', params: { kind: kindName, name: objectName, uid: '0' } });
+  }
+
+  async deleteItem(): Promise<void> {
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
+    const primaryKey = this.getPrimaryKey();
+    if (!primaryKey) {
+      return;
+    }
+
+    // Make delete request.
+    this.isWaiting = true;
+    const uid = this.selectedRecord[primaryKey.name];
+    const response = await this.dataObjectsProvider.deleteItem(this.kind, this.name, uid);
+    this.isWaiting = false;
+
+    if (response.isOK) {
+      // Delete item from list to avoid one more backed call.
+      const index = this.dataTableItems.findIndex((item) => item[primaryKey.name] === uid);
+      if (index !== -1) {
+        this.dataTableItems.splice(index, 1);
+      }
+      this.toastHelper.success(response.message);
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
   }
 
   async init(): Promise<void> {
