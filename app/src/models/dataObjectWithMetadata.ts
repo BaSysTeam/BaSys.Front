@@ -37,4 +37,13 @@ export default class DataObjectWithMetadata {
 
     return false;
   }
+
+  setPrimaryKey(key: string): void {
+    const primaryKey = this.metaObjectSettings.header.getPrimaryKey();
+    if (primaryKey == null) {
+      return;
+    }
+
+    this.item.header[primaryKey.name] = key;
+  }
 }

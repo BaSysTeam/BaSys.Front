@@ -84,6 +84,7 @@ class DataObjectEditView extends Vue {
 
     if (this.model.isNew()) {
       // Insert new item.
+      console.log('Insert');
       const response = await this.dataObjectsProvider.createItem(
         this.model.metaObjectKindSettings.uid,
         this.model.metaObjectSettings.uid,
@@ -94,6 +95,7 @@ class DataObjectEditView extends Vue {
 
       if (response.isOK) {
         this.isModified = false;
+        this.model.setPrimaryKey(response.data);
         this.toastHelper.success(response.message);
         return true;
       }
@@ -103,6 +105,7 @@ class DataObjectEditView extends Vue {
       return false;
     }
     // Update existing item.
+    console.log('Update');
     const response = await this.dataObjectsProvider.updateItem(
       this.model.metaObjectKindSettings.uid,
       this.model.metaObjectSettings.uid,
