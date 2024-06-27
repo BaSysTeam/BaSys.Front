@@ -38,6 +38,19 @@ export default class DataObjectWithMetadata {
     return false;
   }
 
+  isPrimaryKeyEditable(): boolean {
+    const primaryKey = this.metaObjectSettings.header.getPrimaryKey();
+    if (primaryKey == null) {
+      return false;
+    }
+
+    if (primaryKey.dataTypeUid === '0234c067-7868-46b2-ba8e-e22fae5255cb') {
+      return true;
+    }
+
+    return false;
+  }
+
   setPrimaryKey(key: string): void {
     const primaryKey = this.metaObjectSettings.header.getPrimaryKey();
     if (primaryKey == null) {

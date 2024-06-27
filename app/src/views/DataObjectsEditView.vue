@@ -43,11 +43,17 @@ class DataObjectEditView extends Vue {
 
   isWaiting = false;
   isModified = false;
+  isNew = false;
+  isPrimaryKeyEditable = false;
   title = '';
   dataObjectsProvider = new DataObjectsProvider();
   model = new DataObjectWithMetadata(null);
   toastHelper = new ToastHelper(useToast());
   router = useRouter();
+
+  get isPrimaryKeyEnabled(): boolean {
+    return this.isNew && this.isPrimaryKeyEditable;
+  }
 
   onBackClick(): void {
     console.log('Back click');
@@ -82,7 +88,7 @@ class DataObjectEditView extends Vue {
   async save(): Promise<boolean> {
     this.isWaiting = true;
 
-    if (this.model.isNew()) {
+    if (this.isNew) {
       // Insert new item.
       console.log('Insert');
       const response = await this.dataObjectsProvider.createItem(
@@ -95,6 +101,7 @@ class DataObjectEditView extends Vue {
 
       if (response.isOK) {
         this.isModified = false;
+        this.isNew = false;
         this.model.setPrimaryKey(response.data);
         this.toastHelper.success(response.message);
         return true;
@@ -132,6 +139,8 @@ class DataObjectEditView extends Vue {
 
     if (response.isOK) {
       this.model = new DataObjectWithMetadata(response.data);
+      this.isNew = this.model.isNew();
+      this.isPrimaryKeyEditable = this.model.isPrimaryKeyEditable();
       this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
       console.log('init', this.model);
     } else {
@@ -199,7 +208,7 @@ export default toNative(DataObjectEditView);
           <label :for="column.uid" class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
           <div class="col-12 md:col-8">
             <InputText
-              :disabled="column.primaryKey"
+              :disabled="column.primaryKey && !isPrimaryKeyEnabled"
               :id="column.uid"
               v-model="model.item.header[column.name]"
               autocomplete="off"
