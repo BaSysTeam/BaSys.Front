@@ -51,7 +51,6 @@ class DataObjectEditView extends Vue {
 
   isWaiting = false;
   isModified = false;
-  isNew = false;
   isPrimaryKeyEditable = false;
   title = '';
   dataObjectsProvider = new DataObjectsProvider();
@@ -60,7 +59,15 @@ class DataObjectEditView extends Vue {
   router = useRouter();
 
   get isPrimaryKeyEnabled(): boolean {
-    return this.isNew && this.isPrimaryKeyEditable;
+    return this.model.isNew && this.isPrimaryKeyEditable;
+  }
+
+  get isAdd(): boolean {
+    return this.$route.name === 'data-objects-add';
+  }
+
+  get isCopy(): boolean {
+    return this.$route.name === 'data-objects-copy';
   }
 
   onBackClick(): void {
@@ -96,7 +103,7 @@ class DataObjectEditView extends Vue {
   async save(): Promise<boolean> {
     this.isWaiting = true;
 
-    if (this.isNew) {
+    if (this.model.isNew) {
       // Insert new item.
       console.log('Insert');
       const response = await this.dataObjectsProvider.createItem(
@@ -109,7 +116,6 @@ class DataObjectEditView extends Vue {
 
       if (response.isOK) {
         this.isModified = false;
-        this.isNew = false;
         this.model.setPrimaryKey(response.data);
         this.toastHelper.success(response.message);
         return true;
@@ -143,42 +149,46 @@ class DataObjectEditView extends Vue {
   async init(): Promise<void> {
     this.isWaiting = true;
 
-    if (this.$route.name === 'data-objects-copy') {
-      const response = await this.dataObjectsProvider.getItem(this.kind, this.name, this.copyuid);
-
-      if (response.isOK) {
-        this.model = new DataObjectWithMetadata(response.data);
-        this.model.setPrimaryKey('');
-        this.model.addCopyMessage('title');
-        this.isNew = this.model.isNew();
-        this.isPrimaryKeyEditable = this.model.isPrimaryKeyEditable();
-        this.isModified = true;
-        this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
-        console.log('init-copy', this.model);
-      } else {
-        this.toastHelper.error(response.message);
-        console.error(response.presentation);
-      }
-    } else {
-      const response = await this.dataObjectsProvider.getItem(this.kind, this.name, this.uid);
-
-      if (response.isOK) {
-        this.model = new DataObjectWithMetadata(response.data);
-        this.isNew = this.model.isNew();
-        this.isPrimaryKeyEditable = this.model.isPrimaryKeyEditable();
-        this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
-        console.log('init', this.model);
-      } else {
-        this.toastHelper.error(response.message);
-        console.error(response.presentation);
-      }
-    }
-
-    if (this.$route.name === 'data-objects-add') {
-      this.isModified = true;
+    try {
+      await this.loadDataObject();
+    } catch (error) {
+      console.error('Error loading data object:', error);
+      this.toastHelper.error('An error occurred while loading the data object.');
     }
 
     this.isWaiting = false;
+  }
+
+  private async loadDataObject(): Promise<void> {
+    const uid = this.isCopy ? this.copyuid : this.uid;
+    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, uid);
+
+    if (response.isOK) {
+      this.setupModel(response.data);
+      console.log('init', this.model);
+    } else {
+      this.handleError(response);
+    }
+  }
+
+  private setupModel(data: any): void {
+    this.model = new DataObjectWithMetadata(data);
+    if (this.isCopy) {
+      this.model.setPrimaryKey('');
+      this.model.isNew = true;
+      this.model.addCopyMessage('title');
+    }
+    this.isPrimaryKeyEditable = this.model.isPrimaryKeyEditable();
+    this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
+
+    if (this.isAdd || this.isCopy) {
+      this.isModified = true;
+    }
+  }
+
+  private handleError(response: any): void {
+    this.toastHelper.error(response.message);
+    console.error(response.presentation);
   }
 
   mounted(): void {

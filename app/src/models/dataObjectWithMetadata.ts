@@ -7,6 +7,7 @@ export default class DataObjectWithMetadata {
   item: DataObject;
   metaObjectKindSettings: MetaObjectKindSettings;
   metaObjectSettings: MetaObjectStorableSettings;
+  isNew = false;
 
   constructor(param: any) {
     let data: any = {};
@@ -17,9 +18,10 @@ export default class DataObjectWithMetadata {
     this.metaObjectKindSettings = new MetaObjectKindSettings(data.metaObjectKindSettings);
     this.metaObjectSettings = new MetaObjectStorableSettings(data.metaObjectSettings);
     this.item = new DataObject(data.item);
+    this.isNew = this.checkIsNew();
   }
 
-  isNew(): boolean {
+  checkIsNew(): boolean {
     const primaryKey = this.metaObjectSettings.header.getPrimaryKey();
     if (primaryKey == null) {
       return true;
@@ -58,6 +60,7 @@ export default class DataObjectWithMetadata {
     }
 
     this.item.header[primaryKey.name] = key;
+    this.isNew = this.checkIsNew();
   }
 
   addCopyMessage(fieldName: string): void {
