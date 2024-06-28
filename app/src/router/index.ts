@@ -42,7 +42,7 @@ const routes: Array<RouteRecordRaw> = [
     component: DataObjectsEditView,
   },
   {
-    path: '/data-objects/copy/:kind/:name/:copyuid',
+    path: '/data-objects/copy/:kind/:name/:copyUid',
     name: 'data-objects-copy',
     props: true,
     component: DataObjectsEditView,

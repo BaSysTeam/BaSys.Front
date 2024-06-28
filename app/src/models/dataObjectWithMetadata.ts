@@ -8,6 +8,7 @@ export default class DataObjectWithMetadata {
   metaObjectKindSettings: MetaObjectKindSettings;
   metaObjectSettings: MetaObjectStorableSettings;
   isNew = false;
+  isPrimaryKeyEditable = false;
 
   constructor(param: any) {
     let data: any = {};
@@ -19,6 +20,7 @@ export default class DataObjectWithMetadata {
     this.metaObjectSettings = new MetaObjectStorableSettings(data.metaObjectSettings);
     this.item = new DataObject(data.item);
     this.isNew = this.checkIsNew();
+    this.isPrimaryKeyEditable = this.checkIsPrimaryKeyEditable();
   }
 
   checkIsNew(): boolean {
@@ -40,7 +42,7 @@ export default class DataObjectWithMetadata {
     return false;
   }
 
-  isPrimaryKeyEditable(): boolean {
+  checkIsPrimaryKeyEditable(): boolean {
     const primaryKey = this.metaObjectSettings.header.getPrimaryKey();
     if (primaryKey == null) {
       return false;

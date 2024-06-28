@@ -47,11 +47,10 @@ class DataObjectEditView extends Vue {
     type: String,
     default: '',
   })
-  copyuid!: string;
+  copyUid!: string;
 
   isWaiting = false;
   isModified = false;
-  isPrimaryKeyEditable = false;
   title = '';
   dataObjectsProvider = new DataObjectsProvider();
   model = new DataObjectWithMetadata(null);
@@ -59,7 +58,7 @@ class DataObjectEditView extends Vue {
   router = useRouter();
 
   get isPrimaryKeyEnabled(): boolean {
-    return this.model.isNew && this.isPrimaryKeyEditable;
+    return this.model.isNew && this.model.isPrimaryKeyEditable;
   }
 
   get isAdd(): boolean {
@@ -71,18 +70,15 @@ class DataObjectEditView extends Vue {
   }
 
   onBackClick(): void {
-    console.log('Back click');
     this.returnToList();
   }
 
   async onSaveCloseClick(): Promise<void> {
-    console.log('Save&close click');
     const saved = await this.save();
     if (saved) this.returnToList();
   }
 
   onSaveClick(): void {
-    console.log('Save click');
     this.save();
   }
 
@@ -105,7 +101,6 @@ class DataObjectEditView extends Vue {
 
     if (this.model.isNew) {
       // Insert new item.
-      console.log('Insert');
       const response = await this.dataObjectsProvider.createItem(
         this.model.metaObjectKindSettings.uid,
         this.model.metaObjectSettings.uid,
@@ -121,12 +116,10 @@ class DataObjectEditView extends Vue {
         return true;
       }
 
-      this.toastHelper.error(response.message);
-      console.error(response.presentation);
+      this.handleError(response);
       return false;
     }
     // Update existing item.
-    console.log('Update');
     const response = await this.dataObjectsProvider.updateItem(
       this.model.metaObjectKindSettings.uid,
       this.model.metaObjectSettings.uid,
@@ -141,8 +134,7 @@ class DataObjectEditView extends Vue {
       return true;
     }
 
-    this.toastHelper.error(response.message);
-    console.error(response.presentation);
+    this.handleError(response);
     return false;
   }
 
@@ -160,7 +152,7 @@ class DataObjectEditView extends Vue {
   }
 
   private async loadDataObject(): Promise<void> {
-    const uid = this.isCopy ? this.copyuid : this.uid;
+    const uid = this.isCopy ? this.copyUid : this.uid;
     const response = await this.dataObjectsProvider.getItem(this.kind, this.name, uid);
 
     if (response.isOK) {
@@ -178,7 +170,6 @@ class DataObjectEditView extends Vue {
       this.model.isNew = true;
       this.model.addCopyMessage('title');
     }
-    this.isPrimaryKeyEditable = this.model.isPrimaryKeyEditable();
     this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
 
     if (this.isAdd || this.isCopy) {
@@ -192,7 +183,6 @@ class DataObjectEditView extends Vue {
   }
 
   mounted(): void {
-    console.log('mounted');
     this.init();
   }
 }

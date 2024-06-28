@@ -253,7 +253,7 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     }
     const uid = this.selectedRecord[primaryKey.name];
 
-    this.router.push({ name: 'data-objects-copy', params: { kind: kindName, name: objectName, copyuid: uid } });
+    this.router.push({ name: 'data-objects-copy', params: { kind: kindName, name: objectName, copyUid: uid } });
   }
 
   navigateToAdd(): void {
