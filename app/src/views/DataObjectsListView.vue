@@ -338,14 +338,15 @@ class DataObjectsListView extends Vue {
   }
 
   initColumns(): void {
-    if (this.dataTableItems.length > 0) {
-      const first = this.dataTableItems[0];
-      const keys = Object.keys(first);
-      this.columns = keys.map((key) => (
-        {
-          field: key.toString(), header: this.capitalizeFirstLetter(key.toString()),
-        }));
-    }
+    this.columns = [];
+    // eslint-disable-next-line no-restricted-syntax
+    this.dataObjectList.metaObjectSettings.header.columns.forEach((column) => {
+      const newColumn = {
+        field: column.name,
+        header: column.title,
+      };
+      this.columns.push(newColumn);
+    });
   }
 
   initFilters(): void {
