@@ -235,7 +235,9 @@ export default toNative(DataObjectEditView);
       <div class="col-6">
         <div class="field grid" v-for="column in model.metaObjectSettings.header.columns"
              :key="column.uid">
-          <label :for="column.uid" class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
+          <label :for="column.uid"
+                 :class="{ 'bs-required': column.required }"
+                 class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
           <div class="col-12 md:col-8">
             <InputText
               :disabled="column.primaryKey && !isPrimaryKeyEnabled"
@@ -255,5 +257,9 @@ export default toNative(DataObjectEditView);
 </template>
 
 <style scoped>
-
+.bs-required:after {
+  content: "*";
+  color: red;
+  font-size: 12pt;
+}
 </style>
