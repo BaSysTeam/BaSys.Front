@@ -1,6 +1,6 @@
 <script lang="ts">
 import {
-  Prop, Component, Vue, toNative,
+  Prop, Watch, Component, Vue, toNative,
 } from 'vue-facing-decorator';
 import { useRouter } from 'vue-router';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
@@ -67,6 +67,14 @@ class DataObjectEditView extends Vue {
 
   get isCopy(): boolean {
     return this.$route.name === 'data-objects-copy';
+  }
+
+  @Watch('kind')
+  @Watch('name')
+  @Watch('uid')
+  @Watch('copyUid')
+  onPropChange(newVal: string, oldVal: string): void {
+    this.init();
   }
 
   onBackClick(): void {

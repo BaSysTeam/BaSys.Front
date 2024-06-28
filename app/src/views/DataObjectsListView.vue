@@ -113,6 +113,7 @@ import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useToast } from 'primevue/usetoast';
+import { Watch } from 'vue-facing-decorator';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -161,6 +162,13 @@ export default class DataObjectsListView extends mixins(ResizeWindow) {
 
   get isSelectedRecordEmpty(): boolean {
     return Object.keys(this.selectedRecord).length === 0;
+  }
+
+  @Watch('kind')
+  @Watch('name')
+  onPropChange(newVal: string, oldVal: string): void {
+    console.log(`Prop changed from ${oldVal} to ${newVal}`);
+    this.init();
   }
 
   onAddClick(): void {
