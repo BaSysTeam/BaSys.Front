@@ -99,10 +99,13 @@
 </template>
 
 <script lang="ts">
-import { Options, mixins } from 'vue-class-component';
+import {
+  Prop, Watch, Component, Vue, toNative,
+} from 'vue-facing-decorator';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
@@ -112,16 +115,13 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import ConfirmDialog from 'primevue/confirmdialog';
-import { useToast } from 'primevue/usetoast';
-import { Watch } from 'vue-facing-decorator';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
-import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectKindStandardColumn';
 
-@Options({
+@Component({
   components: {
     ViewTitleComponent,
     DataTable,
@@ -134,14 +134,20 @@ import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectK
     TriStateCheckbox,
     ConfirmDialog,
   },
-  props: {
-    kind: String,
-    name: String,
-  },
 })
-export default class DataObjectsListView extends mixins(ResizeWindow) {
+class DataObjectsListView extends Vue {
+  @Prop({
+    required: true,
+    type: String,
+  })
   kind!: string;
+
+  @Prop({
+    required: true,
+    type: String,
+  })
   name!: string;
+
   router = useRouter();
   isWaiting = false;
   title = '';
@@ -153,6 +159,7 @@ export default class DataObjectsListView extends mixins(ResizeWindow) {
   filters:any = {};
   selectedRecord:any = {};
   confirm = useConfirm();
+  windowHeight = window.innerHeight;
 
   get dataTableStyle(): object {
     return {
@@ -166,8 +173,7 @@ export default class DataObjectsListView extends mixins(ResizeWindow) {
 
   @Watch('kind')
   @Watch('name')
-  onPropChange(newVal: string, oldVal: string): void {
-    console.log(`Prop changed from ${oldVal} to ${newVal}`);
+  onPropChange(): void {
     this.init();
   }
 
@@ -217,7 +223,17 @@ export default class DataObjectsListView extends mixins(ResizeWindow) {
   }
 
   mounted(): void {
+    window.addEventListener('resize', this.onResize);
+    this.windowHeight = window.innerHeight;
     this.init();
+  }
+
+  beforeDestroy(): void {
+    window.removeEventListener('resize', this.onResize);
+  }
+
+  onResize(): void {
+    this.windowHeight = window.innerHeight;
   }
 
   getPrimaryKey(): MetaObjectKindStandardColumn | null {
@@ -373,6 +389,8 @@ export default class DataObjectsListView extends mixins(ResizeWindow) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 }
+
+export default toNative(DataObjectsListView);
 </script>
 
 <style scoped>
