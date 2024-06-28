@@ -36,10 +36,18 @@ class DataObjectEditView extends Vue {
   name!: string;
 
   @Prop({
-    required: true,
+    required: false,
     type: String,
+    default: '',
   })
   uid!: string;
+
+  @Prop({
+    required: false,
+    type: String,
+    default: '',
+  })
+  copyuid!: string;
 
   isWaiting = false;
   isModified = false;
@@ -135,17 +143,39 @@ class DataObjectEditView extends Vue {
   async init(): Promise<void> {
     this.isWaiting = true;
 
-    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, this.uid);
+    if (this.$route.name === 'data-objects-copy') {
+      const response = await this.dataObjectsProvider.getItem(this.kind, this.name, this.copyuid);
 
-    if (response.isOK) {
-      this.model = new DataObjectWithMetadata(response.data);
-      this.isNew = this.model.isNew();
-      this.isPrimaryKeyEditable = this.model.isPrimaryKeyEditable();
-      this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
-      console.log('init', this.model);
+      if (response.isOK) {
+        this.model = new DataObjectWithMetadata(response.data);
+        this.model.setPrimaryKey('');
+        this.model.addCopyMessage('title');
+        this.isNew = this.model.isNew();
+        this.isPrimaryKeyEditable = this.model.isPrimaryKeyEditable();
+        this.isModified = true;
+        this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
+        console.log('init-copy', this.model);
+      } else {
+        this.toastHelper.error(response.message);
+        console.error(response.presentation);
+      }
     } else {
-      this.toastHelper.error(response.message);
-      console.error(response.presentation);
+      const response = await this.dataObjectsProvider.getItem(this.kind, this.name, this.uid);
+
+      if (response.isOK) {
+        this.model = new DataObjectWithMetadata(response.data);
+        this.isNew = this.model.isNew();
+        this.isPrimaryKeyEditable = this.model.isPrimaryKeyEditable();
+        this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
+        console.log('init', this.model);
+      } else {
+        this.toastHelper.error(response.message);
+        console.error(response.presentation);
+      }
+    }
+
+    if (this.$route.name === 'data-objects-add') {
+      this.isModified = true;
     }
 
     this.isWaiting = false;

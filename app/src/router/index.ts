@@ -41,6 +41,18 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
     component: DataObjectsEditView,
   },
+  {
+    path: '/data-objects/copy/:kind/:name/:copyuid',
+    name: 'data-objects-copy',
+    props: true,
+    component: DataObjectsEditView,
+  },
+  {
+    path: '/data-objects/add/:kind/:name',
+    name: 'data-objects-add',
+    props: true,
+    component: DataObjectsEditView,
+  },
 ];
 
 const router = createRouter({

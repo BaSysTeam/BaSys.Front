@@ -196,6 +196,10 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
 
   onCopyClick(): void {
     console.log('Copy click');
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
+    this.navigateToCopy();
   }
 
   onRowDblClick():void {
@@ -239,11 +243,24 @@ export default class DataObjectsView extends mixins(ResizeWindow) {
     this.router.push({ name: 'data-objects-edit', params: { kind: kindName, name: objectName, uid } });
   }
 
+  navigateToCopy(): void {
+    const kindName = this.dataObjectList.metaObjectKindSettings.name;
+    const objectName = this.dataObjectList.metaObjectSettings.name;
+
+    const primaryKey = this.getPrimaryKey();
+    if (!primaryKey) {
+      return;
+    }
+    const uid = this.selectedRecord[primaryKey.name];
+
+    this.router.push({ name: 'data-objects-copy', params: { kind: kindName, name: objectName, copyuid: uid } });
+  }
+
   navigateToAdd(): void {
     const kindName = this.dataObjectList.metaObjectKindSettings.name;
     const objectName = this.dataObjectList.metaObjectSettings.name;
 
-    this.router.push({ name: 'data-objects-edit', params: { kind: kindName, name: objectName, uid: '0' } });
+    this.router.push({ name: 'data-objects-add', params: { kind: kindName, name: objectName } });
   }
 
   async deleteItem(): Promise<void> {

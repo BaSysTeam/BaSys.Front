@@ -59,4 +59,10 @@ export default class DataObjectWithMetadata {
 
     this.item.header[primaryKey.name] = key;
   }
+
+  addCopyMessage(fieldName: string): void {
+    if (this.item.header[fieldName]) {
+      this.item.header[fieldName] = `Copy ${this.item.header[fieldName]}`;
+    }
+  }
 }
