@@ -3,7 +3,7 @@ import FileStorageTest from '@/views/FileStorageTest.vue';
 import DataObjectsEditView from '@/views/DataObjectsEditView.vue';
 import HomeView from '../views/HomeView.vue';
 import UserSettingsView from '../views/UserSettingsView.vue';
-import DataObjectsView from '../views/DataObjectsView.vue';
+import DataObjectsListView from '../views/DataObjectsListView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -33,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/data-objects/:kind/:name',
     name: 'data-objects',
     props: true,
-    component: DataObjectsView,
+    component: DataObjectsListView,
   },
   {
     path: '/data-objects/edit/:kind/:name/:uid',

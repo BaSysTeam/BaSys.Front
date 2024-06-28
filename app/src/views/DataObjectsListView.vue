@@ -138,7 +138,7 @@ import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectK
     name: String,
   },
 })
-export default class DataObjectsView extends mixins(ResizeWindow) {
+export default class DataObjectsListView extends mixins(ResizeWindow) {
   kind!: string;
   name!: string;
   router = useRouter();
