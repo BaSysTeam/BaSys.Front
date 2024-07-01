@@ -94,6 +94,7 @@
         </div>
       </div>
     </div>
+    <DataObjectEditDialog v-if="isEditDialogOpen" @close="onEditDialogClose"></DataObjectEditDialog>
     <ConfirmDialog :draggable="false"></ConfirmDialog>
   </div>
 </template>
@@ -115,6 +116,7 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import ConfirmDialog from 'primevue/confirmdialog';
+import DataObjectEditDialog from '@/components/DataObjectEditDialog.vue';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -133,6 +135,7 @@ import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectK
     ButtonGroup,
     TriStateCheckbox,
     ConfirmDialog,
+    DataObjectEditDialog,
   },
 })
 class DataObjectsListView extends Vue {
@@ -160,6 +163,7 @@ class DataObjectsListView extends Vue {
   selectedRecord:any = {};
   confirm = useConfirm();
   windowHeight = window.innerHeight;
+  isEditDialogOpen = false;
 
   get dataTableStyle(): object {
     return {
@@ -187,7 +191,7 @@ class DataObjectsListView extends Vue {
     if (this.isSelectedRecordEmpty) {
       return;
     }
-    this.navigateToEdit();
+    this.startEdit();
   }
 
   onDeleteClick(): void {
@@ -219,7 +223,11 @@ class DataObjectsListView extends Vue {
   onRowDblClick():void {
     console.log('Row dbl click', this.selectedRecord);
     console.log('list view model', this.dataObjectList);
-    this.navigateToEdit();
+    this.startEdit();
+  }
+
+  onEditDialogClose():void {
+    this.isEditDialogOpen = false;
   }
 
   mounted(): void {
@@ -250,6 +258,14 @@ class DataObjectsListView extends Vue {
     if (!primaryKey) return '';
 
     return this.selectedRecord[primaryKey.name];
+  }
+
+  startEdit(): void {
+    if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
+      this.isEditDialogOpen = true;
+    } else {
+      this.navigateToEdit();
+    }
   }
 
   navigateToEdit(): void {
