@@ -127,6 +127,7 @@ export default class DataObjectEditComponent extends Vue {
       this.model.addCopyMessage('title');
     }
     this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
+    this.isPrimaryKeyEnabled = this.model.isPrimaryKeyEditable && this.model.isNew;
     this.titleChanged(this.title);
 
     if (this.isAdd() || this.isCopy()) {
