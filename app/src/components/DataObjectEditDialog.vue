@@ -1,6 +1,6 @@
 <script lang="ts">
 import {
-  Vue, Component, toNative, Prop,
+  Vue, Component, toNative, Prop, Ref,
 } from 'vue-facing-decorator';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
@@ -53,27 +53,27 @@ class DataObjectEditDialog extends Vue {
   isWaiting = false;
   closeAfterSave = false;
 
+  @Ref
+  editComponentRef!: any;
+
   onCloseClick(): void {
     this.$emit('close');
   }
 
-  async onSaveCloseClick(): Promise<void> {
-    console.log('onSaveCloseClick');
-    // eslint-disable-next-line max-len
-    const editComponent = this.$refs.editComponentRef as InstanceType<typeof DataObjectEditComponent>;
-    if (editComponent) {
+  onSaveClick(): void {
+    console.log('onSaveClick');
+    if (this.editComponentRef) {
       console.log('It is edit component');
-      editComponent.triggerSaveClick();
+      this.editComponentRef.triggerSaveClick();
     }
   }
 
-  onSaveClick(): void {
-    console.log('onSaveClick');
-    // eslint-disable-next-line max-len
-    const editComponent = this.$refs.editComponentRef as InstanceType<typeof DataObjectEditComponent>;
-    if (editComponent) {
+  onSaveAndCloseClick(): void {
+    console.log('onSaveCloseClick');
+    if (this.editComponentRef) {
       console.log('It is edit component');
-      editComponent.triggerSaveClick();
+      this.closeAfterSave = true;
+      this.editComponentRef.triggerSaveClick();
     }
   }
 
@@ -89,6 +89,7 @@ class DataObjectEditDialog extends Vue {
     console.log('saved', args);
     if (args && this.closeAfterSave) {
       console.log('need close');
+      this.$emit('close');
     }
     this.closeAfterSave = false;
   }
@@ -147,7 +148,7 @@ export default toNative(DataObjectEditDialog);
             size="small"
             outlined
             icon="pi pi-save"
-            @click="onSaveCloseClick"
+            @click="onSaveAndCloseClick"
           />
           <Button
             :label="$t('save')"
