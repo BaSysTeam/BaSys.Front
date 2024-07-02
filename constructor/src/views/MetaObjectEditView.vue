@@ -1,7 +1,7 @@
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
 import {
-  Vue, Component, Prop, Watch,
+  Vue, Prop, Watch,
 } from 'vue-property-decorator';
 import { Codemirror } from 'vue-codemirror';
 import { json as jsonLang } from '@codemirror/lang-json';
@@ -77,6 +77,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   onSaveClick():void {
     console.log('Save click');
     this.save();
+  }
+
+  onRunClick(): void {
+    const url = `app#/data-objects/${this.kind}/${this.name}`;
+    window.open(url, '_blank');
   }
 
   onSettingsInput():void {
@@ -180,6 +185,13 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
             @click="onSaveClick"
           />
         </ButtonGroup>
+        <Button
+          class="ml-1"
+          severity="success"
+          size="small"
+          icon="pi pi-play"
+          @click="onRunClick"
+        />
         <SplitButton
           label="Actions"
           severity="primary"
