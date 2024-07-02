@@ -94,7 +94,12 @@
         </div>
       </div>
     </div>
-    <DataObjectEditDialog v-if="isEditDialogOpen" @close="onEditDialogClose"></DataObjectEditDialog>
+    <DataObjectEditDialog v-if="isEditDialogOpen"
+                          :title="title"
+                          :kind="kind"
+                          :name="name"
+                          :uid="selectedUid"
+                          @close="onEditDialogClose"></DataObjectEditDialog>
     <ConfirmDialog :draggable="false"></ConfirmDialog>
   </div>
 </template>
@@ -161,6 +166,7 @@ class DataObjectsListView extends Vue {
   columns:any[] = [];
   filters:any = {};
   selectedRecord:any = {};
+  selectedUid = '';
   confirm = useConfirm();
   windowHeight = window.innerHeight;
   isEditDialogOpen = false;
@@ -262,6 +268,7 @@ class DataObjectsListView extends Vue {
 
   startEdit(): void {
     if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
+      this.selectedUid = this.getCurrentUid();
       this.isEditDialogOpen = true;
     } else {
       this.navigateToEdit();
