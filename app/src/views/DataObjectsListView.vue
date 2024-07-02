@@ -99,7 +99,8 @@
                           :kind="kind"
                           :name="name"
                           :uid="selectedUid"
-                          @close="onEditDialogClose"></DataObjectEditDialog>
+                          @close="onEditDialogClose"
+                          @saved="onItemInDialogSaved"></DataObjectEditDialog>
     <ConfirmDialog :draggable="false"></ConfirmDialog>
   </div>
 </template>
@@ -122,6 +123,7 @@ import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import ConfirmDialog from 'primevue/confirmdialog';
 import DataObjectEditDialog from '@/components/DataObjectEditDialog.vue';
+import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -234,6 +236,42 @@ class DataObjectsListView extends Vue {
 
   onEditDialogClose():void {
     this.isEditDialogOpen = false;
+  }
+
+  onItemInDialogSaved(savedUid: string): void {
+    console.log('ItemInDialogSaved');
+    this.handleItemSaved(savedUid);
+  }
+
+  async handleItemSaved(savedUid: string): Promise<void> {
+    if (!savedUid) {
+      return;
+    }
+    this.isWaiting = true;
+    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, savedUid);
+    this.isWaiting = false;
+
+    if (response.isOK) {
+      const resultData = new DataObjectWithMetadata(response.data);
+      const primaryKey = this.getPrimaryKey();
+      if (!primaryKey) {
+        return;
+      }
+      const uid = resultData.getUid();
+
+      const index = this.dataTableItems.findIndex((item) => item[primaryKey.name] === uid);
+      if (index === -1) {
+        this.dataTableItems.unshift(resultData.item.header);
+        // eslint-disable-next-line prefer-destructuring
+        this.selectedRecord = this.dataTableItems[0];
+      } else {
+        this.dataTableItems.splice(index, 1, resultData.item.header);
+        this.selectedRecord = this.dataTableItems[index];
+      }
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
   }
 
   mounted(): void {

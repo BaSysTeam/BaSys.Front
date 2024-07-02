@@ -85,10 +85,10 @@ class DataObjectEditDialog extends Vue {
     this.isWaiting = args;
   }
 
-  onSaved(args: boolean): void {
+  onSaved(args: string): void {
     console.log('saved', args);
+    this.$emit('saved', args);
     if (args && this.closeAfterSave) {
-      console.log('need close');
       this.$emit('close');
     }
     this.closeAfterSave = false;
