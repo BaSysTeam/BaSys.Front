@@ -223,11 +223,7 @@ class DataObjectsListView extends Vue {
   }
 
   onCopyClick(): void {
-    console.log('Copy click');
-    if (this.isSelectedRecordEmpty) {
-      return;
-    }
-    this.navigateToCopy();
+    this.startCopy();
   }
 
   onRowDblClick():void {
@@ -304,6 +300,19 @@ class DataObjectsListView extends Vue {
     if (!primaryKey) return '';
 
     return this.selectedRecord[primaryKey.name];
+  }
+
+  startCopy(): void {
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
+    if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
+      this.selectedUid = this.getCurrentUid();
+      this.editRegime = 'copy';
+      this.isEditDialogOpen = true;
+    } else {
+      this.navigateToCopy();
+    }
   }
 
   startEdit(): void {
