@@ -1,54 +1,43 @@
 <script lang="ts">
-import {
-  Component, Emit, Prop, toNative, Vue,
-} from 'vue-facing-decorator';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Emit } from 'vue-property-decorator';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
-@Component({
+@Options({
   components: {
     InputText,
   },
 })
-class DataObjectEditComponent extends Vue {
-  @Prop({
-    required: true,
-    type: String,
-    default: 'edit',
-  })
+export default class DataObjectEditComponent extends Vue {
+  @Prop({ required: true, type: String, default: 'edit' })
   regime!: string;
 
-  @Prop({
-    required: true,
-    type: String,
-  })
+  @Prop({ required: true, type: String })
   kind!: string;
 
-  @Prop({
-    required: true,
-    type: String,
-  })
+  @Prop({ required: true, type: String })
   name!: string;
 
-  @Prop({
-    required: false,
-    type: String,
-    default: '',
-  })
+  @Prop({ required: false, type: String, default: '' })
   uid!: string;
 
-  @Prop({
-    required: false,
-    type: String,
-    default: '',
-  })
+  @Prop({ required: false, type: String, default: '' })
   copyUid!: string;
 
-  isCopy = false;
-  isAdd = false;
+  regimeValue = 'edit';
+
+  isAdd(): boolean {
+    return this.regimeValue === 'add';
+  }
+
+  isCopy(): boolean {
+    return this.regimeValue === 'copy';
+  }
+
   isPrimaryKeyEnabled = false;
   isWaiting = false;
   isModified = false;
@@ -56,14 +45,6 @@ class DataObjectEditComponent extends Vue {
   dataObjectsProvider = new DataObjectsProvider();
   model = new DataObjectWithMetadata(null);
   toastHelper = new ToastHelper(useToast());
-
-  public getIsModified(): boolean {
-    return this.isModified;
-  }
-
-  public getIsWaiting(): boolean {
-    return this.isWaiting;
-  }
 
   async save(): Promise<void> {
     this.isWaitingChanged(true);
@@ -121,7 +102,7 @@ class DataObjectEditComponent extends Vue {
   }
 
   private async loadDataObject(): Promise<void> {
-    const uid = this.isCopy ? this.copyUid : this.uid;
+    const uid = this.isCopy() ? this.copyUid : this.uid;
     const response = await this.dataObjectsProvider.getItem(this.kind, this.name, uid);
 
     if (response.isOK) {
@@ -134,14 +115,14 @@ class DataObjectEditComponent extends Vue {
 
   private setupModel(data: any): void {
     this.model = new DataObjectWithMetadata(data);
-    if (this.isCopy) {
+    if (this.isCopy()) {
       this.model.setPrimaryKey('');
       this.model.isNew = true;
       this.model.addCopyMessage('title');
     }
     this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
 
-    if (this.isAdd || this.isCopy) {
+    if (this.isAdd() || this.isCopy()) {
       this.isModifiedChanged(true);
     }
   }
@@ -152,6 +133,7 @@ class DataObjectEditComponent extends Vue {
   }
 
   mounted(): void {
+    this.regimeValue = this.regime;
     this.init();
   }
 
@@ -181,7 +163,6 @@ class DataObjectEditComponent extends Vue {
     return result;
   }
 }
-export default toNative(DataObjectEditComponent);
 </script>
 
 <template>

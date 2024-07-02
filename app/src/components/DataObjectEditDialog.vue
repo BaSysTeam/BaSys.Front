@@ -1,13 +1,12 @@
 <script lang="ts">
-import {
-  Vue, Component, toNative, Prop, Ref,
-} from 'vue-facing-decorator';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Ref } from 'vue-property-decorator';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 
-@Component({
+@Options({
   components: {
     Dialog,
     Button,
@@ -15,52 +14,36 @@ import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponen
     ViewTitleComponent,
   },
 })
-class DataObjectEditDialog extends Vue {
-  @Prop({
-    required: true,
-    type: String,
-    default: 'edit',
-  })
+export default class DataObjectEditDialog extends Vue {
+  // Regime of editing: edit | copy | add.
+  @Prop({ required: true, type: String, default: 'edit' })
   regime!: string;
 
-  @Prop({
-    required: true,
-    type: String,
-  })
+  // Name of metadata object kind.
+  @Prop({ required: true, type: String })
   kind!: string;
 
-  @Prop({
-    required: true,
-    type: String,
-  })
+  // Name of metadata object.
+  @Prop({ required: true, type: String })
   name!: string;
 
-  @Prop({
-    required: false,
-    type: String,
-    default: '',
-  })
+  // Identifier of editing item.
+  @Prop({ type: String, default: '' })
   uid!: string;
 
-  @Prop({
-    required: false,
-    type: String,
-    default: '',
-  })
+  // Identifier of source item (item which was copied).
+  @Prop({ type: String, default: '' })
   copyUid!: string;
 
-  @Prop({
-    required: false,
-    type: String,
-    default: '',
-  })
-  title = '';
+  // Title of the dialog.
+  @Prop({ type: String, default: '' })
+  title!: string;
 
   isModified = false;
   isWaiting = false;
   closeAfterSave = false;
 
-  @Ref
+  @Ref()
   editComponentRef!: any;
 
   onCloseClick(): void {
@@ -107,8 +90,6 @@ class DataObjectEditDialog extends Vue {
     }
   }
 }
-
-export default toNative(DataObjectEditDialog);
 </script>
 
 <template>
@@ -133,6 +114,7 @@ export default toNative(DataObjectEditDialog);
                                  :kind="kind"
                                  :name="name"
                                  :uid="uid"
+                                 :copyUid="copyUid"
                                  :regime="regime"
                                  @isModifiedChanged="onIsModifiedChanged"
                                  @isWaitingChanged="onIsWaitingChanged"

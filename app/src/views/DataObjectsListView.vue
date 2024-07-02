@@ -99,6 +99,7 @@
                           :kind="kind"
                           :name="name"
                           :uid="selectedUid"
+                          :copyUid="copyUid"
                           :regime="editRegime"
                           @close="onEditDialogClose"
                           @saved="onItemInDialogSaved"></DataObjectEditDialog>
@@ -107,9 +108,8 @@
 </template>
 
 <script lang="ts">
-import {
-  Prop, Watch, Component, Vue, toNative,
-} from 'vue-facing-decorator';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
@@ -131,7 +131,7 @@ import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponen
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectKindStandardColumn';
 
-@Component({
+@Options({
   components: {
     ViewTitleComponent,
     DataTable,
@@ -146,7 +146,7 @@ import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectK
     DataObjectEditDialog,
   },
 })
-class DataObjectsListView extends Vue {
+export default class DataObjectsListView extends Vue {
   @Prop({
     required: true,
     type: String,
@@ -170,6 +170,7 @@ class DataObjectsListView extends Vue {
   filters:any = {};
   selectedRecord:any = {};
   selectedUid = '';
+  copyUid = '';
   confirm = useConfirm();
   windowHeight = window.innerHeight;
   isEditDialogOpen = false;
@@ -193,7 +194,7 @@ class DataObjectsListView extends Vue {
 
   onAddClick(): void {
     console.log('Add clicked');
-    this.navigateToAdd();
+    this.startAdd();
   }
 
   onEditClick(): void {
@@ -302,12 +303,23 @@ class DataObjectsListView extends Vue {
     return this.selectedRecord[primaryKey.name];
   }
 
+  startAdd(): void {
+    if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
+      this.selectedUid = '';
+      this.editRegime = 'add';
+      this.isEditDialogOpen = true;
+    } else {
+      this.navigateToAdd();
+    }
+  }
+
   startCopy(): void {
     if (this.isSelectedRecordEmpty) {
       return;
     }
     if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
-      this.selectedUid = this.getCurrentUid();
+      this.selectedUid = '';
+      this.copyUid = this.getCurrentUid();
       this.editRegime = 'copy';
       this.isEditDialogOpen = true;
     } else {
@@ -316,6 +328,10 @@ class DataObjectsListView extends Vue {
   }
 
   startEdit(): void {
+    console.log('start edit, title', this.title);
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
     if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
       this.selectedUid = this.getCurrentUid();
       this.editRegime = 'edit';
@@ -463,8 +479,6 @@ class DataObjectsListView extends Vue {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 }
-
-export default toNative(DataObjectsListView);
 </script>
 
 <style scoped>
