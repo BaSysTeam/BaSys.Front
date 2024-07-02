@@ -73,23 +73,24 @@ export default class DataObjectEditComponent extends Vue {
         this.handleError(response);
         this.saved('');
       }
-    }
-    // Update existing item.
-    const response = await this.dataObjectsProvider.updateItem(
-      this.model.metaObjectKindSettings.uid,
-      this.model.metaObjectSettings.uid,
-      this.model.item,
-    );
-
-    this.isWaitingChanged(false);
-
-    if (response.isOK) {
-      this.isModifiedChanged(false);
-      this.toastHelper.success(response.message);
-      this.saved(this.model.getUid());
     } else {
-      this.handleError(response);
-      this.saved('');
+      // Update existing item.
+      const response = await this.dataObjectsProvider.updateItem(
+        this.model.metaObjectKindSettings.uid,
+        this.model.metaObjectSettings.uid,
+        this.model.item,
+      );
+
+      this.isWaitingChanged(false);
+
+      if (response.isOK) {
+        this.isModifiedChanged(false);
+        this.toastHelper.success(response.message);
+        this.saved(this.model.getUid());
+      } else {
+        this.handleError(response);
+        this.saved('');
+      }
     }
   }
 
@@ -126,6 +127,7 @@ export default class DataObjectEditComponent extends Vue {
       this.model.addCopyMessage('title');
     }
     this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
+    this.titleChanged(this.title);
 
     if (this.isAdd() || this.isCopy()) {
       this.isModifiedChanged(true);
@@ -138,6 +140,7 @@ export default class DataObjectEditComponent extends Vue {
   }
 
   mounted(): void {
+    console.log('DataObjectEditComponent initialized', this.regime, this.copyUid);
     this.regimeValue = this.regime;
     this.init();
   }
@@ -161,6 +164,11 @@ export default class DataObjectEditComponent extends Vue {
   isWaitingChanged(newValue: boolean): boolean {
     this.isWaiting = newValue;
     return this.isWaiting;
+  }
+
+  @Emit('titleChanged')
+  titleChanged(title: string): string {
+    return this.title;
   }
 
   @Emit('saved')

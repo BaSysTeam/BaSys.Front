@@ -1,60 +1,51 @@
 <script lang="ts">
-import {
-  Prop, Watch, Component, Vue, toNative,
-} from 'vue-facing-decorator';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Ref } from 'vue-property-decorator';
 import { useRouter } from 'vue-router';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
-import { useToast } from 'primevue/usetoast';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import InputText from 'primevue/inputtext';
-import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
-import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 
-@Component({
+@Options({
   components: {
     ViewTitleComponent,
     Divider,
     Button,
     ButtonGroup,
     InputText,
+    DataObjectEditComponent,
   },
 })
-class DataObjectEditView extends Vue {
-  @Prop({
-    required: true,
-    type: String,
-  })
+export default class DataObjectEditView extends Vue {
+  // Name of metadata object kind.
+  @Prop({ required: true, type: String })
   kind!: string;
 
-  @Prop({
-    required: true,
-    type: String,
-  })
+  // Name of metadata object.
+  @Prop({ required: true, type: String })
   name!: string;
 
-  @Prop({
-    required: false,
-    type: String,
-    default: '',
-  })
+  // Identifier of editing item.
+  @Prop({ required: false, type: String, default: '' })
   uid!: string;
 
-  @Prop({
-    required: false,
-    type: String,
-    default: '',
-  })
+  // Identifier of source item (item which was copied).
+  @Prop({ required: false, type: String, default: '' })
   copyUid!: string;
+
+  @Ref()
+  editComponentRef!: any;
 
   isWaiting = false;
   isModified = false;
+  closeAfterSave = false;
   title = '';
-  dataObjectsProvider = new DataObjectsProvider();
+  editRegime = 'edit';
   model = new DataObjectWithMetadata(null);
-  toastHelper = new ToastHelper(useToast());
   router = useRouter();
 
   get isPrimaryKeyEnabled(): boolean {
@@ -69,29 +60,45 @@ class DataObjectEditView extends Vue {
     return this.$route.name === 'data-objects-copy';
   }
 
-  @Watch('kind')
-  @Watch('name')
-  @Watch('uid')
-  @Watch('copyUid')
-  onPropChange(newVal: string, oldVal: string): void {
-    this.init();
-  }
-
   onBackClick(): void {
     this.returnToList();
   }
 
-  async onSaveCloseClick(): Promise<void> {
-    const saved = await this.save();
-    if (saved) this.returnToList();
+  onSaveCloseClick(): void {
+    console.log('saveAndClose');
+    if (this.editComponentRef) {
+      this.closeAfterSave = true;
+      console.log('It is edit component');
+      this.editComponentRef.triggerSaveClick();
+    }
   }
 
   onSaveClick(): void {
-    this.save();
+    console.log('save');
+    if (this.editComponentRef) {
+      console.log('It is edit component');
+      this.editComponentRef.triggerSaveClick();
+    }
   }
 
-  onHeaderFieldChange(): void {
-    this.isModified = true;
+  onIsModifiedChanged(args: boolean): void {
+    this.isModified = args;
+  }
+
+  onIsWaitingChanged(args: boolean): void {
+    this.isWaiting = args;
+  }
+
+  onTitleChanged(args: string): void {
+    this.title = args;
+  }
+
+  onSaved(args: string): void {
+    console.log('saved', args);
+    if (args && this.closeAfterSave) {
+      this.returnToList();
+    }
+    this.closeAfterSave = false;
   }
 
   returnToList(): void {
@@ -104,98 +111,21 @@ class DataObjectEditView extends Vue {
     });
   }
 
-  async save(): Promise<boolean> {
-    this.isWaiting = true;
-
-    if (this.model.isNew) {
-      // Insert new item.
-      const response = await this.dataObjectsProvider.createItem(
-        this.model.metaObjectKindSettings.uid,
-        this.model.metaObjectSettings.uid,
-        this.model.item,
-      );
-
-      this.isWaiting = false;
-
-      if (response.isOK) {
-        this.isModified = false;
-        this.model.setPrimaryKey(response.data);
-        this.toastHelper.success(response.message);
-        return true;
-      }
-
-      this.handleError(response);
-      return false;
-    }
-    // Update existing item.
-    const response = await this.dataObjectsProvider.updateItem(
-      this.model.metaObjectKindSettings.uid,
-      this.model.metaObjectSettings.uid,
-      this.model.item,
-    );
-
-    this.isWaiting = false;
-
-    if (response.isOK) {
-      this.isModified = false;
-      this.toastHelper.success(response.message);
-      return true;
-    }
-
-    this.handleError(response);
-    return false;
-  }
-
-  async init(): Promise<void> {
-    this.isWaiting = true;
-
-    try {
-      await this.loadDataObject();
-    } catch (error) {
-      console.error('Error loading data object:', error);
-      this.toastHelper.error('An error occurred while loading the data object.');
-    }
-
-    this.isWaiting = false;
-  }
-
-  private async loadDataObject(): Promise<void> {
-    const uid = this.isCopy ? this.copyUid : this.uid;
-    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, uid);
-
-    if (response.isOK) {
-      this.setupModel(response.data);
-      console.log('init', this.model);
+  defineEditRegime(): void {
+    if (this.$route.name === 'data-objects-copy') {
+      this.editRegime = 'copy';
+    } else if (this.$route.name === 'data-objects-add') {
+      this.editRegime = 'add';
     } else {
-      this.handleError(response);
+      this.editRegime = 'edit';
     }
   }
 
-  private setupModel(data: any): void {
-    this.model = new DataObjectWithMetadata(data);
-    if (this.isCopy) {
-      this.model.setPrimaryKey('');
-      this.model.isNew = true;
-      this.model.addCopyMessage('title');
-    }
-    this.title = `${this.model.metaObjectKindSettings.title}.${this.model.metaObjectSettings.title}`;
-
-    if (this.isAdd || this.isCopy) {
-      this.isModified = true;
-    }
-  }
-
-  private handleError(response: any): void {
-    this.toastHelper.error(response.message);
-    console.error(response.presentation);
-  }
-
-  mounted(): void {
-    this.init();
+  beforeMount(): void {
+    this.defineEditRegime();
+    console.log('DataObjectEditView before mount', this.editRegime, this.$route.name);
   }
 }
-
-export default toNative(DataObjectEditView);
 </script>
 
 <template>
@@ -241,24 +171,16 @@ export default toNative(DataObjectEditView);
     </div>
     <div class="grid">
       <div class="col-6">
-        <div class="field grid" v-for="column in model.metaObjectSettings.header.columns"
-             :key="column.uid">
-          <label :for="column.uid"
-                 :class="{ 'bs-required': column.required }"
-                 class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
-          <div class="col-12 md:col-8">
-            <InputText
-              :disabled="column.primaryKey && !isPrimaryKeyEnabled"
-              :id="column.uid"
-              v-model="model.item.header[column.name]"
-              autocomplete="off"
-              size="small"
-              class="w-full"
-              @change="onHeaderFieldChange"
-            />
-
-          </div>
-        </div>
+        <DataObjectEditComponent ref="editComponentRef"
+                                 :regime="editRegime"
+                                 :kind="kind"
+                                 :name="name"
+                                 :uid="uid"
+                                 :copyUid="copyUid"
+                                 @is-modified-changed="onIsModifiedChanged"
+                                 @is-waiting-changed="onIsWaitingChanged"
+                                 @title-changed="onTitleChanged"
+                                 @saved="onSaved"></DataObjectEditComponent>
       </div>
     </div>
   </div>
