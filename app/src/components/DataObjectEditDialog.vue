@@ -19,6 +19,13 @@ class DataObjectEditDialog extends Vue {
   @Prop({
     required: true,
     type: String,
+    default: 'edit',
+  })
+  regime!: string;
+
+  @Prop({
+    required: true,
+    type: String,
   })
   kind!: string;
 
@@ -126,6 +133,7 @@ export default toNative(DataObjectEditDialog);
                                  :kind="kind"
                                  :name="name"
                                  :uid="uid"
+                                 :regime="regime"
                                  @isModifiedChanged="onIsModifiedChanged"
                                  @isWaitingChanged="onIsWaitingChanged"
                                  @saved="onSaved"></DataObjectEditComponent>

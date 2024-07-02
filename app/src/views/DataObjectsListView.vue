@@ -99,6 +99,7 @@
                           :kind="kind"
                           :name="name"
                           :uid="selectedUid"
+                          :regime="editRegime"
                           @close="onEditDialogClose"
                           @saved="onItemInDialogSaved"></DataObjectEditDialog>
     <ConfirmDialog :draggable="false"></ConfirmDialog>
@@ -172,6 +173,7 @@ class DataObjectsListView extends Vue {
   confirm = useConfirm();
   windowHeight = window.innerHeight;
   isEditDialogOpen = false;
+  editRegime = 'edit';
 
   get dataTableStyle(): object {
     return {
@@ -307,6 +309,7 @@ class DataObjectsListView extends Vue {
   startEdit(): void {
     if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
       this.selectedUid = this.getCurrentUid();
+      this.editRegime = 'edit';
       this.isEditDialogOpen = true;
     } else {
       this.navigateToEdit();

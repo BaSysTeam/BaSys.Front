@@ -17,6 +17,13 @@ class DataObjectEditComponent extends Vue {
   @Prop({
     required: true,
     type: String,
+    default: 'edit',
+  })
+  regime!: string;
+
+  @Prop({
+    required: true,
+    type: String,
   })
   kind!: string;
 
