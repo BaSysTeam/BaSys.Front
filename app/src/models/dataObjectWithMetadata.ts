@@ -65,6 +65,15 @@ export default class DataObjectWithMetadata {
     this.isNew = this.checkIsNew();
   }
 
+  getUid(): string {
+    const primaryKey = this.metaObjectSettings.header.getPrimaryKey();
+    if (primaryKey == null) {
+      return '';
+    }
+
+    return this.item.header[primaryKey.name];
+  }
+
   addCopyMessage(fieldName: string): void {
     if (this.item.header[fieldName]) {
       this.item.header[fieldName] = `Copy ${this.item.header[fieldName]}`;

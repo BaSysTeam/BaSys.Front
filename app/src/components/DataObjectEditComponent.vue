@@ -75,10 +75,10 @@ class DataObjectEditComponent extends Vue {
         this.isModifiedChanged(false);
         this.model.setPrimaryKey(response.data);
         this.toastHelper.success(response.message);
-        this.saved(true);
+        this.saved(response.data);
       } else {
         this.handleError(response);
-        this.saved(false);
+        this.saved('');
       }
     }
     // Update existing item.
@@ -93,10 +93,10 @@ class DataObjectEditComponent extends Vue {
     if (response.isOK) {
       this.isModifiedChanged(false);
       this.toastHelper.success(response.message);
-      this.saved(true);
+      this.saved(this.model.getUid());
     } else {
       this.handleError(response);
-      this.saved(false);
+      this.saved('');
     }
   }
 
@@ -157,11 +157,6 @@ class DataObjectEditComponent extends Vue {
     this.save();
   }
 
-  public triggerSaveAndCloseClick(): void {
-    console.log('SaveAndClose clicked in edit component');
-    this.save();
-  }
-
   @Emit('isModifiedChanged')
   isModifiedChanged(newValue: boolean): boolean {
     this.isModified = newValue;
@@ -175,7 +170,7 @@ class DataObjectEditComponent extends Vue {
   }
 
   @Emit('saved')
-  saved(result: boolean): boolean {
+  saved(result: string): string {
     return result;
   }
 }
