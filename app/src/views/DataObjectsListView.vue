@@ -94,14 +94,22 @@
         </div>
       </div>
     </div>
+    <DataObjectEditDialog v-if="isEditDialogOpen"
+                          :title="title"
+                          :kind="kind"
+                          :name="name"
+                          :uid="selectedUid"
+                          :copyUid="copyUid"
+                          :regime="editRegime"
+                          @close="onEditDialogClose"
+                          @saved="onItemInDialogSaved"></DataObjectEditDialog>
     <ConfirmDialog :draggable="false"></ConfirmDialog>
   </div>
 </template>
 
 <script lang="ts">
-import {
-  Prop, Watch, Component, Vue, toNative,
-} from 'vue-facing-decorator';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
@@ -115,13 +123,15 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import ConfirmDialog from 'primevue/confirmdialog';
+import DataObjectEditDialog from '@/components/DataObjectEditDialog.vue';
+import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectKindStandardColumn';
 
-@Component({
+@Options({
   components: {
     ViewTitleComponent,
     DataTable,
@@ -133,19 +143,16 @@ import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectK
     ButtonGroup,
     TriStateCheckbox,
     ConfirmDialog,
+    DataObjectEditDialog,
   },
 })
-class DataObjectsListView extends Vue {
-  @Prop({
-    required: true,
-    type: String,
-  })
+export default class DataObjectsListView extends Vue {
+  // Name of metadata object kind.
+  @Prop({ required: true, type: String })
   kind!: string;
 
-  @Prop({
-    required: true,
-    type: String,
-  })
+  // Name of metadata object.
+  @Prop({ required: true, type: String })
   name!: string;
 
   router = useRouter();
@@ -158,8 +165,12 @@ class DataObjectsListView extends Vue {
   columns:any[] = [];
   filters:any = {};
   selectedRecord:any = {};
+  selectedUid = '';
+  copyUid = '';
   confirm = useConfirm();
   windowHeight = window.innerHeight;
+  isEditDialogOpen = false;
+  editRegime = 'edit';
 
   get dataTableStyle(): object {
     return {
@@ -179,7 +190,7 @@ class DataObjectsListView extends Vue {
 
   onAddClick(): void {
     console.log('Add clicked');
-    this.navigateToAdd();
+    this.startAdd();
   }
 
   onEditClick(): void {
@@ -187,7 +198,7 @@ class DataObjectsListView extends Vue {
     if (this.isSelectedRecordEmpty) {
       return;
     }
-    this.navigateToEdit();
+    this.startEdit();
   }
 
   onDeleteClick(): void {
@@ -209,17 +220,53 @@ class DataObjectsListView extends Vue {
   }
 
   onCopyClick(): void {
-    console.log('Copy click');
-    if (this.isSelectedRecordEmpty) {
-      return;
-    }
-    this.navigateToCopy();
+    this.startCopy();
   }
 
   onRowDblClick():void {
     console.log('Row dbl click', this.selectedRecord);
     console.log('list view model', this.dataObjectList);
-    this.navigateToEdit();
+    this.startEdit();
+  }
+
+  onEditDialogClose():void {
+    this.isEditDialogOpen = false;
+  }
+
+  onItemInDialogSaved(savedUid: string): void {
+    console.log('ItemInDialogSaved');
+    this.handleItemSaved(savedUid);
+  }
+
+  async handleItemSaved(savedUid: string): Promise<void> {
+    if (!savedUid) {
+      return;
+    }
+    this.isWaiting = true;
+    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, savedUid);
+    this.isWaiting = false;
+
+    if (response.isOK) {
+      const resultData = new DataObjectWithMetadata(response.data);
+      const primaryKey = this.getPrimaryKey();
+      if (!primaryKey) {
+        return;
+      }
+      const uid = resultData.getUid();
+
+      const index = this.dataTableItems.findIndex((item) => item[primaryKey.name] === uid);
+      if (index === -1) {
+        this.dataTableItems.unshift(resultData.item.header);
+        // eslint-disable-next-line prefer-destructuring
+        this.selectedRecord = this.dataTableItems[0];
+      } else {
+        this.dataTableItems.splice(index, 1, resultData.item.header);
+        this.selectedRecord = this.dataTableItems[index];
+      }
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
   }
 
   mounted(): void {
@@ -250,6 +297,44 @@ class DataObjectsListView extends Vue {
     if (!primaryKey) return '';
 
     return this.selectedRecord[primaryKey.name];
+  }
+
+  startAdd(): void {
+    if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
+      this.selectedUid = '';
+      this.editRegime = 'add';
+      this.isEditDialogOpen = true;
+    } else {
+      this.navigateToAdd();
+    }
+  }
+
+  startCopy(): void {
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
+    if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
+      this.selectedUid = '';
+      this.copyUid = this.getCurrentUid();
+      this.editRegime = 'copy';
+      this.isEditDialogOpen = true;
+    } else {
+      this.navigateToCopy();
+    }
+  }
+
+  startEdit(): void {
+    console.log('start edit, title', this.title);
+    if (this.isSelectedRecordEmpty) {
+      return;
+    }
+    if (this.dataObjectList.metaObjectSettings.editMethod === 1) {
+      this.selectedUid = this.getCurrentUid();
+      this.editRegime = 'edit';
+      this.isEditDialogOpen = true;
+    } else {
+      this.navigateToEdit();
+    }
   }
 
   navigateToEdit(): void {
@@ -385,13 +470,7 @@ class DataObjectsListView extends Vue {
   isColumnDataTypeBoolean(param: any): boolean {
     return param.columnDataType === 'boolean';
   }
-
-  capitalizeFirstLetter(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
 }
-
-export default toNative(DataObjectsListView);
 </script>
 
 <style scoped>

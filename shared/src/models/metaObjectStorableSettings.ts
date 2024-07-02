@@ -3,6 +3,7 @@ import MetaObjectTable from './metaObjectTable';
 export default class MetaObjectStorableSettings {
   uid:string;
   metaObjectKindUid:string;
+  editMethod:number;
   title:string;
   name:string;
   memo:string;
@@ -18,6 +19,7 @@ export default class MetaObjectStorableSettings {
 
     this.uid = data.uid || '';
     this.metaObjectKindUid = data.metaObjectKindUid || '';
+    this.editMethod = data.editMethod || 0;
     this.title = data.title || '';
     this.name = data.name || '';
     this.memo = data.memo || '';

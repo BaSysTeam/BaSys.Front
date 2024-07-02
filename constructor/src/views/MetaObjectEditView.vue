@@ -114,6 +114,9 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.isWaiting = true;
 
     this.settings = new MetaObjectStorableSettings(JSON.parse(this.settingsJson));
+
+    console.log('save object', this.settingsJson);
+    console.log('settings', this.settings);
     const response = await this.provider.update(this.settings);
     this.isWaiting = false;
 
