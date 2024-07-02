@@ -147,16 +147,12 @@ import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectK
   },
 })
 export default class DataObjectsListView extends Vue {
-  @Prop({
-    required: true,
-    type: String,
-  })
+  // Name of metadata object kind.
+  @Prop({ required: true, type: String })
   kind!: string;
 
-  @Prop({
-    required: true,
-    type: String,
-  })
+  // Name of metadata object.
+  @Prop({ required: true, type: String })
   name!: string;
 
   router = useRouter();
@@ -473,10 +469,6 @@ export default class DataObjectsListView extends Vue {
 
   isColumnDataTypeBoolean(param: any): boolean {
     return param.columnDataType === 'boolean';
-  }
-
-  capitalizeFirstLetter(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 }
 </script>

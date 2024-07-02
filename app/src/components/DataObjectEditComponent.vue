@@ -13,18 +13,23 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   },
 })
 export default class DataObjectEditComponent extends Vue {
+  // Regime of editing: edit | copy | add.
   @Prop({ required: true, type: String, default: 'edit' })
   regime!: string;
 
+  // Name of metadata object kind.
   @Prop({ required: true, type: String })
   kind!: string;
 
+  // Name of metadata object.
   @Prop({ required: true, type: String })
   name!: string;
 
+  // Identifier of editing item.
   @Prop({ required: false, type: String, default: '' })
   uid!: string;
 
+  // Identifier of source item (item which was copied).
   @Prop({ required: false, type: String, default: '' })
   copyUid!: string;
 
