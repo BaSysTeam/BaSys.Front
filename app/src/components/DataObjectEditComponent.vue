@@ -3,13 +3,16 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Emit } from 'vue-property-decorator';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import { DbType } from '../../../shared/src/enums/DbTypes';
 
 @Options({
   components: {
     InputText,
+    InputNumber,
   },
 })
 export default class DataObjectEditComponent extends Vue {
@@ -177,6 +180,45 @@ export default class DataObjectEditComponent extends Vue {
   saved(result: string): string {
     return result;
   }
+
+  shouldRenderStringInput(dataTypeUid: string): boolean {
+    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.dbType === DbType.String && dataType.isPrimitive) {
+      return true;
+    }
+
+    return false;
+  }
+
+  shouldRenderIntInput(dataTypeUid: string): boolean {
+    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.dbType === DbType.Int32 && dataType.isPrimitive) {
+      return true;
+    }
+
+    return false;
+  }
+
+  shouldRenderNumberInput(dataTypeUid: string): boolean {
+    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.dbType === DbType.Decimal && dataType.isPrimitive) {
+      return true;
+    }
+
+    return false;
+  }
 }
 </script>
 
@@ -188,7 +230,7 @@ export default class DataObjectEditComponent extends Vue {
         <label :for="column.uid"
                :class="{ 'bs-required': column.required }"
                class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
-        <div class="col-12 md:col-8">
+        <div class="col-12 md:col-8" v-if="column.primaryKey">
           <InputText
             :disabled="column.primaryKey && !isPrimaryKeyEnabled"
             :id="column.uid"
@@ -200,15 +242,43 @@ export default class DataObjectEditComponent extends Vue {
           />
 
         </div>
+        <div class="col-12 md:col-8" v-if="!column.primaryKey">
+          <!--String input-->
+          <InputText v-if="shouldRenderStringInput(column.dataTypeUid)"
+            :id="column.uid"
+            v-model="model.item.header[column.name]"
+            autocomplete="off"
+            size="small"
+            class="w-full"
+            @change="onHeaderFieldChange"
+          />
+          <!--Integer input-->
+          <InputNumber v-if="shouldRenderIntInput(column.dataTypeUid)"
+            :id="column.uid"
+            v-model="model.item.header[column.name]"
+            autocomplete="off"
+            size="small"
+            class="w-full text-right"
+            @change="onHeaderFieldChange"
+          />
+          <!--Number input-->
+          <InputNumber v-if="shouldRenderNumberInput(column.dataTypeUid)"
+            :id="column.uid"
+            v-model="model.item.header[column.name]"
+            :min-fraction-digits="column.numberDigits"
+            :max-fraction-digits="column.numberDigits"
+            autocomplete="off"
+            size="small"
+            class="w-full text-right"
+            @change="onHeaderFieldChange"
+          />
+        </div>
+
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.bs-required:after {
-  content: "*";
-  color: red;
-  font-size: 12pt;
-}
+
 </style>
