@@ -4,6 +4,7 @@ import { Prop, Emit } from 'vue-property-decorator';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
+import Checkbox from 'primevue/checkbox';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -13,6 +14,7 @@ import { DbType } from '../../../shared/src/enums/DbTypes';
   components: {
     InputText,
     InputNumber,
+    Checkbox,
   },
 })
 export default class DataObjectEditComponent extends Vue {
@@ -219,6 +221,19 @@ export default class DataObjectEditComponent extends Vue {
 
     return false;
   }
+
+  shouldRenderCheckboxInput(dataTypeUid: string): boolean {
+    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.dbType === DbType.Boolean && dataType.isPrimitive) {
+      return true;
+    }
+
+    return false;
+  }
 }
 </script>
 
@@ -272,6 +287,13 @@ export default class DataObjectEditComponent extends Vue {
             class="w-full text-right"
             @change="onHeaderFieldChange"
           />
+          <!--Checkbox-->
+          <Checkbox v-if="shouldRenderCheckboxInput(column.dataTypeUid)"
+                    :id="column.uid"
+                    :binary="true"
+                    v-model="model.item.header[column.name]"
+                    @change="onHeaderFieldChange">
+          </Checkbox>
         </div>
 
       </div>
