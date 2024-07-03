@@ -1,5 +1,6 @@
 import { Guid } from 'guid-typescript';
 import DataObject from '@/models/dataObject';
+import DataType from '../../../shared/src/models/dataType';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 
@@ -7,6 +8,7 @@ export default class DataObjectWithMetadata {
   item: DataObject;
   metaObjectKindSettings: MetaObjectKindSettings;
   metaObjectSettings: MetaObjectStorableSettings;
+  dataTypes: DataType[];
   isNew = false;
   isPrimaryKeyEditable = false;
 
@@ -19,6 +21,14 @@ export default class DataObjectWithMetadata {
     this.metaObjectKindSettings = new MetaObjectKindSettings(data.metaObjectKindSettings);
     this.metaObjectSettings = new MetaObjectStorableSettings(data.metaObjectSettings);
     this.item = new DataObject(data.item);
+
+    this.dataTypes = [];
+    if (data.dataTypes) {
+      data.dataTypes.forEach((item: any) => {
+        this.dataTypes.push(new DataType(item));
+      });
+    }
+
     this.isNew = this.checkIsNew();
     this.isPrimaryKeyEditable = this.checkIsPrimaryKeyEditable();
   }

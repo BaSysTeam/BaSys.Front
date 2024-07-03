@@ -120,6 +120,7 @@ export default class DataObjectEditComponent extends Vue {
   }
 
   private setupModel(data: any): void {
+    console.log('setupModel', data);
     this.model = new DataObjectWithMetadata(data);
     if (this.isCopy()) {
       this.model.setPrimaryKey('');
