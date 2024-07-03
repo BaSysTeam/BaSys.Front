@@ -1,5 +1,5 @@
 import axios from 'axios';
-import DataType from '../models/dataType';
+import DataType from '../../../shared/src/models/dataType';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class DataTypeProvider {
