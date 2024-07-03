@@ -10,6 +10,7 @@ export default class MetaObjectTableColumn {
   primaryKey:boolean;
   required:boolean;
   unique:boolean;
+  isStandard:boolean;
 
   constructor(params: any) {
     let data: any = {};
@@ -26,5 +27,6 @@ export default class MetaObjectTableColumn {
     this.primaryKey = data.primaryKey || false;
     this.required = data.required || false;
     this.unique = data.unique || false;
+    this.isStandard = data.isStandard || false;
   }
 }
