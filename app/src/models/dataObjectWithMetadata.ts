@@ -1,8 +1,10 @@
 import { Guid } from 'guid-typescript';
 import DataObject from '@/models/dataObject';
 import DataType from '../../../shared/src/models/dataType';
+import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
+import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
 
 export default class DataObjectWithMetadata {
   item: DataObject;
@@ -21,6 +23,19 @@ export default class DataObjectWithMetadata {
     this.metaObjectKindSettings = new MetaObjectKindSettings(data.metaObjectKindSettings);
     this.metaObjectSettings = new MetaObjectStorableSettings(data.metaObjectSettings);
     this.item = new DataObject(data.item);
+
+    // Convert ISO string to Date.
+    this.metaObjectSettings.header.columns.forEach((column: MetaObjectTableColumn) => {
+      if (column.dataTypeUid === DataTypeDefaults.DateTime.uid) {
+        console.log('date value before', this.item.header[column.name]);
+        const isoString = this.item.header[column.name];
+        if (isoString === '0001-01-01T00:00:00' || !isoString) {
+          this.item.header[column.name] = '';
+        } else {
+          this.item.header[column.name] = new Date(this.item.header[column.name]);
+        }
+      }
+    });
 
     this.dataTypes = [];
     if (data.dataTypes) {
