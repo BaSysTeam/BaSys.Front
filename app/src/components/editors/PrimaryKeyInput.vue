@@ -48,7 +48,7 @@ onMounted(() => {
              autocomplete="off"
              size="small"
              class="w-full"
-             @change="onChange"></InputText>
+             @update:model-value="onChange"></InputText>
 </template>
 
 <style scoped>

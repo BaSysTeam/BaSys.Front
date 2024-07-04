@@ -11,14 +11,14 @@ import DataObject from '@/models/dataObject';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
 import DataObjectHeaderFieldEditComponent
   from '@/components/DataObjectHeaderFieldEditComponent.vue';
+import DataObjectHeaderFieldEditComponentTmp
+  from '@/components/DataObjectHeaderFieldEditComponentTmp.vue';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
-import { DbType } from '../../../shared/src/enums/DbTypes';
-import DataType from '../../../shared/src/models/dataType';
-import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 
 @Options({
   components: {
+    DataObjectHeaderFieldEditComponentTmp,
     InputText,
     InputNumber,
     Checkbox,
@@ -214,75 +214,6 @@ export default class DataObjectEditComponent extends Vue {
   saved(result: string): string {
     return result;
   }
-
-  shouldRenderStringInput(dataTypeUid: string): boolean {
-    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
-    if (!dataType) {
-      return false;
-    }
-
-    if (dataType.dbType === DbType.String && dataType.isPrimitive) {
-      return true;
-    }
-
-    return false;
-  }
-
-  getDataType(dataTypeUid: string): DataType | undefined {
-    return this.model.dataTypes.find((x) => x.uid === dataTypeUid);
-  }
-
-  shouldRenderIntInput(dataTypeUid: string): boolean {
-    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
-    if (!dataType) {
-      return false;
-    }
-
-    if (dataType.dbType === DbType.Int32 && dataType.isPrimitive) {
-      return true;
-    }
-
-    return false;
-  }
-
-  shouldRenderNumberInput(dataTypeUid: string): boolean {
-    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
-    if (!dataType) {
-      return false;
-    }
-
-    if (dataType.dbType === DbType.Decimal && dataType.isPrimitive) {
-      return true;
-    }
-
-    return false;
-  }
-
-  shouldRenderCheckboxInput(dataTypeUid: string): boolean {
-    const dataType = this.getDataType(dataTypeUid);
-    if (!dataType) {
-      return false;
-    }
-
-    if (dataType.uid === DataTypeDefaults.Bool.uid) {
-      return true;
-    }
-
-    return false;
-  }
-
-  shouldRenderDateTimeInput(dataTypeUid: string): boolean {
-    const dataType = this.getDataType(dataTypeUid);
-    if (!dataType) {
-      return false;
-    }
-
-    if (dataType.uid === DataTypeDefaults.DateTime.uid) {
-      return true;
-    }
-
-    return false;
-  }
 }
 </script>
 
@@ -292,70 +223,22 @@ export default class DataObjectEditComponent extends Vue {
       <div class="field grid" v-for="column in model.metaObjectSettings.header.columns"
            :key="column.uid">
 
-        <DataObjectHeaderFieldEditComponent :column="column"
+        <DataObjectHeaderFieldEditComponentTmp :column="column"
+                                            :key="column.uid"
+                                            :data-types="model.dataTypes"
                                             :is-primary-key-enabled="isPrimaryKeyEnabled"
                                             v-model="model.item.header[column.name]"
                                             @change="onHeaderFieldChange">
-        </DataObjectHeaderFieldEditComponent>
-
-        <div class="col-12 md:col-8"
-             v-if="!column.primaryKey && shouldRenderStringInput(column.dataTypeUid)">
-          <!--String input-->
-          <InputText :id="column.uid"
-                     v-model="model.item.header[column.name]"
-                     autocomplete="off"
-                     size="small"
-                     class="w-full"
-                     @change="onHeaderFieldChange"
-          />
-        </div>
-        <!--Integer input-->
-        <div class="col-12 md:col-4"
-             v-if="!column.primaryKey && shouldRenderIntInput(column.dataTypeUid)">
-          <InputNumber :id="column.uid"
-                       v-model="model.item.header[column.name]"
-                       autocomplete="off"
-                       size="small"
-                       class="w-full"
-                       @change="onHeaderFieldChange"
-          />
-        </div>
-        <!--Number input-->
-        <div class="col-12 md:col-4"
-             v-if="!column.primaryKey && shouldRenderNumberInput(column.dataTypeUid)">
-          <InputNumber :id="column.uid"
-                       v-model="model.item.header[column.name]"
-                       :min-fraction-digits="column.numberDigits"
-                       :max-fraction-digits="column.numberDigits"
-                       autocomplete="off"
-                       size="small"
-                       class="w-full"
-                       @change="onHeaderFieldChange"
-          />
-        </div>
-        <!--Checkbox-->
-        <div class="col-12 md:col-4"
-             v-if="!column.primaryKey && shouldRenderCheckboxInput(column.dataTypeUid)">
-          <Checkbox :id="column.uid"
-                    :binary="true"
-                    v-model="model.item.header[column.name]"
-                    @change="onHeaderFieldChange">
-          </Checkbox>
-        </div>
-        <!--Calendar-->
-        <div class="col-12 md:col-4"
-             v-if="!column.primaryKey && shouldRenderDateTimeInput(column.dataTypeUid)">
-          <Calendar :id="column.uid"
-                    :show-time="false"
-                    :show-icon="true"
-                    :show-button-bar="true"
-                    iconDisplay="input"
-                    date-format="dd.mm.yy"
-                    class="w-full"
-                    v-model="model.item.header[column.name]"
-                    @change="onHeaderFieldChange"></Calendar>
-
-        </div>
+        </DataObjectHeaderFieldEditComponentTmp>
+        <!--
+         <DataObjectHeaderFieldEditComponent :key="column.uid"
+                                             :column="column"
+                                             :data-types="model.dataTypes"
+                                             :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                             :item="model.item"
+                                             @change="onHeaderFieldChange">
+         </DataObjectHeaderFieldEditComponent>
+          -->
 
       </div>
     </div>
