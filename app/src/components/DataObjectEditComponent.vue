@@ -293,8 +293,8 @@ export default class DataObjectEditComponent extends Vue {
            :key="column.uid">
 
         <DataObjectHeaderFieldEditComponent :column="column"
-                                            :item="model.item"
                                             :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                            v-model="model.item.header[column.name]"
                                             @change="onHeaderFieldChange">
         </DataObjectHeaderFieldEditComponent>
 
