@@ -3,34 +3,62 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Emit } from 'vue-property-decorator';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import Checkbox from 'primevue/checkbox';
+import Calendar from 'primevue/calendar';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import DataObject from '@/models/dataObject';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import { DbType } from '../../../shared/src/enums/DbTypes';
+import DataType from '../../../shared/src/models/dataType';
+import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 
 @Options({
   components: {
     InputText,
+    InputNumber,
+    Checkbox,
+    Calendar,
   },
 })
 export default class DataObjectEditComponent extends Vue {
   // Regime of editing: edit | copy | add.
-  @Prop({ required: true, type: String, default: 'edit' })
+  @Prop({
+    required: true,
+    type: String,
+    default: 'edit',
+  })
   regime!: string;
 
   // Name of metadata object kind.
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   kind!: string;
 
   // Name of metadata object.
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   name!: string;
 
   // Identifier of editing item.
-  @Prop({ required: false, type: String, default: '' })
+  @Prop({
+    required: false,
+    type: String,
+    default: '',
+  })
   uid!: string;
 
   // Identifier of source item (item which was copied).
-  @Prop({ required: false, type: String, default: '' })
+  @Prop({
+    required: false,
+    type: String,
+    default: '',
+  })
   copyUid!: string;
 
   regimeValue = 'edit';
@@ -53,13 +81,17 @@ export default class DataObjectEditComponent extends Vue {
 
   async save(): Promise<void> {
     this.isWaitingChanged(true);
+    console.log('before date convert', this.model.item);
+    const objectToSave = new DataObject(this.model.item);
+    objectToSave.convertDatesToIso();
 
+    console.log('objectToSave', objectToSave);
     if (this.model.isNew) {
       // Insert new item.
       const response = await this.dataObjectsProvider.createItem(
         this.model.metaObjectKindSettings.uid,
         this.model.metaObjectSettings.uid,
-        this.model.item,
+        objectToSave,
       );
 
       this.isWaitingChanged(false);
@@ -78,7 +110,7 @@ export default class DataObjectEditComponent extends Vue {
       const response = await this.dataObjectsProvider.updateItem(
         this.model.metaObjectKindSettings.uid,
         this.model.metaObjectSettings.uid,
-        this.model.item,
+        objectToSave,
       );
 
       this.isWaitingChanged(false);
@@ -120,6 +152,7 @@ export default class DataObjectEditComponent extends Vue {
   }
 
   private setupModel(data: any): void {
+    console.log('setupModel', data);
     this.model = new DataObjectWithMetadata(data);
     if (this.isCopy()) {
       this.model.setPrimaryKey('');
@@ -176,6 +209,75 @@ export default class DataObjectEditComponent extends Vue {
   saved(result: string): string {
     return result;
   }
+
+  shouldRenderStringInput(dataTypeUid: string): boolean {
+    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.dbType === DbType.String && dataType.isPrimitive) {
+      return true;
+    }
+
+    return false;
+  }
+
+  getDataType(dataTypeUid: string): DataType | undefined {
+    return this.model.dataTypes.find((x) => x.uid === dataTypeUid);
+  }
+
+  shouldRenderIntInput(dataTypeUid: string): boolean {
+    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.dbType === DbType.Int32 && dataType.isPrimitive) {
+      return true;
+    }
+
+    return false;
+  }
+
+  shouldRenderNumberInput(dataTypeUid: string): boolean {
+    const dataType = this.model.dataTypes.find((x) => x.uid === dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.dbType === DbType.Decimal && dataType.isPrimitive) {
+      return true;
+    }
+
+    return false;
+  }
+
+  shouldRenderCheckboxInput(dataTypeUid: string): boolean {
+    const dataType = this.getDataType(dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.uid === DataTypeDefaults.Bool.uid) {
+      return true;
+    }
+
+    return false;
+  }
+
+  shouldRenderDateTimeInput(dataTypeUid: string): boolean {
+    const dataType = this.getDataType(dataTypeUid);
+    if (!dataType) {
+      return false;
+    }
+
+    if (dataType.uid === DataTypeDefaults.DateTime.uid) {
+      return true;
+    }
+
+    return false;
+  }
 }
 </script>
 
@@ -187,7 +289,7 @@ export default class DataObjectEditComponent extends Vue {
         <label :for="column.uid"
                :class="{ 'bs-required': column.required }"
                class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
-        <div class="col-12 md:col-8">
+        <div class="col-12 md:col-8" v-if="column.primaryKey">
           <InputText
             :disabled="column.primaryKey && !isPrimaryKeyEnabled"
             :id="column.uid"
@@ -199,15 +301,70 @@ export default class DataObjectEditComponent extends Vue {
           />
 
         </div>
+        <div class="col-12 md:col-8"
+             v-if="!column.primaryKey && shouldRenderStringInput(column.dataTypeUid)">
+          <!--String input-->
+          <InputText :id="column.uid"
+                     v-model="model.item.header[column.name]"
+                     autocomplete="off"
+                     size="small"
+                     class="w-full"
+                     @change="onHeaderFieldChange"
+          />
+        </div>
+        <!--Integer input-->
+        <div class="col-12 md:col-4"
+             v-if="!column.primaryKey && shouldRenderIntInput(column.dataTypeUid)">
+          <InputNumber :id="column.uid"
+                       v-model="model.item.header[column.name]"
+                       autocomplete="off"
+                       size="small"
+                       class="w-full"
+                       @change="onHeaderFieldChange"
+          />
+        </div>
+        <!--Number input-->
+        <div class="col-12 md:col-4"
+             v-if="!column.primaryKey && shouldRenderNumberInput(column.dataTypeUid)">
+          <InputNumber :id="column.uid"
+                       v-model="model.item.header[column.name]"
+                       :min-fraction-digits="column.numberDigits"
+                       :max-fraction-digits="column.numberDigits"
+                       autocomplete="off"
+                       size="small"
+                       class="w-full"
+                       @change="onHeaderFieldChange"
+          />
+        </div>
+        <!--Checkbox-->
+        <div class="col-12 md:col-4"
+             v-if="!column.primaryKey && shouldRenderCheckboxInput(column.dataTypeUid)">
+          <Checkbox :id="column.uid"
+                    :binary="true"
+                    v-model="model.item.header[column.name]"
+                    @change="onHeaderFieldChange">
+          </Checkbox>
+        </div>
+        <!--Calendar-->
+        <div class="col-12 md:col-4"
+             v-if="!column.primaryKey && shouldRenderDateTimeInput(column.dataTypeUid)">
+          <Calendar :id="column.uid"
+                    :show-time="false"
+                    :show-icon="true"
+                    :show-button-bar="true"
+                    iconDisplay="input"
+                    date-format="dd.mm.yy"
+                    class="w-full"
+                    v-model="model.item.header[column.name]"
+                    @change="onHeaderFieldChange"></Calendar>
+
+        </div>
+
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.bs-required:after {
-  content: "*";
-  color: red;
-  font-size: 12pt;
-}
+
 </style>

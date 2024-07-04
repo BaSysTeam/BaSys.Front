@@ -68,4 +68,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
+
+.bs-required:after {
+  content: "*";
+  color: red;
+  font-size: 12pt;
+}
+.p-inputnumber-input{
+  text-align: right !important;
+}
 </style>

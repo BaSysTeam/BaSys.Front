@@ -25,8 +25,10 @@ export default class DataObjectsProvider {
     : Promise<ResultWrapper<DataObjectWithMetadata>> {
     let result: ResultWrapper<DataObjectWithMetadata> = new ResultWrapper<DataObjectWithMetadata>();
 
+    let requestUid = uid;
+    if (!requestUid) requestUid = '1175f1ae-2630-47ae-8a11-19e75e3f49e0'; // NON existing uid.
     try {
-      const { data } = await axios.get(`${this.BASE_URL}/${kind}/${name}/${uid}`);
+      const { data } = await axios.get(`${this.BASE_URL}/${kind}/${name}/${requestUid}`);
       result = data;
     } catch (error) {
       console.error('error', error);
