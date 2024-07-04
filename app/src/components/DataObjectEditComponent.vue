@@ -8,6 +8,7 @@ import Checkbox from 'primevue/checkbox';
 import Calendar from 'primevue/calendar';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import DataObject from '@/models/dataObject';
+import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import { DbType } from '../../../shared/src/enums/DbTypes';
@@ -20,6 +21,7 @@ import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults
     InputNumber,
     Checkbox,
     Calendar,
+    PrimaryKeyInput,
   },
 })
 export default class DataObjectEditComponent extends Vue {
@@ -290,15 +292,10 @@ export default class DataObjectEditComponent extends Vue {
                :class="{ 'bs-required': column.required }"
                class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
         <div class="col-12 md:col-8" v-if="column.primaryKey">
-          <InputText
-            :disabled="column.primaryKey && !isPrimaryKeyEnabled"
-            :id="column.uid"
-            v-model="model.item.header[column.name]"
-            autocomplete="off"
-            size="small"
-            class="w-full"
-            @change="onHeaderFieldChange"
-          />
+          <PrimaryKeyInput v-model="model.item.header[column.name]"
+                           :id="column.uid"
+                           :is-disabled="!isPrimaryKeyEnabled"
+                           @change="onHeaderFieldChange" ></PrimaryKeyInput>
 
         </div>
         <div class="col-12 md:col-8"
