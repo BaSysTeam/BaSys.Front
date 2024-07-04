@@ -37,9 +37,7 @@ function onChange(): void {
 
 // Life cycle hooks
 onMounted(() => {
-  console.log('OnMounted');
   inputValue.value = props.modelValue;
-  console.log('PK input', props.modelValue);
 });
 </script>
 
