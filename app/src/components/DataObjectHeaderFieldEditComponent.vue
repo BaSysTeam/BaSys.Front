@@ -4,6 +4,7 @@ import { Prop, Emit } from 'vue-property-decorator';
 import { PropType } from 'vue';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
+import Textarea from 'primevue/textarea';
 import Checkbox from 'primevue/checkbox';
 import InputSwitch from 'primevue/inputswitch';
 import Calendar from 'primevue/calendar';
@@ -14,6 +15,7 @@ import DataObject from '@/models/dataObject';
 @Options({
   components: {
     InputText,
+    Textarea,
     InputNumber,
     Calendar,
     Checkbox,
@@ -51,11 +53,23 @@ export default class DataObjectHeaderEditComponent extends Vue {
 
   </div>
 
-  <div class="col-12 md:col-8" v-if="column.isString">
-    <!--String input-->
+  <!--String input-->
+  <div class="col-12 md:col-8" v-if="column.isTextInput">
     <InputText :id="column.uid"
                v-model="item.header[column.name]"
                autocomplete="off"
+               size="small"
+               class="w-full"
+               @update:model-value="onChange"
+    />
+  </div>
+
+  <!--Text area-->
+  <div class="col-12 md:col-8" v-if="column.isTextArea">
+    <Textarea :id="column.uid"
+              :auto-resize="true"
+               v-model="item.header[column.name]"
+               rows="3"
                size="small"
                class="w-full"
                @update:model-value="onChange"

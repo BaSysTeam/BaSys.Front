@@ -14,11 +14,16 @@ export default class MetaObjectColumnViewModel {
   numberDigits = 0;
 
   isPrimaryKey = false;
-  isString = false;
+
+  isTextInput = false;
+  isTextArea = false;
+
   isCheckbox = false;
   isSwitch = false;
+
   isNumber = false;
   isInt = false;
+
   isDateInput = false;
   isDateTimeInput = false;
 
@@ -55,8 +60,17 @@ export default class MetaObjectColumnViewModel {
       return;
     }
 
-    this.isString = dataType.uid === DataTypeDefaults.String.uid;
-    if (this.isString) {
+    const isString = dataType.uid === DataTypeDefaults.String.uid;
+    if (isString) {
+      if (columnRenderSettings) {
+        if (columnRenderSettings.controlKindUid === ControlKindDefaults.PrimeVueTextArea.uid) {
+          this.isTextArea = true;
+        } else {
+          this.isTextInput = true;
+        }
+      } else {
+        this.isTextInput = true;
+      }
       return;
     }
 
