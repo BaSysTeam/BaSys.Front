@@ -11,14 +11,11 @@ import DataObject from '@/models/dataObject';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
 import DataObjectHeaderFieldEditComponent
   from '@/components/DataObjectHeaderFieldEditComponent.vue';
-import DataObjectHeaderFieldEditComponentTmp
-  from '@/components/DataObjectHeaderFieldEditComponentTmp.vue';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
-    DataObjectHeaderFieldEditComponentTmp,
     InputText,
     InputNumber,
     Checkbox,
@@ -220,25 +217,15 @@ export default class DataObjectEditComponent extends Vue {
 <template>
   <div class="grid">
     <div class="col-12">
-      <div class="field grid" v-for="column in model.metaObjectSettings.header.columns"
+      <div class="field grid" v-for="column in model.headerColumns"
            :key="column.uid">
 
-        <DataObjectHeaderFieldEditComponentTmp :column="column"
-                                            :key="column.uid"
-                                            :data-types="model.dataTypes"
-                                            :is-primary-key-enabled="isPrimaryKeyEnabled"
-                                            v-model="model.item.header[column.name]"
-                                            @change="onHeaderFieldChange">
-        </DataObjectHeaderFieldEditComponentTmp>
-        <!--
          <DataObjectHeaderFieldEditComponent :key="column.uid"
                                              :column="column"
-                                             :data-types="model.dataTypes"
                                              :is-primary-key-enabled="isPrimaryKeyEnabled"
                                              :item="model.item"
                                              @change="onHeaderFieldChange">
          </DataObjectHeaderFieldEditComponent>
-          -->
 
       </div>
     </div>

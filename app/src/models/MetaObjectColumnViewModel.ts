@@ -1,8 +1,18 @@
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
+import ControlKindDefaults from '../../../shared/src/dataProviders/controlKindDefaults';
 import DataType from '../../../shared/src/models/dataType';
+import ControlKind from '../../../shared/src/models/controlKind';
 import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
+import MetaObjectTableColumnRenderSettings from '../../../shared/src/models/metaObjectTableColumnRenderSettings';
 
-export default class MetaObjectColumnFlags {
+export default class MetaObjectColumnViewModel {
+  uid = '';
+  name = '';
+  title = '';
+  dataTypeUid = '';
+  required = false;
+  numberDigits = 0;
+
   isPrimaryKey = false;
   isString = false;
   isBoolean = false;
@@ -10,10 +20,21 @@ export default class MetaObjectColumnFlags {
   isInt = false;
   isDate = false;
 
-  constructor(column: MetaObjectTableColumn | null, dataTypes: DataType[]) {
+  constructor(
+    column: MetaObjectTableColumn | null,
+    dataTypes: DataType[],
+    renderSettings: MetaObjectTableColumnRenderSettings[],
+  ) {
     if (column == null || dataTypes == null) {
       return;
     }
+
+    this.name = column.name;
+    this.uid = column.uid;
+    this.title = column.title;
+    this.dataTypeUid = column.dataTypeUid;
+    this.required = column.required;
+    this.numberDigits = column.numberDigits;
 
     this.isPrimaryKey = column.primaryKey;
 

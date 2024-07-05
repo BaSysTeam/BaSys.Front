@@ -1,5 +1,6 @@
 import { Guid } from 'guid-typescript';
 import DataObject from '@/models/dataObject';
+import MetaObjectColumnViewModel from '@/models/MetaObjectColumnViewModel';
 import DataType from '../../../shared/src/models/dataType';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
@@ -13,6 +14,7 @@ export default class DataObjectWithMetadata {
   dataTypes: DataType[];
   isNew = false;
   isPrimaryKeyEditable = false;
+  headerColumns: MetaObjectColumnViewModel[];
 
   constructor(param: any) {
     let data: any = {};
@@ -46,6 +48,16 @@ export default class DataObjectWithMetadata {
 
     this.isNew = this.checkIsNew();
     this.isPrimaryKeyEditable = this.checkIsPrimaryKeyEditable();
+
+    this.headerColumns = [];
+    this.metaObjectSettings.header.columns.forEach((column: MetaObjectTableColumn) => {
+      const columnViewModel = new MetaObjectColumnViewModel(
+        column,
+        this.dataTypes,
+        this.metaObjectSettings.header.columnRenderSettings,
+      );
+      this.headerColumns.push(columnViewModel);
+    });
   }
 
   checkIsNew(): boolean {

@@ -7,10 +7,9 @@ import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
 import Calendar from 'primevue/calendar';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
-import MetaObjectColumnFlags from '@/models/MetaObjectColumnFlags';
+import MetaObjectColumnViewModel from '@/models/MetaObjectColumnViewModel';
 import DataObject from '@/models/dataObject';
 import DataType from '../../../shared/src/models/dataType';
-import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
 
 @Options({
   components: {
@@ -22,23 +21,14 @@ import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableCol
   },
 })
 export default class DataObjectHeaderEditComponent extends Vue {
-  @Prop({ type: Object as PropType<MetaObjectTableColumn>, required: true })
-  column!: MetaObjectTableColumn;
-
-  @Prop({ type: Object as PropType<DataType[]>, required: true })
-  dataTypes!: DataType[];
+  @Prop({ type: Object as PropType<MetaObjectColumnViewModel>, required: true })
+  column!: MetaObjectColumnViewModel;
 
   @Prop({ type: Object as PropType<DataObject>, required: true })
   item!: DataObject;
 
   @Prop({ type: Boolean, required: true })
   isPrimaryKeyEnabled!: boolean;
-
-  columnFlags: MetaObjectColumnFlags = new MetaObjectColumnFlags(null, []);
-
-  beforeMount(): void {
-    this.columnFlags = new MetaObjectColumnFlags(this.column, this.dataTypes);
-  }
 
   onChange(): void {
     this.$emit('change');
@@ -51,7 +41,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
          :class="{ 'bs-required': column.required }"
          class="col-12 mb-2 md:col-4 md:mb-0">{{ column.title }}</label>
 
-  <div class="col-12 md:col-8" v-if="columnFlags.isPrimaryKey">
+  <div class="col-12 md:col-8" v-if="column.isPrimaryKey">
 
     <PrimaryKeyInput v-model="item.header[column.name]"
                      :id="column.uid"
@@ -60,7 +50,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
 
   </div>
 
-  <div class="col-12 md:col-8" v-if="columnFlags.isString">
+  <div class="col-12 md:col-8" v-if="column.isString">
     <!--String input-->
     <InputText :id="column.uid"
                v-model="item.header[column.name]"
@@ -72,7 +62,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
   </div>
 
   <!--Integer input-->
-  <div class="col-12 md:col-4" v-if="columnFlags.isInt">
+  <div class="col-12 md:col-4" v-if="column.isInt">
     <InputNumber :id="column.uid"
                  v-model="item.header[column.name]"
                  autocomplete="off"
@@ -83,7 +73,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
   </div>
 
   <!--Number input-->
-  <div class="col-12 md:col-4" v-if="columnFlags.isNumber">
+  <div class="col-12 md:col-4" v-if="column.isNumber">
     <InputNumber :id="column.uid"
                  v-model="item.header[column.name]"
                  :min-fraction-digits="column.numberDigits"
@@ -96,7 +86,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
   </div>
 
   <!--Checkbox-->
-  <div class="col-12 md:col-4" v-if="columnFlags.isBoolean">
+  <div class="col-12 md:col-4" v-if="column.isBoolean">
     <Checkbox :id="column.uid"
               :binary="true"
               v-model="item.header[column.name]"
@@ -105,7 +95,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
   </div>
 
   <!--Calendar-->
-  <div class="col-12 md:col-4" v-if="columnFlags.isDate">
+  <div class="col-12 md:col-4" v-if="column.isDate">
     <Calendar :id="column.uid"
               :show-time="false"
               :show-icon="true"

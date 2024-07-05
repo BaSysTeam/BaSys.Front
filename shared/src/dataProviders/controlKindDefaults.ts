@@ -1,7 +1,7 @@
 import ControlKind from '../models/controlKind';
 import DataTypeDefaults from './dataTypeDefaults';
 
-export class ControlKindDefaults {
+export default class ControlKindDefaults {
   static readonly PrimeVueTextInput = new ControlKind({
     uid: '0923119C-04F8-4CE4-A417-777D93011312',
     name: 'PrimeVue.TextInput',
