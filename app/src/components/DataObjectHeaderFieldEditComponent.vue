@@ -5,11 +5,11 @@ import { PropType } from 'vue';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
+import InputSwitch from 'primevue/inputswitch';
 import Calendar from 'primevue/calendar';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
 import MetaObjectColumnViewModel from '@/models/MetaObjectColumnViewModel';
 import DataObject from '@/models/dataObject';
-import DataType from '../../../shared/src/models/dataType';
 
 @Options({
   components: {
@@ -17,6 +17,7 @@ import DataType from '../../../shared/src/models/dataType';
     InputNumber,
     Calendar,
     Checkbox,
+    InputSwitch,
     PrimaryKeyInput,
   },
 })
@@ -86,7 +87,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
   </div>
 
   <!--Checkbox-->
-  <div class="col-12 md:col-4" v-if="column.isBoolean">
+  <div class="col-12 md:col-4" v-if="column.isCheckbox">
     <Checkbox :id="column.uid"
               :binary="true"
               v-model="item.header[column.name]"
@@ -94,10 +95,31 @@ export default class DataObjectHeaderEditComponent extends Vue {
     </Checkbox>
   </div>
 
+  <!--Switch-->
+  <div class="col-12 md:col-4" v-if="column.isSwitch">
+    <InputSwitch :id="column.uid"
+              v-model="item.header[column.name]"
+              @change="onChange">
+    </InputSwitch>
+  </div>
+
   <!--Calendar-->
-  <div class="col-12 md:col-4" v-if="column.isDate">
+  <div class="col-12 md:col-4" v-if="column.isDateInput">
     <Calendar :id="column.uid"
               :show-time="false"
+              :show-icon="true"
+              :show-button-bar="true"
+              iconDisplay="input"
+              date-format="dd.mm.yy"
+              class="w-full"
+              v-model="item.header[column.name]"
+              @update:model-value="onChange"></Calendar>
+
+  </div>
+
+  <div class="col-12 md:col-4" v-if="column.isDateTimeInput">
+    <Calendar :id="column.uid"
+              :show-time="true"
               :show-icon="true"
               :show-button-bar="true"
               iconDisplay="input"

@@ -15,10 +15,12 @@ export default class MetaObjectColumnViewModel {
 
   isPrimaryKey = false;
   isString = false;
-  isBoolean = false;
+  isCheckbox = false;
+  isSwitch = false;
   isNumber = false;
   isInt = false;
-  isDate = false;
+  isDateInput = false;
+  isDateTimeInput = false;
 
   constructor(
     column: MetaObjectTableColumn | null,
@@ -35,6 +37,11 @@ export default class MetaObjectColumnViewModel {
     this.dataTypeUid = column.dataTypeUid;
     this.required = column.required;
     this.numberDigits = column.numberDigits;
+
+    const columnRenderSettings = renderSettings.find(
+      (item) => item.uid.toLowerCase() === column.uid.toLowerCase(),
+    );
+    console.log('columnViewModel', this.name, this.uid, columnRenderSettings);
 
     this.isPrimaryKey = column.primaryKey;
 
@@ -64,11 +71,32 @@ export default class MetaObjectColumnViewModel {
       return;
     }
 
-    this.isBoolean = dataType.uid === DataTypeDefaults.Bool.uid;
-    if (this.isBoolean) {
+    const isBoolean = dataType.uid === DataTypeDefaults.Bool.uid;
+    if (isBoolean) {
+      if (columnRenderSettings) {
+        if (columnRenderSettings.controlKindUid === ControlKindDefaults.PrimeVueSwitchInput.uid) {
+          this.isSwitch = true;
+        } else {
+          this.isCheckbox = true;
+        }
+      } else {
+        this.isCheckbox = true;
+      }
+
       return;
     }
 
-    this.isDate = dataType.uid === DataTypeDefaults.DateTime.uid;
+    const isDateTime = dataType.uid === DataTypeDefaults.DateTime.uid;
+    if (isDateTime) {
+      if (columnRenderSettings) {
+        if (columnRenderSettings.controlKindUid === ControlKindDefaults.PrimeVueDateTimeInput.uid) {
+          this.isDateTimeInput = true;
+        } else {
+          this.isDateInput = true;
+        }
+      } else {
+        this.isDateInput = true;
+      }
+    }
   }
 }
