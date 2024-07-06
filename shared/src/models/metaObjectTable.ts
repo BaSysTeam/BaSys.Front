@@ -1,3 +1,4 @@
+import MetaObjectTableColumnRenderSettings from './metaObjectTableColumnRenderSettings';
 import MetaObjectTableColumn from './metaObjectTableColumn';
 
 export default class MetaObjectTable {
@@ -6,6 +7,7 @@ export default class MetaObjectTable {
   name:string;
   memo:string;
   columns:Array<MetaObjectTableColumn>;
+  columnRenderSettings:Array<MetaObjectTableColumnRenderSettings>
 
   constructor(params: any) {
     let data: any = {};
@@ -20,6 +22,11 @@ export default class MetaObjectTable {
 
     this.columns = data.columns
       ? data.columns.map((item: any) => new MetaObjectTableColumn(item)) : [];
+
+    this.columnRenderSettings = data.columnRenderSettings
+      ? data.columnRenderSettings.map(
+        (item: any) => new MetaObjectTableColumnRenderSettings(item),
+      ) : [];
   }
 
   getPrimaryKey(): MetaObjectTableColumn | null {
@@ -35,5 +42,11 @@ export default class MetaObjectTable {
     const column = new MetaObjectTableColumn({});
     this.columns.push(column);
     return column;
+  }
+
+  newRenderSettingsColumn(): MetaObjectTableColumnRenderSettings {
+    const item = new MetaObjectTableColumnRenderSettings(null);
+    this.columnRenderSettings.push(item);
+    return item;
   }
 }

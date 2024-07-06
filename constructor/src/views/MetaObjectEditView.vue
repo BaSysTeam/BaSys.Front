@@ -54,6 +54,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       command: () => this.addHeaderColumn(),
     },
     {
+      label: 'render settings column',
+      icon: 'pi pi-plus',
+      command: () => this.addRenderSettingsColumn(),
+    },
+    {
       label: 'update',
       icon: 'pi pi-sync',
       command: () => this.onUpdateClick(),
@@ -107,6 +112,12 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   addHeaderColumn(): void {
     this.isModified = true;
     this.settings.header.newColumn();
+    this.settingsJson = JSON.stringify(this.settings, null, 2);
+  }
+
+  addRenderSettingsColumn(): void {
+    this.isModified = true;
+    this.settings.header.newRenderSettingsColumn();
     this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
