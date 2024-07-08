@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import FileStorageTest from '@/views/FileStorageTest.vue';
 import DataObjectsEditView from '@/views/DataObjectsEditView.vue';
+import ExperimentalView from '@/views/ExperimentalView.vue';
 import HomeView from '../views/HomeView.vue';
 import UserSettingsView from '../views/UserSettingsView.vue';
 import DataObjectsListView from '../views/DataObjectsListView.vue';
@@ -52,6 +53,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'data-objects-add',
     props: true,
     component: DataObjectsEditView,
+  },
+  {
+    path: '/experimental',
+    name: 'experimental',
+    component: ExperimentalView,
   },
 ];
 
