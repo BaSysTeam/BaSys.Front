@@ -14,6 +14,19 @@ import SelectItem from '@/models/selectItem';
   },
 })
 export default class ExperimentalView extends Vue {
+  isWaiting = false;
+  productGroupItems: SelectItem[] = [];
+  productGroupFilteredItems: SelectItem[] = [];
+
+  virtualScrollerOptions = {
+    lazy: true,
+    onLazyLoad: (evt: any) => this.onLazyLoad(evt),
+    itemSize: 38,
+    showLoader: true,
+    loading: this.isWaiting,
+    delay: 250,
+  };
+
   dataItem = new DataObject({
     header: {
       amount: 100,
@@ -22,22 +35,36 @@ export default class ExperimentalView extends Vue {
     },
   });
 
-  selectedGroup = new SelectItem({
-    value: 15,
-    text: 'Product group 15',
-  });
-
-  autoCompleteValue = new SelectItem({
-    value: 3,
-    text: 'Product group 3',
-  });
-
-  productGroupItems: SelectItem[] = [];
-  productGroupItemsFiltered: SelectItem[] = [];
+  selectedGroup = 15;
 
   onProductGroupChange(evt: any): void {
     console.log('product group change', evt, this.selectedGroup);
     console.log('dataItem', this.dataItem);
+
+    if (!evt.value) {
+      return;
+    }
+
+    const searchValue = evt.value.toString();
+
+    if (searchValue) {
+      this.isWaiting = true;
+      this.productGroupFilteredItems = this.productGroupItems.filter(
+        (item) => item.text.toLowerCase().includes(searchValue.toLowerCase()),
+      ).slice(0, 100);
+      this.isWaiting = false;
+    }
+
+    console.log('searchValue', searchValue);
+  }
+
+  onDropDownBeforeShow(): void {
+    const filterResult = this.productGroupItems.filter((x) => x.value === this.selectedGroup);
+    if (filterResult.length) {
+      this.getTopItems(filterResult[0]);
+    } else {
+      this.getTopItems(new SelectItem(null));
+    }
   }
 
   onProductGroupUpdated(evt: any): void {
@@ -45,31 +72,60 @@ export default class ExperimentalView extends Vue {
     console.log('dataItem', this.dataItem);
   }
 
-  onAutoCompleteSearch(evt: any): void {
-    console.log('search', evt);
-
-    if (!evt.query.trim().length) {
-      this.productGroupItemsFiltered = this.productGroupItems;
-    } else {
-      this.productGroupItemsFiltered = this.productGroupItems.filter(
-        (item) => item.text.toLowerCase().startsWith(evt.query.toLowerCase()),
-      );
-    }
+  onDropDownFilter(evt: any): void {
+    console.log('dropDown filter', evt);
   }
 
-  onAutCompleteUpdate(evt: any): void {
-    console.log('update', evt, this.autoCompleteValue);
-  }
+  onLazyLoad(evt: any): void {
+    this.isWaiting = true;
+    console.log('lazyLoad', evt, this.productGroupItems);
 
-  mounted(): void {
-    const itemsCount = 100;
     // eslint-disable-next-line no-plusplus
-    for (let i = 1; i < itemsCount; i++) {
+    for (let i = evt.first; i < evt.first + 50; i++) {
       const newItem = new SelectItem({
         value: i,
         text: `Product group ${i}`,
       });
+
       this.productGroupItems.push(newItem);
+    }
+    this.isWaiting = false;
+  }
+
+  beforeMount(): void {
+    console.log('onBeforeMount');
+    // eslint-disable-next-line no-plusplus
+    for (let i = 1; i <= 100000; i++) {
+      const newItem = new SelectItem({
+        value: i,
+        text: `Product group ${i}`,
+      });
+
+      this.productGroupItems.push(newItem);
+    }
+
+    const filterResult = this.productGroupItems.filter((x) => x.value === this.selectedGroup);
+    filterResult.forEach((x) => { this.productGroupFilteredItems.push(x); });
+
+    this.getTopItems(filterResult[0]);
+    // const ind = this.productGroupItems.indexOf(filterResult[0]);
+    // eslint-disable-next-line no-plusplus
+    // for (let i = ind + 1; i < ind + 20; i++) {
+    //  this.productGroupFilteredItems.push(this.productGroupItems[i]);
+    // }
+
+    console.log('Product group items', this.productGroupItems);
+  }
+
+  getTopItems(item: SelectItem): void {
+    let ind = this.productGroupItems.indexOf(item);
+
+    if (ind < 0) {
+      ind = 0;
+    }
+    // eslint-disable-next-line no-plusplus
+    for (let i = ind + 1; i < ind + 20; i++) {
+      this.productGroupFilteredItems.push(this.productGroupItems[i]);
     }
   }
 }
@@ -90,34 +146,22 @@ export default class ExperimentalView extends Vue {
     <div class="col-3">
         <Dropdown id="product-group-dropdown"
                   v-model="selectedGroup"
-                  :options="productGroupItems"
+                  :options="productGroupFilteredItems"
                   :editable="true"
                   :show-clear="true"
-                  filter
+                  :loading="false"
                   size="small"
                   option-label="text"
+                  option-value="value"
                   class="w-full"
+                  @filter="onDropDownFilter"
+                  @before-show="onDropDownBeforeShow"
                   @change="onProductGroupChange"
                   @update:model-value="onProductGroupUpdated"></Dropdown>
 
     </div>
   </div>
-  <!--AutoComplete-->
-  <div class="grid">
-    <div class="col-1">
-      <label>AutoComplete</label>
-    </div>
-    <div class="col-3">
-        <AutoComplete class="w-full"
-                      v-model="autoCompleteValue"
-                      :suggestions="productGroupItemsFiltered"
-                      option-label="text"
-                      dropdown
-                      size="small"
-                      @complete="onAutoCompleteSearch"
-                      @update:model-value="onAutCompleteUpdate"></AutoComplete>
-      </div>
-  </div>
+
 </template>
 
 <style scoped>
