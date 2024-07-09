@@ -49,6 +49,7 @@ export default class ExperimentalView extends Vue {
 
     if (searchValue) {
       this.isWaiting = true;
+      this.productGroupFilteredItems = [];
       this.productGroupFilteredItems = this.productGroupItems.filter(
         (item) => item.text.toLowerCase().includes(searchValue.toLowerCase()),
       ).slice(0, 100);
@@ -149,7 +150,7 @@ export default class ExperimentalView extends Vue {
                   :options="productGroupFilteredItems"
                   :editable="true"
                   :show-clear="true"
-                  :loading="false"
+                  :loading="isWaiting"
                   size="small"
                   option-label="text"
                   option-value="value"
