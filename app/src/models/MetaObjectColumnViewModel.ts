@@ -27,6 +27,8 @@ export default class MetaObjectColumnViewModel {
   isDateInput = false;
   isDateTimeInput = false;
 
+  isDropdown = false;
+
   constructor(
     column: MetaObjectTableColumn | null,
     dataTypes: DataType[],
@@ -57,6 +59,11 @@ export default class MetaObjectColumnViewModel {
     const dataType = dataTypes.find((x) => x.uid === column.dataTypeUid);
 
     if (!dataType) {
+      return;
+    }
+
+    if (!dataType.isPrimitive) {
+      this.isDropdown = true;
       return;
     }
 
