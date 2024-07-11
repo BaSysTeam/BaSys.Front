@@ -3,6 +3,7 @@ import { Vue, Options } from 'vue-class-component';
 import { Prop, Emit } from 'vue-property-decorator';
 import SelectItem from '@/models/selectItem';
 import Dropdown from 'primevue/dropdown';
+import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
 
 @Options({
   components: {
@@ -27,8 +28,26 @@ export default class DropdownEditor extends Vue {
   modelValue!: any;
 
   isWaiting = false;
+  provider = new SelectItemsProvider();
 
   items: SelectItem[] = [];
+
+  async onDropdownBeforeShow(): Promise<void> {
+    console.log('dropdownBeforeShow');
+    this.isWaiting = true;
+
+    if (this.items.length === 0) {
+      const response = await this.provider.getCollection(this.dataTypeUid);
+      console.log('select items result', response);
+      if (response.isOK) {
+        this.items = response.data;
+      } else {
+        console.error(response.presentation);
+      }
+    }
+
+    this.isWaiting = false;
+  }
 }
 </script>
 
@@ -37,10 +56,12 @@ export default class DropdownEditor extends Vue {
             :editable="true"
             :show-clear="true"
             :loading="isWaiting"
+            :options="items"
             size="small"
             option-label="text"
             option-value="value"
-            class="w-full"></Dropdown>
+            class="w-full"
+            @before-show="onDropdownBeforeShow"></Dropdown>
 </template>
 
 <style scoped>
