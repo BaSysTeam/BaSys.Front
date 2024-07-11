@@ -146,10 +146,12 @@ export default class DataObjectHeaderEditComponent extends Vue {
 
   </div>
 
-  <!--Text area-->
+  <!--Dropdown-->
   <div class="col-12 md:col-8" v-if="column.isDropdown">
       <DropdownEditor :id="column.uid"
-                      :data-type-uid="column.dataTypeUid"></DropdownEditor>
+                      :data-type-uid="column.dataTypeUid"
+                      v-model="item.header[column.name]"
+                      @update:model-value="onChange"></DropdownEditor>
   </div>
 
 </template>
