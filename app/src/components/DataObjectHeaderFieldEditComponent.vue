@@ -11,9 +11,11 @@ import Calendar from 'primevue/calendar';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
 import MetaObjectColumnViewModel from '@/models/MetaObjectColumnViewModel';
 import DataObject from '@/models/dataObject';
+import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 
 @Options({
   components: {
+    DropdownEditor,
     InputText,
     Textarea,
     InputNumber,
@@ -143,6 +145,15 @@ export default class DataObjectHeaderEditComponent extends Vue {
               @update:model-value="onChange"></Calendar>
 
   </div>
+
+  <!--Dropdown-->
+  <div class="col-12 md:col-8" v-if="column.isDropdown">
+      <DropdownEditor :id="column.uid"
+                      :data-type-uid="column.dataTypeUid"
+                      v-model="item.header[column.name]"
+                      @update:model-value="onChange"></DropdownEditor>
+  </div>
+
 </template>
 
 <style scoped>
