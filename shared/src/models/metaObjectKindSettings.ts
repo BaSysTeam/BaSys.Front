@@ -13,6 +13,7 @@ export default class MetaObjectKindSettings {
     memo:string;
     version:number;
     iconClass:string;
+    orderByExpression: string;
     standardColumns: MetaObjectKindStandardColumn[];
     availableRoles: Array<string>;
 
@@ -32,6 +33,7 @@ export default class MetaObjectKindSettings {
       this.memo = initialData.memo || '';
       this.version = initialData.version || 0;
       this.iconClass = initialData.iconClass || '';
+      this.orderByExpression = initialData.orderByExpression || '';
 
       this.standardColumns = initialData.standardColumns
         ? initialData.standardColumns.map(
