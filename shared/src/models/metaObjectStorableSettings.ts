@@ -7,6 +7,8 @@ export default class MetaObjectStorableSettings {
   title:string;
   name:string;
   memo:string;
+  orderByExpression: string;
+  displayExpression: string;
   isActive:boolean;
   header: MetaObjectTable;
   tableParts: Array<MetaObjectTable>
@@ -25,6 +27,8 @@ export default class MetaObjectStorableSettings {
     this.memo = data.memo || '';
     this.isActive = data.isActive || false;
     this.header = new MetaObjectTable(data.header);
+    this.orderByExpression = data.orderByExpression || '';
+    this.displayExpression = data.displayExpression || '';
 
     this.tableParts = data.tableParts
       ? data.tableParts.map((item: any) => new MetaObjectTable(item)) : [];
