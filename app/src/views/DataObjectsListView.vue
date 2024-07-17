@@ -130,6 +130,7 @@ import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectKindStandardColumn';
+import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 
 @Options({
   components: {
@@ -407,6 +408,8 @@ export default class DataObjectsListView extends Vue {
     if (response.isOK) {
       this.dataObjectList = response.data;
       this.dataTableItems = this.dataObjectList.items.map((x) => x.header);
+      console.log('list response', response.data);
+      console.log('items', this.dataTableItems);
       if (this.dataTableItems.length) {
         // eslint-disable-next-line prefer-destructuring
         this.selectedRecord = this.dataTableItems[0];
@@ -426,8 +429,12 @@ export default class DataObjectsListView extends Vue {
     this.columns = [];
     // eslint-disable-next-line no-restricted-syntax
     this.dataObjectList.metaObjectSettings.header.columns.forEach((column) => {
+      const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);
+
+      const columnName = isPrimitive ? column.name : `${column.name}_display`;
+
       const newColumn = {
-        field: column.name,
+        field: columnName,
         header: column.title,
       };
       this.columns.push(newColumn);

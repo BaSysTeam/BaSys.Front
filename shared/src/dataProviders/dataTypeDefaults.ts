@@ -71,4 +71,15 @@ export default class DataTypeDefaults {
       DataTypeDefaults.UniqueIdentifier,
     ];
   }
+
+  public static IsPrimitiveType(dataTypeUid: string): boolean {
+    const types = DataTypeDefaults.AllTypes();
+    const result = types.find((x) => x.uid === dataTypeUid);
+
+    if (!result) {
+      return false;
+    }
+
+    return true;
+  }
 }
