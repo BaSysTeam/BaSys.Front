@@ -1,3 +1,6 @@
+import { Guid } from 'guid-typescript';
+import MetaObjectTableColumn from './metaObjectTableColumn';
+import DataTypeDefaults from '../dataProviders/dataTypeDefaults';
 import MetaObjectTable from './metaObjectTable';
 
 export default class MetaObjectStorableSettings {
@@ -32,5 +35,48 @@ export default class MetaObjectStorableSettings {
 
     this.tableParts = data.tableParts
       ? data.tableParts.map((item: any) => new MetaObjectTable(item)) : [];
+  }
+
+  newTablePart(objectPrimaryKeyDataTypeUid: string): MetaObjectTable {
+    const tablePart = new MetaObjectTable({
+      uid: Guid.create().toString(),
+    });
+
+    // Primary key column.
+    const pkColumn = new MetaObjectTableColumn(null);
+    pkColumn.uid = Guid.create().toString();
+    pkColumn.name = 'id';
+    pkColumn.title = 'Id';
+    pkColumn.dataTypeUid = DataTypeDefaults.Long.uid;
+    pkColumn.primaryKey = true;
+    pkColumn.isStandard = true;
+
+    tablePart.columns.push(pkColumn);
+
+    // Object uid column.
+    const objectUidColumn = new MetaObjectTableColumn(null);
+    objectUidColumn.uid = Guid.create().toString();
+    objectUidColumn.name = 'object_uid';
+    objectUidColumn.title = 'Object UID';
+    objectUidColumn.dataTypeUid = objectPrimaryKeyDataTypeUid;
+    objectUidColumn.required = true;
+    objectUidColumn.isStandard = true;
+
+    tablePart.columns.push(objectUidColumn);
+
+    // Row number column.
+    const rowNumberColumn = new MetaObjectTableColumn(null);
+    rowNumberColumn.uid = Guid.create().toString();
+    rowNumberColumn.name = 'row_number';
+    rowNumberColumn.title = 'Row number';
+    rowNumberColumn.dataTypeUid = DataTypeDefaults.Int.uid;
+    pkColumn.required = true;
+    pkColumn.isStandard = true;
+
+    tablePart.columns.push(rowNumberColumn);
+
+    this.tableParts.push(tablePart);
+
+    return tablePart;
   }
 }
