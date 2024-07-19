@@ -59,9 +59,9 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       command: () => this.addRenderSettingsColumn(),
     },
     {
-      label: 'table part',
+      label: 'detail table',
       icon: 'pi pi-plus',
-      command: () => this.addTablePart(),
+      command: () => this.addDetailTable(),
     },
     {
       label: 'update',
@@ -126,7 +126,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
-  addTablePart(): void {
+  addDetailTable(): void {
     this.isModified = true;
 
     const pk = this.settings.header.getPrimaryKey();
@@ -134,7 +134,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       return;
     }
 
-    this.settings.newTablePart(pk.dataTypeUid);
+    this.settings.newDetailTable(pk.dataTypeUid);
 
     this.settingsJson = JSON.stringify(this.settings, null, 2);
   }

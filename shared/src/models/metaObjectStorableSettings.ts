@@ -14,7 +14,7 @@ export default class MetaObjectStorableSettings {
   displayExpression: string;
   isActive:boolean;
   header: MetaObjectTable;
-  tableParts: Array<MetaObjectTable>
+  detailTables: Array<MetaObjectTable>
 
   constructor(params: any) {
     let data: any = {};
@@ -33,12 +33,12 @@ export default class MetaObjectStorableSettings {
     this.orderByExpression = data.orderByExpression || '';
     this.displayExpression = data.displayExpression || '';
 
-    this.tableParts = data.tableParts
-      ? data.tableParts.map((item: any) => new MetaObjectTable(item)) : [];
+    this.detailTables = data.detailTables
+      ? data.detailTables.map((item: any) => new MetaObjectTable(item)) : [];
   }
 
-  newTablePart(objectPrimaryKeyDataTypeUid: string): MetaObjectTable {
-    const tablePart = new MetaObjectTable({
+  newDetailTable(objectPrimaryKeyDataTypeUid: string): MetaObjectTable {
+    const detailTable = new MetaObjectTable({
       uid: Guid.create().toString(),
     });
 
@@ -51,7 +51,7 @@ export default class MetaObjectStorableSettings {
     pkColumn.primaryKey = true;
     pkColumn.isStandard = true;
 
-    tablePart.columns.push(pkColumn);
+    detailTable.columns.push(pkColumn);
 
     // Object uid column.
     const objectUidColumn = new MetaObjectTableColumn(null);
@@ -62,7 +62,7 @@ export default class MetaObjectStorableSettings {
     objectUidColumn.required = true;
     objectUidColumn.isStandard = true;
 
-    tablePart.columns.push(objectUidColumn);
+    detailTable.columns.push(objectUidColumn);
 
     // Row number column.
     const rowNumberColumn = new MetaObjectTableColumn(null);
@@ -73,10 +73,10 @@ export default class MetaObjectStorableSettings {
     pkColumn.required = true;
     pkColumn.isStandard = true;
 
-    tablePart.columns.push(rowNumberColumn);
+    detailTable.columns.push(rowNumberColumn);
 
-    this.tableParts.push(tablePart);
+    this.detailTables.push(detailTable);
 
-    return tablePart;
+    return detailTable;
   }
 }
