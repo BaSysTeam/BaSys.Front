@@ -45,9 +45,9 @@ export default class MetaObjectStorableSettings {
     // Primary key column.
     const pkColumn = new MetaObjectTableColumn(null);
     pkColumn.uid = Guid.create().toString();
-    pkColumn.name = 'id';
-    pkColumn.title = 'Id';
-    pkColumn.dataTypeUid = DataTypeDefaults.Long.uid;
+    pkColumn.name = 'uid';
+    pkColumn.title = 'Uid';
+    pkColumn.dataTypeUid = DataTypeDefaults.UniqueIdentifier.uid;
     pkColumn.primaryKey = true;
     pkColumn.isStandard = true;
 
