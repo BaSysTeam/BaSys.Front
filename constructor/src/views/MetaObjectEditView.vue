@@ -44,6 +44,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   actions = [
     {
+      label: 'update',
+      icon: 'pi pi-sync',
+      command: () => this.onUpdateClick(),
+    },
+    {
       label: 'json',
       icon: 'pi pi-download',
       command: () => this.downloadJson(),
@@ -59,11 +64,10 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       command: () => this.addRenderSettingsColumn(),
     },
     {
-      label: 'update',
-      icon: 'pi pi-sync',
-      command: () => this.onUpdateClick(),
+      label: 'detail table',
+      icon: 'pi pi-plus',
+      command: () => this.addDetailTable(),
     },
-
   ];
 
   get codemirrorStyle(): object {
@@ -121,6 +125,31 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
+  addDetailTable(): void {
+    this.isModified = true;
+
+    const pk = this.settings.header.getPrimaryKey();
+    if (!pk) {
+      return;
+    }
+
+    this.settings.newDetailTable(pk.dataTypeUid);
+
+    this.settingsJson = JSON.stringify(this.settings, null, 2);
+  }
+
+  onAddDetailTableColumn(detailTableUid: string): void {
+    const currentTable = this.settings.detailTables.find(
+      (detailTable) => detailTable.uid === detailTableUid,
+    );
+    if (!currentTable) {
+      return;
+    }
+    this.isModified = true;
+    currentTable.newColumn();
+    this.settingsJson = JSON.stringify(this.settings, null, 2);
+  }
+
   onUpdateClick(): void {
     this.update();
   }
@@ -156,6 +185,15 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
     if (response.isOK) {
       this.settings = new MetaObjectStorableSettings(response.data);
+      this.settings.detailTables.forEach((detailTable) => {
+        console.log('detailTable', detailTable);
+        const newAction = {
+          icon: 'pi pi-plus',
+          label: `${detailTable.title} table column`,
+          command: () => this.onAddDetailTableColumn(detailTable.uid),
+        };
+        this.actions.push(newAction);
+      });
       this.formTitle = `${response.data.metaObjectKindTitle}.${this.settings.title}`;
       this.settingsJson = JSON.stringify(this.settings, null, 2);
     } else {
