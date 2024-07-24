@@ -7,6 +7,7 @@ import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
 import Calendar from 'primevue/calendar';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import DataObjectViewModel from '@/models/dataObjectViewModel';
 import DataObject from '@/models/dataObject';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
 import DataObjectHeaderFieldEditComponent
@@ -78,7 +79,7 @@ export default class DataObjectEditComponent extends Vue {
   isModified = false;
   title = '';
   dataObjectsProvider = new DataObjectsProvider();
-  model = new DataObjectWithMetadata(null);
+  model = new DataObjectViewModel(null);
   toastHelper = new ToastHelper(useToast());
 
   async save(): Promise<void> {
