@@ -86,6 +86,7 @@ export default class DataObjectEditComponent extends Vue {
   dataObjectsProvider = new DataObjectsProvider();
   model = new DataObjectViewModel(null);
   toastHelper = new ToastHelper(useToast());
+  windowHeight = window.innerHeight;
 
   async save(): Promise<void> {
     this.isWaitingChanged(true);
@@ -224,32 +225,34 @@ export default class DataObjectEditComponent extends Vue {
 <template>
   <div class="grid" v-if="model.tabs.length > 0">
     <div class="col-12">
-      <TabView>
-        <!--Header tab-->
-        <TabPanel key="header" header="Header">
-          <div class="grid">
-            <div class="col-6">
-              <div class="field grid" v-for="column in model.headerColumns"
-                   :key="column.uid">
+      <div class="tabview-bottom">
+        <TabView>
+          <!--Header tab-->
+          <TabPanel key="header" header="Header">
+            <div class="grid" :style="{height: `${windowHeight - 250}px`}">
+              <div class="col-6">
+                <div class="field grid" v-for="column in model.headerColumns"
+                     :key="column.uid">
 
-                <DataObjectHeaderFieldEditComponent :key="column.uid"
-                                                    :column="column"
-                                                    :is-primary-key-enabled="isPrimaryKeyEnabled"
-                                                    :item="model.item"
-                                                    @change="onHeaderFieldChange">
-                </DataObjectHeaderFieldEditComponent>
+                  <DataObjectHeaderFieldEditComponent :key="column.uid"
+                                                      :column="column"
+                                                      :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                                      :item="model.item"
+                                                      @change="onHeaderFieldChange">
+                  </DataObjectHeaderFieldEditComponent>
 
+                </div>
               </div>
             </div>
-          </div>
-        </TabPanel>
-        <!--Detail tables tabs-->
-         <TabPanel v-for="tab in model.detailTabs" :key="tab.uid" :header="tab.title">
-           <DataObjectDetailTableEdit :table-uid="tab.uid"
-                                      :meta-object-settings="model.metaObjectSettings">
-           </DataObjectDetailTableEdit>
-         </TabPanel>
-     </TabView>
+          </TabPanel>
+          <!--Detail tables tabs-->
+          <TabPanel v-for="tab in model.detailTabs" :key="tab.uid" :header="tab.title">
+            <DataObjectDetailTableEdit :table-uid="tab.uid"
+                                       :meta-object-settings="model.metaObjectSettings">
+            </DataObjectDetailTableEdit>
+          </TabPanel>
+        </TabView>
+      </div>
     </div>
   </div>
 
@@ -271,5 +274,17 @@ export default class DataObjectEditComponent extends Vue {
 </template>
 
 <style scoped>
+.tabview-bottom .p-tabview-nav {
+  order: 2; /* Pushes the tabs to the bottom */
+}
+
+.tabview-bottom .p-tabview-panels {
+  order: 1; /* Keeps the content above the tabs */
+}
+
+.tabview-bottom .p-tabview {
+  display: flex;
+  flex-direction: column-reverse; /* Reverses the order of children */
+}
 
 </style>

@@ -35,7 +35,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
   get dataTableStyle(): object {
     return {
-      height: `${this.windowHeight - 150}px`,
+      height: `${this.windowHeight - 250}px`,
     };
   }
 
