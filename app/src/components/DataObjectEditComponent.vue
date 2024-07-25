@@ -6,7 +6,8 @@ import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
 import Calendar from 'primevue/calendar';
-import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 import DataObjectViewModel from '@/models/dataObjectViewModel';
 import DataObject from '@/models/dataObject';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
@@ -21,6 +22,8 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputNumber,
     Checkbox,
     Calendar,
+    TabView,
+    TabPanel,
     PrimaryKeyInput,
     DataObjectHeaderFieldEditComponent,
   },
@@ -156,7 +159,8 @@ export default class DataObjectEditComponent extends Vue {
 
   private setupModel(data: any): void {
     console.log('setupModel', data);
-    this.model = new DataObjectWithMetadata(data);
+    this.model = new DataObjectViewModel(data);
+    console.log('tabs', this.model.tabs);
     if (this.isCopy()) {
       this.model.setPrimaryKey('');
       this.model.isNew = true;
@@ -216,7 +220,32 @@ export default class DataObjectEditComponent extends Vue {
 </script>
 
 <template>
-  <div class="grid">
+  <div class="grid" v-if="model.tabs.length > 0">
+    <div class="col-12">
+      <TabView>
+        <!--Header tab-->
+        <TabPanel key="header" header="Header">
+          <div class="field grid" v-for="column in model.headerColumns"
+               :key="column.uid">
+
+            <DataObjectHeaderFieldEditComponent :key="column.uid"
+                                                :column="column"
+                                                :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                                :item="model.item"
+                                                @change="onHeaderFieldChange">
+            </DataObjectHeaderFieldEditComponent>
+
+          </div>
+        </TabPanel>
+        <!--Detail tables tabs-->
+         <TabPanel v-for="tab in model.detailTabs" :key="tab.uid" :header="tab.title">
+           <p>{{ tab.title }}</p>
+         </TabPanel>
+     </TabView>
+    </div>
+  </div>
+
+  <div class="grid" v-if="model.tabs.length === 0">
     <div class="col-12">
       <div class="field grid" v-for="column in model.headerColumns"
            :key="column.uid">

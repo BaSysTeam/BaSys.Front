@@ -1,6 +1,7 @@
 import { Guid } from 'guid-typescript';
 import DataObject from '@/models/dataObject';
 import MetaObjectColumnViewModel from '@/models/MetaObjectColumnViewModel';
+import TabViewModel from '@/models/tabViewModel';
 import DataType from '../../../shared/src/models/dataType';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
@@ -15,6 +16,7 @@ export default class DataObjectViewModel {
   isNew = false;
   isPrimaryKeyEditable = false;
   headerColumns: MetaObjectColumnViewModel[];
+  tabs: any[] = [];
 
   constructor(param: any) {
     let data: any = {};
@@ -58,6 +60,30 @@ export default class DataObjectViewModel {
       );
       this.headerColumns.push(columnViewModel);
     });
+
+    this.tabs = [];
+    if (this.metaObjectSettings.detailTables.length) {
+      const headerTab = new TabViewModel({
+        title: 'Header',
+        name: 'header',
+        uid: 'header',
+        isHeader: true,
+      });
+      this.tabs.push(headerTab);
+
+      this.metaObjectSettings.detailTables.forEach((detailTable) => {
+        const newTab = new TabViewModel({
+          title: detailTable.title,
+          name: detailTable.name,
+          uid: detailTable.uid,
+        });
+        this.tabs.push(newTab);
+      });
+    }
+  }
+
+  get detailTabs(): TabViewModel[] {
+    return this.tabs.filter((x) => !x.isHeader);
   }
 
   checkIsNew(): boolean {
