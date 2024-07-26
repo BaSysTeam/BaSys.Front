@@ -44,6 +44,7 @@
           <DataTable
             v-model:selection="selectedRow"
             v-model:value="metadataKinds"
+            :style="dataTableStyle"
             :metaKeySelection="true"
             showGridlines
             size="small"
@@ -123,9 +124,16 @@ export default class MetadataKindsListView extends Vue {
   selectedRow = {};
   metadataKinds:MetaObjectKind[] = [];
   isWaiting = true;
+  windowHeight = window.innerHeight;
 
   get isSelectedRowEmpty(): boolean {
     return Object.keys(this.selectedRow).length === 0;
+  }
+
+  get dataTableStyle(): object {
+    return {
+      height: `${this.windowHeight - 150}px`,
+    };
   }
 
   onAddClicked():void {
