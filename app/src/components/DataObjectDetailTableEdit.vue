@@ -9,6 +9,7 @@ import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 
 @Options({
   components:
@@ -74,9 +75,11 @@ export default class DataObjectDetailTableEdit extends Vue {
       if (column.name === 'uid' || column.name === 'object_uid') {
         return;
       }
+      const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);
 
+      const columnName = isPrimitive ? column.name : `${column.name}_display`;
       const newColumn = {
-        field: column.name,
+        field: columnName,
         header: column.title,
       };
       this.columns.push(newColumn);
