@@ -5,11 +5,9 @@ import { PropType } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import DataObject from '@/models/dataObject';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
-import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
@@ -20,40 +18,23 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     },
 })
 export default class DataObjectDetailTableEdit extends Vue {
-  // Name of metaobject kind.
-  @Prop({
-    required: true,
-    type: String,
-    default: '',
-  })
+  // Name of metadata object kind.
+  @Prop({ required: true, type: String, default: '' })
   kind!: string;
 
   // Identifier of the object.
-  @Prop({
-    required: true,
-    type: String,
-    default: '',
-  })
+  @Prop({ required: true, type: String, default: '' })
   objectUid!: string;
-
-  // Identifier of detail table.
-  @Prop({
-    required: false,
-    type: String,
-    default: '',
-  })
-  tableUid!: string;
 
   // Metadata object.
   @Prop({ type: Object as PropType<MetaObjectStorableSettings>, required: true })
   metaObjectSettings!: MetaObjectStorableSettings;
 
-  // Data object.
-  @Prop({ type: Object as PropType<DataObject>, required: true })
-  item!: DataObject;
+  // DetailsTable.
+  @Prop({ type: Object as PropType<DataObjectDetailsTable>, required: true })
+  table!: DataObjectDetailsTable;
 
   isWaiting = false;
-  tableName = '';
   columns:any[] = [];
   selectedRecord:any = {};
   windowHeight = window.innerHeight;
@@ -63,19 +44,8 @@ export default class DataObjectDetailTableEdit extends Vue {
   get dataTableStyle(): object {
     return {
       height: `${this.windowHeight - 250}px`,
+      fontSize: '14px',
     };
-  }
-
-  get currentTable(): DataObjectDetailsTable {
-    const currentTable = this.item.detailsTables.find((x) => x.uid === this.tableUid);
-
-    if (currentTable) {
-      return currentTable;
-    }
-
-    const newTable = new DataObjectDetailsTable({ uid: this.tableUid });
-    this.item.updateTable(newTable);
-    return newTable;
   }
 
   @Watch('tableUid')
@@ -92,12 +62,12 @@ export default class DataObjectDetailTableEdit extends Vue {
     }
 
     // Get current table.
-    const tableSettings = this.metaObjectSettings.detailTables.find((x) => x.uid === this.tableUid);
+    const tableSettings = this.metaObjectSettings.detailTables.find(
+      (x) => x.uid === this.table.uid,
+    );
     if (!tableSettings) {
       return;
     }
-
-    this.tableName = tableSettings.name;
 
     // eslint-disable-next-line no-restricted-syntax
     tableSettings.columns.forEach((column) => {
@@ -119,11 +89,11 @@ export default class DataObjectDetailTableEdit extends Vue {
       this.kind,
       this.metaObjectSettings.name,
       this.objectUid,
-      this.tableName,
+      this.table.name,
     );
     if (response.isOK) {
-      this.item.updateTable(response.data);
-      console.log('current table', this.currentTable);
+      this.table.rows = response.data.rows;
+      console.log('current table', this.table);
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -132,8 +102,19 @@ export default class DataObjectDetailTableEdit extends Vue {
   }
 
   mounted():void {
+    this.$nextTick(() => {
+      window.addEventListener('resize', this.onResize);
+    });
     this.initColumns();
     this.loadData();
+  }
+
+  beforeDestroy(): void {
+    window.removeEventListener('resize', this.onResize);
+  }
+
+  onResize(): void {
+    this.windowHeight = window.innerHeight;
   }
 }
 </script>
@@ -142,7 +123,7 @@ export default class DataObjectDetailTableEdit extends Vue {
   <DataTable
     v-model:selection="selectedRecord"
     :style="dataTableStyle"
-    :value="currentTable.rows"
+    :value="table.rows"
     :metaKeySelection="true"
     :rows="15"
     showGridlines

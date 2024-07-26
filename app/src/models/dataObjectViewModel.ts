@@ -2,6 +2,7 @@ import { Guid } from 'guid-typescript';
 import DataObject from '@/models/dataObject';
 import MetaObjectColumnViewModel from '@/models/MetaObjectColumnViewModel';
 import TabViewModel from '@/models/tabViewModel';
+import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataType from '../../../shared/src/models/dataType';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
@@ -72,12 +73,20 @@ export default class DataObjectViewModel {
       this.tabs.push(headerTab);
 
       this.metaObjectSettings.detailTables.forEach((detailTable) => {
+        // Init tab for detail table.
         const newTab = new TabViewModel({
           title: detailTable.title,
           name: detailTable.name,
           uid: detailTable.uid,
         });
         this.tabs.push(newTab);
+        // Init empty details table.
+        const newTable = new DataObjectDetailsTable({
+          uid: detailTable.uid,
+          name: detailTable.name,
+          title: detailTable.title,
+        });
+        this.item.detailsTables.push(newTable);
       });
     }
   }

@@ -1,5 +1,6 @@
 export default class DataObjectDetailsTable {
   name: string;
+  title: string;
   uid: string;
   rows: any[];
 
@@ -10,6 +11,7 @@ export default class DataObjectDetailsTable {
     }
 
     this.name = data.name || '';
+    this.title = data.title || '';
     this.uid = data.uid || '';
     this.rows = [];
     if (data.rows) {
