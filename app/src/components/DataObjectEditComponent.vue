@@ -219,6 +219,10 @@ export default class DataObjectEditComponent extends Vue {
   saved(result: string): string {
     return result;
   }
+
+  onTableIsModifiedChanged(args: boolean): void {
+    this.isModifiedChanged(args);
+  }
 }
 </script>
 
@@ -253,7 +257,8 @@ export default class DataObjectEditComponent extends Vue {
                                        :kind="kind"
                                        :object-uid="uid"
                                        :meta-object-settings="model.metaObjectSettings"
-                                       :data-types="model.dataTypes">
+                                       :data-types="model.dataTypes"
+                                       @is-modified-changed="onTableIsModifiedChanged">
             </DataObjectDetailTableEdit>
           </TabPanel>
         </TabView>

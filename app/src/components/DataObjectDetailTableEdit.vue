@@ -64,6 +64,11 @@ export default class DataObjectDetailTableEdit extends Vue {
     this.loadData();
   }
 
+  @Emit('isModifiedChanged')
+  isModifiedChanged(newValue: boolean): boolean {
+    return newValue;
+  }
+
   initColumns(): void {
     this.columns = [];
     if (!this.metaObjectSettings) {
@@ -151,6 +156,7 @@ export default class DataObjectDetailTableEdit extends Vue {
     console.log('onCellEditComplete', event);
     const { data, newValue, field } = event;
     data[field] = newValue;
+    this.isModifiedChanged(true);
   }
 }
 </script>
@@ -173,7 +179,7 @@ export default class DataObjectDetailTableEdit extends Vue {
     :pt="{
                 table: { style: 'min-width: 50rem' },
                 column: {
-                    bodycell: ({ state }) => ({
+                    bodycell: ({ state }:any) => ({
                         class: [{ 'pt-0 pb-0': state['d_editing'] }]
                     })
                 }
