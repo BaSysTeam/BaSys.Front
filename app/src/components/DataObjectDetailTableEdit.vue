@@ -5,8 +5,11 @@ import { PropType } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
+import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
+import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
@@ -16,6 +19,7 @@ import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults
     {
       DataTable,
       Column,
+      InputText,
     },
 })
 export default class DataObjectDetailTableEdit extends Vue {
@@ -31,12 +35,16 @@ export default class DataObjectDetailTableEdit extends Vue {
   @Prop({ type: Object as PropType<MetaObjectStorableSettings>, required: true })
   metaObjectSettings!: MetaObjectStorableSettings;
 
+  // Data types.
+  @Prop({ type: Object as PropType<DataType[]>, required: true })
+  dataTypes!: DataType[];
+
   // DetailsTable.
   @Prop({ type: Object as PropType<DataObjectDetailsTable>, required: true })
   table!: DataObjectDetailsTable;
 
   isWaiting = false;
-  columns:any[] = [];
+  columns:MetaObjectColumnViewModel[] = [];
   selectedRecord:any = {};
   windowHeight = window.innerHeight;
   provider = new DataObjectsProvider();
@@ -78,11 +86,21 @@ export default class DataObjectDetailTableEdit extends Vue {
       const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);
 
       const columnName = isPrimitive ? column.name : `${column.name}_display`;
-      const newColumn = {
-        field: columnName,
-        header: column.title,
-      };
-      this.columns.push(newColumn);
+
+      const columnViewModel = new MetaObjectColumnViewModel(
+        column,
+        this.dataTypes,
+        tableSettings.columnRenderSettings,
+      );
+
+      columnViewModel.name = columnName;
+
+      if (columnViewModel.name === 'row_number') {
+        columnViewModel.setWidth('30px');
+        columnViewModel.title = '#';
+      }
+
+      this.columns.push(columnViewModel);
     });
   }
 
@@ -104,6 +122,14 @@ export default class DataObjectDetailTableEdit extends Vue {
     this.isWaiting = false;
   }
 
+  getColumn(name: string): MetaObjectColumnViewModel {
+    const column = this.columns.find((x) => x.name === name);
+    if (!column) {
+      return new MetaObjectColumnViewModel(null, this.dataTypes, []);
+    }
+    return column;
+  }
+
   mounted():void {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
@@ -118,6 +144,12 @@ export default class DataObjectDetailTableEdit extends Vue {
 
   onResize(): void {
     this.windowHeight = window.innerHeight;
+  }
+
+  onCellEditComplete(event: any): void {
+    console.log('onCellEditComplete', event);
+    const { data, newValue, field } = event;
+    data[field] = newValue;
   }
 }
 </script>
@@ -135,13 +167,40 @@ export default class DataObjectDetailTableEdit extends Vue {
     scrollHeight="flex"
     filterDisplay="menu"
     size="small"
+    edit-mode="cell"
+    @cell-edit-complete="onCellEditComplete"
+    :pt="{
+                table: { style: 'min-width: 50rem' },
+                column: {
+                    bodycell: ({ state }) => ({
+                        class: [{ 'pt-0 pb-0': state['d_editing'] }]
+                    })
+                }
+            }"
   >
     <template #empty>{{ $t('noItemsFound') }}</template>
     <Column
       v-for="col of columns"
-      :key="col.field"
-      :field="col.field"
-      :header="col.header">
+      :key="col.name"
+      :field="col.name"
+      :header="col.title"
+      :style="col.style"
+    >
+      <template #body="{ data, field }">
+        {{ data[field] }}
+      </template>
+      <template #editor="{ data, field }">
+        <template v-if="getColumn(field).isTextInput">
+          <InputText v-model="data[field]"
+                     class="w-full"
+                     size="small"
+                     autocomplete="off"
+                     autofocus="true" />
+        </template>
+        <template v-else>
+          {{ data[field] }}
+        </template>
+      </template>
     </Column>
   </DataTable>
 </template>

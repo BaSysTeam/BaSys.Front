@@ -252,7 +252,8 @@ export default class DataObjectEditComponent extends Vue {
             <DataObjectDetailTableEdit :table ="table"
                                        :kind="kind"
                                        :object-uid="uid"
-                                       :meta-object-settings="model.metaObjectSettings">
+                                       :meta-object-settings="model.metaObjectSettings"
+                                       :data-types="model.dataTypes">
             </DataObjectDetailTableEdit>
           </TabPanel>
         </TabView>

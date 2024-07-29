@@ -17,6 +17,7 @@ module.exports = {
     'class-methods-use-this': 'off',
     'vuejs-accessibility/label-has-for': 'off',
     'vuejs-accessibility/form-control-has-label': 'off',
+    'vuejs-accessibility/no-autofocus': 'off',
     'import/prefer-default-export': 'off',
     'no-shadow': 'off', // Turn off the base rule,
     '@typescript-eslint/no-explicit-any': 'off',

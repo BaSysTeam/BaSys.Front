@@ -28,10 +28,11 @@ export default class MetaObjectColumnViewModel {
   isDateTimeInput = false;
 
   isDropdown = false;
+  style: any = { width: '100px', minWidth: '100px', maxWidth: '100px' };
 
   constructor(
     column: MetaObjectTableColumn | null,
-    dataTypes: DataType[],
+    dataTypes: DataType[] | null,
     renderSettings: MetaObjectTableColumnRenderSettings[],
   ) {
     if (column == null || dataTypes == null) {
@@ -48,7 +49,6 @@ export default class MetaObjectColumnViewModel {
     const columnRenderSettings = renderSettings.find(
       (item) => item.uid.toLowerCase() === column.uid.toLowerCase(),
     );
-    console.log('columnViewModel', this.name, this.uid, columnRenderSettings);
 
     this.isPrimaryKey = column.primaryKey;
 
@@ -119,5 +119,11 @@ export default class MetaObjectColumnViewModel {
         this.isDateInput = true;
       }
     }
+  }
+
+  setWidth(widthExpression: string): void {
+    this.style.width = widthExpression;
+    this.style.maxWidth = widthExpression;
+    this.style.minWidth = widthExpression;
   }
 }
