@@ -28,6 +28,8 @@ export default class MetaObjectColumnViewModel {
   isDateTimeInput = false;
 
   isDropdown = false;
+
+  readonly = false;
   style: any = { width: 'auto', minWidth: 'auto', maxWidth: 'auto' };
 
   constructor(

@@ -25,6 +25,9 @@ export default class DropdownEditor extends Vue {
   })
   dataTypeUid!: string;
 
+  @Prop({ type: Object, default: {} })
+  inputStyle!: any;
+
   @Prop({ type: Object as PropType<any> })
   modelValue!: any;
 
@@ -109,6 +112,7 @@ export default class DropdownEditor extends Vue {
             :show-clear="true"
             :loading="isWaiting"
             :options="items"
+            :input-style="inputStyle"
             v-model="localValue"
             size="small"
             option-label="text"
