@@ -28,7 +28,7 @@ export default class MetaObjectColumnViewModel {
   isDateTimeInput = false;
 
   isDropdown = false;
-  style: any = { width: '100px', minWidth: '100px', maxWidth: '100px' };
+  style: any = { width: 'auto', minWidth: 'auto', maxWidth: 'auto' };
 
   constructor(
     column: MetaObjectTableColumn | null,
@@ -125,5 +125,19 @@ export default class MetaObjectColumnViewModel {
     this.style.width = widthExpression;
     this.style.maxWidth = widthExpression;
     this.style.minWidth = widthExpression;
+  }
+
+  setDefaultWidth(): void {
+    if (this.isSwitch || this.isCheckbox) {
+      this.setWidth('30px');
+    } else if (this.isDropdown) {
+      this.setWidth('250px');
+    } else if (this.isNumber || this.isInt) {
+      this.setWidth('100px');
+    } else if (this.isDateInput) {
+      this.setWidth('70px');
+    } else if (this.isDateTimeInput) {
+      this.setWidth('120px');
+    }
   }
 }

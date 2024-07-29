@@ -94,6 +94,7 @@ export default class DataObjectDetailTableEdit extends Vue {
       );
 
       columnViewModel.name = columnName;
+      columnViewModel.setDefaultWidth();
 
       if (columnViewModel.name === 'row_number') {
         columnViewModel.setWidth('30px');
