@@ -6,6 +6,10 @@ import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import Checkbox from 'primevue/checkbox';
+import InputSwitch from 'primevue/inputswitch';
+import Calendar from 'primevue/calendar';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
@@ -20,6 +24,10 @@ import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults
       DataTable,
       Column,
       InputText,
+      InputNumber,
+      Checkbox,
+      InputSwitch,
+      Calendar,
     },
 })
 export default class DataObjectDetailTableEdit extends Vue {
@@ -104,6 +112,8 @@ export default class DataObjectDetailTableEdit extends Vue {
       if (columnViewModel.name === 'row_number') {
         columnViewModel.setWidth('30px');
         columnViewModel.title = '#';
+        columnViewModel.isInt = false;
+        columnViewModel.isNumber = false;
       }
 
       this.columns.push(columnViewModel);
@@ -180,7 +190,7 @@ export default class DataObjectDetailTableEdit extends Vue {
                 table: { style: 'min-width: 50rem' },
                 column: {
                     bodycell: ({ state }:any) => ({
-                        class: [{ 'pt-0 pb-0': state['d_editing'] }]
+                        class: [{ 'p-0': state['d_editing'] }]
                     })
                 }
             }"
@@ -197,12 +207,72 @@ export default class DataObjectDetailTableEdit extends Vue {
         {{ data[field] }}
       </template>
       <template #editor="{ data, field }">
-        <template v-if="getColumn(field).isTextInput">
+        <template v-if="getColumn(field).isTextInput || getColumn(field).isTextArea">
           <InputText v-model="data[field]"
-                     class="w-full"
+                     class="w-full border-noround"
+                     style="padding: 5px"
                      size="small"
                      autocomplete="off"
                      autofocus="true" />
+        </template>
+        <template v-else-if="getColumn(field).isInt">
+          <InputNumber v-model="data[field]"
+                       :input-style="{width: '100%',
+                       fontSize: '14px',
+                       borderRadius:0,
+                       padding: '5px'}"
+                       autocomplete="off"
+                       size="small"
+                       autofocus/>
+        </template>
+        <template v-else-if="getColumn(field).isNumber">
+          <InputNumber v-model="data[field]"
+                       :min-fraction-digits="getColumn(field).numberDigits"
+                       :max-fraction-digits="getColumn(field).numberDigits"
+                       :input-style="{width: '100%',
+                       fontSize: '14px',
+                       borderRadius:0,
+                       padding:'5px'}"
+                       autocomplete="off"
+                       size="small"
+                       variant="filled"
+                       autofocus
+          />
+        </template>
+        <template v-else-if="getColumn(field).isCheckbox">
+          <Checkbox :binary="true"
+                    v-model="data[field]">
+          </Checkbox>
+        </template>
+        <template v-else-if="getColumn(field).isSwitch">
+          <InputSwitch v-model="data[field]">
+          </InputSwitch>
+        </template>
+        <template v-else-if="getColumn(field).isDateInput">
+          <Calendar :show-time="false"
+                    :show-icon="true"
+                    :show-button-bar="true"
+                    :input-style="{width: '100%',
+                       fontSize: '14px',
+                       borderRadius:0,
+                       padding: '5px'}"
+                    iconDisplay="input"
+                    date-format="dd.mm.yy"
+                    class="w-full"
+                    v-model="data[field]"></Calendar>
+        </template>
+        <template v-else-if="getColumn(field).isDateTimeInput">
+          <Calendar :show-time="true"
+                    :show-icon="true"
+                    :show-button-bar="true"
+                    :input-style="{width: '100%',
+                       fontSize: '14px',
+                       borderRadius:0,
+                       padding: '5px'}"
+                    iconDisplay="input"
+                    date-format="dd.mm.yy"
+                    class="w-full"
+                    v-model="data[field]"></Calendar>
         </template>
         <template v-else>
           {{ data[field] }}
