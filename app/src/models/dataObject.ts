@@ -1,5 +1,8 @@
+import DataObjectDetailsTable from './dataObjectDetailsTable';
+
 export default class DataObject {
   header: { [key: string]: any };
+  detailsTables: DataObjectDetailsTable[]
 
   constructor(param: any) {
     let data: any = {};
@@ -11,6 +14,13 @@ export default class DataObject {
     if (data.header) {
       Object.entries(data.header).forEach(([key, value]) => {
         this.header[key] = value;
+      });
+    }
+
+    this.detailsTables = [];
+    if (data.detailsTables) {
+      data.detailsTables.forEach((item: any) => {
+        this.detailsTables.push(new DataObjectDetailsTable(item));
       });
     }
   }
@@ -52,5 +62,17 @@ export default class DataObject {
         this.header[key] = this.dateToIsoString(currentValue);
       }
     });
+  }
+
+  updateTable(detailsTable: DataObjectDetailsTable): void {
+    const currentTable = this.detailsTables.find(
+      (x) => x.uid === detailsTable.uid,
+    );
+
+    if (currentTable) {
+      currentTable.rows = detailsTable.rows;
+    } else {
+      this.detailsTables.push(detailsTable);
+    }
   }
 }

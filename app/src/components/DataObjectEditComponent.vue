@@ -6,11 +6,14 @@ import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
 import Calendar from 'primevue/calendar';
-import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
+import DataObjectViewModel from '@/models/dataObjectViewModel';
 import DataObject from '@/models/dataObject';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
 import DataObjectHeaderFieldEditComponent
   from '@/components/DataObjectHeaderFieldEditComponent.vue';
+import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vue';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -20,8 +23,11 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     InputNumber,
     Checkbox,
     Calendar,
+    TabView,
+    TabPanel,
     PrimaryKeyInput,
     DataObjectHeaderFieldEditComponent,
+    DataObjectDetailTableEdit,
   },
 })
 export default class DataObjectEditComponent extends Vue {
@@ -78,8 +84,9 @@ export default class DataObjectEditComponent extends Vue {
   isModified = false;
   title = '';
   dataObjectsProvider = new DataObjectsProvider();
-  model = new DataObjectWithMetadata(null);
+  model = new DataObjectViewModel(null);
   toastHelper = new ToastHelper(useToast());
+  windowHeight = window.innerHeight;
 
   async save(): Promise<void> {
     this.isWaitingChanged(true);
@@ -155,7 +162,8 @@ export default class DataObjectEditComponent extends Vue {
 
   private setupModel(data: any): void {
     console.log('setupModel', data);
-    this.model = new DataObjectWithMetadata(data);
+    this.model = new DataObjectViewModel(data);
+    console.log('tabs', this.model.tabs);
     if (this.isCopy()) {
       this.model.setPrimaryKey('');
       this.model.isNew = true;
@@ -215,8 +223,45 @@ export default class DataObjectEditComponent extends Vue {
 </script>
 
 <template>
-  <div class="grid">
+  <div class="grid" v-if="model.tabs.length > 0">
     <div class="col-12">
+      <div class="bs-tabview-bottom">
+        <TabView>
+          <!--Header tab-->
+          <TabPanel key="header" header="Header">
+            <div class="grid" :style="{height: `${windowHeight - 250}px`}">
+              <div class="col-6">
+                <div class="field grid" v-for="column in model.headerColumns"
+                     :key="column.uid">
+
+                  <DataObjectHeaderFieldEditComponent :key="column.uid"
+                                                      :column="column"
+                                                      :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                                      :item="model.item"
+                                                      @change="onHeaderFieldChange">
+                  </DataObjectHeaderFieldEditComponent>
+
+                </div>
+              </div>
+            </div>
+          </TabPanel>
+          <!--Detail tables tabs-->
+          <TabPanel v-for="table in model.item.detailsTables"
+                    :key="table.uid"
+                    :header="table.title">
+            <DataObjectDetailTableEdit :table ="table"
+                                       :kind="kind"
+                                       :object-uid="uid"
+                                       :meta-object-settings="model.metaObjectSettings">
+            </DataObjectDetailTableEdit>
+          </TabPanel>
+        </TabView>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" v-if="model.tabs.length === 0">
+    <div class="col-6">
       <div class="field grid" v-for="column in model.headerColumns"
            :key="column.uid">
 
@@ -233,5 +278,21 @@ export default class DataObjectEditComponent extends Vue {
 </template>
 
 <style scoped>
+.bs-tabview-bottom .p-tabview-nav {
+  order: 2; /* Pushes the tabs to the bottom */
+}
+
+.bs-tabview-bottom .p-tabview-panels {
+  order: 1; /* Keeps the content above the tabs */
+}
+
+.bs-tabview-bottom .p-tabview {
+  display: flex;
+  flex-direction: column-reverse; /* Reverses the order of children */
+}
+
+.bs-tabview-bottom .p-tabview /deep/ .p-tabview-nav {
+  border-top: 1px solid #ececec !important;
+}
 
 </style>

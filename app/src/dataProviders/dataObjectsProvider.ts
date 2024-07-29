@@ -1,6 +1,7 @@
 import axios from 'axios';
 import DataObject from '@/models/dataObject';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectSaveDto from '@/models/dataObjectSaveDto';
 import DataObjectList from '../models/dataObjectList';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
@@ -29,6 +30,22 @@ export default class DataObjectsProvider {
     if (!requestUid) requestUid = '1175f1ae-2630-47ae-8a11-19e75e3f49e0'; // NON existing uid.
     try {
       const { data } = await axios.get(`${this.BASE_URL}/${kind}/${name}/${requestUid}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async getDetailsTable(kind: string, name: string, uid: string, tableName: string)
+    : Promise<ResultWrapper<DataObjectDetailsTable>> {
+    let result: ResultWrapper<DataObjectDetailsTable> = new ResultWrapper<DataObjectDetailsTable>();
+
+    let requestUid = uid;
+    if (!requestUid) requestUid = '1175f1ae-2630-47ae-8a11-19e75e3f49e0'; // NON existing uid.
+    try {
+      const { data } = await axios.get(`${this.BASE_URL}/${kind}/${name}/${requestUid}/details/${tableName}`);
       result = data;
     } catch (error) {
       console.error('error', error);

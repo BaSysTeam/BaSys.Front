@@ -170,7 +170,7 @@ export default class DataObjectEditView extends Vue {
       <Divider class="m-2"/>
     </div>
     <div class="grid">
-      <div class="col-6">
+      <div class="col-12">
         <DataObjectEditComponent ref="editComponentRef"
                                  :regime="editRegime"
                                  :kind="kind"

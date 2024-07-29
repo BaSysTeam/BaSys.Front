@@ -13,8 +13,11 @@
         <div class="card m-1">
           <DataTable
             :value="dataTypes"
+            :style="dataTableStyle"
             showGridlines
             size="small"
+            scrollable
+            scrollHeight="flex"
           >
             <template #empty> No items found. </template>
             <Column field="uid" header="Uid"></Column>
@@ -63,8 +66,20 @@ export default class DataTypesComponent extends Vue {
   dataProvider = new DataTypeProvider();
   toastHelper = new ToastHelper(useToast());
   dataTypes:DataType[] = [];
+  windowHeight = window.innerHeight;
+
+  get dataTableStyle(): object {
+    return {
+      height: `${this.windowHeight - 120}px`,
+      fontSize: '14px',
+    };
+  }
 
   async mounted(): Promise<void> {
+    this.$nextTick(() => {
+      window.addEventListener('resize', this.onResize);
+    });
+
     const response = await this.dataProvider.getDataTypes();
     if (response.isOK) {
       this.dataTypes = response.data;
@@ -76,6 +91,14 @@ export default class DataTypesComponent extends Vue {
 
   formatDbType(type: DbType): string {
     return DbType[type];
+  }
+
+  beforeDestroy(): void {
+    window.removeEventListener('resize', this.onResize);
+  }
+
+  onResize(): void {
+    this.windowHeight = window.innerHeight;
   }
 }
 </script>
