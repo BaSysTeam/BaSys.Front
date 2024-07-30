@@ -85,14 +85,6 @@ export default class DataObjectDetailTableEdit extends Vue {
     padding: '5px',
   };
 
-  inputNumberStyle = {
-    width: '100%',
-    fontSize: '14px',
-    borderRadius: 0,
-    padding: '5px',
-    textAlign: 'right',
-  };
-
   get dataTableStyle(): object {
     return {
       height: `${this.windowHeight - 250}px`,
@@ -142,7 +134,7 @@ export default class DataObjectDetailTableEdit extends Vue {
       );
 
       columnViewModel.name = columnName;
-      columnViewModel.setDefaultWidth();
+      columnViewModel.setDefaultStyle();
 
       if (columnViewModel.name === 'row_number') {
         columnViewModel.setWidth('30px');
@@ -166,7 +158,6 @@ export default class DataObjectDetailTableEdit extends Vue {
     );
     if (response.isOK) {
       this.table.rows = response.data.rows;
-      console.log('current table', this.table);
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -306,7 +297,7 @@ export default class DataObjectDetailTableEdit extends Vue {
         </template>
         <template v-else-if="getColumn(field).isInt">
           <InputNumber v-model="data[field]"
-                       :input-style="inputNumberStyle"
+                       :input-style="inputStyle"
                        autocomplete="off"
                        size="small"
                        autofocus/>
@@ -315,7 +306,7 @@ export default class DataObjectDetailTableEdit extends Vue {
           <InputNumber v-model="data[field]"
                        :min-fraction-digits="getColumn(field).numberDigits"
                        :max-fraction-digits="getColumn(field).numberDigits"
-                       :input-style="inputNumberStyle"
+                       :input-style="inputStyle"
                        autocomplete="off"
                        size="small"
                        variant="filled"

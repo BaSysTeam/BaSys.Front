@@ -90,7 +90,6 @@ export default class DataObjectEditComponent extends Vue {
 
   async save(): Promise<void> {
     this.isWaitingChanged(true);
-    console.log('before date convert', this.model.item);
     const objectToSave = new DataObject(this.model.item);
     objectToSave.convertDatesToIso();
 
@@ -154,16 +153,13 @@ export default class DataObjectEditComponent extends Vue {
 
     if (response.isOK) {
       this.setupModel(response.data);
-      console.log('init', this.model);
     } else {
       this.handleError(response);
     }
   }
 
   private setupModel(data: any): void {
-    console.log('setupModel', data);
     this.model = new DataObjectViewModel(data);
-    console.log('tabs', this.model.tabs);
     if (this.isCopy()) {
       this.model.setPrimaryKey('');
       this.model.isNew = true;
@@ -191,7 +187,6 @@ export default class DataObjectEditComponent extends Vue {
 
   onHeaderFieldChange(): void {
     this.isModifiedChanged(true);
-    console.log('header field changed');
   }
 
   public triggerSaveClick(): void {

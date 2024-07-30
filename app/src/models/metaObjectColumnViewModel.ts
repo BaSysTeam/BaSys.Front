@@ -129,13 +129,14 @@ export default class MetaObjectColumnViewModel {
     this.style.minWidth = widthExpression;
   }
 
-  setDefaultWidth(): void {
+  setDefaultStyle(): void {
     if (this.isSwitch || this.isCheckbox) {
       this.setWidth('30px');
     } else if (this.isDropdown) {
       this.setWidth('250px');
     } else if (this.isNumber || this.isInt) {
       this.setWidth('100px');
+      this.style.textAlign = 'right';
     } else if (this.isDateInput) {
       this.setWidth('70px');
     } else if (this.isDateTimeInput) {
