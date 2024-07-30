@@ -14,6 +14,7 @@ import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
+import SelectItem from '@/models/selectItem';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -76,6 +77,12 @@ export default class DataObjectDetailTableEdit extends Vue {
   windowHeight = window.innerHeight;
   provider = new DataObjectsProvider();
   toastHelper = new ToastHelper(useToast());
+  inputStyle = {
+    width: '100%',
+    fontSize: '14px',
+    borderRadius: 0,
+    padding: '5px',
+  };
 
   get dataTableStyle(): object {
     return {
@@ -166,6 +173,18 @@ export default class DataObjectDetailTableEdit extends Vue {
     return column;
   }
 
+  parseDisplayName(displayName: string): { valueName: string, displayName: string } {
+    const names = {
+      valueName: '',
+      displayName,
+    };
+    const ind = displayName.lastIndexOf('_display');
+    if (ind > -1) {
+      names.valueName = displayName.substring(0, ind);
+    }
+    return names;
+  }
+
   mounted(): void {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
@@ -182,22 +201,26 @@ export default class DataObjectDetailTableEdit extends Vue {
     this.windowHeight = window.innerHeight;
   }
 
-  onCellEditInit(event: any): void {
-    console.log('onCellEditInit', event);
-    if (event.field === 'row_number') {
-      console.log('start row number edit');
+  onCellEditComplete(event: any): void {
+    const row = event.data;
+    const columnName: string = event.field as string;
+    const newRow = event.newData;
+
+    const names = this.parseDisplayName(columnName);
+    row[columnName] = newRow[columnName];
+    if (names.valueName) {
+      row[names.valueName] = newRow[names.valueName];
     }
+
+    this.isModifiedChanged(true);
   }
 
-  onCellEditComplete(event: any): void {
-    console.log('onCellEditComplete', event);
-    const {
-      data,
-      newValue,
-      field,
-    } = event;
-    data[field] = newValue;
-    this.isModifiedChanged(true);
+  onDropDownSelected(row: any, field: string, selectItem: SelectItem): void {
+    const names = this.parseDisplayName(field);
+    if (names.valueName) {
+      row[names.valueName] = selectItem.value;
+    }
+    row[names.displayName] = selectItem.text;
   }
 }
 </script>
@@ -217,7 +240,6 @@ export default class DataObjectDetailTableEdit extends Vue {
     size="small"
     edit-mode="cell"
     @cell-edit-complete="onCellEditComplete"
-    @cell-edit-init="onCellEditInit"
     :pt="{
                 table: { style: 'min-width: 50rem' },
                 column: {
@@ -239,85 +261,73 @@ export default class DataObjectDetailTableEdit extends Vue {
         {{ data[field] }}
       </template>
       <template v-if="!col.readonly" #editor="{ data, field }">
-          <template v-if="getColumn(field).isTextInput || getColumn(field).isTextArea">
-            <InputText v-model="data[field]"
-                       class="w-full border-noround"
-                       style="padding: 5px"
-                       size="small"
+        <template v-if="getColumn(field).isTextInput || getColumn(field).isTextArea">
+          <InputText v-model="data[field]"
+                     class="w-full border-noround"
+                     style="padding: 5px"
+                     size="small"
+                     autocomplete="off"
+                     autofocus="true"/>
+        </template>
+        <template v-else-if="getColumn(field).isInt">
+          <InputNumber v-model="data[field]"
+                       :input-style="inputStyle"
                        autocomplete="off"
-                       autofocus="true"/>
-          </template>
-          <template v-else-if="getColumn(field).isInt">
-            <InputNumber v-model="data[field]"
-                         :input-style="{width: '100%',
-                       fontSize: '14px',
-                       borderRadius:0,
-                       padding: '5px'}"
-                         autocomplete="off"
-                         size="small"
-                         autofocus/>
-          </template>
-          <template v-else-if="getColumn(field).isNumber">
-            <InputNumber v-model="data[field]"
-                         :min-fraction-digits="getColumn(field).numberDigits"
-                         :max-fraction-digits="getColumn(field).numberDigits"
-                         :input-style="{width: '100%',
-                       fontSize: '14px',
-                       borderRadius:0,
-                       padding:'5px'}"
-                         autocomplete="off"
-                         size="small"
-                         variant="filled"
-                         autofocus
-            />
-          </template>
-          <template v-else-if="getColumn(field).isCheckbox">
-            <Checkbox :binary="true"
-                      v-model="data[field]">
-            </Checkbox>
-          </template>
-          <template v-else-if="getColumn(field).isSwitch">
-            <InputSwitch v-model="data[field]">
-            </InputSwitch>
-          </template>
-          <template v-else-if="getColumn(field).isDateInput">
-            <Calendar :show-time="false"
-                      :show-icon="true"
-                      :show-button-bar="true"
-                      :input-style="{width: '100%',
-                       fontSize: '14px',
-                       borderRadius:0,
-                       padding: '5px'}"
-                      iconDisplay="input"
-                      date-format="dd.mm.yy"
-                      class="w-full"
-                      v-model="data[field]"></Calendar>
-          </template>
-          <template v-else-if="getColumn(field).isDateTimeInput">
-            <Calendar :show-time="true"
-                      :show-icon="true"
-                      :show-button-bar="true"
-                      :input-style="{width: '100%',
-                       fontSize: '14px',
-                       borderRadius:0,
-                       padding: '5px'}"
-                      iconDisplay="input"
-                      date-format="dd.mm.yy"
-                      class="w-full"
-                      v-model="data[field]"></Calendar>
-          </template>
-          <template v-else-if="getColumn(field).isDropdown">
-            <DropdownEditor class="border-noround"
-                            :data-type-uid="getColumn(field).dataTypeUid"
-                            :input-style="{width: '100%',
-                       fontSize: '14px',
-                       borderRadius:0,
-                       padding: '5px'}"
-                            v-model="data[field]"></DropdownEditor>
-          </template>
-          <template v-else>
-            {{ data[field] }}
-          </template>
+                       size="small"
+                       autofocus/>
+        </template>
+        <template v-else-if="getColumn(field).isNumber">
+          <InputNumber v-model="data[field]"
+                       :min-fraction-digits="getColumn(field).numberDigits"
+                       :max-fraction-digits="getColumn(field).numberDigits"
+                       :input-style="inputStyle"
+                       autocomplete="off"
+                       size="small"
+                       variant="filled"
+                       autofocus
+          />
+        </template>
+        <template v-else-if="getColumn(field).isCheckbox">
+          <Checkbox :binary="true"
+                    v-model="data[field]">
+          </Checkbox>
+        </template>
+        <template v-else-if="getColumn(field).isSwitch">
+          <InputSwitch v-model="data[field]">
+          </InputSwitch>
+        </template>
+        <template v-else-if="getColumn(field).isDateInput">
+          <Calendar :show-time="false"
+                    :show-icon="true"
+                    :show-button-bar="true"
+                    :input-style="inputStyle"
+                    iconDisplay="input"
+                    date-format="dd.mm.yy"
+                    class="w-full"
+                    v-model="data[field]"></Calendar>
+        </template>
+        <template v-else-if="getColumn(field).isDateTimeInput">
+          <Calendar :show-time="true"
+                    :show-icon="true"
+                    :show-button-bar="true"
+                    :input-style="inputStyle"
+                    iconDisplay="input"
+                    date-format="dd.mm.yy"
+                    class="w-full"
+                    v-model="data[field]"></Calendar>
+        </template>
+        <template v-else-if="getColumn(field).isDropdown">
+          <DropdownEditor class="border-noround"
+                          :data-type-uid="getColumn(field).dataTypeUid"
+                          :input-style="inputStyle"
+                          v-model="data[parseDisplayName(field).valueName]"
+                          @selected="(args:any):any => onDropDownSelected(data, field, args)">
+
+          </DropdownEditor>
+        </template>
+        <template v-else>
+          {{ data[field] }}
+        </template>
       </template>
     </Column>
   </DataTable>

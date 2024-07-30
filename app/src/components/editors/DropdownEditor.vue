@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Vue, Options } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
+import { Prop, Watch, Emit } from 'vue-property-decorator';
 import { PropType } from 'vue';
 import SelectItem from '@/models/selectItem';
 import Dropdown from 'primevue/dropdown';
@@ -62,6 +62,8 @@ export default class DropdownEditor extends Vue {
 
   onModelValueChanged(): void {
     this.$emit('update:modelValue', this.localValue);
+    const currentItem = this.items.find((x) => x.value === this.localValue);
+    this.$emit('selected', currentItem);
   }
 
   shouldGetCollection(): boolean {
