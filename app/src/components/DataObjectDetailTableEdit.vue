@@ -19,6 +19,7 @@ import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
+import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 
 @Options({
   components:
@@ -82,6 +83,14 @@ export default class DataObjectDetailTableEdit extends Vue {
     fontSize: '14px',
     borderRadius: 0,
     padding: '5px',
+  };
+
+  inputNumberStyle = {
+    width: '100%',
+    fontSize: '14px',
+    borderRadius: 0,
+    padding: '5px',
+    textAlign: 'right',
   };
 
   get dataTableStyle(): object {
@@ -185,6 +194,26 @@ export default class DataObjectDetailTableEdit extends Vue {
     return names;
   }
 
+  formatValue(row: any, field: string): string {
+    const column = this.getColumn(field);
+
+    const value = row[field];
+    if (column.isInt) {
+      return ValuesFormatter.formatNumber(value, 0);
+    }
+    if (column.isNumber) {
+      return ValuesFormatter.formatNumber(value, column.numberDigits);
+    }
+    if (column.isDateInput) {
+      return ValuesFormatter.formatDate(value);
+    }
+    if (column.isDateTimeInput) {
+      return ValuesFormatter.formatDateTime(value);
+    }
+
+    return value;
+  }
+
   mounted(): void {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
@@ -258,7 +287,13 @@ export default class DataObjectDetailTableEdit extends Vue {
       :style="col.style"
     >
       <template #body="{ data, field }">
-        {{ data[field] }}
+        <template v-if="getColumn(field).isCheckbox">
+          <span v-if="data[field]" class="pi pi-check text-primary"></span>
+        </template>
+        <template v-else>
+          {{ formatValue(data, field) }}
+        </template>
+
       </template>
       <template v-if="!col.readonly" #editor="{ data, field }">
         <template v-if="getColumn(field).isTextInput || getColumn(field).isTextArea">
@@ -271,7 +306,7 @@ export default class DataObjectDetailTableEdit extends Vue {
         </template>
         <template v-else-if="getColumn(field).isInt">
           <InputNumber v-model="data[field]"
-                       :input-style="inputStyle"
+                       :input-style="inputNumberStyle"
                        autocomplete="off"
                        size="small"
                        autofocus/>
@@ -280,7 +315,7 @@ export default class DataObjectDetailTableEdit extends Vue {
           <InputNumber v-model="data[field]"
                        :min-fraction-digits="getColumn(field).numberDigits"
                        :max-fraction-digits="getColumn(field).numberDigits"
-                       :input-style="inputStyle"
+                       :input-style="inputNumberStyle"
                        autocomplete="off"
                        size="small"
                        variant="filled"
