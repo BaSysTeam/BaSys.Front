@@ -120,7 +120,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
     // eslint-disable-next-line no-restricted-syntax
     tableSettings.columns.forEach((column) => {
-      if (column.name === 'uid' || column.name === 'object_uid') {
+      if (column.name === 'id' || column.name === 'object_uid') {
         return;
       }
       const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);

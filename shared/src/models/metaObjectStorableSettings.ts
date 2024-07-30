@@ -45,9 +45,9 @@ export default class MetaObjectStorableSettings {
     // Primary key column.
     const pkColumn = new MetaObjectTableColumn(null);
     pkColumn.uid = Guid.create().toString();
-    pkColumn.name = 'uid';
-    pkColumn.title = 'Uid';
-    pkColumn.dataTypeUid = DataTypeDefaults.UniqueIdentifier.uid;
+    pkColumn.name = 'id';
+    pkColumn.title = 'Id';
+    pkColumn.dataTypeUid = DataTypeDefaults.Long.uid;
     pkColumn.primaryKey = true;
     pkColumn.isStandard = true;
 
@@ -70,8 +70,8 @@ export default class MetaObjectStorableSettings {
     rowNumberColumn.name = 'row_number';
     rowNumberColumn.title = 'Row number';
     rowNumberColumn.dataTypeUid = DataTypeDefaults.Int.uid;
-    pkColumn.required = true;
-    pkColumn.isStandard = true;
+    rowNumberColumn.required = true;
+    rowNumberColumn.isStandard = true;
 
     detailTable.columns.push(rowNumberColumn);
 
