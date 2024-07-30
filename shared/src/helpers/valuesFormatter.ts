@@ -15,6 +15,10 @@ export default class ValuesFormatter {
   }
 
   static formatDate(value: any): string {
+    if (value == null || Number.isNaN(value)) {
+      return '';
+    }
+
     if (!(value instanceof Date)) {
       return value.toString();
     }
@@ -25,6 +29,10 @@ export default class ValuesFormatter {
   }
 
   static formatDateTime(value: any): string {
+    if (value == null || Number.isNaN(value)) {
+      return '';
+    }
+
     if (!(value instanceof Date)) {
       return value.toString();
     }
