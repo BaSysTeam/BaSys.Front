@@ -10,6 +10,7 @@ import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
 import InputSwitch from 'primevue/inputswitch';
 import Calendar from 'primevue/calendar';
+import Menubar from 'primevue/menubar';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
@@ -32,6 +33,7 @@ import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
       Checkbox,
       InputSwitch,
       Calendar,
+      Menubar,
     },
 })
 export default class DataObjectDetailTableEdit extends Vue {
@@ -85,9 +87,11 @@ export default class DataObjectDetailTableEdit extends Vue {
     padding: '5px',
   };
 
+  menuItems: any[] = [];
+
   get dataTableStyle(): object {
     return {
-      height: `${this.windowHeight - 250}px`,
+      height: `${this.windowHeight - 275}px`,
       fontSize: '14px',
     };
   }
@@ -107,6 +111,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
   initColumns(): void {
     this.columns = [];
+    console.log('MetaObjectSettings', this.metaObjectSettings);
     if (!this.metaObjectSettings) {
       return;
     }
@@ -211,6 +216,12 @@ export default class DataObjectDetailTableEdit extends Vue {
       window.addEventListener('resize', this.onResize);
     });
     this.initColumns();
+    this.menuItems.push({
+      label: 'Add',
+      icon: 'pi pi-plus',
+      command: () => this.onAddClick(),
+
+    });
     this.loadData();
   }
 
@@ -243,10 +254,47 @@ export default class DataObjectDetailTableEdit extends Vue {
     }
     row[names.displayName] = selectItem.text;
   }
+
+  onAddClick(): void {
+    console.log('Add row click', this.metaObjectSettings);
+    const tableSettings = this.metaObjectSettings.detailTables.find(
+      (x) => x.uid === this.table.uid,
+    );
+    if (!tableSettings) {
+      return;
+    }
+
+    const newRow: any = {};
+    tableSettings.columns.forEach((column) => {
+      const dataType = this.dataTypes.find((x) => x.uid === column.dataTypeUid);
+      if (dataType) {
+        let currentValue: any = '';
+        if (dataType.uid === DataTypeDefaults.Int.uid
+          || dataType.uid === DataTypeDefaults.Long.uid
+          || dataType.uid === DataTypeDefaults.Decimal.uid) {
+          currentValue = 0;
+        } else if (dataType.uid === DataTypeDefaults.Bool.uid) {
+          currentValue = false;
+        }
+        newRow[column.name] = currentValue;
+        if (!dataType.isPrimitive) {
+          newRow[`${column.name}_display`] = '';
+        }
+      } else {
+        newRow[column.name] = '';
+      }
+    });
+    newRow.object_uid = this.objectUid;
+    newRow.row_number = this.table.rows.length + 1;
+    this.table.rows.push(newRow);
+
+    this.isModifiedChanged(true);
+  }
 }
 </script>
 
 <template>
+  <Menubar :model="menuItems" style="margin-bottom: 3px; padding: 0; font-size: 14px;"></Menubar>
   <DataTable
     v-model:selection="selectedRecord"
     :style="dataTableStyle"
