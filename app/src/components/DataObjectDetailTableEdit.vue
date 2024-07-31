@@ -11,6 +11,7 @@ import Checkbox from 'primevue/checkbox';
 import InputSwitch from 'primevue/inputswitch';
 import Calendar from 'primevue/calendar';
 import Menubar from 'primevue/menubar';
+import Button from 'primevue/button';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
@@ -34,6 +35,7 @@ import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
       InputSwitch,
       Calendar,
       Menubar,
+      Button,
     },
 })
 export default class DataObjectDetailTableEdit extends Vue {
@@ -126,7 +128,9 @@ export default class DataObjectDetailTableEdit extends Vue {
 
     // eslint-disable-next-line no-restricted-syntax
     tableSettings.columns.forEach((column) => {
-      if (column.name === 'id' || column.name === 'object_uid') {
+      if (column.name === 'id'
+        || column.name === 'object_uid'
+        || column.name === 'row_number') {
         return;
       }
       const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);
@@ -290,6 +294,15 @@ export default class DataObjectDetailTableEdit extends Vue {
 
     this.isModifiedChanged(true);
   }
+
+  onRowDeleteClick(row: any): void {
+    console.log('Row delete click', row);
+    const ind = this.table.rows.indexOf(row);
+    if (ind > -1) {
+      this.table.rows.splice(ind, 1);
+      this.isModifiedChanged(true);
+    }
+  }
 }
 </script>
 
@@ -319,6 +332,11 @@ export default class DataObjectDetailTableEdit extends Vue {
             }"
   >
     <template #empty>{{ $t('noItemsFound') }}</template>
+    <Column header="#" style="max-width:40px; min-width:40px; width: 40px;">
+      <template #body="{index}">
+        {{ index + 1 }}
+      </template>
+    </Column>
     <Column
       v-for="col of columns"
       :key="col.name"
@@ -403,6 +421,14 @@ export default class DataObjectDetailTableEdit extends Vue {
         <template v-else>
           {{ data[field] }}
         </template>
+      </template>
+    </Column>
+    <Column header="actions" style="max-width:200px; min-width:200px; width: 200px;">
+      <template #body="{ data }">
+
+        <a href="#" @click.prevent="onRowDeleteClick(data)">
+          <span class="pi pi-times text-red-500"></span>
+        </a>
       </template>
     </Column>
   </DataTable>
