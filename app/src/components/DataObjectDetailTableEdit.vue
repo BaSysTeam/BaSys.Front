@@ -101,6 +101,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
   @Emit('isModifiedChanged')
   isModifiedChanged(newValue: boolean): boolean {
+    this.table.isModified = newValue;
     return newValue;
   }
 

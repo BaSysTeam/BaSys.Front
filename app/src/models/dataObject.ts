@@ -9,7 +9,13 @@ export default class DataObject {
     if (param) {
       data = param;
     }
+    this.header = {};
+    this.detailsTables = [];
 
+    this.init(data, false);
+  }
+
+  init(data: any, includeOnlyModifiedTables: boolean): void {
     this.header = {};
     if (data.header) {
       Object.entries(data.header).forEach(([key, value]) => {
@@ -20,7 +26,13 @@ export default class DataObject {
     this.detailsTables = [];
     if (data.detailsTables) {
       data.detailsTables.forEach((item: any) => {
-        this.detailsTables.push(new DataObjectDetailsTable(item));
+        if (includeOnlyModifiedTables) {
+          if (item.isModified) {
+            this.detailsTables.push(new DataObjectDetailsTable(item));
+          }
+        } else {
+          this.detailsTables.push(new DataObjectDetailsTable(item));
+        }
       });
     }
   }
@@ -61,6 +73,16 @@ export default class DataObject {
       if (this.isDate(currentValue)) {
         this.header[key] = this.dateToIsoString(currentValue);
       }
+    });
+
+    this.detailsTables.forEach((detailTable) => {
+      detailTable.rows.forEach((row: any) => {
+        Object.entries(row).forEach(([key, value]) => {
+          if (this.isDate(value)) {
+            row[key] = this.dateToIsoString(value as Date);
+          }
+        });
+      });
     });
   }
 
