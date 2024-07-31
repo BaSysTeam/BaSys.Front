@@ -260,7 +260,6 @@ export default class DataObjectDetailTableEdit extends Vue {
   }
 
   onAddClick(): void {
-    console.log('Add row click', this.metaObjectSettings);
     const tableSettings = this.metaObjectSettings.detailTables.find(
       (x) => x.uid === this.table.uid,
     );
@@ -296,7 +295,6 @@ export default class DataObjectDetailTableEdit extends Vue {
   }
 
   onRowDeleteClick(row: any): void {
-    console.log('Row delete click', row);
     const ind = this.table.rows.indexOf(row);
     if (ind > -1) {
       this.table.rows.splice(ind, 1);
@@ -305,7 +303,6 @@ export default class DataObjectDetailTableEdit extends Vue {
   }
 
   onRowCopyClick(row: any): void {
-    console.log('Row copied', row);
     const newRow: any = {};
     Object.entries(row).forEach(([key, value]) => {
       newRow[key] = value;
@@ -316,11 +313,27 @@ export default class DataObjectDetailTableEdit extends Vue {
   }
 
   onRowUpClick(row: any): void {
-    console.log('Row up click', row);
+    const ind = this.table.rows.indexOf(row);
+    if (ind > 0) {
+      const nextInd = ind - 1;
+      const rowNext = this.table.rows[nextInd];
+
+      this.table.rows[nextInd] = row;
+      this.table.rows[ind] = rowNext;
+      this.isModifiedChanged(true);
+    }
   }
 
   onRowDownClick(row: any): void {
-    console.log('Row down click', row);
+    const ind = this.table.rows.indexOf(row);
+    const nextInd = ind + 1;
+    if (nextInd > 0 && nextInd <= this.table.rows.length - 1) {
+      const rowNext = this.table.rows[nextInd];
+
+      this.table.rows[nextInd] = row;
+      this.table.rows[ind] = rowNext;
+      this.isModifiedChanged(true);
+    }
   }
 }
 </script>
