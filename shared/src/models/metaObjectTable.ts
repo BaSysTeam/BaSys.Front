@@ -6,6 +6,7 @@ export default class MetaObjectTable {
   title:string;
   name:string;
   memo:string;
+  isModified:boolean;
   columns:Array<MetaObjectTableColumn>;
   columnRenderSettings:Array<MetaObjectTableColumnRenderSettings>
 
@@ -19,6 +20,7 @@ export default class MetaObjectTable {
     this.title = data.title || '';
     this.name = data.name || '';
     this.memo = data.memo || '';
+    this.isModified = data.isModified || false;
 
     this.columns = data.columns
       ? data.columns.map((item: any) => new MetaObjectTableColumn(item)) : [];

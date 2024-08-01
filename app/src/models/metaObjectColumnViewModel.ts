@@ -29,9 +29,12 @@ export default class MetaObjectColumnViewModel {
 
   isDropdown = false;
 
+  readonly = false;
+  style: any = { width: 'auto', minWidth: 'auto', maxWidth: 'auto' };
+
   constructor(
     column: MetaObjectTableColumn | null,
-    dataTypes: DataType[],
+    dataTypes: DataType[] | null,
     renderSettings: MetaObjectTableColumnRenderSettings[],
   ) {
     if (column == null || dataTypes == null) {
@@ -48,7 +51,6 @@ export default class MetaObjectColumnViewModel {
     const columnRenderSettings = renderSettings.find(
       (item) => item.uid.toLowerCase() === column.uid.toLowerCase(),
     );
-    console.log('columnViewModel', this.name, this.uid, columnRenderSettings);
 
     this.isPrimaryKey = column.primaryKey;
 
@@ -118,6 +120,27 @@ export default class MetaObjectColumnViewModel {
       } else {
         this.isDateInput = true;
       }
+    }
+  }
+
+  setWidth(widthExpression: string): void {
+    this.style.width = widthExpression;
+    this.style.maxWidth = widthExpression;
+    this.style.minWidth = widthExpression;
+  }
+
+  setDefaultStyle(): void {
+    if (this.isSwitch || this.isCheckbox) {
+      this.setWidth('30px');
+    } else if (this.isDropdown) {
+      this.setWidth('250px');
+    } else if (this.isNumber || this.isInt) {
+      this.setWidth('100px');
+      this.style.textAlign = 'right';
+    } else if (this.isDateInput) {
+      this.setWidth('70px');
+    } else if (this.isDateTimeInput) {
+      this.setWidth('120px');
     }
   }
 }

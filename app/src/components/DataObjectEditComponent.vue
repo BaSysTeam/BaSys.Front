@@ -88,10 +88,15 @@ export default class DataObjectEditComponent extends Vue {
   toastHelper = new ToastHelper(useToast());
   windowHeight = window.innerHeight;
 
+  get requestUid(): string {
+    const uid = this.isCopy() ? this.copyUid : this.uid;
+    return uid;
+  }
+
   async save(): Promise<void> {
     this.isWaitingChanged(true);
-    console.log('before date convert', this.model.item);
-    const objectToSave = new DataObject(this.model.item);
+    const objectToSave = new DataObject(null);
+    objectToSave.init(this.model.item, true);
     objectToSave.convertDatesToIso();
 
     console.log('objectToSave', objectToSave);
@@ -149,21 +154,17 @@ export default class DataObjectEditComponent extends Vue {
   }
 
   private async loadDataObject(): Promise<void> {
-    const uid = this.isCopy() ? this.copyUid : this.uid;
-    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, uid);
+    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, this.requestUid);
 
     if (response.isOK) {
       this.setupModel(response.data);
-      console.log('init', this.model);
     } else {
       this.handleError(response);
     }
   }
 
   private setupModel(data: any): void {
-    console.log('setupModel', data);
     this.model = new DataObjectViewModel(data);
-    console.log('tabs', this.model.tabs);
     if (this.isCopy()) {
       this.model.setPrimaryKey('');
       this.model.isNew = true;
@@ -191,7 +192,6 @@ export default class DataObjectEditComponent extends Vue {
 
   onHeaderFieldChange(): void {
     this.isModifiedChanged(true);
-    console.log('header field changed');
   }
 
   public triggerSaveClick(): void {
@@ -218,6 +218,10 @@ export default class DataObjectEditComponent extends Vue {
   @Emit('saved')
   saved(result: string): string {
     return result;
+  }
+
+  onTableIsModifiedChanged(args: boolean): void {
+    this.isModifiedChanged(args);
   }
 }
 </script>
@@ -248,11 +252,13 @@ export default class DataObjectEditComponent extends Vue {
           <!--Detail tables tabs-->
           <TabPanel v-for="table in model.item.detailsTables"
                     :key="table.uid"
-                    :header="table.title">
+                    :header="table.display">
             <DataObjectDetailTableEdit :table ="table"
                                        :kind="kind"
-                                       :object-uid="uid"
-                                       :meta-object-settings="model.metaObjectSettings">
+                                       :object-uid="requestUid"
+                                       :meta-object-settings="model.metaObjectSettings"
+                                       :data-types="model.dataTypes"
+                                       @is-modified-changed="onTableIsModifiedChanged">
             </DataObjectDetailTableEdit>
           </TabPanel>
         </TabView>

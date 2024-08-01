@@ -9,7 +9,7 @@ import Checkbox from 'primevue/checkbox';
 import InputSwitch from 'primevue/inputswitch';
 import Calendar from 'primevue/calendar';
 import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
-import MetaObjectColumnViewModel from '@/models/MetaObjectColumnViewModel';
+import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DataObject from '@/models/dataObject';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 

@@ -1,6 +1,6 @@
 import { Guid } from 'guid-typescript';
 import DataObject from '@/models/dataObject';
-import MetaObjectColumnViewModel from '@/models/MetaObjectColumnViewModel';
+import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DataType from '../../../shared/src/models/dataType';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
