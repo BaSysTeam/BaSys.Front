@@ -88,6 +88,11 @@ export default class DataObjectEditComponent extends Vue {
   toastHelper = new ToastHelper(useToast());
   windowHeight = window.innerHeight;
 
+  get requestUid(): string {
+    const uid = this.isCopy() ? this.copyUid : this.uid;
+    return uid;
+  }
+
   async save(): Promise<void> {
     this.isWaitingChanged(true);
     const objectToSave = new DataObject(null);
@@ -149,8 +154,7 @@ export default class DataObjectEditComponent extends Vue {
   }
 
   private async loadDataObject(): Promise<void> {
-    const uid = this.isCopy() ? this.copyUid : this.uid;
-    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, uid);
+    const response = await this.dataObjectsProvider.getItem(this.kind, this.name, this.requestUid);
 
     if (response.isOK) {
       this.setupModel(response.data);
@@ -251,7 +255,7 @@ export default class DataObjectEditComponent extends Vue {
                     :header="table.display">
             <DataObjectDetailTableEdit :table ="table"
                                        :kind="kind"
-                                       :object-uid="uid"
+                                       :object-uid="requestUid"
                                        :meta-object-settings="model.metaObjectSettings"
                                        :data-types="model.dataTypes"
                                        @is-modified-changed="onTableIsModifiedChanged">
