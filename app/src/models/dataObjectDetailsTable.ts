@@ -22,4 +22,8 @@ export default class DataObjectDetailsTable {
       });
     }
   }
+
+  get display(): string {
+    return `${this.title} (${this.rows.length})`;
+  }
 }
