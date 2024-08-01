@@ -221,8 +221,8 @@ export default class DataObjectDetailTableEdit extends Vue {
     });
     this.initColumns();
     this.menuItems.push({
-      label: 'Add',
       icon: 'pi pi-plus',
+      class: 'text-primary',
       command: () => this.onAddClick(),
 
     });
@@ -455,20 +455,32 @@ export default class DataObjectDetailTableEdit extends Vue {
         </template>
       </template>
     </Column>
-    <Column header="Actions"
+    <Column :header="$t('actions')"
             style="max-width:200px; min-width:200px; width: 200px;">
       <template #body="{ data }">
 
-        <a href="#" class="mr-2 bs-row-action" @click.prevent="onRowDeleteClick(data)">
+        <a href="#"
+           class="mr-2 bs-row-action"
+           tabindex="-1"
+           @click.prevent="onRowDeleteClick(data)">
           <span class="pi pi-times text-red-500"></span>
         </a>
-        <a href="#" class="mr-2 bs-row-action" @click.prevent="onRowCopyClick(data)">
+        <a href="#"
+           class="mr-2 bs-row-action"
+           tabindex="-1"
+           @click.prevent="onRowCopyClick(data)">
           <span class="pi pi-clone text-primary"></span>
         </a>
-        <a href="#" class="mr-2 bs-row-action" @click.prevent="onRowUpClick(data)">
+        <a href="#"
+           class="mr-2 bs-row-action"
+           tabindex="-1"
+           @click.prevent="onRowUpClick(data)">
           <span class="pi pi-arrow-up text-primary"></span>
         </a>
-        <a href="#" class="bs-row-action" @click.prevent="onRowDownClick(data)">
+        <a href="#"
+           class="bs-row-action"
+           tabindex="-1"
+           @click.prevent="onRowDownClick(data)">
           <span class="pi pi-arrow-down text-primary"></span>
         </a>
       </template>
