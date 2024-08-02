@@ -252,7 +252,7 @@ export default class DataObjectEditComponent extends Vue {
           <!--Detail tables tabs-->
           <TabPanel v-for="table in model.item.detailsTables"
                     :key="table.uid"
-                    :header="table.display">
+                    :header="table.title">
             <DataObjectDetailTableEdit :table ="table"
                                        :kind="kind"
                                        :object-uid="requestUid"
