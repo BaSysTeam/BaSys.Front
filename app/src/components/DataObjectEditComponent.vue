@@ -230,7 +230,7 @@ export default class DataObjectEditComponent extends Vue {
   <div class="grid" v-if="model.tabs.length > 0">
     <div class="col-12">
       <div class="bs-tabview-bottom">
-        <TabView>
+        <TabView :lazy="true">
           <!--Header tab-->
           <TabPanel key="header" header="Header">
             <div class="grid" :style="{height: `${windowHeight - 250}px`}">

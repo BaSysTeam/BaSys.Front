@@ -1,6 +1,8 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch, Emit } from 'vue-property-decorator';
+import {
+  Prop, Watch, Emit, Ref,
+} from 'vue-property-decorator';
 import { PropType } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
@@ -76,6 +78,10 @@ export default class DataObjectDetailTableEdit extends Vue {
   })
   table!: DataObjectDetailsTable;
 
+  @Ref()
+  dataTableRef!:any;
+
+  tableKey = 0;
   isWaiting = false;
   columns: MetaObjectColumnViewModel[] = [];
   selectedRecord: any = {};
@@ -89,13 +95,24 @@ export default class DataObjectDetailTableEdit extends Vue {
     padding: '5px',
   };
 
+  virtualScrollerOptions = {
+    itemSize: 30,
+    delay: 0,
+    disabled: true,
+  };
+
   menuItems: any[] = [];
+  vScroll: any;
 
   get dataTableStyle(): object {
     return {
-      height: `${this.windowHeight - 275}px`,
+      // height: `${this.windowHeight - 275}px`,
       fontSize: '14px',
     };
+  }
+
+  get dataTableScrollHeight(): string {
+    return `${this.windowHeight - 275}px`;
   }
 
   @Watch('tableUid')
@@ -147,7 +164,7 @@ export default class DataObjectDetailTableEdit extends Vue {
       columnViewModel.setDefaultStyle();
 
       if (columnViewModel.name === 'row_number') {
-        columnViewModel.setWidth('30px');
+        columnViewModel.setWidth('50px');
         columnViewModel.title = '#';
         columnViewModel.isInt = false;
         columnViewModel.isNumber = false;
@@ -159,6 +176,9 @@ export default class DataObjectDetailTableEdit extends Vue {
   }
 
   async loadData(): Promise<void> {
+    if (this.table.rows.length > 0) {
+      return;
+    }
     this.isWaiting = true;
     const response = await this.provider.getDetailsTable(
       this.kind,
@@ -172,6 +192,12 @@ export default class DataObjectDetailTableEdit extends Vue {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
+    this.$nextTick(() => {
+      if (this.table.rows.length) {
+        // eslint-disable-next-line prefer-destructuring
+        this.selectedRecord = this.table.rows[0];
+      }
+    });
     this.isWaiting = false;
   }
 
@@ -227,6 +253,12 @@ export default class DataObjectDetailTableEdit extends Vue {
 
     });
     this.loadData();
+    this.$nextTick(() => {
+      if (this.table.rows.length) {
+        // eslint-disable-next-line prefer-destructuring
+        this.selectedRecord = this.table.rows[0];
+      }
+    });
   }
 
   beforeDestroy(): void {
@@ -289,9 +321,32 @@ export default class DataObjectDetailTableEdit extends Vue {
     });
     newRow.object_uid = this.objectUid;
     newRow.row_number = this.table.rows.length + 1;
+    if (this.table.rows.length) {
+      newRow.id = this.table.rows[this.table.rows.length - 1].id + 1;
+    } else {
+      newRow.id = 1;
+    }
+
     this.table.rows.push(newRow);
+    // this.tableKey += 1;
+    this.selectedRecord = newRow;
+    console.log('Row added', newRow);
 
     this.isModifiedChanged(true);
+    this.$nextTick(() => {
+      if (this.dataTableRef) {
+        console.log('dataTableRef', this.dataTableRef);
+
+        if (!this.vScroll) {
+          this.vScroll = this.dataTableRef.getVirtualScrollerRef();
+        }
+        console.log('vScroll', this.vScroll);
+        this.vScroll.scrollToIndex(this.table.rows.length - 1);
+        // const vScroll = this.dataTableRef.getVirtualScrollerRef();
+        // console.log('vScroll', vScroll);
+        // vScroll.scrollToIndex(this.table.rows.length - 1);
+      }
+    });
   }
 
   onRowDeleteClick(row: any): void {
@@ -346,10 +401,14 @@ export default class DataObjectDetailTableEdit extends Vue {
     :value="table.rows"
     :metaKeySelection="true"
     :rows="15"
+    :key="tableKey"
+    ref="dataTableRef"
+    data-key="id"
     showGridlines
     selectionMode="single"
     scrollable
-    scrollHeight="flex"
+    :scrollHeight="dataTableScrollHeight"
+    :virtual-scroller-options="virtualScrollerOptions"
     filterDisplay="menu"
     size="small"
     edit-mode="cell"
@@ -364,7 +423,7 @@ export default class DataObjectDetailTableEdit extends Vue {
             }"
   >
     <template #empty>{{ $t('noItemsFound') }}</template>
-    <Column header="#" style="max-width:40px; min-width:40px; width: 40px;">
+    <Column header="#" style="max-width:50px; min-width:50px; width: 50px;">
       <template #body="{index}">
         {{ index + 1 }}
       </template>
