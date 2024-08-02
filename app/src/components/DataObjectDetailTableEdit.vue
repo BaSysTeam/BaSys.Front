@@ -14,11 +14,13 @@ import InputSwitch from 'primevue/inputswitch';
 import Calendar from 'primevue/calendar';
 import Menubar from 'primevue/menubar';
 import Button from 'primevue/button';
+import Badge from 'primevue/badge';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 import SelectItem from '@/models/selectItem';
+import { Guid } from 'guid-typescript';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -38,6 +40,7 @@ import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
       Calendar,
       Menubar,
       Button,
+      Badge,
     },
 })
 export default class DataObjectDetailTableEdit extends Vue {
@@ -81,6 +84,13 @@ export default class DataObjectDetailTableEdit extends Vue {
   @Ref()
   dataTableRef!:any;
 
+  get tableRows(): any[] {
+    if (this.table != null) {
+      return this.table.rows;
+    }
+    return [];
+  }
+
   tableKey = 0;
   isWaiting = false;
   columns: MetaObjectColumnViewModel[] = [];
@@ -98,7 +108,8 @@ export default class DataObjectDetailTableEdit extends Vue {
   virtualScrollerOptions = {
     itemSize: 30,
     delay: 0,
-    disabled: true,
+    disabled: false,
+    numToleratedItems: 20,
   };
 
   menuItems: any[] = [];
@@ -106,13 +117,13 @@ export default class DataObjectDetailTableEdit extends Vue {
 
   get dataTableStyle(): object {
     return {
-      // height: `${this.windowHeight - 275}px`,
+      height: `${this.windowHeight - 420}px`,
       fontSize: '14px',
     };
   }
 
   get dataTableScrollHeight(): string {
-    return `${this.windowHeight - 275}px`;
+    return `${this.windowHeight - 320}px`;
   }
 
   @Watch('tableUid')
@@ -321,32 +332,36 @@ export default class DataObjectDetailTableEdit extends Vue {
     });
     newRow.object_uid = this.objectUid;
     newRow.row_number = this.table.rows.length + 1;
-    if (this.table.rows.length) {
-      newRow.id = this.table.rows[this.table.rows.length - 1].id + 1;
+    newRow.id = Guid.create();
+
+    const ind = this.table.rows.indexOf(this.selectedRecord);
+    if (ind > -1) {
+      this.table.rows.splice(ind + 1, 0, newRow);
     } else {
-      newRow.id = 1;
+      this.table.rows.push(newRow);
+      this.tableKey += 1;
     }
 
-    this.table.rows.push(newRow);
-    // this.tableKey += 1;
     this.selectedRecord = newRow;
     console.log('Row added', newRow);
+    console.log('Rows count', this.table.rows.length);
+    console.log('Rows', this.table.rows);
 
     this.isModifiedChanged(true);
-    this.$nextTick(() => {
-      if (this.dataTableRef) {
-        console.log('dataTableRef', this.dataTableRef);
 
-        if (!this.vScroll) {
-          this.vScroll = this.dataTableRef.getVirtualScrollerRef();
-        }
-        console.log('vScroll', this.vScroll);
-        this.vScroll.scrollToIndex(this.table.rows.length - 1);
-        // const vScroll = this.dataTableRef.getVirtualScrollerRef();
-        // console.log('vScroll', vScroll);
-        // vScroll.scrollToIndex(this.table.rows.length - 1);
-      }
-    });
+    // this.$nextTick(() => {
+    //   if (this.dataTableRef) {
+    //     console.log('dataTableRef', this.dataTableRef);
+    //
+    //     if (!this.vScroll) {
+    //       this.vScroll = this.dataTableRef.getVirtualScrollerRef();
+    //     }
+    //     console.log('vScroll', this.vScroll);
+    //     if (this.vScroll) {
+    //       // this.vScroll.scrollToIndex(this.table.rows.length - 1);
+    //     }
+    //   }
+    // });
   }
 
   onRowDeleteClick(row: any): void {
@@ -363,7 +378,14 @@ export default class DataObjectDetailTableEdit extends Vue {
       newRow[key] = value;
     });
     newRow.row_number = this.table.rows.length + 1;
-    this.table.rows.push(newRow);
+    newRow.id = Guid.create();
+
+    const ind = this.table.rows.indexOf(row);
+    if (ind > -1) {
+      this.table.rows.splice(ind + 1, 0, newRow);
+    }
+
+    this.selectedRecord = newRow;
     this.isModifiedChanged(true);
   }
 
@@ -390,29 +412,42 @@ export default class DataObjectDetailTableEdit extends Vue {
       this.isModifiedChanged(true);
     }
   }
+
+  onPageChanged(args: any): void {
+    console.log('Page changed', args);
+    if (this.table.rows.length > args.first) {
+      this.selectedRecord = this.table.rows[args.first];
+    }
+  }
 }
 </script>
 
 <template>
-  <Menubar :model="menuItems" style="margin-bottom: 3px; padding: 0; font-size: 14px;"></Menubar>
+  <Menubar :model="menuItems" style="margin-bottom: 3px; padding: 0; font-size: 14px;">
+    <template #end>
+      <Badge class="mr-1" :value="table.rows.length" />
+    </template>
+  </Menubar>
   <DataTable
     v-model:selection="selectedRecord"
     :style="dataTableStyle"
-    :value="table.rows"
+    :scroll-height="dataTableScrollHeight"
+    :value="tableRows"
     :metaKeySelection="true"
-    :rows="15"
+    :rows="100"
+    :rowsPerPageOptions="[10, 20, 50, 100, 500]"
     :key="tableKey"
     ref="dataTableRef"
     data-key="id"
     showGridlines
     selectionMode="single"
+    paginator
     scrollable
-    :scrollHeight="dataTableScrollHeight"
-    :virtual-scroller-options="virtualScrollerOptions"
     filterDisplay="menu"
     size="small"
     edit-mode="cell"
     @cell-edit-complete="onCellEditComplete"
+    @page="onPageChanged"
     :pt="{
                 table: { style: 'min-width: 50rem' },
                 column: {
@@ -424,8 +459,8 @@ export default class DataObjectDetailTableEdit extends Vue {
   >
     <template #empty>{{ $t('noItemsFound') }}</template>
     <Column header="#" style="max-width:50px; min-width:50px; width: 50px;">
-      <template #body="{index}">
-        {{ index + 1 }}
+      <template #body="{data}">
+        {{ table.rows.indexOf(data) + 1 }}
       </template>
     </Column>
     <Column
@@ -547,8 +582,12 @@ export default class DataObjectDetailTableEdit extends Vue {
   </DataTable>
 </template>
 
-<style scoped>
+<style >
 .bs-row-action span{
   font-size: 12px!important;
+}
+
+.p-tabview-nav-link  {
+  padding: 0.5rem!important;
 }
 </style>

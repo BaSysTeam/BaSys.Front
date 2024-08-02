@@ -230,7 +230,7 @@ export default class DataObjectEditComponent extends Vue {
   <div class="grid" v-if="model.tabs.length > 0">
     <div class="col-12">
       <div class="bs-tabview-bottom">
-        <TabView :lazy="true">
+        <TabView :lazy="false">
           <!--Header tab-->
           <TabPanel key="header" header="Header">
             <div class="grid" :style="{height: `${windowHeight - 250}px`}">
@@ -284,21 +284,22 @@ export default class DataObjectEditComponent extends Vue {
 </template>
 
 <style scoped>
+/*
 .bs-tabview-bottom .p-tabview-nav {
-  order: 2; /* Pushes the tabs to the bottom */
+  order: 2;
 }
 
 .bs-tabview-bottom .p-tabview-panels {
-  order: 1; /* Keeps the content above the tabs */
+  order: 1;
 }
 
 .bs-tabview-bottom .p-tabview {
   display: flex;
-  flex-direction: column-reverse; /* Reverses the order of children */
+  flex-direction: column-reverse;
 }
 
 .bs-tabview-bottom .p-tabview /deep/ .p-tabview-nav {
   border-top: 1px solid #ececec !important;
 }
-
+*/
 </style>

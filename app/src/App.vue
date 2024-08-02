@@ -77,4 +77,5 @@ body {
 .p-inputnumber-input{
   text-align: right !important;
 }
+
 </style>
