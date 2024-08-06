@@ -22,6 +22,7 @@ import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 import SelectItem from '@/models/selectItem';
 import { Guid } from 'guid-typescript';
+import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -95,6 +96,7 @@ export default class DataObjectDetailTableEdit extends Vue {
   tableKey = 0;
   isWaiting = false;
   columns: MetaObjectColumnViewModel[] = [];
+  filters:any = {};
   selectedRecord: any = {};
   windowHeight = window.innerHeight;
   provider = new DataObjectsProvider();
@@ -132,6 +134,7 @@ export default class DataObjectDetailTableEdit extends Vue {
   @Watch('metaObjectSettings')
   onPropChange(): void {
     this.initColumns();
+    this.initFilters();
     this.loadData();
   }
 
@@ -201,6 +204,7 @@ export default class DataObjectDetailTableEdit extends Vue {
     );
     if (response.isOK) {
       this.table.rows = response.data.rows;
+      this.initFilters();
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -254,16 +258,58 @@ export default class DataObjectDetailTableEdit extends Vue {
     return value;
   }
 
+  initFilters(): void {
+    if (this.tableRows.length > 0) {
+      const first = this.tableRows[0];
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [key, value] of Object.entries(first)) {
+        if (typeof value === 'number') {
+          this.filters[key] = {
+            operator: FilterOperator.AND,
+            constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS, columnDataType: 'number' }],
+          };
+        }
+        if (typeof value === 'string') {
+          this.filters[key] = {
+            operator: FilterOperator.AND,
+            constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH, columnDataType: 'string' }],
+          };
+        }
+        if (typeof value === 'boolean') {
+          this.filters[key] = { value: null, matchMode: FilterMatchMode.NOT_EQUALS, columnDataType: 'boolean' };
+        }
+      }
+    }
+  }
+
+  isColumnDataTypeNumber(param: any): boolean {
+    return param.columnDataType === 'number';
+  }
+
+  isColumnDataTypeString(param: any): boolean {
+    return param.columnDataType === 'string';
+  }
+
+  isColumnDataTypeBoolean(param: any): boolean {
+    return param.columnDataType === 'boolean';
+  }
+
   mounted(): void {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
     });
     this.initColumns();
+    this.initFilters();
     this.menuItems.push({
       icon: 'pi pi-plus',
       class: 'text-primary',
       command: () => this.onAddClick(),
-
+    }, {
+      label: 'Filters',
+      icon: 'pi pi-filter-slash',
+      class: 'text-primary',
+      command: () => this.onClearFiltersClick(),
     });
     this.loadData();
     this.$nextTick(() => {
@@ -366,6 +412,10 @@ export default class DataObjectDetailTableEdit extends Vue {
     // });
   }
 
+  onClearFiltersClick(): void {
+    this.initFilters();
+  }
+
   onRowDeleteClick(row: any): void {
     const ind = this.table.rows.indexOf(row);
     if (ind > -1) {
@@ -432,6 +482,7 @@ export default class DataObjectDetailTableEdit extends Vue {
   </Menubar>
   <DataTable
     v-model:selection="selectedRecord"
+    v-model:filters="filters"
     :style="dataTableStyle"
     :scroll-height="dataTableScrollHeight"
     :value="tableRows"
@@ -480,6 +531,23 @@ export default class DataObjectDetailTableEdit extends Vue {
           {{ formatValue(data, field) }}
         </template>
 
+      </template>
+      <template #filter="{ filterModel }">
+        <template v-if="isColumnDataTypeNumber(filterModel)">
+          <InputNumber v-model="filterModel.value" mode="decimal" />
+        </template>
+        <template v-if="isColumnDataTypeString(filterModel)">
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            class="p-column-filter"
+            :placeholder="`Search by ${col.title}`"
+          />
+        </template>
+        <template v-if="isColumnDataTypeBoolean(filterModel)">
+          <span for="isBoolean-filter" class="font-bold"> {{ col.title }} </span>
+          <TriStateCheckbox v-model="filterModel.value" inputId="isBoolean-filter" />
+        </template>
       </template>
       <template v-if="!col.readonly" #editor="{ data, field }">
         <template v-if="getColumn(field).isTextInput || getColumn(field).isTextArea">
