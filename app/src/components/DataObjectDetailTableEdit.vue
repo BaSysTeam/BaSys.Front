@@ -17,6 +17,7 @@ import Button from 'primevue/button';
 import Badge from 'primevue/badge';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
+import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 import SelectItem from '@/models/selectItem';
@@ -97,6 +98,7 @@ export default class DataObjectDetailTableEdit extends Vue {
   selectedRecord: any = {};
   windowHeight = window.innerHeight;
   provider = new DataObjectsProvider();
+  selectItemProvider = new SelectItemsProvider();
   toastHelper = new ToastHelper(useToast());
   inputStyle = {
     width: '100%',
@@ -538,6 +540,7 @@ export default class DataObjectDetailTableEdit extends Vue {
         <template v-else-if="getColumn(field).isDropdown">
           <DropdownEditor class="border-noround"
                           :data-type-uid="getColumn(field).dataTypeUid"
+                          :provider="selectItemProvider"
                           :input-style="inputStyle"
                           v-model="data[parseDisplayName(field).valueName]"
                           @selected="(args:any):any => onDropDownSelected(data, field, args)">
