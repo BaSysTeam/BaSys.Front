@@ -283,6 +283,7 @@ export default class DataObjectsListView extends Vue {
 
   mounted(): void {
     window.addEventListener('resize', this.onResize);
+    document.title = 'BaSYS';
     this.windowHeight = window.innerHeight;
     this.init();
   }
@@ -426,6 +427,7 @@ export default class DataObjectsListView extends Vue {
         this.selectedRecord = this.dataTableItems[0];
       }
       this.title = `${this.dataObjectList.metaObjectKindSettings.title}.${this.dataObjectList.metaObjectSettings.title}`;
+      document.title = `${this.title} - BaSYS`;
       this.initColumns();
       this.initFilters();
     } else {
