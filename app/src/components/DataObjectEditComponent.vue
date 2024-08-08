@@ -225,7 +225,7 @@ export default class DataObjectEditComponent extends Vue {
       <div class="bs-tabview-bottom">
         <TabView :lazy="false">
           <!--Header tab-->
-          <TabPanel key="header" header="Header">
+          <TabPanel key="header" :header="$t('mainTab')">
 
             <DataObjectHeaderEdit :model="model"
                                       :is-primary-key-enabled="isPrimaryKeyEnabled"

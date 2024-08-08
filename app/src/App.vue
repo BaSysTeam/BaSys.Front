@@ -67,6 +67,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+  min-width: 1280px;
+}
+
+body, html {
+  min-width: 1280px;
 }
 
 .bs-required:after {
