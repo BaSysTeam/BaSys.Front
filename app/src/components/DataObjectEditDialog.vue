@@ -98,6 +98,7 @@ export default class DataObjectEditDialog extends Vue {
       modal
       class="pb-0"
       position="top"
+      maximizable
       :visible="true"
       :draggable="false"
       :style="{width: '50rem'}"
