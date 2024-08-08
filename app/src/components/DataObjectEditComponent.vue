@@ -226,15 +226,13 @@ export default class DataObjectEditComponent extends Vue {
         <TabView :lazy="false">
           <!--Header tab-->
           <TabPanel key="header" header="Header">
-            <div class="grid" :style="{height: `${windowHeight - 250}px`}">
-              <div :class="{'col-6': renderPlace == 'page', 'col-12': renderPlace == 'dialog'}">
 
-                <DataObjectHeaderEdit :model="model"
+            <DataObjectHeaderEdit :model="model"
                                       :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                      :render-place="renderPlace"
                                       @is-modified-changed="onHeaderFieldChange">
                 </DataObjectHeaderEdit>
-              </div>
-            </div>
+
           </TabPanel>
           <!--Detail tables tabs-->
           <TabPanel v-for="table in model.item.detailsTables"
@@ -254,13 +252,12 @@ export default class DataObjectEditComponent extends Vue {
   </div>
 
   <!--Edit header fields-->
-  <div class="grid" v-if="model.tabs.length === 0">
-    <div :class="{'col-6': renderPlace == 'page', 'col-12': renderPlace == 'dialog'}">
-    <DataObjectHeaderEdit :model="model"
+    <DataObjectHeaderEdit v-if="model.tabs.length === 0"
+                          :model="model"
                           :is-primary-key-enabled="isPrimaryKeyEnabled"
+                          :render-place="renderPlace"
                           @is-modified-changed="onHeaderFieldChange"></DataObjectHeaderEdit>
-    </div>
-  </div>
+
 </template>
 
 <style scoped>

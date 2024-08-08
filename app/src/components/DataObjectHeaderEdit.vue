@@ -43,14 +43,43 @@ import { PropType } from 'vue';
   },
 })
 export default class DataObjectHeaderEdit extends Vue {
-  @Prop({ type: Object as PropType<DataObjectViewModel>, required: true })
+  @Prop({
+    type: Object as PropType<DataObjectViewModel>,
+    required: true,
+  })
   model!: DataObjectViewModel;
 
-  @Prop({ type: Boolean, required: true })
+  @Prop({
+    type: Boolean,
+    required: true,
+  })
   isPrimaryKeyEnabled!: boolean;
+
+  // Specify where component is used. In item edit page or item edit dialog.
+  @Prop({
+    required: true,
+    type: String,
+    default: 'page',
+  })
+  renderPlace!: string;
 
   searchString = '';
   sortKind = 1;
+  windowHeight = window.innerHeight;
+
+  get fieldsContainerStyle(): any {
+    if (this.renderPlace === 'page') {
+      return {
+        height: `${this.windowHeight - 200}px`,
+        fontSize: '14px',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        width: '100%',
+      };
+    }
+
+    return { width: '100%' };
+  }
 
   get headerColumnsFiltered(): MetaObjectColumnViewModel[] {
     let result: MetaObjectColumnViewModel[] = [];
@@ -60,7 +89,8 @@ export default class DataObjectHeaderEdit extends Vue {
       result = this.model.headerColumns;
     } else {
       result = this.model.headerColumns.filter(
-        (x) => x.title.toLowerCase().includes(this.searchString.toLowerCase()),
+        (x) => x.title.toLowerCase()
+          .includes(this.searchString.toLowerCase()),
       );
     }
 
@@ -71,13 +101,16 @@ export default class DataObjectHeaderEdit extends Vue {
         return result;
       case 2:
         // Reverse.
-        return result.slice().reverse();
+        return result.slice()
+          .reverse();
       case 3:
         // Sort by title.
-        return result.slice().sort((a, b) => a.title.localeCompare(b.title));
+        return result.slice()
+          .sort((a, b) => a.title.localeCompare(b.title));
       case 4:
         // Sort by title DESC.
-        return result.slice().sort((a, b) => b.title.localeCompare(a.title));
+        return result.slice()
+          .sort((a, b) => b.title.localeCompare(a.title));
       default:
         return result;
     }
@@ -99,69 +132,96 @@ export default class DataObjectHeaderEdit extends Vue {
   onClearSearchClick(): void {
     this.searchString = '';
   }
+
+  beforeDestroy(): void {
+    window.removeEventListener('resize', this.onResize);
+  }
+
+  onResize(): void {
+    this.windowHeight = window.innerHeight;
+  }
+
+  mounted(): void {
+    this.$nextTick(() => {
+      window.addEventListener('resize', this.onResize);
+    });
+  }
 }
 </script>
 
 <template>
-  <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
-    <template #start>
-      <a href="#"
-         class="mr-2 ml-2 bs-toolbar-action"
-         tabindex="-1"
-         @click.prevent="onFieldsSortChangeClick(1)">
+
+  <div class="grid">
+    <div :class="{'col-6': renderPlace == 'page', 'col-12': renderPlace == 'dialog'}">
+      <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
+        <template #start>
+          <a href="#"
+             class="mr-2 ml-2 bs-toolbar-action"
+             tabindex="-1"
+             @click.prevent="onFieldsSortChangeClick(1)">
                       <span class="pi pi-sort-numeric-down"
-                            :class="{'text-primary': sortKind == 1}" ></span>
-      </a>
-      <a href="#"
-         class="mr-2 bs-toolbar-action"
-         tabindex="-1"
-         @click.prevent="onFieldsSortChangeClick(2)">
+                            :class="{'text-primary': sortKind == 1}"></span>
+          </a>
+          <a href="#"
+             class="mr-2 bs-toolbar-action"
+             tabindex="-1"
+             @click.prevent="onFieldsSortChangeClick(2)">
                       <span class="pi pi-sort-numeric-up"
                             :class="{'text-primary': sortKind == 2}"></span>
-      </a>
-      <a href="#"
-         class="mr-2 bs-toolbar-action"
-         tabindex="-1"
-         @click.prevent="onFieldsSortChangeClick(3)">
+          </a>
+          <a href="#"
+             class="mr-2 bs-toolbar-action"
+             tabindex="-1"
+             @click.prevent="onFieldsSortChangeClick(3)">
                       <span class="pi pi-sort-alpha-down"
                             :class="{'text-primary': sortKind == 3}"></span>
-      </a>
-      <a href="#"
-         class="mr-2 bs-toolbar-action"
-         tabindex="-1"
-         @click.prevent="onFieldsSortChangeClick(4)">
+          </a>
+          <a href="#"
+             class="mr-2 bs-toolbar-action"
+             tabindex="-1"
+             @click.prevent="onFieldsSortChangeClick(4)">
                       <span class="pi pi-sort-alpha-up"
                             :class="{'text-primary': sortKind == 4}"></span>
-      </a>
-    </template>
+          </a>
+        </template>
 
-    <template #end>
-      <InputGroup>
-        <InputText v-model="searchString"
-                   :placeholder="$t('search')"
-                   size="small" />
-        <Button icon="pi pi-times"
-                severity="secondary"
-                @click="onClearSearchClick"
-                outlined></Button>
-      </InputGroup>
+        <template #end>
+          <InputGroup>
+            <InputText v-model="searchString"
+                       :placeholder="$t('search')"
+                       size="small"/>
+            <Button icon="pi pi-times"
+                    severity="secondary"
+                    @click="onClearSearchClick"
+                    outlined></Button>
+          </InputGroup>
 
-    </template>
-  </Toolbar>
-  <div class="field grid" v-for="column in headerColumnsFiltered"
-       :key="column.uid">
+        </template>
+      </Toolbar>
+    </div>
+  </div>
 
-    <DataObjectHeaderFieldEditComponent :key="column.uid"
-                                        :column="column"
-                                        :is-primary-key-enabled="isPrimaryKeyEnabled"
-                                        :item="model.item"
-                                        @change="onHeaderFieldChange">
-    </DataObjectHeaderFieldEditComponent>
+  <div class="grid" :style="fieldsContainerStyle">
+    <div :class="{'col-6': renderPlace == 'page', 'col-12': renderPlace == 'dialog'}">
+      <div class="field grid" v-for="column in headerColumnsFiltered"
+           :key="column.uid">
+
+        <DataObjectHeaderFieldEditComponent :key="column.uid"
+                                            :column="column"
+                                            :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                            :item="model.item"
+                                            @change="onHeaderFieldChange">
+        </DataObjectHeaderFieldEditComponent>
+
+      </div>
+    </div>
 
   </div>
 
 </template>
 
 <style scoped>
-
+.field.grid {
+  margin-bottom: 0.5rem;
+}
 </style>
