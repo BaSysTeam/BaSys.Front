@@ -2,6 +2,8 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Emit } from 'vue-property-decorator';
 import { useToast } from 'primevue/usetoast';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import IconField from 'primevue/iconfield';
@@ -27,6 +29,8 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
   components: {
     Button,
     ButtonGroup,
+    InputGroup,
+    InputGroupAddon,
     InputText,
     InputNumber,
     InputIcon,
@@ -269,8 +273,11 @@ export default class DataObjectEditComponent extends Vue {
   }
 
   onFieldsSortChangeClick(args: number): void {
-    console.log('onSortChangeClick', args);
     this.sortKind = args;
+  }
+
+  onClearSearchClick(): void {
+    this.searchString = '';
   }
 }
 </script>
@@ -317,14 +324,16 @@ export default class DataObjectEditComponent extends Vue {
                   </template>
 
                   <template #end>
-                    <IconField iconPosition="left">
-                      <InputIcon>
-                        <i class="pi pi-search" />
-                      </InputIcon>
+                    <InputGroup>
                       <InputText v-model="searchString"
-                                 placeholder="Search"
+                                 :placeholder="$t('search')"
                                  size="small" />
-                    </IconField>
+                      <Button icon="pi pi-times"
+                              severity="secondary"
+                              @click="onClearSearchClick"
+                              outlined></Button>
+                    </InputGroup>
+
                   </template>
                 </Toolbar>
                 <div class="field grid" v-for="column in headerColumnFiltered"
