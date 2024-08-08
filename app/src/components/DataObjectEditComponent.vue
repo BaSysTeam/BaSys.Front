@@ -84,6 +84,10 @@ export default class DataObjectEditComponent extends Vue {
   })
   copyUid!: string;
 
+  // Specify where component is used. In item edit page or item edit dialog.
+  @Prop({ required: true, type: String, default: 'page' })
+  renderPlace!: string;
+
   regimeValue = 'edit';
 
   isAdd(): boolean {
@@ -290,7 +294,7 @@ export default class DataObjectEditComponent extends Vue {
           <!--Header tab-->
           <TabPanel key="header" header="Header">
             <div class="grid" :style="{height: `${windowHeight - 250}px`}">
-              <div class="col-6">
+              <div :class="{'col-6': renderPlace == 'page', 'col-12': renderPlace == 'dialog'}">
                 <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
                   <template #start>
                     <a href="#"
@@ -367,9 +371,55 @@ export default class DataObjectEditComponent extends Vue {
     </div>
   </div>
 
+  <!--Edit header fields-->
   <div class="grid" v-if="model.tabs.length === 0">
-    <div class="col-6">
-      <div class="field grid" v-for="column in model.headerColumns"
+    <div :class="{'col-6': renderPlace == 'page', 'col-12': renderPlace == 'dialog'}">
+      <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
+        <template #start>
+          <a href="#"
+             class="mr-2 ml-2 bs-toolbar-action"
+             tabindex="-1"
+             @click.prevent="onFieldsSortChangeClick(1)">
+                      <span class="pi pi-sort-numeric-down"
+                            :class="{'text-primary': sortKind == 1}" ></span>
+          </a>
+          <a href="#"
+             class="mr-2 bs-toolbar-action"
+             tabindex="-1"
+             @click.prevent="onFieldsSortChangeClick(2)">
+                      <span class="pi pi-sort-numeric-up"
+                            :class="{'text-primary': sortKind == 2}"></span>
+          </a>
+          <a href="#"
+             class="mr-2 bs-toolbar-action"
+             tabindex="-1"
+             @click.prevent="onFieldsSortChangeClick(3)">
+                      <span class="pi pi-sort-alpha-down"
+                            :class="{'text-primary': sortKind == 3}"></span>
+          </a>
+          <a href="#"
+             class="mr-2 bs-toolbar-action"
+             tabindex="-1"
+             @click.prevent="onFieldsSortChangeClick(4)">
+                      <span class="pi pi-sort-alpha-up"
+                            :class="{'text-primary': sortKind == 4}"></span>
+          </a>
+        </template>
+
+        <template #end>
+          <InputGroup>
+            <InputText v-model="searchString"
+                       :placeholder="$t('search')"
+                       size="small" />
+            <Button icon="pi pi-times"
+                    severity="secondary"
+                    @click="onClearSearchClick"
+                    outlined></Button>
+          </InputGroup>
+
+        </template>
+      </Toolbar>
+      <div class="field grid" v-for="column in headerColumnFiltered"
            :key="column.uid">
 
          <DataObjectHeaderFieldEditComponent :key="column.uid"

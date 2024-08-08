@@ -116,6 +116,7 @@ export default class DataObjectEditDialog extends Vue {
                                  :uid="uid"
                                  :copyUid="copyUid"
                                  :regime="regime"
+                                 render-place="dialog"
                                  @isModifiedChanged="onIsModifiedChanged"
                                  @isWaitingChanged="onIsWaitingChanged"
                                  @saved="onSaved"></DataObjectEditComponent>

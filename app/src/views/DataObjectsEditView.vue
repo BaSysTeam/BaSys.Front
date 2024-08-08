@@ -177,6 +177,7 @@ export default class DataObjectEditView extends Vue {
                                  :name="name"
                                  :uid="uid"
                                  :copyUid="copyUid"
+                                 render-place="page"
                                  @is-modified-changed="onIsModifiedChanged"
                                  @is-waiting-changed="onIsWaitingChanged"
                                  @title-changed="onTitleChanged"
