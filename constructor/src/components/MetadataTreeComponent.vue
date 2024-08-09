@@ -26,6 +26,7 @@
           v-model:selectionKeys="selectedKey"
           :value="treeNodes"
           :metaKeySelection="false"
+          :style="treeStyle"
           selectionMode="single"
           @nodeSelect="onNodeSelect"
           @node-expand="onNodeExpand"
@@ -110,6 +111,14 @@ export default class MetadataTreeComponent extends Vue {
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
   treeNodeCreateDialogRegime = 'create';
+  treeStyle = {
+    fontSize: '0.9rem',
+    maxWidth: '280px',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    textWrap: 'nowrap',
+    textOverflow: 'ellipsis',
+  };
 
   items = [
     {

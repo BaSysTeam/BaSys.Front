@@ -12,6 +12,8 @@ import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
 import Menu from 'primevue/menu';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
+import MainTab from '@/components/metaObjectEditComponents/mainTab.vue';
+import HeaderFieldsTab from '@/components/metaObjectEditComponents/headerFieldsTab.vue';
 import { useToast } from 'primevue/usetoast';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -23,6 +25,8 @@ import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
     ViewTitleComponent,
     Button,
     ButtonGroup,
+    MainTab,
+    HeaderFieldsTab,
     Menu,
     SplitButton,
     Divider,
@@ -224,7 +228,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     });
 
     this.navMenuItems.push({
-      label: 'Field',
+      label: 'Fields',
       command: () => this.onNavTabClick('fields'),
     });
 
@@ -305,10 +309,16 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
     <!--Settings edit-->
     <div class="grid">
-      <div class="col-fixed bs-nav-panel" style="width: 250px;">
+      <div class="col-fixed bs-nav-panel h-screen" style="width: 220px;">
         <Menu :model="navMenuItems"></Menu>
       </div>
       <div class="col">
+        <div v-if="activeTab=='main'">
+          <MainTab></MainTab>
+        </div>
+        <div v-if="activeTab=='fields'">
+          <HeaderFieldsTab></HeaderFieldsTab>
+        </div>
         <div v-if="activeTab == 'json'">
         <codemirror
           ref="codemirrorEditor"
