@@ -69,9 +69,18 @@
             <template #empty>{{ $t('noItemsFound') }}</template>
             <Column
               v-for="col of columns"
-              :key="col.field"
-              :field="col.field"
-              :header="col.header">
+              :key="col.name"
+              :field="col.name"
+              :header="col.title">
+              <template #body="{ data, field }">
+                <template v-if="getColumn(field).isCheckbox">
+                  <span v-if="data[field]" class="pi pi-check text-primary"></span>
+                </template>
+                <template v-else>
+                  {{ formatValue(data, field) }}
+                </template>
+
+              </template>
               <template #filter="{ filterModel }">
                 <template v-if="isColumnDataTypeNumber(filterModel)">
                   <InputNumber v-model="filterModel.value" mode="decimal" />
@@ -81,11 +90,11 @@
                     v-model="filterModel.value"
                     type="text"
                     class="p-column-filter"
-                    :placeholder="`Search by ${col.header}`"
+                    :placeholder="`Search by ${col.title}`"
                   />
                 </template>
                 <template v-if="isColumnDataTypeBoolean(filterModel)">
-                  <span for="isBoolean-filter" class="font-bold"> {{ col.header }} </span>
+                  <span for="isBoolean-filter" class="font-bold"> {{ col.title }} </span>
                   <TriStateCheckbox v-model="filterModel.value" inputId="isBoolean-filter" />
                 </template>
               </template>
@@ -125,12 +134,14 @@ import TriStateCheckbox from 'primevue/tristatecheckbox';
 import ConfirmDialog from 'primevue/confirmdialog';
 import DataObjectEditDialog from '@/components/DataObjectEditDialog.vue';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectKindStandardColumn';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
+import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 
 @Options({
   components: {
@@ -163,7 +174,7 @@ export default class DataObjectsListView extends Vue {
   dataObjectsProvider = new DataObjectsProvider();
   dataObjectList = new DataObjectList(null);
   dataTableItems:any[] = [];
-  columns:any[] = [];
+  columns:MetaObjectColumnViewModel[] = [];
   filters:any = {};
   selectedRecord:any = {};
   selectedUid = '';
@@ -272,6 +283,7 @@ export default class DataObjectsListView extends Vue {
 
   mounted(): void {
     window.addEventListener('resize', this.onResize);
+    document.title = 'BaSYS';
     this.windowHeight = window.innerHeight;
     this.init();
   }
@@ -415,6 +427,7 @@ export default class DataObjectsListView extends Vue {
         this.selectedRecord = this.dataTableItems[0];
       }
       this.title = `${this.dataObjectList.metaObjectKindSettings.title}.${this.dataObjectList.metaObjectSettings.title}`;
+      document.title = `${this.title} - BaSYS`;
       this.initColumns();
       this.initFilters();
     } else {
@@ -425,6 +438,34 @@ export default class DataObjectsListView extends Vue {
     this.isWaiting = false;
   }
 
+  getColumn(name: string): MetaObjectColumnViewModel {
+    const column = this.columns.find((x) => x.name === name);
+    if (!column) {
+      return new MetaObjectColumnViewModel(null, this.dataObjectList.dataTypes, []);
+    }
+    return column;
+  }
+
+  formatValue(row: any, field: string): string {
+    const column = this.getColumn(field);
+
+    const value = row[field];
+    if (column.isInt) {
+      return ValuesFormatter.formatNumber(value, 0);
+    }
+    if (column.isNumber) {
+      return ValuesFormatter.formatNumber(value, column.numberDigits);
+    }
+    if (column.isDateInput) {
+      return ValuesFormatter.formatDate(value);
+    }
+    if (column.isDateTimeInput) {
+      return ValuesFormatter.formatDateTime(value);
+    }
+
+    return value;
+  }
+
   initColumns(): void {
     this.columns = [];
     // eslint-disable-next-line no-restricted-syntax
@@ -433,12 +474,16 @@ export default class DataObjectsListView extends Vue {
 
       const columnName = isPrimitive ? column.name : `${column.name}_display`;
 
-      const newColumn = {
-        field: columnName,
-        header: column.title,
-      };
-      this.columns.push(newColumn);
+      const columnViewModel = new MetaObjectColumnViewModel(
+        column,
+        this.dataObjectList.dataTypes,
+        [],
+      );
+      columnViewModel.name = columnName;
+
+      this.columns.push(columnViewModel);
     });
+    console.log('init columns list', this.columns);
   }
 
   initFilters(): void {

@@ -31,10 +31,12 @@ export default class DropdownEditor extends Vue {
   @Prop({ type: Object as PropType<any> })
   modelValue!: any;
 
+  @Prop({ type: Object as PropType<SelectItemsProvider> })
+  provider!: SelectItemsProvider;
+
   localValue: any = '';
 
   isWaiting = false;
-  provider = new SelectItemsProvider();
 
   items: SelectItem[] = [];
 
@@ -115,6 +117,7 @@ export default class DropdownEditor extends Vue {
             :loading="isWaiting"
             :options="items"
             :input-style="inputStyle"
+            :virtualScrollerOptions="{ itemSize: 38 }"
             v-model="localValue"
             size="small"
             option-label="text"

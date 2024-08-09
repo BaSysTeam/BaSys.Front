@@ -43,7 +43,7 @@ export default class DataObjectEditView extends Vue {
   isWaiting = false;
   isModified = false;
   closeAfterSave = false;
-  title = '';
+  title = 'BaSYS';
   editRegime = 'edit';
   model = new DataObjectWithMetadata(null);
   router = useRouter();
@@ -91,6 +91,7 @@ export default class DataObjectEditView extends Vue {
 
   onTitleChanged(args: string): void {
     this.title = args;
+    document.title = `${args} - BaSYS`;
   }
 
   onSaved(args: string): void {
@@ -177,6 +178,7 @@ export default class DataObjectEditView extends Vue {
                                  :name="name"
                                  :uid="uid"
                                  :copyUid="copyUid"
+                                 render-place="page"
                                  @is-modified-changed="onIsModifiedChanged"
                                  @is-waiting-changed="onIsWaitingChanged"
                                  @title-changed="onTitleChanged"

@@ -12,6 +12,7 @@ import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DataObject from '@/models/dataObject';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
+import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
 
 @Options({
   components: {
@@ -34,6 +35,8 @@ export default class DataObjectHeaderEditComponent extends Vue {
 
   @Prop({ type: Boolean, required: true })
   isPrimaryKeyEnabled!: boolean;
+
+  selectItemProvider = new SelectItemsProvider();
 
   onChange(): void {
     this.$emit('change');
@@ -150,6 +153,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
   <div class="col-12 md:col-8" v-if="column.isDropdown">
       <DropdownEditor :id="column.uid"
                       :data-type-uid="column.dataTypeUid"
+                      :provider="selectItemProvider"
                       v-model="item.header[column.name]"
                       @update:model-value="onChange"></DropdownEditor>
   </div>

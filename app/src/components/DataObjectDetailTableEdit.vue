@@ -1,6 +1,8 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch, Emit } from 'vue-property-decorator';
+import {
+  Prop, Watch, Emit, Ref,
+} from 'vue-property-decorator';
 import { PropType } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
@@ -12,11 +14,15 @@ import InputSwitch from 'primevue/inputswitch';
 import Calendar from 'primevue/calendar';
 import Menubar from 'primevue/menubar';
 import Button from 'primevue/button';
+import Badge from 'primevue/badge';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
+import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 import SelectItem from '@/models/selectItem';
+import { Guid } from 'guid-typescript';
+import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -36,6 +42,7 @@ import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
       Calendar,
       Menubar,
       Button,
+      Badge,
     },
 })
 export default class DataObjectDetailTableEdit extends Vue {
@@ -76,11 +83,24 @@ export default class DataObjectDetailTableEdit extends Vue {
   })
   table!: DataObjectDetailsTable;
 
+  @Ref()
+  dataTableRef!:any;
+
+  get tableRows(): any[] {
+    if (this.table != null) {
+      return this.table.rows;
+    }
+    return [];
+  }
+
+  tableKey = 0;
   isWaiting = false;
   columns: MetaObjectColumnViewModel[] = [];
+  filters:any = {};
   selectedRecord: any = {};
   windowHeight = window.innerHeight;
   provider = new DataObjectsProvider();
+  selectItemProvider = new SelectItemsProvider();
   toastHelper = new ToastHelper(useToast());
   inputStyle = {
     width: '100%',
@@ -89,19 +109,32 @@ export default class DataObjectDetailTableEdit extends Vue {
     padding: '5px',
   };
 
+  virtualScrollerOptions = {
+    itemSize: 30,
+    delay: 0,
+    disabled: false,
+    numToleratedItems: 20,
+  };
+
   menuItems: any[] = [];
+  vScroll: any;
 
   get dataTableStyle(): object {
     return {
-      height: `${this.windowHeight - 275}px`,
+      height: `${this.windowHeight - 420}px`,
       fontSize: '14px',
     };
+  }
+
+  get dataTableScrollHeight(): string {
+    return `${this.windowHeight - 320}px`;
   }
 
   @Watch('tableUid')
   @Watch('metaObjectSettings')
   onPropChange(): void {
     this.initColumns();
+    this.initFilters();
     this.loadData();
   }
 
@@ -147,7 +180,7 @@ export default class DataObjectDetailTableEdit extends Vue {
       columnViewModel.setDefaultStyle();
 
       if (columnViewModel.name === 'row_number') {
-        columnViewModel.setWidth('30px');
+        columnViewModel.setWidth('50px');
         columnViewModel.title = '#';
         columnViewModel.isInt = false;
         columnViewModel.isNumber = false;
@@ -159,6 +192,9 @@ export default class DataObjectDetailTableEdit extends Vue {
   }
 
   async loadData(): Promise<void> {
+    if (this.table.rows.length > 0) {
+      return;
+    }
     this.isWaiting = true;
     const response = await this.provider.getDetailsTable(
       this.kind,
@@ -168,10 +204,17 @@ export default class DataObjectDetailTableEdit extends Vue {
     );
     if (response.isOK) {
       this.table.rows = response.data.rows;
+      this.initFilters();
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
+    this.$nextTick(() => {
+      if (this.table.rows.length) {
+        // eslint-disable-next-line prefer-destructuring
+        this.selectedRecord = this.table.rows[0];
+      }
+    });
     this.isWaiting = false;
   }
 
@@ -215,18 +258,66 @@ export default class DataObjectDetailTableEdit extends Vue {
     return value;
   }
 
+  initFilters(): void {
+    if (this.tableRows.length > 0) {
+      const first = this.tableRows[0];
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [key, value] of Object.entries(first)) {
+        if (typeof value === 'number') {
+          this.filters[key] = {
+            operator: FilterOperator.AND,
+            constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS, columnDataType: 'number' }],
+          };
+        }
+        if (typeof value === 'string') {
+          this.filters[key] = {
+            operator: FilterOperator.AND,
+            constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH, columnDataType: 'string' }],
+          };
+        }
+        if (typeof value === 'boolean') {
+          this.filters[key] = { value: null, matchMode: FilterMatchMode.NOT_EQUALS, columnDataType: 'boolean' };
+        }
+      }
+    }
+  }
+
+  isColumnDataTypeNumber(param: any): boolean {
+    return param.columnDataType === 'number';
+  }
+
+  isColumnDataTypeString(param: any): boolean {
+    return param.columnDataType === 'string';
+  }
+
+  isColumnDataTypeBoolean(param: any): boolean {
+    return param.columnDataType === 'boolean';
+  }
+
   mounted(): void {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
     });
     this.initColumns();
+    this.initFilters();
     this.menuItems.push({
       icon: 'pi pi-plus',
       class: 'text-primary',
       command: () => this.onAddClick(),
-
+    }, {
+      label: 'Filters',
+      icon: 'pi pi-filter-slash',
+      class: 'text-primary',
+      command: () => this.onClearFiltersClick(),
     });
     this.loadData();
+    this.$nextTick(() => {
+      if (this.table.rows.length) {
+        // eslint-disable-next-line prefer-destructuring
+        this.selectedRecord = this.table.rows[0];
+      }
+    });
   }
 
   beforeDestroy(): void {
@@ -289,9 +380,40 @@ export default class DataObjectDetailTableEdit extends Vue {
     });
     newRow.object_uid = this.objectUid;
     newRow.row_number = this.table.rows.length + 1;
-    this.table.rows.push(newRow);
+    newRow.id = Guid.create();
+
+    const ind = this.table.rows.indexOf(this.selectedRecord);
+    if (ind > -1) {
+      this.table.rows.splice(ind + 1, 0, newRow);
+    } else {
+      this.table.rows.push(newRow);
+      this.tableKey += 1;
+    }
+
+    this.selectedRecord = newRow;
+    console.log('Row added', newRow);
+    console.log('Rows count', this.table.rows.length);
+    console.log('Rows', this.table.rows);
 
     this.isModifiedChanged(true);
+
+    // this.$nextTick(() => {
+    //   if (this.dataTableRef) {
+    //     console.log('dataTableRef', this.dataTableRef);
+    //
+    //     if (!this.vScroll) {
+    //       this.vScroll = this.dataTableRef.getVirtualScrollerRef();
+    //     }
+    //     console.log('vScroll', this.vScroll);
+    //     if (this.vScroll) {
+    //       // this.vScroll.scrollToIndex(this.table.rows.length - 1);
+    //     }
+    //   }
+    // });
+  }
+
+  onClearFiltersClick(): void {
+    this.initFilters();
   }
 
   onRowDeleteClick(row: any): void {
@@ -308,7 +430,14 @@ export default class DataObjectDetailTableEdit extends Vue {
       newRow[key] = value;
     });
     newRow.row_number = this.table.rows.length + 1;
-    this.table.rows.push(newRow);
+    newRow.id = Guid.create();
+
+    const ind = this.table.rows.indexOf(row);
+    if (ind > -1) {
+      this.table.rows.splice(ind + 1, 0, newRow);
+    }
+
+    this.selectedRecord = newRow;
     this.isModifiedChanged(true);
   }
 
@@ -335,25 +464,43 @@ export default class DataObjectDetailTableEdit extends Vue {
       this.isModifiedChanged(true);
     }
   }
+
+  onPageChanged(args: any): void {
+    console.log('Page changed', args);
+    if (this.table.rows.length > args.first) {
+      this.selectedRecord = this.table.rows[args.first];
+    }
+  }
 }
 </script>
 
 <template>
-  <Menubar :model="menuItems" style="margin-bottom: 3px; padding: 0; font-size: 14px;"></Menubar>
+  <Menubar :model="menuItems" style="margin-bottom: 3px; padding: 0; font-size: 14px;">
+    <template #end>
+      <Badge class="mr-1" :value="table.rows.length" />
+    </template>
+  </Menubar>
   <DataTable
     v-model:selection="selectedRecord"
+    v-model:filters="filters"
     :style="dataTableStyle"
-    :value="table.rows"
+    :scroll-height="dataTableScrollHeight"
+    :value="tableRows"
     :metaKeySelection="true"
-    :rows="15"
+    :rows="100"
+    :rowsPerPageOptions="[10, 20, 50, 100, 500]"
+    :key="tableKey"
+    ref="dataTableRef"
+    data-key="id"
     showGridlines
     selectionMode="single"
+    paginator
     scrollable
-    scrollHeight="flex"
     filterDisplay="menu"
     size="small"
     edit-mode="cell"
     @cell-edit-complete="onCellEditComplete"
+    @page="onPageChanged"
     :pt="{
                 table: { style: 'min-width: 50rem' },
                 column: {
@@ -364,9 +511,9 @@ export default class DataObjectDetailTableEdit extends Vue {
             }"
   >
     <template #empty>{{ $t('noItemsFound') }}</template>
-    <Column header="#" style="max-width:40px; min-width:40px; width: 40px;">
-      <template #body="{index}">
-        {{ index + 1 }}
+    <Column header="#" style="max-width:50px; min-width:50px; width: 50px;">
+      <template #body="{data}">
+        {{ table.rows.indexOf(data) + 1 }}
       </template>
     </Column>
     <Column
@@ -384,6 +531,23 @@ export default class DataObjectDetailTableEdit extends Vue {
           {{ formatValue(data, field) }}
         </template>
 
+      </template>
+      <template #filter="{ filterModel }">
+        <template v-if="isColumnDataTypeNumber(filterModel)">
+          <InputNumber v-model="filterModel.value" mode="decimal" />
+        </template>
+        <template v-if="isColumnDataTypeString(filterModel)">
+          <InputText
+            v-model="filterModel.value"
+            type="text"
+            class="p-column-filter"
+            :placeholder="`Search by ${col.title}`"
+          />
+        </template>
+        <template v-if="isColumnDataTypeBoolean(filterModel)">
+          <span for="isBoolean-filter" class="font-bold"> {{ col.title }} </span>
+          <TriStateCheckbox v-model="filterModel.value" inputId="isBoolean-filter" />
+        </template>
       </template>
       <template v-if="!col.readonly" #editor="{ data, field }">
         <template v-if="getColumn(field).isTextInput || getColumn(field).isTextArea">
@@ -444,6 +608,7 @@ export default class DataObjectDetailTableEdit extends Vue {
         <template v-else-if="getColumn(field).isDropdown">
           <DropdownEditor class="border-noround"
                           :data-type-uid="getColumn(field).dataTypeUid"
+                          :provider="selectItemProvider"
                           :input-style="inputStyle"
                           v-model="data[parseDisplayName(field).valueName]"
                           @selected="(args:any):any => onDropDownSelected(data, field, args)">
@@ -488,8 +653,12 @@ export default class DataObjectDetailTableEdit extends Vue {
   </DataTable>
 </template>
 
-<style scoped>
+<style >
 .bs-row-action span{
   font-size: 12px!important;
+}
+
+.p-tabview-nav-link  {
+  padding: 0.5rem!important;
 }
 </style>

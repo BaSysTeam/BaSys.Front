@@ -2,31 +2,20 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Emit } from 'vue-property-decorator';
 import { useToast } from 'primevue/usetoast';
-import InputText from 'primevue/inputtext';
-import InputNumber from 'primevue/inputnumber';
-import Checkbox from 'primevue/checkbox';
-import Calendar from 'primevue/calendar';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import DataObjectViewModel from '@/models/dataObjectViewModel';
 import DataObject from '@/models/dataObject';
-import PrimaryKeyInput from '@/components/editors/PrimaryKeyInput.vue';
-import DataObjectHeaderFieldEditComponent
-  from '@/components/DataObjectHeaderFieldEditComponent.vue';
+import DataObjectHeaderEdit from '@/components/DataObjectHeaderEdit.vue';
 import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vue';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 @Options({
   components: {
-    InputText,
-    InputNumber,
-    Checkbox,
-    Calendar,
     TabView,
     TabPanel,
-    PrimaryKeyInput,
-    DataObjectHeaderFieldEditComponent,
+    DataObjectHeaderEdit,
     DataObjectDetailTableEdit,
   },
 })
@@ -68,6 +57,10 @@ export default class DataObjectEditComponent extends Vue {
     default: '',
   })
   copyUid!: string;
+
+  // Specify where component is used. In item edit page or item edit dialog.
+  @Prop({ required: true, type: String, default: 'page' })
+  renderPlace!: string;
 
   regimeValue = 'edit';
 
@@ -230,24 +223,16 @@ export default class DataObjectEditComponent extends Vue {
   <div class="grid" v-if="model.tabs.length > 0">
     <div class="col-12">
       <div class="bs-tabview-bottom">
-        <TabView>
+        <TabView :lazy="false">
           <!--Header tab-->
-          <TabPanel key="header" header="Header">
-            <div class="grid" :style="{height: `${windowHeight - 250}px`}">
-              <div class="col-6">
-                <div class="field grid" v-for="column in model.headerColumns"
-                     :key="column.uid">
+          <TabPanel key="header" :header="$t('mainTab')">
 
-                  <DataObjectHeaderFieldEditComponent :key="column.uid"
-                                                      :column="column"
-                                                      :is-primary-key-enabled="isPrimaryKeyEnabled"
-                                                      :item="model.item"
-                                                      @change="onHeaderFieldChange">
-                  </DataObjectHeaderFieldEditComponent>
+            <DataObjectHeaderEdit :model="model"
+                                      :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                      :render-place="renderPlace"
+                                      @is-modified-changed="onHeaderFieldChange">
+                </DataObjectHeaderEdit>
 
-                </div>
-              </div>
-            </div>
           </TabPanel>
           <!--Detail tables tabs-->
           <TabPanel v-for="table in model.item.detailsTables"
@@ -266,39 +251,32 @@ export default class DataObjectEditComponent extends Vue {
     </div>
   </div>
 
-  <div class="grid" v-if="model.tabs.length === 0">
-    <div class="col-6">
-      <div class="field grid" v-for="column in model.headerColumns"
-           :key="column.uid">
+  <!--Edit header fields-->
+    <DataObjectHeaderEdit v-if="model.tabs.length === 0"
+                          :model="model"
+                          :is-primary-key-enabled="isPrimaryKeyEnabled"
+                          :render-place="renderPlace"
+                          @is-modified-changed="onHeaderFieldChange"></DataObjectHeaderEdit>
 
-         <DataObjectHeaderFieldEditComponent :key="column.uid"
-                                             :column="column"
-                                             :is-primary-key-enabled="isPrimaryKeyEnabled"
-                                             :item="model.item"
-                                             @change="onHeaderFieldChange">
-         </DataObjectHeaderFieldEditComponent>
-
-      </div>
-    </div>
-  </div>
 </template>
 
 <style scoped>
+/*
 .bs-tabview-bottom .p-tabview-nav {
-  order: 2; /* Pushes the tabs to the bottom */
+  order: 2;
 }
 
 .bs-tabview-bottom .p-tabview-panels {
-  order: 1; /* Keeps the content above the tabs */
+  order: 1;
 }
 
 .bs-tabview-bottom .p-tabview {
   display: flex;
-  flex-direction: column-reverse; /* Reverses the order of children */
+  flex-direction: column-reverse;
 }
 
 .bs-tabview-bottom .p-tabview /deep/ .p-tabview-nav {
   border-top: 1px solid #ececec !important;
 }
-
+*/
 </style>
