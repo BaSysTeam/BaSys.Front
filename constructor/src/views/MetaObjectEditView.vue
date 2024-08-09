@@ -10,6 +10,7 @@ import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
+import Menu from 'primevue/menu';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import { useToast } from 'primevue/usetoast';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
@@ -22,6 +23,7 @@ import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
     ViewTitleComponent,
     Button,
     ButtonGroup,
+    Menu,
     SplitButton,
     Divider,
     Codemirror,
@@ -38,6 +40,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   settings = new MetaObjectStorableSettings({});
   toastHelper = new ToastHelper(useToast());
   formTitle = '';
+  activeTab = 'main';
 
   codemirrorExtensions = [jsonLang(), githubLight];
   codemirrorEditor: any = null;
@@ -69,6 +72,8 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       command: () => this.addDetailTable(),
     },
   ];
+
+  navMenuItems:any[] = [];
 
   get codemirrorStyle(): object {
     return {
@@ -154,6 +159,15 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.update();
   }
 
+  onNavTabClick(args: string): void {
+    console.log(args, 'Tab click');
+    this.activeTab = args;
+  }
+
+  onDetailsTableAdd(): void {
+    console.log('Add details table');
+  }
+
   async save(): Promise<boolean> {
     let result = false;
     this.isWaiting = true;
@@ -201,6 +215,39 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       console.error(response.presentation);
     }
     console.log('update', response);
+  }
+
+  beforeMount():void {
+    this.navMenuItems.push({
+      label: 'Main',
+      command: () => this.onNavTabClick('main'),
+    });
+
+    this.navMenuItems.push({
+      label: 'Field',
+      command: () => this.onNavTabClick('fields'),
+    });
+
+    const tablesGroup = {
+      label: 'Details tables',
+      items: [{
+        label: 'Add',
+        icon: 'pi pi-plus',
+        command: () => this.onDetailsTableAdd(),
+      }],
+    };
+
+    this.navMenuItems.push(tablesGroup);
+
+    const otherGroup = {
+      label: 'Other',
+      items: [{
+        label: 'JSON',
+        command: () => this.onNavTabClick('json'),
+      }],
+    };
+
+    this.navMenuItems.push(otherGroup);
   }
 
   mounted(): void {
@@ -258,7 +305,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
     <!--Settings edit-->
     <div class="grid">
-      <div class="col-12">
+      <div class="col-fixed bs-nav-panel" style="width: 250px;">
+        <Menu :model="navMenuItems"></Menu>
+      </div>
+      <div class="col">
+        <div v-if="activeTab == 'json'">
         <codemirror
           ref="codemirrorEditor"
           v-model="settingsJson"
@@ -269,6 +320,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
           :extensions="codemirrorExtensions"
           @change="onSettingsInput"
         />
+        </div>
       </div>
     </div>
   </div>
