@@ -90,8 +90,8 @@ export default class DataObjectEditView extends Vue {
   }
 
   onTitleChanged(args: string): void {
-    this.title = `${args} - BaSYS`;
-    document.title = this.title;
+    this.title = args;
+    document.title = `${args} - BaSYS`;
   }
 
   onSaved(args: string): void {

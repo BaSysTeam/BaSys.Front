@@ -1,7 +1,7 @@
 <template>
   <Toast/>
   <AppHeaderComponent
-    title="BaSys: Application"
+    title="BaSYS: Application"
     @burgerClicked="onBurgerClicked"
   >
     <template #userActions>
