@@ -172,6 +172,10 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     console.log('Add details table');
   }
 
+  onSettingsChanged(): void {
+    this.isModified = true;
+  }
+
   async save(): Promise<boolean> {
     let result = false;
     this.isWaiting = true;
@@ -314,7 +318,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       </div>
       <div class="col">
         <div v-if="activeTab=='main'">
-          <MainTab></MainTab>
+          <MainTab :settings="settings" @change="onSettingsChanged"></MainTab>
         </div>
         <div v-if="activeTab=='fields'">
           <HeaderFieldsTab></HeaderFieldsTab>
