@@ -14,6 +14,7 @@ import Menu from 'primevue/menu';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import MainTab from '@/components/metaObjectEditComponents/mainTab.vue';
 import HeaderFieldsTab from '@/components/metaObjectEditComponents/headerFieldsTab.vue';
+import JsonTab from '@/components/metaObjectEditComponents/jsonTab.vue';
 import { useToast } from 'primevue/usetoast';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -22,6 +23,7 @@ import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 
 @Options({
   components: {
+    JsonTab,
     ViewTitleComponent,
     Button,
     ButtonGroup,
@@ -39,11 +41,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   isModified = false;
   isWaiting = true;
 
-  settingsJson = '';
+  // settingsJson = '';
   provider = new MetaObjectProvider();
   settings = new MetaObjectStorableSettings({});
   toastHelper = new ToastHelper(useToast());
-  formTitle = '';
+  metaObjectKindTitle = '';
   activeTab = 'main';
 
   codemirrorExtensions = [jsonLang(), githubLight];
@@ -85,6 +87,10 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     };
   }
 
+  get formTitle(): string {
+    return `${this.metaObjectKindTitle}.${this.settings.title}`;
+  }
+
   @Watch('kind')
   @Watch('name')
   onPropChange(newVal: string, oldVal: string): void {
@@ -107,7 +113,8 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   }
 
   downloadJson():void {
-    const blob = new Blob([this.settingsJson], { type: 'application/json' });
+    const settingsJson = JSON.stringify(this.settings, null, 2);
+    const blob = new Blob([settingsJson], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
     // Create a link and trigger the download
@@ -125,13 +132,13 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   addHeaderColumn(): void {
     this.isModified = true;
     this.settings.header.newColumn();
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
+    // this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
   addRenderSettingsColumn(): void {
     this.isModified = true;
     this.settings.header.newRenderSettingsColumn();
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
+    // this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
   addDetailTable(): void {
@@ -144,7 +151,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
     this.settings.newDetailTable(pk.dataTypeUid);
 
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
+    // this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
   onAddDetailTableColumn(detailTableUid: string): void {
@@ -156,7 +163,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     }
     this.isModified = true;
     currentTable.newColumn();
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
+    // this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
   onUpdateClick(): void {
@@ -176,14 +183,19 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.isModified = true;
   }
 
+  onJsonChanged(args: string): void {
+    this.isModified = true;
+    console.log('JSON text changed', args);
+    const settingsTmp = new MetaObjectStorableSettings(JSON.parse(args));
+  }
+
   async save(): Promise<boolean> {
     let result = false;
     this.isWaiting = true;
 
-    this.settings = new MetaObjectStorableSettings(JSON.parse(this.settingsJson));
+    // this.settings = new MetaObjectStorableSettings(JSON.parse(this.settingsJson));
 
-    console.log('save object', this.settingsJson);
-    console.log('settings', this.settings);
+    console.log('save settings', this.settings);
     const response = await this.provider.update(this.settings);
     this.isWaiting = false;
 
@@ -216,8 +228,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
         };
         this.actions.push(newAction);
       });
-      this.formTitle = `${response.data.metaObjectKindTitle}.${this.settings.title}`;
-      this.settingsJson = JSON.stringify(this.settings, null, 2);
+      this.metaObjectKindTitle = response.data.metaObjectKindTitle;
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
@@ -281,7 +292,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       <div class="col-12">
         <ButtonGroup>
           <Button
-            label="Save"
+            :label="$t('save')"
             severity="primary"
             size="small"
             outlined
@@ -297,7 +308,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
           @click="onRunClick"
         />
         <SplitButton
-          label="Actions"
+          :label="$t('actions')"
           severity="primary"
           size="small"
           class="ml-1"
@@ -324,6 +335,8 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
           <HeaderFieldsTab></HeaderFieldsTab>
         </div>
         <div v-if="activeTab == 'json'">
+          <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>
+          <!--
         <codemirror
           ref="codemirrorEditor"
           v-model="settingsJson"
@@ -334,6 +347,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
           :extensions="codemirrorExtensions"
           @change="onSettingsInput"
         />
+        -->
         </div>
       </div>
     </div>
