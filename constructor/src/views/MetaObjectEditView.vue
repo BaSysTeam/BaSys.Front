@@ -332,7 +332,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
           <MainTab :settings="settings" @change="onSettingsChanged"></MainTab>
         </div>
         <div v-if="activeTab=='fields'">
-          <HeaderFieldsTab></HeaderFieldsTab>
+          <HeaderFieldsTab :settings="settings"></HeaderFieldsTab>
         </div>
         <div v-if="activeTab == 'json'">
           <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>
