@@ -91,4 +91,8 @@ body {
   top: 100px;
   margin: 0;
 }
+
+.p-accordion-content{
+  padding-bottom:0;
+}
 </style>

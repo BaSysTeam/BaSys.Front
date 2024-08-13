@@ -1,0 +1,181 @@
+<script setup lang="ts">
+import {
+  defineProps, defineEmits, PropType, ref, watch, onMounted,
+} from 'vue';
+import Accordion from 'primevue/accordion';
+import AccordionTab from 'primevue/accordiontab';
+import Dropdown from 'primevue/dropdown';
+import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
+import InputSwitch from 'primevue/inputswitch';
+import DataType from '../../../../shared/src/models/dataType';
+import DataTypeDefaults from '../../../../shared/src/dataProviders/dataTypeDefaults';
+import MetaObjectTableColumn from '../../../../shared/src/models/metaObjectTableColumn';
+
+// @component
+const name = 'ColumnPropertiesPanel';
+
+// Props
+const props = defineProps({
+  column: {
+    type: Object as PropType<MetaObjectTableColumn>,
+    required: true,
+  },
+  dataTypes: {
+    type: Object as PropType<DataType[]>,
+    required: true,
+  },
+});
+
+// Emits
+const emit = defineEmits({ change: () => true });
+
+function onChange(): void {
+  emit('change');
+}
+
+function isString(dataTypeUid: string): boolean {
+  return DataTypeDefaults.String.uid === dataTypeUid;
+}
+
+function isNumber(dataTypeUid: string): boolean {
+  return DataTypeDefaults.Decimal.uid === dataTypeUid;
+}
+
+</script>
+
+<template>
+<Accordion :multiple="true" :active-index="[0, 1, 2]">
+  <AccordionTab :header="$t('mainTab')">
+    <div class="grid">
+      <div class="col-12">
+        <!--Title-->
+        <div class="field grid">
+          <label for="prop-title" class="col-4 bs-label bs-required">{{$t('title')}}</label>
+          <div class="col-8">
+            <InputText id="prop-title"
+                       size="small"
+                       autocomplete="off"
+                       class="w-full"
+                       v-model="column.title"
+                       @change="onChange"></InputText>
+          </div>
+        </div>
+
+        <!--Name-->
+        <div class="field grid">
+          <label for="prop-name" class="col-4 bs-label bs-required">{{$t('name')}}</label>
+          <div class="col-8">
+            <InputText id="prop-name"
+                       size="small"
+                       autocomplete="off"
+                       class="w-full"
+                       v-model="column.name"
+                       @change="onChange"></InputText>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </AccordionTab>
+  <AccordionTab :header="$t('data')">
+
+    <!--Data type-->
+    <div class="field grid">
+      <label for="column-data-type"
+             class="col-4 bs-label">{{$t('dataType')}}</label>
+      <div class="col-8">
+        <Dropdown id="column-data-type"
+                  size="small"
+                  class="w-full"
+                  :options="dataTypes"
+                  option-label="title"
+                  option-value="uid"
+                  v-model="column.dataTypeUid"
+                  @change="onChange"></Dropdown>
+      </div>
+    </div>
+
+    <!--Number digits-->
+    <div class="field grid" v-if="isNumber(column.dataTypeUid)">
+      <label for="column-number-digits"
+             class="col-4 bs-label">{{$t('numberDigits')}}</label>
+      <div class="col-8">
+        <InputNumber id="column-number-digits"
+                     v-model="column.numberDigits"
+                     class="w-full"
+                     size="small"
+                     show-buttons
+                     :min="0"
+                     :min-fraction-digits="0"
+                     :max-fraction-digits="0"
+                     @update:model-value="onChange"></InputNumber>
+      </div>
+    </div>
+
+    <!--String length-->
+    <div class="field grid" v-if="isString(column.dataTypeUid)">
+      <label for="column-string-length"
+             class="col-4 bs-label">{{$t('stringLength')}}</label>
+      <div class="col-8">
+        <InputNumber id="column-string-length"
+                     v-model="column.stringLength"
+                     class="w-full"
+                     size="small"
+                     show-buttons
+                     :step="10"
+                     :min ="0"
+                     :min-fraction-digits="0"
+                     :max-fraction-digits="0"
+                     @update:model-value="onChange"></InputNumber>
+      </div>
+    </div>
+
+    <!--Primary key-->
+    <div class="field grid">
+      <label for="column-primary-key"
+             class="col-4 bs-label">{{$t('primaryKey')}}</label>
+      <div class="col-8">
+        <InputSwitch id="column-primary-key"
+                     v-model="column.primaryKey"
+                     @change="onChange"></InputSwitch>
+      </div>
+    </div>
+
+    <!--Unique-->
+    <div class="field grid" v-if="!column.primaryKey">
+      <label for="column-unique"
+             class="col-4 bs-label">{{$t('unique')}}</label>
+      <div class="col-8">
+        <InputSwitch id="column-unique"
+                     v-model="column.unique"
+                     @change="onChange"></InputSwitch>
+      </div>
+    </div>
+
+    <!--Required-->
+    <div class="field grid" v-if="!column.primaryKey">
+      <label for="column-required"
+             class="col-4 bs-label">{{$t('required')}}</label>
+      <div class="col-8">
+        <InputSwitch id="column-required"
+                     v-model="column.required"
+                     @change="onChange"></InputSwitch>
+      </div>
+    </div>
+  </AccordionTab>
+  <AccordionTab :header="$t('render')">
+    <h3>Render</h3>
+  </AccordionTab>
+</Accordion>
+</template>
+
+<style scoped>
+.field.grid {
+  margin-bottom: 0.5rem;
+}
+
+.bs-label{
+  margin-bottom: 0;
+}
+</style>

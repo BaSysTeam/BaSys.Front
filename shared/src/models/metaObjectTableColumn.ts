@@ -5,7 +5,7 @@ export default class MetaObjectTableColumn {
   title:string;
   name:string;
   dataTypeUid:string;
-  stringLength:string;
+  stringLength:number;
   numberDigits:number;
   primaryKey:boolean;
   required:boolean;

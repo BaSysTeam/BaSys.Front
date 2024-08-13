@@ -11,11 +11,13 @@ import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
 import Menu from 'primevue/menu';
+import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import MainTab from '@/components/metaObjectEditComponents/mainTab.vue';
 import HeaderFieldsTab from '@/components/metaObjectEditComponents/headerFieldsTab.vue';
 import JsonTab from '@/components/metaObjectEditComponents/jsonTab.vue';
 import { useToast } from 'primevue/usetoast';
+import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -43,7 +45,9 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   // settingsJson = '';
   provider = new MetaObjectProvider();
+  dataTypesProvider = new DataTypeProvider();
   settings = new MetaObjectStorableSettings({});
+  dataTypes: DataType[] = [];
   toastHelper = new ToastHelper(useToast());
   metaObjectKindTitle = '';
   activeTab = 'main';
@@ -214,6 +218,18 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   async update(): Promise<void> {
     console.log('meta-object-update', this.kind, this.name);
     this.isWaiting = true;
+
+    // Get datatypes
+    if (!this.dataTypes.length) {
+      const dataTypeResponse = await this.dataTypesProvider.getDataTypes();
+      if (dataTypeResponse.isOK) {
+        this.dataTypes = dataTypeResponse.data;
+      } else {
+        this.toastHelper.error(dataTypeResponse.message);
+        console.error(dataTypeResponse.presentation);
+      }
+    }
+
     const response = await this.provider.getMetaObjectSettings(this.kind, this.name);
     this.isWaiting = false;
 
@@ -332,7 +348,8 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
           <MainTab :settings="settings" @change="onSettingsChanged"></MainTab>
         </div>
         <div v-if="activeTab=='fields'">
-          <HeaderFieldsTab :settings="settings"></HeaderFieldsTab>
+          <HeaderFieldsTab :settings="settings"
+                           :data-types="dataTypes"></HeaderFieldsTab>
         </div>
         <div v-if="activeTab == 'json'">
           <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>
