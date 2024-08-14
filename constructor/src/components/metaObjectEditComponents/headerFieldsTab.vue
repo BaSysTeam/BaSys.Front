@@ -2,11 +2,14 @@
 import {
   defineProps, defineEmits, PropType, ref, watch, onBeforeMount,
 } from 'vue';
+import { Guid } from 'guid-typescript';
 import Badge from 'primevue/badge';
 import Button from 'primevue/button';
 import Toolbar from 'primevue/toolbar';
 import Listbox from 'primevue/listbox';
+import { useConfirm } from 'primevue/useconfirm';
 import ColumnPropertiesPanel from '@/components/metaObjectEditComponents/columnPropertiesPanel.vue';
+import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 import DataType from '../../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
 
@@ -15,6 +18,7 @@ const name = 'HeaderFieldsTab';
 
 // Data
 const selectedItem:any = ref(null);
+const confirm = useConfirm();
 
 // Props
 const props = defineProps({
@@ -31,19 +35,86 @@ const props = defineProps({
 // Emits
 const emit = defineEmits({ change: () => true });
 
+function deleteColumn(): void {
+  const indexToDelete = props.settings.header.columns.findIndex(
+    (column) => column.uid === selectedItem.value.uid,
+  );
+  if (indexToDelete > -1) {
+    props.settings.header.columns.splice(indexToDelete, 1);
+
+    if (props.settings.header.columns.length) {
+      // eslint-disable-next-line prefer-destructuring
+      selectedItem.value = props.settings.header.columns[0];
+    }
+  }
+
+  emit('change');
+}
+
 function onAddClick(): void {
-  console.log('AddClick', props.settings);
+  const newColumn = props.settings.header.newColumn(null);
+  newColumn.title = `New column ${props.settings.header.columns.length}`;
+  selectedItem.value = newColumn;
+
+  emit('change');
 }
 
 function onCopyClick(): void {
-  console.log('CopyClick');
+  if (!selectedItem.value) {
+    return;
+  }
+  if (selectedItem.value.isStandard) {
+    return;
+  }
+
+  const newColumn = props.settings.header.newColumn(selectedItem.value);
+  newColumn.uid = Guid.create().toString();
+  newColumn.title = `${newColumn.title} - copy`;
+  newColumn.name = '';
+  selectedItem.value = newColumn;
+
+  emit('change');
 }
 
 function onDeleteClick(): void {
-  console.log('DeleteClick');
+  if (!selectedItem.value) {
+    return;
+  }
+  if (selectedItem.value.isStandard) {
+    return;
+  }
+
+  confirm.require({
+    message: 'Delete column?',
+    header: 'Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Cancel',
+    acceptLabel: 'Delete',
+    accept: () => deleteColumn(),
+  });
 }
 
 function onPropertiesChange(): void {
+  emit('change');
+}
+
+function onUpClick(): void {
+  if (!selectedItem.value) {
+    return;
+  }
+  UpDownHelper.up(props.settings.header.columns, selectedItem.value);
+
+  emit('change');
+}
+
+function onDownClick(): void {
+  if (!selectedItem.value) {
+    return;
+  }
+  UpDownHelper.down(props.settings.header.columns, selectedItem.value);
+
   emit('change');
 }
 
@@ -77,6 +148,17 @@ onBeforeMount(() => {
                   size="small"
                   text
                   @click="onDeleteClick" />
+          <Button class="ml-2"
+                  icon="pi pi-arrow-up"
+                  severity="primary"
+                  size="small"
+                  text
+                  @click="onUpClick" />
+          <Button icon="pi pi-arrow-down"
+                  severity="primary"
+                  size="small"
+                  text
+                  @click="onDownClick" />
         </template>
       </Toolbar>
       <!--Columns list-->

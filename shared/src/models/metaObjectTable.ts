@@ -40,8 +40,8 @@ export default class MetaObjectTable {
     return null;
   }
 
-  newColumn(): MetaObjectTableColumn {
-    const column = new MetaObjectTableColumn({});
+  newColumn(params: any): MetaObjectTableColumn {
+    const column = new MetaObjectTableColumn(params);
     this.columns.push(column);
     return column;
   }

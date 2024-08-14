@@ -42,6 +42,10 @@ function isNumber(dataTypeUid: string): boolean {
   return DataTypeDefaults.Decimal.uid === dataTypeUid;
 }
 
+function isColumnDisabled(): boolean {
+  return props.column.isStandard;
+}
+
 </script>
 
 <template>
@@ -70,6 +74,7 @@ function isNumber(dataTypeUid: string): boolean {
                        size="small"
                        autocomplete="off"
                        class="w-full"
+                       :disabled="isColumnDisabled()"
                        v-model="column.name"
                        @change="onChange"></InputText>
           </div>
@@ -83,12 +88,13 @@ function isNumber(dataTypeUid: string): boolean {
     <!--Data type-->
     <div class="field grid">
       <label for="column-data-type"
-             class="col-4 bs-label">{{$t('dataType')}}</label>
+             class="col-4 bs-label bs-required">{{$t('dataType')}}</label>
       <div class="col-8">
         <Dropdown id="column-data-type"
                   size="small"
                   class="w-full"
                   :options="dataTypes"
+                  :disabled="isColumnDisabled()"
                   option-label="title"
                   option-value="uid"
                   v-model="column.dataTypeUid"
@@ -109,6 +115,7 @@ function isNumber(dataTypeUid: string): boolean {
                      :min="0"
                      :min-fraction-digits="0"
                      :max-fraction-digits="0"
+                     :disabled="isColumnDisabled()"
                      @update:model-value="onChange"></InputNumber>
       </div>
     </div>
@@ -127,6 +134,7 @@ function isNumber(dataTypeUid: string): boolean {
                      :min ="0"
                      :min-fraction-digits="0"
                      :max-fraction-digits="0"
+                     :disabled="isColumnDisabled()"
                      @update:model-value="onChange"></InputNumber>
       </div>
     </div>
@@ -138,6 +146,7 @@ function isNumber(dataTypeUid: string): boolean {
       <div class="col-8">
         <InputSwitch id="column-primary-key"
                      v-model="column.primaryKey"
+                     :disabled="isColumnDisabled()"
                      @change="onChange"></InputSwitch>
       </div>
     </div>
@@ -149,6 +158,7 @@ function isNumber(dataTypeUid: string): boolean {
       <div class="col-8">
         <InputSwitch id="column-unique"
                      v-model="column.unique"
+                     :disabled="isColumnDisabled()"
                      @change="onChange"></InputSwitch>
       </div>
     </div>
@@ -160,6 +170,7 @@ function isNumber(dataTypeUid: string): boolean {
       <div class="col-8">
         <InputSwitch id="column-required"
                      v-model="column.required"
+                     :disabled="isColumnDisabled()"
                      @change="onChange"></InputSwitch>
       </div>
     </div>

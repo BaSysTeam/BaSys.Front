@@ -67,11 +67,6 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       command: () => this.downloadJson(),
     },
     {
-      label: 'header column',
-      icon: 'pi pi-plus',
-      command: () => this.addHeaderColumn(),
-    },
-    {
       label: 'render settings column',
       icon: 'pi pi-plus',
       command: () => this.addRenderSettingsColumn(),
@@ -133,12 +128,6 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     URL.revokeObjectURL(url);
   }
 
-  addHeaderColumn(): void {
-    this.isModified = true;
-    this.settings.header.newColumn();
-    // this.settingsJson = JSON.stringify(this.settings, null, 2);
-  }
-
   addRenderSettingsColumn(): void {
     this.isModified = true;
     this.settings.header.newRenderSettingsColumn();
@@ -166,7 +155,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       return;
     }
     this.isModified = true;
-    currentTable.newColumn();
+    currentTable.newColumn(null);
     // this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
@@ -345,26 +334,16 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       </div>
       <div class="col">
         <div v-if="activeTab=='main'">
-          <MainTab :settings="settings" @change="onSettingsChanged"></MainTab>
+          <MainTab :settings="settings"
+                   @change="onSettingsChanged"></MainTab>
         </div>
         <div v-if="activeTab=='fields'">
           <HeaderFieldsTab :settings="settings"
-                           :data-types="dataTypes"></HeaderFieldsTab>
+                           :data-types="dataTypes"
+                           @change="onSettingsChanged"></HeaderFieldsTab>
         </div>
         <div v-if="activeTab == 'json'">
           <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>
-          <!--
-        <codemirror
-          ref="codemirrorEditor"
-          v-model="settingsJson"
-          placeholder="Code goes here..."
-          :style="codemirrorStyle"
-          :indent-with-tab="true"
-          :tab-size="2"
-          :extensions="codemirrorExtensions"
-          @change="onSettingsInput"
-        />
-        -->
         </div>
       </div>
     </div>
