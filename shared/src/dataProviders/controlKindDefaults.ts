@@ -57,4 +57,15 @@ export default class ControlKindDefaults {
     title: 'Date&time input',
     appliesFor: [DataTypeDefaults.DateTime],
   });
+
+  public static AllItems(): ControlKind[] {
+    return [this.PrimeVueTextInput,
+      this.PrimeVueTextArea,
+      this.PrimeVueIntegerInput,
+      this.PrimeVueNumberInput,
+      this.PrimeVueCheckbox,
+      this.PrimeVueSwitchInput,
+      this.PrimeVueDateInput,
+      this.PrimeVueDateTimeInput];
+  }
 }

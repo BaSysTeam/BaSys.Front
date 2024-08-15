@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  defineProps, defineEmits, PropType, ref, watch, onMounted,
+  defineProps, defineEmits, PropType, ref, watch, onBeforeMount,
 } from 'vue';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
@@ -8,6 +8,8 @@ import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import InputSwitch from 'primevue/inputswitch';
+import ControlKind from '../../../../shared/src/models/controlKind';
+import ControlKindDefaults from '../../../../shared/src/dataProviders/controlKindDefaults';
 import DataType from '../../../../shared/src/models/dataType';
 import DataTypeDefaults from '../../../../shared/src/dataProviders/dataTypeDefaults';
 import MetaObjectTableColumn from '../../../../shared/src/models/metaObjectTableColumn';
@@ -27,10 +29,36 @@ const props = defineProps({
   },
 });
 
+const controlKinds = ref<ControlKind[]>([]);
+
 // Emits
 const emit = defineEmits({ change: () => true });
 
+function prepareControlKinds(): void {
+  const allControls = ControlKindDefaults.AllItems();
+  controlKinds.value = [];
+
+  allControls.forEach((control:any) => {
+    const findResult = control.appliesFor.find((x:any) => x.uid === props.column.dataTypeUid);
+    if (findResult) {
+      controlKinds.value.push(control);
+    }
+  });
+}
+
+// Watch
+watch(() => props.column, (newValue, oldValue) => {
+  if (newValue.dataTypeUid !== oldValue.dataTypeUid) {
+    prepareControlKinds();
+  }
+});
+
 function onChange(): void {
+  emit('change');
+}
+
+function onDataTypeChange(): void {
+  prepareControlKinds();
   emit('change');
 }
 
@@ -45,6 +73,10 @@ function isNumber(dataTypeUid: string): boolean {
 function isColumnDisabled(): boolean {
   return props.column.isStandard;
 }
+
+onBeforeMount(() => {
+  prepareControlKinds();
+});
 
 </script>
 
@@ -98,7 +130,7 @@ function isColumnDisabled(): boolean {
                   option-label="title"
                   option-value="uid"
                   v-model="column.dataTypeUid"
-                  @change="onChange"></Dropdown>
+                  @change="onDataTypeChange"></Dropdown>
       </div>
     </div>
 
@@ -176,7 +208,22 @@ function isColumnDisabled(): boolean {
     </div>
   </AccordionTab>
   <AccordionTab :header="$t('render')">
-    <h3>Render</h3>
+    <!--Control kind-->
+    <div class="field grid">
+      <label for="column-control-kind"
+             class="col-4 bs-label">{{$t('uiControl')}}</label>
+      <div class="col-8">
+        <Dropdown id="column-control-kind"
+                  size="small"
+                  class="w-full"
+                  :options="controlKinds"
+                  :disabled="isColumnDisabled()"
+                  option-label="title"
+                  option-value="uid"
+                  v-model="column.renderSettings.controlKindUid"
+                  @change="onChange"></Dropdown>
+      </div>
+    </div>
   </AccordionTab>
 </Accordion>
 </template>

@@ -67,11 +67,6 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       command: () => this.downloadJson(),
     },
     {
-      label: 'render settings column',
-      icon: 'pi pi-plus',
-      command: () => this.addRenderSettingsColumn(),
-    },
-    {
       label: 'detail table',
       icon: 'pi pi-plus',
       command: () => this.addDetailTable(),
@@ -126,12 +121,6 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     // Clean up by removing the link and revoking the URL
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }
-
-  addRenderSettingsColumn(): void {
-    this.isModified = true;
-    this.settings.header.newRenderSettingsColumn();
-    // this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
   addDetailTable(): void {

@@ -1,4 +1,5 @@
 import { Guid } from 'guid-typescript';
+import MetaObjectTableColumnRenderSettings from './metaObjectTableColumnRenderSettings';
 
 export default class MetaObjectTableColumn {
   uid:string;
@@ -11,6 +12,7 @@ export default class MetaObjectTableColumn {
   required:boolean;
   unique:boolean;
   isStandard:boolean;
+  renderSettings:MetaObjectTableColumnRenderSettings;
 
   constructor(params: any) {
     let data: any = {};
@@ -28,5 +30,7 @@ export default class MetaObjectTableColumn {
     this.required = data.required || false;
     this.unique = data.unique || false;
     this.isStandard = data.isStandard || false;
+
+    this.renderSettings = new MetaObjectTableColumnRenderSettings(data.renderSettings);
   }
 }

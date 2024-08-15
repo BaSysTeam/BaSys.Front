@@ -173,7 +173,6 @@ export default class DataObjectDetailTableEdit extends Vue {
       const columnViewModel = new MetaObjectColumnViewModel(
         column,
         this.dataTypes,
-        tableSettings.columnRenderSettings,
       );
 
       columnViewModel.name = columnName;
@@ -221,7 +220,7 @@ export default class DataObjectDetailTableEdit extends Vue {
   getColumn(name: string): MetaObjectColumnViewModel {
     const column = this.columns.find((x) => x.name === name);
     if (!column) {
-      return new MetaObjectColumnViewModel(null, this.dataTypes, []);
+      return new MetaObjectColumnViewModel(null, this.dataTypes);
     }
     return column;
   }
