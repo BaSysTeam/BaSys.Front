@@ -15,9 +15,11 @@ import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import MainTab from '@/components/metaObjectEditComponents/mainTab.vue';
 import HeaderFieldsTab from '@/components/metaObjectEditComponents/headerFieldsTab.vue';
+import TableSettingsTab from '@/components/metaObjectEditComponents/TableSettingsTab.vue';
 import JsonTab from '@/components/metaObjectEditComponents/jsonTab.vue';
 import { useToast } from 'primevue/usetoast';
 import DataType from '../../../shared/src/models/dataType';
+import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -25,6 +27,7 @@ import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 
 @Options({
   components: {
+    TableSettingsTab,
     JsonTab,
     ViewTitleComponent,
     Button,
@@ -47,10 +50,15 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   provider = new MetaObjectProvider();
   dataTypesProvider = new DataTypeProvider();
   settings = new MetaObjectStorableSettings({});
+  selectedTable = new MetaObjectTable(null);
   dataTypes: DataType[] = [];
   toastHelper = new ToastHelper(useToast());
   metaObjectKindTitle = '';
   activeTab = 'main';
+  tableGroups: any = {
+    label: 'Details tables',
+    items: [],
+  };
 
   codemirrorExtensions = [jsonLang(), githubLight];
   codemirrorEditor: any = null;
@@ -83,6 +91,27 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   get formTitle(): string {
     return `${this.metaObjectKindTitle}.${this.settings.title}`;
+  }
+
+  initTableMenu(): void {
+    this.tableGroups.items = [];
+    this.tableGroups.items.push({
+      label: 'Add',
+      icon: 'pi pi-plus',
+      command: () => this.onDetailsTableAdd(),
+    });
+
+    this.settings.detailTables.forEach((detailTable) => {
+      console.log('detailTable', detailTable);
+
+      const tableMenuItem = {
+        label: detailTable.title,
+        icon: 'pi pi-table',
+        command: () => this.onTableTabClick(detailTable.uid),
+      };
+
+      this.tableGroups.items.push(tableMenuItem);
+    });
   }
 
   @Watch('kind')
@@ -146,6 +175,18 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.isModified = true;
     currentTable.newColumn(null);
     // this.settingsJson = JSON.stringify(this.settings, null, 2);
+  }
+
+  onTableTabClick(detailTableUid: string): void {
+    console.log('Table tab click', detailTableUid);
+    const currentTable = this.settings.detailTables.find(
+      (detailTable) => detailTable.uid === detailTableUid,
+    );
+    if (!currentTable) {
+      return;
+    }
+    this.selectedTable = currentTable;
+    this.activeTab = 'table_settings';
   }
 
   onUpdateClick(): void {
@@ -213,15 +254,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
     if (response.isOK) {
       this.settings = new MetaObjectStorableSettings(response.data);
-      this.settings.detailTables.forEach((detailTable) => {
-        console.log('detailTable', detailTable);
-        const newAction = {
-          icon: 'pi pi-plus',
-          label: `${detailTable.title} table column`,
-          command: () => this.onAddDetailTableColumn(detailTable.uid),
-        };
-        this.actions.push(newAction);
-      });
+      this.initTableMenu();
       this.metaObjectKindTitle = response.data.metaObjectKindTitle;
     } else {
       this.toastHelper.error(response.message);
@@ -241,16 +274,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       command: () => this.onNavTabClick('fields'),
     });
 
-    const tablesGroup = {
-      label: 'Details tables',
-      items: [{
-        label: 'Add',
-        icon: 'pi pi-plus',
-        command: () => this.onDetailsTableAdd(),
-      }],
-    };
-
-    this.navMenuItems.push(tablesGroup);
+    this.navMenuItems.push(this.tableGroups);
 
     const otherGroup = {
       label: 'Other',
@@ -333,6 +357,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
         </div>
         <div v-if="activeTab == 'json'">
           <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>
+        </div>
+        <div v-if="activeTab == 'table_settings'">
+          <TableSettingsTab :table="selectedTable"
+                            :data-types="dataTypes"
+                            @change="onSettingsChanged"></TableSettingsTab>
         </div>
       </div>
     </div>

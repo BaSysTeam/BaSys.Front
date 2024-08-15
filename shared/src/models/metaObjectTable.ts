@@ -1,4 +1,3 @@
-import MetaObjectTableColumnRenderSettings from './metaObjectTableColumnRenderSettings';
 import MetaObjectTableColumn from './metaObjectTableColumn';
 
 export default class MetaObjectTable {
