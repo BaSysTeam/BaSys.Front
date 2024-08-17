@@ -76,11 +76,6 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       icon: 'pi pi-download',
       command: () => this.downloadJson(),
     },
-    {
-      label: 'detail table',
-      icon: 'pi pi-plus',
-      command: () => this.addDetailTable(),
-    },
   ];
 
   navMenuItems:any[] = [];
@@ -165,19 +160,6 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     } else {
       this.activeTab = 'main';
     }
-  }
-
-  addDetailTable(): void {
-    this.isModified = true;
-
-    const pk = this.settings.header.getPrimaryKey();
-    if (!pk) {
-      return;
-    }
-
-    this.settings.newDetailTable(pk.dataTypeUid);
-
-    // this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
   onAddDetailTableColumn(detailTableUid: string): void {

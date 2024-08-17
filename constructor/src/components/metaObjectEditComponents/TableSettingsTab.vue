@@ -133,6 +133,15 @@ function onPropertiesChange(): void {
   emit('change');
 }
 
+onBeforeMount(() => {
+  if (props.table.columns.length) {
+    const [firstColumn] = props.table.columns;
+    if (firstColumn) {
+      selectedItem.value = firstColumn;
+    }
+  }
+});
+
 </script>
 
 <template>
@@ -153,7 +162,7 @@ function onPropertiesChange(): void {
                 @click="onDeleteTableClick" />
       </template>
       <template #end>
-        <span class="text-primary">Table.{{table.title}}</span>
+        <span class="text-primary">{{$t('table')}}.{{table.title}}</span>
       </template>
     </Toolbar>
     <!--Table properties-->
@@ -213,7 +222,7 @@ function onPropertiesChange(): void {
                 @click="onDownColumnClick" />
       </template>
       <template #end>
-        <span class="text-primary">Columns</span>
+        <span class="text-primary">{{$t('columns')}}</span>
       </template>
     </Toolbar>
 
