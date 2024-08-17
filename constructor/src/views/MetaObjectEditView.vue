@@ -243,6 +243,12 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     });
   }
 
+  onTableCopy(uid: string): void {
+    this.isModified = true;
+    this.selectedTable = this.settings.copyDetailsTable(uid);
+    this.initTableMenu();
+  }
+
   onJsonChanged(args: string): void {
     this.isModified = true;
     console.log('JSON text changed', args);
@@ -399,7 +405,8 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
           <TableSettingsTab :table="selectedTable"
                             :data-types="dataTypes"
                             @change="onSettingsChanged"
-                            @delete="onTableDelete"></TableSettingsTab>
+                            @delete="onTableDelete"
+                            @copy="onTableCopy"></TableSettingsTab>
         </div>
       </div>
     </div>
