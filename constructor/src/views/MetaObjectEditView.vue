@@ -18,6 +18,7 @@ import HeaderFieldsTab from '@/components/metaObjectEditComponents/headerFieldsT
 import TableSettingsTab from '@/components/metaObjectEditComponents/TableSettingsTab.vue';
 import JsonTab from '@/components/metaObjectEditComponents/jsonTab.vue';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
@@ -48,6 +49,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   // settingsJson = '';
   provider = new MetaObjectProvider();
+  confirm = useConfirm();
   dataTypesProvider = new DataTypeProvider();
   settings = new MetaObjectStorableSettings({});
   selectedTable = new MetaObjectTable(null);
@@ -152,6 +154,19 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     URL.revokeObjectURL(url);
   }
 
+  deleteTable(uid: string): void {
+    this.isModified = true;
+    this.settings.deleteDetailsTable(uid);
+    this.initTableMenu();
+    if (this.settings.detailTables.length) {
+      this.activeTab = 'table_settings';
+      // eslint-disable-next-line prefer-destructuring
+      this.selectedTable = this.settings.detailTables[0];
+    } else {
+      this.activeTab = 'main';
+    }
+  }
+
   addDetailTable(): void {
     this.isModified = true;
 
@@ -199,11 +214,33 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   }
 
   onDetailsTableAdd(): void {
-    console.log('Add details table');
+    const pk = this.settings.header.getPrimaryKey();
+    if (!pk) {
+      return;
+    }
+    const newTable = this.settings.newDetailTable(pk.dataTypeUid);
+    newTable.title = `New table ${this.settings.detailTables.length + 1}`;
+    this.selectedTable = newTable;
+    this.activeTab = 'table_settings';
+
+    this.initTableMenu();
   }
 
   onSettingsChanged(): void {
     this.isModified = true;
+  }
+
+  onTableDelete(uid: string): void {
+    this.confirm.require({
+      message: 'Delete table?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      accept: () => this.deleteTable(uid),
+    });
   }
 
   onJsonChanged(args: string): void {
@@ -361,7 +398,8 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
         <div v-if="activeTab == 'table_settings'">
           <TableSettingsTab :table="selectedTable"
                             :data-types="dataTypes"
-                            @change="onSettingsChanged"></TableSettingsTab>
+                            @change="onSettingsChanged"
+                            @delete="onTableDelete"></TableSettingsTab>
         </div>
       </div>
     </div>

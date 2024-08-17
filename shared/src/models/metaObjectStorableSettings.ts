@@ -79,4 +79,15 @@ export default class MetaObjectStorableSettings {
 
     return detailTable;
   }
+
+  deleteDetailsTable(uid: string): void {
+    const table = this.detailTables.find((x) => x.uid === uid);
+    if (!table) {
+      return;
+    }
+    const ind = this.detailTables.indexOf(table);
+    if (ind > -1) {
+      this.detailTables.splice(ind, 1);
+    }
+  }
 }

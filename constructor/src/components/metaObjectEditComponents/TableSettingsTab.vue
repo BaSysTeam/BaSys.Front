@@ -34,7 +34,11 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits({ change: () => true });
+const emit = defineEmits({
+  change: () => true,
+  copy: (uid: string) => true,
+  delete: (uid: string) => true,
+});
 
 function deleteColumn(): void {
   const indexToDelete = props.table.columns.findIndex(
@@ -54,10 +58,12 @@ function deleteColumn(): void {
 
 function onCopyTableClick(): void {
   console.log('Copy click');
+  emit('copy', props.table.uid);
 }
 
 function onDeleteTableClick(): void {
   console.log('Delete click');
+  emit('delete', props.table.uid);
 }
 
 function onAddColumnClick(): void {
