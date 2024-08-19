@@ -1,9 +1,7 @@
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ControlKindDefaults from '../../../shared/src/dataProviders/controlKindDefaults';
 import DataType from '../../../shared/src/models/dataType';
-import ControlKind from '../../../shared/src/models/controlKind';
 import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
-import MetaObjectTableColumnRenderSettings from '../../../shared/src/models/metaObjectTableColumnRenderSettings';
 
 export default class MetaObjectColumnViewModel {
   uid = '';
@@ -35,7 +33,6 @@ export default class MetaObjectColumnViewModel {
   constructor(
     column: MetaObjectTableColumn | null,
     dataTypes: DataType[] | null,
-    renderSettings: MetaObjectTableColumnRenderSettings[],
   ) {
     if (column == null || dataTypes == null) {
       return;
@@ -47,10 +44,6 @@ export default class MetaObjectColumnViewModel {
     this.dataTypeUid = column.dataTypeUid;
     this.required = column.required;
     this.numberDigits = column.numberDigits;
-
-    const columnRenderSettings = renderSettings.find(
-      (item) => item.uid.toLowerCase() === column.uid.toLowerCase(),
-    );
 
     this.isPrimaryKey = column.primaryKey;
 
@@ -71,12 +64,8 @@ export default class MetaObjectColumnViewModel {
 
     const isString = dataType.uid === DataTypeDefaults.String.uid;
     if (isString) {
-      if (columnRenderSettings) {
-        if (columnRenderSettings.controlKindUid === ControlKindDefaults.PrimeVueTextArea.uid) {
-          this.isTextArea = true;
-        } else {
-          this.isTextInput = true;
-        }
+      if (column.renderSettings.controlKindUid === ControlKindDefaults.PrimeVueTextArea.uid) {
+        this.isTextArea = true;
       } else {
         this.isTextInput = true;
       }
@@ -96,27 +85,18 @@ export default class MetaObjectColumnViewModel {
 
     const isBoolean = dataType.uid === DataTypeDefaults.Bool.uid;
     if (isBoolean) {
-      if (columnRenderSettings) {
-        if (columnRenderSettings.controlKindUid === ControlKindDefaults.PrimeVueSwitchInput.uid) {
-          this.isSwitch = true;
-        } else {
-          this.isCheckbox = true;
-        }
+      if (column.renderSettings.controlKindUid === ControlKindDefaults.PrimeVueSwitchInput.uid) {
+        this.isSwitch = true;
       } else {
         this.isCheckbox = true;
       }
-
       return;
     }
 
     const isDateTime = dataType.uid === DataTypeDefaults.DateTime.uid;
     if (isDateTime) {
-      if (columnRenderSettings) {
-        if (columnRenderSettings.controlKindUid === ControlKindDefaults.PrimeVueDateTimeInput.uid) {
-          this.isDateTimeInput = true;
-        } else {
-          this.isDateInput = true;
-        }
+      if (column.renderSettings.controlKindUid === ControlKindDefaults.PrimeVueDateTimeInput.uid) {
+        this.isDateTimeInput = true;
       } else {
         this.isDateInput = true;
       }

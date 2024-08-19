@@ -79,4 +79,30 @@ export default class MetaObjectStorableSettings {
 
     return detailTable;
   }
+
+  deleteDetailsTable(uid: string): void {
+    const table = this.detailTables.find((x) => x.uid === uid);
+    if (!table) {
+      return;
+    }
+    const ind = this.detailTables.indexOf(table);
+    if (ind > -1) {
+      this.detailTables.splice(ind, 1);
+    }
+  }
+
+  copyDetailsTable(uid: string): MetaObjectTable {
+    const table = this.detailTables.find((x) => x.uid === uid);
+    if (!table) {
+      return new MetaObjectTable(null);
+    }
+    const newTable = new MetaObjectTable(table);
+    newTable.title = `${newTable.title} - copy`;
+    newTable.name = '';
+    newTable.uid = Guid.create().toString();
+
+    this.detailTables.push(newTable);
+
+    return newTable;
+  }
 }

@@ -441,7 +441,7 @@ export default class DataObjectsListView extends Vue {
   getColumn(name: string): MetaObjectColumnViewModel {
     const column = this.columns.find((x) => x.name === name);
     if (!column) {
-      return new MetaObjectColumnViewModel(null, this.dataObjectList.dataTypes, []);
+      return new MetaObjectColumnViewModel(null, this.dataObjectList.dataTypes);
     }
     return column;
   }
@@ -477,7 +477,6 @@ export default class DataObjectsListView extends Vue {
       const columnViewModel = new MetaObjectColumnViewModel(
         column,
         this.dataObjectList.dataTypes,
-        [],
       );
       columnViewModel.name = columnName;
 

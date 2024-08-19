@@ -1,5 +1,4 @@
 export default class MetaObjectTableColumnRenderSettings {
-  uid: string;
   controlKindUid: string;
 
   constructor(params: any = {}) {
@@ -8,7 +7,6 @@ export default class MetaObjectTableColumnRenderSettings {
       data = params;
     }
 
-    this.uid = data.uid || '';
     this.controlKindUid = data.controlKindUid || '';
   }
 }

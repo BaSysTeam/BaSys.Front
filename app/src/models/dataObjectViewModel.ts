@@ -57,7 +57,6 @@ export default class DataObjectViewModel {
       const columnViewModel = new MetaObjectColumnViewModel(
         column,
         this.dataTypes,
-        this.metaObjectSettings.header.columnRenderSettings,
       );
       this.headerColumns.push(columnViewModel);
     });

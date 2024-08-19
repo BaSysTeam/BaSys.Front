@@ -26,6 +26,7 @@
           v-model:selectionKeys="selectedKey"
           :value="treeNodes"
           :metaKeySelection="false"
+          :style="treeStyle"
           selectionMode="single"
           @nodeSelect="onNodeSelect"
           @node-expand="onNodeExpand"
@@ -110,6 +111,7 @@ export default class MetadataTreeComponent extends Vue {
   confirm = useConfirm();
   metadataKindMenuItems:object[] = [];
   treeNodeCreateDialogRegime = 'create';
+  windowHeight = window.innerHeight;
 
   items = [
     {
@@ -139,6 +141,18 @@ export default class MetadataTreeComponent extends Vue {
       ],
     },
   ]
+
+  get treeStyle(): any {
+    return {
+      fontSize: '0.9rem',
+      maxWidth: '300px',
+      overflowX: 'hidden',
+      overflowY: 'auto',
+      textWrap: 'nowrap',
+      textOverflow: 'ellipsis',
+      height: `${this.windowHeight - 130}px`,
+    };
+  }
 
   get isSelectedNodeEmpty(): boolean {
     return !this.selectedNode || Object.keys(this.selectedNode).length === 0;

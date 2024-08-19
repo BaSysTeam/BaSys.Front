@@ -190,6 +190,8 @@ export default class MetadataKindsListView extends Vue {
   }
 
   async mounted(): Promise<void> {
+    window.addEventListener('resize', this.onResize);
+    this.windowHeight = window.innerHeight;
     this.actionUpdate();
   }
 
@@ -204,6 +206,14 @@ export default class MetadataKindsListView extends Vue {
       console.error(response.presentation);
     }
     this.isWaiting = false;
+  }
+
+  beforeDestroy(): void {
+    window.removeEventListener('resize', this.onResize);
+  }
+
+  onResize(): void {
+    this.windowHeight = window.innerHeight;
   }
 }
 </script>

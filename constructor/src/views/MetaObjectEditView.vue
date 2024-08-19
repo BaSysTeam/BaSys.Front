@@ -10,8 +10,17 @@ import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
+import Menu from 'primevue/menu';
+import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
+import MainTab from '@/components/metaObjectEditComponents/mainTab.vue';
+import HeaderFieldsTab from '@/components/metaObjectEditComponents/headerFieldsTab.vue';
+import TableSettingsTab from '@/components/metaObjectEditComponents/TableSettingsTab.vue';
+import JsonTab from '@/components/metaObjectEditComponents/jsonTab.vue';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import DataType from '../../../shared/src/models/dataType';
+import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -19,9 +28,14 @@ import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 
 @Options({
   components: {
+    TableSettingsTab,
+    JsonTab,
     ViewTitleComponent,
     Button,
     ButtonGroup,
+    MainTab,
+    HeaderFieldsTab,
+    Menu,
     SplitButton,
     Divider,
     Codemirror,
@@ -33,11 +47,20 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   isModified = false;
   isWaiting = true;
 
-  settingsJson = '';
+  // settingsJson = '';
   provider = new MetaObjectProvider();
+  confirm = useConfirm();
+  dataTypesProvider = new DataTypeProvider();
   settings = new MetaObjectStorableSettings({});
+  selectedTable = new MetaObjectTable(null);
+  dataTypes: DataType[] = [];
   toastHelper = new ToastHelper(useToast());
-  formTitle = '';
+  metaObjectKindTitle = '';
+  activeTab = 'main';
+  tableGroups: any = {
+    label: 'Details tables',
+    items: [],
+  };
 
   codemirrorExtensions = [jsonLang(), githubLight];
   codemirrorEditor: any = null;
@@ -53,27 +76,39 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       icon: 'pi pi-download',
       command: () => this.downloadJson(),
     },
-    {
-      label: 'header column',
-      icon: 'pi pi-plus',
-      command: () => this.addHeaderColumn(),
-    },
-    {
-      label: 'render settings column',
-      icon: 'pi pi-plus',
-      command: () => this.addRenderSettingsColumn(),
-    },
-    {
-      label: 'detail table',
-      icon: 'pi pi-plus',
-      command: () => this.addDetailTable(),
-    },
   ];
+
+  navMenuItems:any[] = [];
 
   get codemirrorStyle(): object {
     return {
       height: `${this.windowHeight - 150}px`,
     };
+  }
+
+  get formTitle(): string {
+    return `${this.metaObjectKindTitle}.${this.settings.title}`;
+  }
+
+  initTableMenu(): void {
+    this.tableGroups.items = [];
+    this.tableGroups.items.push({
+      label: 'Add',
+      icon: 'pi pi-plus',
+      command: () => this.onDetailsTableAdd(),
+    });
+
+    this.settings.detailTables.forEach((detailTable) => {
+      console.log('detailTable', detailTable);
+
+      const tableMenuItem = {
+        label: detailTable.title,
+        icon: 'pi pi-table',
+        command: () => this.onTableTabClick(detailTable.uid),
+      };
+
+      this.tableGroups.items.push(tableMenuItem);
+    });
   }
 
   @Watch('kind')
@@ -98,7 +133,8 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   }
 
   downloadJson():void {
-    const blob = new Blob([this.settingsJson], { type: 'application/json' });
+    const settingsJson = JSON.stringify(this.settings, null, 2);
+    const blob = new Blob([settingsJson], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
     // Create a link and trigger the download
@@ -113,29 +149,17 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     URL.revokeObjectURL(url);
   }
 
-  addHeaderColumn(): void {
+  deleteTable(uid: string): void {
     this.isModified = true;
-    this.settings.header.newColumn();
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
-  }
-
-  addRenderSettingsColumn(): void {
-    this.isModified = true;
-    this.settings.header.newRenderSettingsColumn();
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
-  }
-
-  addDetailTable(): void {
-    this.isModified = true;
-
-    const pk = this.settings.header.getPrimaryKey();
-    if (!pk) {
-      return;
+    this.settings.deleteDetailsTable(uid);
+    this.initTableMenu();
+    if (this.settings.detailTables.length) {
+      this.activeTab = 'table_settings';
+      // eslint-disable-next-line prefer-destructuring
+      this.selectedTable = this.settings.detailTables[0];
+    } else {
+      this.activeTab = 'main';
     }
-
-    this.settings.newDetailTable(pk.dataTypeUid);
-
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
   }
 
   onAddDetailTableColumn(detailTableUid: string): void {
@@ -146,22 +170,80 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       return;
     }
     this.isModified = true;
-    currentTable.newColumn();
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
+    currentTable.newColumn(null);
+    // this.settingsJson = JSON.stringify(this.settings, null, 2);
+  }
+
+  onTableTabClick(detailTableUid: string): void {
+    console.log('Table tab click', detailTableUid);
+    const currentTable = this.settings.detailTables.find(
+      (detailTable) => detailTable.uid === detailTableUid,
+    );
+    if (!currentTable) {
+      return;
+    }
+    this.selectedTable = currentTable;
+    this.activeTab = 'table_settings';
   }
 
   onUpdateClick(): void {
     this.update();
   }
 
+  onNavTabClick(args: string): void {
+    console.log(args, 'Tab click');
+    this.activeTab = args;
+  }
+
+  onDetailsTableAdd(): void {
+    const pk = this.settings.header.getPrimaryKey();
+    if (!pk) {
+      return;
+    }
+    const newTable = this.settings.newDetailTable(pk.dataTypeUid);
+    newTable.title = `New table ${this.settings.detailTables.length + 1}`;
+    this.selectedTable = newTable;
+    this.activeTab = 'table_settings';
+
+    this.initTableMenu();
+  }
+
+  onSettingsChanged(): void {
+    this.isModified = true;
+  }
+
+  onTableDelete(uid: string): void {
+    this.confirm.require({
+      message: 'Delete table?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      accept: () => this.deleteTable(uid),
+    });
+  }
+
+  onTableCopy(uid: string): void {
+    this.isModified = true;
+    this.selectedTable = this.settings.copyDetailsTable(uid);
+    this.initTableMenu();
+  }
+
+  onJsonChanged(args: string): void {
+    this.isModified = true;
+    console.log('JSON text changed', args);
+    const settingsTmp = new MetaObjectStorableSettings(JSON.parse(args));
+  }
+
   async save(): Promise<boolean> {
     let result = false;
     this.isWaiting = true;
 
-    this.settings = new MetaObjectStorableSettings(JSON.parse(this.settingsJson));
+    // this.settings = new MetaObjectStorableSettings(JSON.parse(this.settingsJson));
 
-    console.log('save object', this.settingsJson);
-    console.log('settings', this.settings);
+    console.log('save settings', this.settings);
     const response = await this.provider.update(this.settings);
     this.isWaiting = false;
 
@@ -180,27 +262,57 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   async update(): Promise<void> {
     console.log('meta-object-update', this.kind, this.name);
     this.isWaiting = true;
+
+    // Get datatypes
+    if (!this.dataTypes.length) {
+      const dataTypeResponse = await this.dataTypesProvider.getDataTypes();
+      if (dataTypeResponse.isOK) {
+        this.dataTypes = dataTypeResponse.data;
+      } else {
+        this.toastHelper.error(dataTypeResponse.message);
+        console.error(dataTypeResponse.presentation);
+      }
+    }
+
     const response = await this.provider.getMetaObjectSettings(this.kind, this.name);
     this.isWaiting = false;
 
     if (response.isOK) {
       this.settings = new MetaObjectStorableSettings(response.data);
-      this.settings.detailTables.forEach((detailTable) => {
-        console.log('detailTable', detailTable);
-        const newAction = {
-          icon: 'pi pi-plus',
-          label: `${detailTable.title} table column`,
-          command: () => this.onAddDetailTableColumn(detailTable.uid),
-        };
-        this.actions.push(newAction);
-      });
-      this.formTitle = `${response.data.metaObjectKindTitle}.${this.settings.title}`;
-      this.settingsJson = JSON.stringify(this.settings, null, 2);
+      this.initTableMenu();
+      this.metaObjectKindTitle = response.data.metaObjectKindTitle;
+      if (this.activeTab === 'table_settings') {
+        this.activeTab = 'main';
+      }
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
     }
     console.log('update', response);
+  }
+
+  beforeMount():void {
+    this.navMenuItems.push({
+      label: 'Main',
+      command: () => this.onNavTabClick('main'),
+    });
+
+    this.navMenuItems.push({
+      label: 'Fields',
+      command: () => this.onNavTabClick('fields'),
+    });
+
+    this.navMenuItems.push(this.tableGroups);
+
+    const otherGroup = {
+      label: 'Other',
+      items: [{
+        label: 'JSON',
+        command: () => this.onNavTabClick('json'),
+      }],
+    };
+
+    this.navMenuItems.push(otherGroup);
   }
 
   mounted(): void {
@@ -226,7 +338,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       <div class="col-12">
         <ButtonGroup>
           <Button
-            label="Save"
+            :label="$t('save')"
             severity="primary"
             size="small"
             outlined
@@ -242,7 +354,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
           @click="onRunClick"
         />
         <SplitButton
-          label="Actions"
+          :label="$t('actions')"
           severity="primary"
           size="small"
           class="ml-1"
@@ -258,17 +370,29 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
     <!--Settings edit-->
     <div class="grid">
-      <div class="col-12">
-        <codemirror
-          ref="codemirrorEditor"
-          v-model="settingsJson"
-          placeholder="Code goes here..."
-          :style="codemirrorStyle"
-          :indent-with-tab="true"
-          :tab-size="2"
-          :extensions="codemirrorExtensions"
-          @change="onSettingsInput"
-        />
+      <div class="col-fixed bs-nav-panel h-screen" style="width: 220px;">
+        <Menu :model="navMenuItems"></Menu>
+      </div>
+      <div class="col">
+        <div v-if="activeTab=='main'">
+          <MainTab :settings="settings"
+                   @change="onSettingsChanged"></MainTab>
+        </div>
+        <div v-if="activeTab=='fields'">
+          <HeaderFieldsTab :settings="settings"
+                           :data-types="dataTypes"
+                           @change="onSettingsChanged"></HeaderFieldsTab>
+        </div>
+        <div v-if="activeTab == 'json'">
+          <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>
+        </div>
+        <div v-if="activeTab == 'table_settings'">
+          <TableSettingsTab :table="selectedTable"
+                            :data-types="dataTypes"
+                            @change="onSettingsChanged"
+                            @delete="onTableDelete"
+                            @copy="onTableCopy"></TableSettingsTab>
+        </div>
       </div>
     </div>
   </div>
