@@ -281,6 +281,9 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       this.settings = new MetaObjectStorableSettings(response.data);
       this.initTableMenu();
       this.metaObjectKindTitle = response.data.metaObjectKindTitle;
+      if (this.activeTab === 'table_settings') {
+        this.activeTab = 'main';
+      }
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
