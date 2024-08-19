@@ -48,4 +48,27 @@ describe('ExpressionEvaluator', () => {
     });
     expect(result).toEqual(500);
   });
+
+  it('IsEmpty from zero value. Return true.', () => {
+    const context = {
+      currentRow: {
+        product: 1,
+        quantity: 5,
+        price: 100,
+        amount: 0,
+      },
+    };
+    const logger = new InMemoryLogger(LogLevels.Debug);
+    const evaluator = new ExpressionEvaluator(context, logger);
+    const expression = 'isEmpty($r.amount)';
+    const result = evaluator.evaluateExpression(expression);
+
+    console.log('expression', expression);
+    console.log('result', result);
+    console.log('messages:');
+    evaluator.logger.messages.forEach((logMessage) => {
+      console.log(logMessage.toString());
+    });
+    expect(result).toEqual(true);
+  });
 });

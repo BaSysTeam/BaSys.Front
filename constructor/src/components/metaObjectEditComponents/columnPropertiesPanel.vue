@@ -206,6 +206,20 @@ onBeforeMount(() => {
                      @change="onChange"></InputSwitch>
       </div>
     </div>
+
+    <!--Formula-->
+    <div class="field grid">
+      <label for="prop-formula" class="col-4 bs-label bs-required">{{$t('formula')}}</label>
+      <div class="col-8">
+        <InputText id="prop-formula"
+                   size="small"
+                   autocomplete="off"
+                   class="w-full"
+                   :disabled="isColumnDisabled()"
+                   v-model="column.formula"
+                   @change="onChange"></InputText>
+      </div>
+    </div>
   </AccordionTab>
   <AccordionTab :header="$t('render')">
     <!--Control kind-->

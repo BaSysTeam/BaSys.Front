@@ -13,6 +13,7 @@ export default class MetaObjectTableColumn {
   unique:boolean;
   isStandard:boolean;
   renderSettings:MetaObjectTableColumnRenderSettings;
+  formula:string;
 
   constructor(params: any) {
     let data: any = {};
@@ -32,5 +33,7 @@ export default class MetaObjectTableColumn {
     this.isStandard = data.isStandard || false;
 
     this.renderSettings = new MetaObjectTableColumnRenderSettings(data.renderSettings);
+
+    this.formula = data.formula || '';
   }
 }

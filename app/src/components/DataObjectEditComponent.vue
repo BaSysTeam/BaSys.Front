@@ -10,6 +10,8 @@ import DataObjectHeaderEdit from '@/components/DataObjectHeaderEdit.vue';
 import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vue';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components: {
@@ -80,6 +82,7 @@ export default class DataObjectEditComponent extends Vue {
   model = new DataObjectViewModel(null);
   toastHelper = new ToastHelper(useToast());
   windowHeight = window.innerHeight;
+  logger = new InMemoryLogger(LogLevels.Debug);
 
   get requestUid(): string {
     const uid = this.isCopy() ? this.copyUid : this.uid;
@@ -239,6 +242,7 @@ export default class DataObjectEditComponent extends Vue {
                     :key="table.uid"
                     :header="table.title">
             <DataObjectDetailTableEdit :table ="table"
+                                       :logger="logger"
                                        :kind="kind"
                                        :object-uid="requestUid"
                                        :meta-object-settings="model.metaObjectSettings"

@@ -28,6 +28,8 @@ import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectSto
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components:
@@ -82,6 +84,13 @@ export default class DataObjectDetailTableEdit extends Vue {
     required: true,
   })
   table!: DataObjectDetailsTable;
+
+  // Logger.
+  @Prop({
+    type: Object as PropType<InMemoryLogger>,
+    required: true,
+  })
+  logger!: DataObjectDetailsTable;
 
   @Ref()
   dataTableRef!:any;

@@ -1,3 +1,4 @@
+import FunctionLibrary from '@/evalEngine/functionLibrary';
 import InMemoryLogger from '../models/inMemoryLogger';
 
 export default class ExpressionEvaluator {
@@ -12,6 +13,7 @@ export default class ExpressionEvaluator {
   evaluateExpression(expression:string): any {
     const $r = this.context.currentRow;
     const $h = this.context.header;
+    const { isEmpty, isNotEmpty } = FunctionLibrary;
 
     let result: any;
     try {
