@@ -10,17 +10,34 @@ export default class ExpressionEvaluator {
   }
 
   evaluateExpression(expression:string): any {
+    const $r = this.context.currentRow;
+    const $h = this.context.header;
+
     let result: any;
     try {
       // eslint-disable-next-line no-eval
       result = eval(expression);
 
-      this.logger.logDebug(`Calculated. Expression: ${expression}, result:${result}`);
+      this.logDebug(`Calculated. Expression: ${expression}, result:${result}.`);
     } catch (e) {
       result = null;
-      this.logger.logError(`Calculation error. Formula: ${expression}. Message: ${e}`);
+      this.logError(`Calculation error. Formula: ${expression}. Message: ${e}.`);
     }
 
     return result;
+  }
+
+  logDebug(text: string): void {
+    if (!this.logger) {
+      return;
+    }
+    this.logger.logDebug(text);
+  }
+
+  logError(text: string): void {
+    if (!this.logger) {
+      return;
+    }
+    this.logger.logError(text);
   }
 }
