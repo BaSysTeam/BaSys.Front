@@ -278,6 +278,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.isWaiting = false;
 
     if (response.isOK) {
+      console.log('GetMetaObject response', response.data);
       this.settings = new MetaObjectStorableSettings(response.data);
       this.initTableMenu();
       this.metaObjectKindTitle = response.data.metaObjectKindTitle;
