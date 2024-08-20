@@ -12,7 +12,6 @@ import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vu
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
-import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components: {
@@ -66,6 +65,10 @@ export default class DataObjectEditComponent extends Vue {
   @Prop({ required: true, type: String, default: 'page' })
   renderPlace!: string;
 
+  // Calculation logger.
+  @Prop({ required: true, type: InMemoryLogger })
+  logger!: InMemoryLogger;
+
   regimeValue = 'edit';
 
   isAdd(): boolean {
@@ -84,7 +87,6 @@ export default class DataObjectEditComponent extends Vue {
   model = new DataObjectViewModel(null);
   toastHelper = new ToastHelper(useToast());
   windowHeight = window.innerHeight;
-  logger = new InMemoryLogger(LogLevels.Debug);
 
   get requestUid(): string {
     const uid = this.isCopy() ? this.copyUid : this.uid;

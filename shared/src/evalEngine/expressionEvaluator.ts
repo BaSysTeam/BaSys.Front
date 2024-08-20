@@ -1,4 +1,4 @@
-import FunctionLibrary from '@/evalEngine/functionLibrary';
+import FunctionLibrary from './functionLibrary';
 import InMemoryLogger from '../models/inMemoryLogger';
 
 export default class ExpressionEvaluator {

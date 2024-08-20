@@ -217,6 +217,7 @@ export default class DataObjectEditView extends Vue {
                                  :name="name"
                                  :uid="uid"
                                  :copyUid="copyUid"
+                                 :logger="logger"
                                  render-place="page"
                                  @is-modified-changed="onIsModifiedChanged"
                                  @is-waiting-changed="onIsWaitingChanged"
@@ -234,7 +235,8 @@ export default class DataObjectEditView extends Vue {
       <template #list="slotProps">
         <div class="grid grid-nogutter">
           <div v-for="(item, index) in slotProps.items" :key="index" class="col-12">
-            <div>{{ item.toString() }}</div>
+            <div style="border: 1px solid #ececec; font-size: 0.8rem; padding: 0.5rem">
+              {{ item.toString() }}</div>
           </div>
         </div>
       </template>

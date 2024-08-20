@@ -29,7 +29,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
-import { LogLevels } from '../../../shared/src/enums/logLevels';
+import ObjectEvaluator from '../evalEngine/objectEvaluator';
 
 @Options({
   components:
@@ -90,7 +90,7 @@ export default class DataObjectDetailTableEdit extends Vue {
     type: Object as PropType<InMemoryLogger>,
     required: true,
   })
-  logger!: DataObjectDetailsTable;
+  logger!: InMemoryLogger;
 
   @Ref()
   dataTableRef!:any;
@@ -109,6 +109,7 @@ export default class DataObjectDetailTableEdit extends Vue {
   selectedRecord: any = {};
   windowHeight = window.innerHeight;
   provider = new DataObjectsProvider();
+  objectEvaluator: ObjectEvaluator = new ObjectEvaluator(this.logger, this.metaObjectSettings);
   selectItemProvider = new SelectItemsProvider();
   toastHelper = new ToastHelper(useToast());
   inputStyle = {
@@ -326,6 +327,8 @@ export default class DataObjectDetailTableEdit extends Vue {
         this.selectedRecord = this.table.rows[0];
       }
     });
+
+    this.objectEvaluator = new ObjectEvaluator(this.logger, this.metaObjectSettings);
   }
 
   beforeDestroy(): void {
@@ -347,6 +350,7 @@ export default class DataObjectDetailTableEdit extends Vue {
       row[names.valueName] = newRow[names.valueName];
     }
 
+    this.objectEvaluator.onRowFieldChanged(columnName, this.table.uid, row);
     this.isModifiedChanged(true);
   }
 

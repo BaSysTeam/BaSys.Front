@@ -1,4 +1,5 @@
 import { LogLevels } from '../enums/logLevels';
+import ValuesFormatter from '../helpers/valuesFormatter';
 
 export default class LogMessage {
   period: Date;
@@ -17,6 +18,6 @@ export default class LogMessage {
   }
 
   toString(): string {
-    return `${this.period}.${this.level}. ${this.text}`;
+    return `${ValuesFormatter.formatDateTime(this.period)}.${LogLevels[this.level]}. ${this.text}`;
   }
 }
