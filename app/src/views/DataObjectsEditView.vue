@@ -3,20 +3,28 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Ref } from 'vue-property-decorator';
 import { useRouter } from 'vue-router';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import DataView from 'primevue/dataview';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import InputText from 'primevue/inputtext';
+import Sidebar from 'primevue/sidebar';
+import SplitButton from 'primevue/splitbutton';
 import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components: {
     ViewTitleComponent,
+    DataView,
     Divider,
     Button,
     ButtonGroup,
     InputText,
+    Sidebar,
+    SplitButton,
     DataObjectEditComponent,
   },
 })
@@ -42,10 +50,23 @@ export default class DataObjectEditView extends Vue {
 
   isWaiting = false;
   isModified = false;
+  isCalculationLogOpen = false;
   closeAfterSave = false;
   title = 'BaSYS';
   editRegime = 'edit';
   model = new DataObjectWithMetadata(null);
+  logger = new InMemoryLogger(LogLevels.Debug);
+  actionsButtonItems = [
+    {
+      label: 'Calculation log',
+      command: () => this.onCalculationLogClick(),
+    },
+    {
+      label: 'Test',
+      command: () => this.onTestClick(),
+    },
+  ];
+
   router = useRouter();
 
   get isPrimaryKeyEnabled(): boolean {
@@ -100,6 +121,15 @@ export default class DataObjectEditView extends Vue {
       this.returnToList();
     }
     this.closeAfterSave = false;
+  }
+
+  onCalculationLogClick(): void {
+    console.log('CalculationLogClick');
+    this.isCalculationLogOpen = true;
+  }
+
+  onTestClick(): void {
+    this.logger.logDebug('Test message');
   }
 
   returnToList(): void {
@@ -163,7 +193,16 @@ export default class DataObjectEditView extends Vue {
             icon="pi pi-save"
             @click="onSaveClick"
           />
+
         </ButtonGroup>
+        <SplitButton
+          class="ml-1"
+          :label="$t('actions')"
+          severity="primary"
+          size="small"
+          outlined
+          :model="actionsButtonItems">
+        </SplitButton>
 
       </div>
     </div>
@@ -186,6 +225,21 @@ export default class DataObjectEditView extends Vue {
       </div>
     </div>
   </div>
+
+  <Sidebar v-model:visible="isCalculationLogOpen"
+           class="w-full md:w-20rem lg:w-30rem"
+           header="Calculation log"
+           position="right">
+    <DataView :value="logger.messages">
+      <template #list="slotProps">
+        <div class="grid grid-nogutter">
+          <div v-for="(item, index) in slotProps.items" :key="index" class="col-12">
+            <div>{{ item.toString() }}</div>
+          </div>
+        </div>
+      </template>
+    </DataView>
+  </Sidebar>
 </template>
 
 <style scoped>

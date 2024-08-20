@@ -2,6 +2,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Emit } from 'vue-property-decorator';
 import { useToast } from 'primevue/usetoast';
+import Sidebar from 'primevue/sidebar';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import DataObjectViewModel from '@/models/dataObjectViewModel';
@@ -15,6 +16,7 @@ import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components: {
+    Sidebar,
     TabView,
     TabPanel,
     DataObjectHeaderEdit,
