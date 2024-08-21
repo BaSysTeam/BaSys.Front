@@ -21,6 +21,7 @@ export default class ExpressionEvaluator {
     } = FunctionLibrary;
 
     let result: any;
+
     try {
       // eslint-disable-next-line no-eval
       result = eval(expression);

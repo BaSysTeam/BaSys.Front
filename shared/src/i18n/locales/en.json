@@ -10,6 +10,8 @@
   "displayExpression": "Display expression",
   "isActive": "Is active",
   "formula": "Formula",
+  "calculationLog": "Calculation log",
+  "clear": "Clear",
   "copy": "Copy",
   "columns": "Columns",
   "close": "Close",

@@ -11,12 +11,14 @@ import InputText from 'primevue/inputtext';
 import Sidebar from 'primevue/sidebar';
 import SplitButton from 'primevue/splitbutton';
 import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
+import LogPanel from '@/components/LogPanel.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components: {
+    LogPanel,
     ViewTitleComponent,
     DataView,
     Divider,
@@ -60,10 +62,6 @@ export default class DataObjectEditView extends Vue {
     {
       label: 'Calculation log',
       command: () => this.onCalculationLogClick(),
-    },
-    {
-      label: 'Test',
-      command: () => this.onTestClick(),
     },
   ];
 
@@ -128,8 +126,8 @@ export default class DataObjectEditView extends Vue {
     this.isCalculationLogOpen = true;
   }
 
-  onTestClick(): void {
-    this.logger.logDebug('Test message');
+  onLogPanelHide(): void {
+    this.isCalculationLogOpen = false;
   }
 
   returnToList(): void {
@@ -227,21 +225,10 @@ export default class DataObjectEditView extends Vue {
     </div>
   </div>
 
-  <Sidebar v-model:visible="isCalculationLogOpen"
-           class="w-full md:w-20rem lg:w-30rem"
-           header="Calculation log"
-           position="right">
-    <DataView :value="logger.messages">
-      <template #list="slotProps">
-        <div class="grid grid-nogutter">
-          <div v-for="(item, index) in slotProps.items" :key="index" class="col-12">
-            <div style="border: 1px solid #ececec; font-size: 0.8rem; padding: 0.5rem">
-              {{ item.toString() }}</div>
-          </div>
-        </div>
-      </template>
-    </DataView>
-  </Sidebar>
+  <LogPanel :visible="isCalculationLogOpen"
+            :logger="logger"
+            :title="$t('calculationLog')"
+            @hide="onLogPanelHide"></LogPanel>
 </template>
 
 <style scoped>

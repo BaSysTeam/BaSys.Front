@@ -44,9 +44,11 @@ export default class InMemoryLogger {
 
  logError(text: string): void {
    this.log(LogLevels.Error, text);
+   console.error(text);
  }
 
  logCritical(text: string): void {
    this.log(LogLevels.Critical, text);
+   console.error(text);
  }
 }
