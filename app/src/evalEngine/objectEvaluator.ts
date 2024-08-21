@@ -1,5 +1,7 @@
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
+import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
+import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
 import DependencyInfo from '../../../shared/src/models/dependencyInfo';
 import ExpressionEvaluator from '../../../shared/src/evalEngine/expressionEvaluator';
 
@@ -17,12 +19,14 @@ export default class ObjectEvaluator {
 
     const tableSettings = this.settings.detailTables.find((x) => x.uid === tableUid);
     if (!tableSettings) {
+      this.logger.logError(`Cannot find table by uid: ${tableUid}`);
       return;
     }
 
     const column = tableSettings.columns.find((x) => x.name === fieldName);
 
     if (!column) {
+      this.logger.logError(`Cannot find column by name: ${fieldName}`);
       return;
     }
 
@@ -33,16 +37,32 @@ export default class ObjectEvaluator {
 
     const evaluator = new ExpressionEvaluator(context, this.logger);
 
-    // eslint-disable-next-line no-restricted-syntax,guard-for-in
-    for (const dependency of column.dependencies) {
+    this.rowDependenciesEval(tableSettings, column, row, evaluator);
+  }
+
+  rowDependenciesEval(
+    tableSettings: MetaObjectTable,
+    columnSettings: MetaObjectTableColumn,
+    row: any,
+    evaluator: ExpressionEvaluator,
+  ):void {
+    if (!columnSettings.dependencies) {
+      return;
+    }
+
+    if (!columnSettings.dependencies.length) {
+      return;
+    }
+
+    columnSettings.dependencies.forEach((dependency: DependencyInfo) => {
       const dependentColumn = tableSettings.columns.find((x) => x.uid === dependency.fieldUid);
       if (!dependentColumn) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
+        this.logger.logError(`Cannot find column by uid: ${dependency.fieldUid}`);
+      } else {
+        row[dependentColumn.name] = evaluator.evaluateExpression(dependentColumn.formula);
 
-      const result = evaluator.evaluateExpression(dependentColumn.formula);
-      row[dependentColumn.name] = result;
-    }
+        this.rowDependenciesEval(tableSettings, dependentColumn, row, evaluator);
+      }
+    });
   }
 }
