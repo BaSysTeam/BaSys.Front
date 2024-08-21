@@ -15,6 +15,7 @@ import Calendar from 'primevue/calendar';
 import Menubar from 'primevue/menubar';
 import Button from 'primevue/button';
 import Badge from 'primevue/badge';
+import DataObject from '@/models/dataObject';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
@@ -78,6 +79,13 @@ export default class DataObjectDetailTableEdit extends Vue {
   })
   dataTypes!: DataType[];
 
+  // DataObject.
+  @Prop({
+    type: Object as PropType<DataObject>,
+    required: true,
+  })
+  dataObject!: DataObject;
+
   // DetailsTable.
   @Prop({
     type: Object as PropType<DataObjectDetailsTable>,
@@ -109,7 +117,12 @@ export default class DataObjectDetailTableEdit extends Vue {
   selectedRecord: any = {};
   windowHeight = window.innerHeight;
   provider = new DataObjectsProvider();
-  objectEvaluator: ObjectEvaluator = new ObjectEvaluator(this.logger, this.metaObjectSettings);
+  objectEvaluator: ObjectEvaluator = new ObjectEvaluator(
+    this.logger,
+    this.metaObjectSettings,
+    this.dataObject,
+  );
+
   selectItemProvider = new SelectItemsProvider();
   toastHelper = new ToastHelper(useToast());
   inputStyle = {
@@ -328,7 +341,11 @@ export default class DataObjectDetailTableEdit extends Vue {
       }
     });
 
-    this.objectEvaluator = new ObjectEvaluator(this.logger, this.metaObjectSettings);
+    this.objectEvaluator = new ObjectEvaluator(
+      this.logger,
+      this.metaObjectSettings,
+      this.dataObject,
+    );
   }
 
   beforeDestroy(): void {

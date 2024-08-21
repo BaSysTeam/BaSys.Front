@@ -235,10 +235,11 @@ export default class DataObjectEditComponent extends Vue {
           <TabPanel key="header" :header="$t('mainTab')">
 
             <DataObjectHeaderEdit :model="model"
-                                      :is-primary-key-enabled="isPrimaryKeyEnabled"
-                                      :render-place="renderPlace"
-                                      @is-modified-changed="onHeaderFieldChange">
-                </DataObjectHeaderEdit>
+                                  :logger="logger"
+                                  :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                  :render-place="renderPlace"
+                                  @is-modified-changed="onHeaderFieldChange">
+            </DataObjectHeaderEdit>
 
           </TabPanel>
           <!--Detail tables tabs-->
@@ -249,6 +250,7 @@ export default class DataObjectEditComponent extends Vue {
                                        :logger="logger"
                                        :kind="kind"
                                        :object-uid="requestUid"
+                                       :data-object="model.item"
                                        :meta-object-settings="model.metaObjectSettings"
                                        :data-types="model.dataTypes"
                                        @is-modified-changed="onTableIsModifiedChanged">
@@ -262,6 +264,7 @@ export default class DataObjectEditComponent extends Vue {
   <!--Edit header fields-->
     <DataObjectHeaderEdit v-if="model.tabs.length === 0"
                           :model="model"
+                          :logger="logger"
                           :is-primary-key-enabled="isPrimaryKeyEnabled"
                           :render-place="renderPlace"
                           @is-modified-changed="onHeaderFieldChange"></DataObjectHeaderEdit>

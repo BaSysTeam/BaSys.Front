@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop, Emit } from 'vue-property-decorator';
+import { Prop, Emit, Watch } from 'vue-property-decorator';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import InputText from 'primevue/inputtext';
@@ -21,6 +21,8 @@ import DataObjectHeaderFieldEditComponent
 import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vue';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import { PropType } from 'vue';
+import ObjectEvaluator from '../evalEngine/objectEvaluator';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 
 @Options({
   components: {
@@ -49,6 +51,13 @@ export default class DataObjectHeaderEdit extends Vue {
   })
   model!: DataObjectViewModel;
 
+  // Logger.
+  @Prop({
+    type: Object as PropType<InMemoryLogger>,
+    required: true,
+  })
+  logger!: InMemoryLogger;
+
   @Prop({
     type: Boolean,
     required: true,
@@ -66,6 +75,7 @@ export default class DataObjectHeaderEdit extends Vue {
   searchString = '';
   sortKind = 1;
   windowHeight = window.innerHeight;
+  objectEvaluator!: ObjectEvaluator;
 
   get fieldsContainerStyle(): any {
     if (this.renderPlace === 'page') {
@@ -121,7 +131,17 @@ export default class DataObjectHeaderEdit extends Vue {
     return newValue;
   }
 
-  onHeaderFieldChange(): void {
+  @Watch('model')
+  onModelChanged(newValue: DataObjectViewModel): void {
+    this.objectEvaluator = new ObjectEvaluator(
+      this.logger,
+      newValue.metaObjectSettings,
+      newValue.item,
+    );
+  }
+
+  onHeaderFieldChange(columnName: string): void {
+    this.objectEvaluator.onHeaderFieldChanged(columnName);
     this.isModifiedChanged(true);
   }
 
@@ -144,6 +164,12 @@ export default class DataObjectHeaderEdit extends Vue {
   mounted(): void {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
+
+      this.objectEvaluator = new ObjectEvaluator(
+        this.logger,
+        this.model.metaObjectSettings,
+        this.model.item,
+      );
     });
   }
 }

@@ -2,6 +2,7 @@ import DataObjectDetailsTable from './dataObjectDetailsTable';
 
 export default class DataObject {
   header: { [key: string]: any };
+  currentRow: { [key: string]: any };
   detailsTables: DataObjectDetailsTable[]
 
   constructor(param: any) {
@@ -10,6 +11,7 @@ export default class DataObject {
       data = param;
     }
     this.header = {};
+    this.currentRow = {};
     this.detailsTables = [];
 
     this.init(data, false);
