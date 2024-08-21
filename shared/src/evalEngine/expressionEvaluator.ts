@@ -13,7 +13,12 @@ export default class ExpressionEvaluator {
   evaluateExpression(expression:string): any {
     const $r = this.context.currentRow;
     const $h = this.context.header;
-    const { isEmpty, isNotEmpty } = FunctionLibrary;
+    const {
+      isEmpty,
+      isNotEmpty,
+      iif,
+      ifs,
+    } = FunctionLibrary;
 
     let result: any;
     try {
