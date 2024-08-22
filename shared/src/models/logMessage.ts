@@ -18,6 +18,6 @@ export default class LogMessage {
   }
 
   toString(): string {
-    return `${ValuesFormatter.formatDateTime(this.period, true)}.${LogLevels[this.level]}. ${this.text}`;
+    return `${ValuesFormatter.formatDateTime(this.period, true)}. ${LogLevels[this.level]}. ${this.text}`;
   }
 }

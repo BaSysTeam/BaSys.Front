@@ -86,7 +86,9 @@ onBeforeMount(() => {
         <div class="grid grid-nogutter">
           <div v-for="(item, index) in slotProps.items" :key="index" class="col-12">
             <div style="border: 1px solid #ececec; font-size: 0.8rem; padding: 0.5rem">
-              {{ item.toString() }}</div>
+              <span class="pi pi-info-circle"></span>
+              <span>{{ item.toString() }}</span>
+              </div>
           </div>
         </div>
       </template>
