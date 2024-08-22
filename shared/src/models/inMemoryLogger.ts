@@ -10,6 +10,10 @@ export default class InMemoryLogger {
    this.minimumLevel = minimumLevel;
  }
 
+ setLevel(level: LogLevels): void {
+   this.minimumLevel = level;
+ }
+
  isEnabled(level: LogLevels): boolean {
    return level >= this.minimumLevel;
  }

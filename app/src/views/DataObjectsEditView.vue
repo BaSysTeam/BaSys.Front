@@ -57,7 +57,7 @@ export default class DataObjectEditView extends Vue {
   title = 'BaSYS';
   editRegime = 'edit';
   model = new DataObjectWithMetadata(null);
-  logger = new InMemoryLogger(LogLevels.Debug);
+  logger = new InMemoryLogger(LogLevels.Error);
   actionsButtonItems = [
     {
       label: 'Calculation log',

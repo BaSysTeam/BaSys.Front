@@ -17,6 +17,8 @@
   "close": "Close",
   "back": "Back",
   "mainTab": "Main",
+  "logLevel": "Log level",
+  "level": "Level",
   "memo": "Memo",
   "name": "Name",
   "numberDigits": "Number digits",
