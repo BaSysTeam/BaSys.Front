@@ -4,10 +4,13 @@ import {
 } from 'vue';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
+import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
+import InputGroup from 'primevue/inputgroup';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import InputSwitch from 'primevue/inputswitch';
+import FormulaEditDialog from '@/components/metaObjectEditComponents/FormulaEditDialog.vue';
 import ControlKind from '../../../../shared/src/models/controlKind';
 import ControlKindDefaults from '../../../../shared/src/dataProviders/controlKindDefaults';
 import DataType from '../../../../shared/src/models/dataType';
@@ -29,7 +32,9 @@ const props = defineProps({
   },
 });
 
+// Data
 const controlKinds = ref<ControlKind[]>([]);
+const isFormulaDialogOpen = ref(false);
 
 // Emits
 const emit = defineEmits({ change: () => true });
@@ -59,6 +64,20 @@ function onChange(): void {
 
 function onDataTypeChange(): void {
   prepareControlKinds();
+  emit('change');
+}
+
+function onFormulaOpenClick(): void {
+  isFormulaDialogOpen.value = true;
+}
+
+function onFormulaDialogClose(): void {
+  isFormulaDialogOpen.value = false;
+}
+
+function onFormulaDialogSave(expression: string): void {
+  isFormulaDialogOpen.value = false;
+  props.column.formula = expression;
   emit('change');
 }
 
@@ -211,13 +230,21 @@ onBeforeMount(() => {
     <div class="field grid">
       <label for="prop-formula" class="col-4 bs-label bs-required">{{$t('formula')}}</label>
       <div class="col-8">
-        <InputText id="prop-formula"
-                   size="small"
-                   autocomplete="off"
-                   class="w-full"
-                   :disabled="isColumnDisabled()"
-                   v-model="column.formula"
-                   @change="onChange"></InputText>
+        <InputGroup>
+          <InputText id="prop-formula"
+                     size="small"
+                     autocomplete="off"
+                     class="w-full"
+                     :disabled="isColumnDisabled()"
+                     v-model="column.formula"
+                     @change="onChange"></InputText>
+          <Button icon="pi pi-search"
+                  size="small"
+                  severity="secondary"
+                  outlined
+                  @click="onFormulaOpenClick"></Button>
+        </InputGroup>
+
       </div>
     </div>
   </AccordionTab>
@@ -240,6 +267,12 @@ onBeforeMount(() => {
     </div>
   </AccordionTab>
 </Accordion>
+
+  <FormulaEditDialog :title="$t('formula')"
+                     :expression="column.formula"
+                     v-if="isFormulaDialogOpen"
+                     @close="onFormulaDialogClose"
+                     @save="onFormulaDialogSave"></FormulaEditDialog>
 </template>
 
 <style scoped>

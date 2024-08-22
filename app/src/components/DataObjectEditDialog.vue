@@ -3,13 +3,19 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Ref } from 'vue-property-decorator';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
+import SplitButton from 'primevue/splitbutton';
 import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
+import LogPanel from '@/components/LogPanel.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components: {
+    LogPanel,
     Dialog,
     Button,
+    SplitButton,
     DataObjectEditComponent,
     ViewTitleComponent,
   },
@@ -42,6 +48,14 @@ export default class DataObjectEditDialog extends Vue {
   isModified = false;
   isWaiting = false;
   closeAfterSave = false;
+  isCalculationLogOpen = false;
+  logger = new InMemoryLogger(LogLevels.Error);
+  actionsButtonItems = [
+    {
+      label: 'Calculation log',
+      command: () => this.onCalculationLogClick(),
+    },
+  ];
 
   @Ref()
   editComponentRef!: any;
@@ -84,6 +98,14 @@ export default class DataObjectEditDialog extends Vue {
     this.closeAfterSave = false;
   }
 
+  onCalculationLogClick(): void {
+    this.isCalculationLogOpen = true;
+  }
+
+  onLogPanelHide(): void {
+    this.isCalculationLogOpen = false;
+  }
+
   updateVisible(value: boolean): void {
     if (!value) {
       this.$emit('close');
@@ -117,6 +139,7 @@ export default class DataObjectEditDialog extends Vue {
                                  :uid="uid"
                                  :copyUid="copyUid"
                                  :regime="regime"
+                                 :logger="logger"
                                  render-place="dialog"
                                  @isModifiedChanged="onIsModifiedChanged"
                                  @isWaitingChanged="onIsWaitingChanged"
@@ -124,6 +147,14 @@ export default class DataObjectEditDialog extends Vue {
       </div>
       <template #footer>
         <div>
+          <SplitButton
+            class="mr-1"
+            :label="$t('actions')"
+            severity="primary"
+            size="small"
+            outlined
+            :model="actionsButtonItems">
+          </SplitButton>
           <Button
             class="mr-1"
             :label="$t('close')"
@@ -155,6 +186,10 @@ export default class DataObjectEditDialog extends Vue {
     </Dialog>
   </div>
 
+  <LogPanel :visible="isCalculationLogOpen"
+            :logger="logger"
+            :title="$t('calculationLog')"
+            @hide="onLogPanelHide"></LogPanel>
 </template>
 
 <style scoped>

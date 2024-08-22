@@ -122,7 +122,6 @@ export default class DataObjectEditView extends Vue {
   }
 
   onCalculationLogClick(): void {
-    console.log('CalculationLogClick');
     this.isCalculationLogOpen = true;
   }
 
