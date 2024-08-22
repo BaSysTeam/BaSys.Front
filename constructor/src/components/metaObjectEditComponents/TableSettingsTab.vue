@@ -237,6 +237,9 @@ onBeforeMount(() => {
           <span class="ml-2">{{option.title}}</span>
           <span class="pi pi-lock ml-2" style="float:right" v-if="option.isStandard"></span>
           <span class="pi pi-key ml-2" style="float:right" v-if="option.primaryKey"></span>
+          <span class="ml-2 text-primary"
+                style="font-style: italic; float: right;"
+                v-if="option.formula">f(x)</span>
         </div>
       </template>
     </Listbox>

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import {
-  defineProps, defineEmits, PropType, ref, watch, onBeforeMount,
+  defineProps, defineEmits, PropType, ref, watch, onBeforeMount, computed,
 } from 'vue';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
-import Textarea from 'primevue/textarea';
+import { Codemirror } from 'vue-codemirror';
+import { javascript as jsLang } from '@codemirror/lang-javascript';
+import { githubLight } from '@ddietr/codemirror-themes/github-light';
 
 // @component
 const name = 'FormulaEditDialog';
@@ -23,6 +25,14 @@ const props = defineProps({
 
 // Data
 const expressionValue = ref('');
+const codemirrorExtensions = [jsLang(), githubLight];
+const codemirrorEditor: any = ref(null);
+const windowHeight = ref(window.innerHeight);
+const codemirrorStyle = computed(() => ({
+  minHeight: `${windowHeight.value - 500}px`,
+  marginTop: '1rem',
+  border: '1px solid #ececec',
+}));
 
 // Emit
 const emit = defineEmits(
@@ -38,6 +48,10 @@ function onCloseClick(): void {
 
 function onSaveClick(): void {
   emit('save', expressionValue.value);
+}
+
+function onEditorInput(): void {
+  console.log('editorInput');
 }
 
 function updateVisible(value: boolean): void {
@@ -65,10 +79,16 @@ onBeforeMount(() => {
   :style="{width: '50rem'}"
   @update:visible="updateVisible">
 <div>
-  <Textarea v-model="expressionValue"
-            rows="10"
-            autocomplete="off"
-            class="w-full"></Textarea>
+  <codemirror
+    ref="codemirrorEditor"
+    v-model="expressionValue"
+    placeholder="Code goes here..."
+    :style="codemirrorStyle"
+    :indent-with-tab="true"
+    :tab-size="2"
+    :extensions="codemirrorExtensions"
+    @change="onEditorInput"
+  />
 </div>
   <template #footer>
     <Button

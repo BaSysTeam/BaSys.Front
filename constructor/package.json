@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@codemirror/basic-setup": "^0.20.0",
+    "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/view": "^6.32.0",
     "@ddietr/codemirror-themes": "^1.4.2",
