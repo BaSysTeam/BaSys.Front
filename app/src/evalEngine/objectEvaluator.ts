@@ -5,11 +5,13 @@ import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
 import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
 import DependencyInfo from '../../../shared/src/models/dependencyInfo';
 import ExpressionEvaluator from '../../../shared/src/evalEngine/expressionEvaluator';
+import { DependencyKinds } from '../../../shared/src/enums/dependencyKinds';
 
 export default class ObjectEvaluator {
   logger: InMemoryLogger;
   settings: MetaObjectStorableSettings;
   dataObject: DataObject;
+  dependenciesToCalc: any;
 
   constructor(
     logger: InMemoryLogger,
@@ -19,6 +21,8 @@ export default class ObjectEvaluator {
     this.logger = logger;
     this.settings = settings;
     this.dataObject = dataObject;
+
+    this.dependenciesToCalc = {};
   }
 
   onHeaderFieldChanged(columnName: string): void {
@@ -34,6 +38,7 @@ export default class ObjectEvaluator {
     this.dataObject.currentRow = {};
     const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
     this.headerDependenciesEval(column, evaluator);
+    this.existingDependenciesEval(evaluator);
   }
 
   onRowFieldChanged(fieldName: string, tableUid: string, row: any): void {
@@ -56,6 +61,7 @@ export default class ObjectEvaluator {
     const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
 
     this.rowDependenciesEval(tableSettings, column, row, evaluator);
+    this.existingDependenciesEval(evaluator);
   }
 
   headerDependenciesEval(
@@ -71,16 +77,22 @@ export default class ObjectEvaluator {
     }
 
     columnSettings.dependencies.forEach((dependency: DependencyInfo) => {
-      const dependentColumn = this.settings.header.columns.find(
-        (x) => x.uid === dependency.fieldUid,
-      );
-      if (!dependentColumn) {
-        this.logger.logError(`Cannot find column by uid: ${dependency.fieldUid}`);
-      } else {
-        const calcResult = evaluator.evaluateExpression(dependentColumn.formula);
-        this.dataObject.header[dependentColumn.name] = calcResult;
+      if (dependency.kind === DependencyKinds.HeaderField) {
+        // Calculate dependent formulas.
+        const dependentColumn = this.settings.header.columns.find(
+          (x) => x.uid === dependency.fieldUid,
+        );
+        if (!dependentColumn) {
+          this.logger.logError(`Cannot find header column by uid: ${dependency.fieldUid}`);
+        } else {
+          const calcResult = evaluator.evaluateExpression(dependentColumn.formula);
+          this.dataObject.header[dependentColumn.name] = calcResult;
 
-        this.headerDependenciesEval(dependentColumn, evaluator);
+          this.headerDependenciesEval(dependentColumn, evaluator);
+        }
+      } else {
+        // Calculate later.
+        this.dependenciesToCalc[dependency.fieldUid] = dependency;
       }
     });
   }
@@ -100,14 +112,109 @@ export default class ObjectEvaluator {
     }
 
     columnSettings.dependencies.forEach((dependency: DependencyInfo) => {
-      const dependentColumn = tableSettings.columns.find((x) => x.uid === dependency.fieldUid);
-      if (!dependentColumn) {
-        this.logger.logError(`Cannot find column by uid: ${dependency.fieldUid}`);
-      } else {
-        row[dependentColumn.name] = evaluator.evaluateExpression(dependentColumn.formula);
+      if (dependency.kind === DependencyKinds.RowField) {
+        // Calculate dependent fields.
+        const dependentColumn = tableSettings.columns.find((x) => x.uid === dependency.fieldUid);
+        if (!dependentColumn) {
+          this.logger.logError(`Cannot find table column by uid: ${dependency.fieldUid}`);
+        } else {
+          row[dependentColumn.name] = evaluator.evaluateExpression(dependentColumn.formula);
 
-        this.rowDependenciesEval(tableSettings, dependentColumn, row, evaluator);
+          this.rowDependenciesEval(tableSettings, dependentColumn, row, evaluator);
+        }
+      } else {
+        // Calculate later.
+        this.dependenciesToCalc[dependency.fieldUid] = dependency;
       }
     });
+  }
+
+  existingDependenciesEval(evaluator: ExpressionEvaluator): void {
+    this.logger.logDebug('DependenciesEval.Start');
+    let dependencies = [];
+
+    // eslint-disable-next-line no-restricted-syntax,guard-for-in
+    for (const key in this.dependenciesToCalc) {
+      dependencies.push(this.dependenciesToCalc[key]);
+    }
+    this.dependenciesToCalc = {};
+
+    let flagContinue = dependencies.length > 0;
+    const iMax = 3;
+    let i = 0;
+
+    while (flagContinue) {
+      i += 1;
+      this.logger.logDebug(`DependenciesEval.Iteration ${i}`);
+
+      // Header dependencies.
+      // eslint-disable-next-line no-restricted-syntax
+      for (const dependency of dependencies.filter((x) => x.kind === DependencyKinds.HeaderField)) {
+        const dependentColumn = this.settings.header.columns.find(
+          (x) => x.uid === dependency.fieldUid,
+        );
+
+        if (!dependentColumn) {
+          this.logger.logError(`Cannot find header column by uid: ${dependency.fieldUid}`);
+        } else {
+          const calcResult = evaluator.evaluateExpression(dependentColumn.formula);
+          this.dataObject.header[dependentColumn.name] = calcResult;
+
+          this.headerDependenciesEval(dependentColumn, evaluator);
+        }
+      }
+
+      // Row dependencies.
+      // eslint-disable-next-line no-restricted-syntax
+      for (const dependency of dependencies.filter((x) => x.kind === DependencyKinds.RowField)) {
+        const tableSettings = this.settings.detailTables.find(
+          (x) => x.uid === dependency.tableUid,
+        );
+        if (!tableSettings) {
+          this.logger.logError(`Cannot find table by uid: ${dependency.tableUid}`);
+          return;
+        }
+
+        const column = tableSettings.columns.find(
+          (x) => x.uid === dependency.fieldUid,
+        );
+
+        if (!column) {
+          this.logger.logError(`Cannot find column by uid: ${dependency.fieldUid}`);
+          return;
+        }
+
+        this.tableRecalculate(tableSettings, column, evaluator);
+      }
+
+      dependencies = [];
+      // eslint-disable-next-line no-restricted-syntax,guard-for-in
+      for (const key in this.dependenciesToCalc) {
+        dependencies.push(this.dependenciesToCalc[key]);
+      }
+      flagContinue = dependencies.length > 0 && i <= iMax;
+    }
+  }
+
+  tableRecalculate(
+    tableSettings: MetaObjectTable,
+    column: MetaObjectTableColumn,
+    evaluator: ExpressionEvaluator,
+  ): void {
+    const table = this.dataObject.detailsTables.find(
+      (x) => x.uid === tableSettings.uid,
+    );
+
+    if (!table) {
+      this.logger.logError(`Cannot find table by uid: ${tableSettings.uid}`);
+      return;
+    }
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const row of table.rows) {
+      this.dataObject.currentRow = row;
+      row[column.name] = evaluator.evaluateExpression(column.formula);
+      this.rowDependenciesEval(tableSettings, column, row, evaluator);
+    }
   }
 }

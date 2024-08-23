@@ -228,7 +228,7 @@ onBeforeMount(() => {
 
     <!--Formula-->
     <div class="field grid">
-      <label for="prop-formula" class="col-4 bs-label bs-required">{{$t('formula')}}</label>
+      <label for="prop-formula" class="col-4 bs-label">{{$t('formula')}}</label>
       <div class="col-8">
         <InputGroup>
           <InputText id="prop-formula"
