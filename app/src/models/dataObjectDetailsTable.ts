@@ -26,4 +26,12 @@ export default class DataObjectDetailsTable {
   get display(): string {
     return `${this.title} (${this.rows.length})`;
   }
+
+  sum(columnName: string): number {
+    let result = 0;
+    this.rows.forEach((row: any) => {
+      result += row[columnName];
+    });
+    return result;
+  }
 }
