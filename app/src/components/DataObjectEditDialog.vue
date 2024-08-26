@@ -50,12 +50,7 @@ export default class DataObjectEditDialog extends Vue {
   closeAfterSave = false;
   isCalculationLogOpen = false;
   logger = new InMemoryLogger(LogLevels.Error);
-  actionsButtonItems = [
-    {
-      label: 'Calculation log',
-      command: () => this.onCalculationLogClick(),
-    },
-  ];
+  actionsButtonItems: any[] = [];
 
   @Ref()
   editComponentRef!: any;
@@ -102,6 +97,12 @@ export default class DataObjectEditDialog extends Vue {
     this.isCalculationLogOpen = true;
   }
 
+  onRecalculateClick(): void {
+    if (this.editComponentRef) {
+      this.editComponentRef.triggerRecalculateClick();
+    }
+  }
+
   onLogPanelHide(): void {
     this.isCalculationLogOpen = false;
   }
@@ -110,6 +111,21 @@ export default class DataObjectEditDialog extends Vue {
     if (!value) {
       this.$emit('close');
     }
+  }
+
+  mounted(): void {
+    this.actionsButtonItems = [
+      {
+        label: 'Calculation log',
+        icon: 'pi pi-list',
+        command: () => this.onCalculationLogClick(),
+      },
+      {
+        label: 'Recalculate',
+        icon: 'pi pi-replay',
+        command: () => this.onRecalculateClick(),
+      },
+    ];
   }
 }
 </script>

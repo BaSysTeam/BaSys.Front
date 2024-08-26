@@ -25,6 +25,7 @@
   "numberDigits": "Количество разрядов",
   "orderExpression": "Выражение сортировки",
   "primaryKey": "Первичный ключ",
+  "recalculate": "Пересчитать",
   "render": "Отображение",
   "required": "Обязательное",
   "save": "Сохранить",

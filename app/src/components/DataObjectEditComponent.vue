@@ -9,6 +9,7 @@ import DataObjectViewModel from '@/models/dataObjectViewModel';
 import DataObject from '@/models/dataObject';
 import DataObjectHeaderEdit from '@/components/DataObjectHeaderEdit.vue';
 import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vue';
+import ObjectEvaluator from '@/evalEngine/objectEvaluator';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
@@ -99,7 +100,6 @@ export default class DataObjectEditComponent extends Vue {
     objectToSave.init(this.model.item, true);
     objectToSave.convertDatesToIso();
 
-    console.log('objectToSave', objectToSave);
     if (this.model.isNew) {
       // Insert new item.
       const response = await this.dataObjectsProvider.createItem(
@@ -179,6 +179,20 @@ export default class DataObjectEditComponent extends Vue {
     }
   }
 
+  private recalculate(): void {
+    this.isWaitingChanged(true);
+    const objectEvaluator = new ObjectEvaluator(
+      this.logger,
+      this.model.metaObjectSettings,
+      this.model.item,
+    );
+
+    objectEvaluator.onObjectRecalculate();
+    this.toastHelper.success('Object recalculated');
+    this.isWaitingChanged(false);
+    this.isModifiedChanged(true);
+  }
+
   private handleError(response: any): void {
     this.toastHelper.error(response.message);
     console.error(response.presentation);
@@ -196,6 +210,10 @@ export default class DataObjectEditComponent extends Vue {
 
   public triggerSaveClick(): void {
     this.save();
+  }
+
+  public triggerRecalculateClick(): void {
+    this.recalculate();
   }
 
   @Emit('isModifiedChanged')

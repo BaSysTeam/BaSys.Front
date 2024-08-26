@@ -8,6 +8,8 @@ import ExpressionEvaluator from '../../../shared/src/evalEngine/expressionEvalua
 import { DependencyKinds } from '../../../shared/src/enums/dependencyKinds';
 
 export default class ObjectEvaluator {
+  private static readonly MAX_ITERATIONS = 3;
+
   logger: InMemoryLogger;
   settings: MetaObjectStorableSettings;
   dataObject: DataObject;
@@ -25,13 +27,17 @@ export default class ObjectEvaluator {
     this.dependenciesToCalc = {};
   }
 
-  onHeaderFieldChanged(columnName: string): void {
-    this.logger.logDebug(`Header field changed "${columnName}"`);
+  /**
+   * Handle changes of a header field. Try to find dependencies
+   * of the field and recalculates all dependencies.
+   * @param name - name of field was changed.
+   */
+  onHeaderFieldChanged(name: string): void {
+    this.logger.logDebug(`Header field changed "${name}"`);
 
-    const column = this.settings.header.columns.find((x) => x.name === columnName);
+    const column = this.settings.header.getColumnByName(name);
     if (!column) {
-      this.logger.logError(`Cannot find column by name: ${columnName}`);
-      console.log('HeaderColumns', JSON.stringify(this.settings));
+      this.logger.logError(`Cannot find column by name: ${name}`);
       return;
     }
 
@@ -65,7 +71,7 @@ export default class ObjectEvaluator {
   }
 
   onTableChanged(tableName: string, tableUid: string): void {
-    this.logger.logDebug(`Table changed ${tableName}`);
+    this.logger.logDebug(`Table changed "${tableName}"`);
 
     const tableSettings = this.settings.getTable(tableUid);
     if (!tableSettings) {
@@ -86,6 +92,51 @@ export default class ObjectEvaluator {
           }
         }
       });
+    });
+
+    this.existingDependenciesEval(evaluator);
+  }
+
+  onObjectRecalculate(): void {
+    this.logger.logDebug('Object recalculate');
+
+    // Eval all formulas in header fields.
+    const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
+    this.settings.header.columns.forEach((column) => {
+      this.headerDependenciesEval(column, evaluator);
+    });
+
+    // Eval all formulas in all rows in all tables.
+    Object.entries(this.dataObject.tables).forEach(([key, table]) => {
+      const tableSettings = this.settings.getTable(table.uid);
+      if (tableSettings) {
+        table.rows.forEach((row: any) => {
+          this.dataObject.currentRow = row;
+          this.logger.logDebug(`Recalculate row #${row.row_number} in table "${table.name}"`);
+          tableSettings.columns.forEach((column) => {
+            this.rowDependenciesEval(tableSettings, column, row, evaluator);
+          });
+        });
+      }
+    });
+
+    this.existingDependenciesEval(evaluator);
+  }
+
+  onRowRecalculate(tableName: string, tableUid: string, row: any): void {
+    this.logger.logDebug(`Row #${row.row_number} recalculate in table "${tableName}"`);
+
+    const tableSettings = this.settings.getTable(tableUid);
+    if (!tableSettings) {
+      this.logger.logError(`Cannot find table by uid: ${tableUid}`);
+      return;
+    }
+
+    this.dataObject.currentRow = row;
+    const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
+
+    tableSettings.columns.forEach((column) => {
+      this.rowDependenciesEval(tableSettings, column, row, evaluator);
     });
 
     this.existingDependenciesEval(evaluator);
@@ -170,7 +221,6 @@ export default class ObjectEvaluator {
     this.dependenciesToCalc = {};
 
     let flagContinue = dependencies.length > 0;
-    const iMax = 3;
     let i = 0;
 
     while (flagContinue) {
@@ -222,7 +272,7 @@ export default class ObjectEvaluator {
       for (const key in this.dependenciesToCalc) {
         dependencies.push(this.dependenciesToCalc[key]);
       }
-      flagContinue = dependencies.length > 0 && i <= iMax;
+      flagContinue = dependencies.length > 0 && i <= ObjectEvaluator.MAX_ITERATIONS;
     }
   }
 

@@ -480,6 +480,13 @@ export default class DataObjectDetailTableEdit extends Vue {
     }
   }
 
+  onRowRecalculateClick(row: any): void {
+    this.isWaiting = true;
+    this.objectEvaluator.onRowRecalculate(this.table.name, this.table.uid, row);
+    this.isWaiting = false;
+    this.isModifiedChanged(true);
+  }
+
   onPageChanged(args: any): void {
     console.log('Page changed', args);
     if (this.table.rows.length > args.first) {
@@ -658,10 +665,17 @@ export default class DataObjectDetailTableEdit extends Vue {
           <span class="pi pi-arrow-up text-primary"></span>
         </a>
         <a href="#"
-           class="bs-row-action"
+           class="mr-2 bs-row-action"
            tabindex="-1"
            @click.prevent="onRowDownClick(data)">
           <span class="pi pi-arrow-down text-primary"></span>
+        </a>
+        <a href="#"
+           class="bs-row-action"
+           tabindex="-1"
+           v-tooltip="$t('recalculate')"
+           @click.prevent="onRowRecalculateClick(data)">
+          <span class="pi pi-replay text-primary"></span>
         </a>
       </template>
     </Column>

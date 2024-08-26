@@ -58,12 +58,7 @@ export default class DataObjectEditView extends Vue {
   editRegime = 'edit';
   model = new DataObjectWithMetadata(null);
   logger = new InMemoryLogger(LogLevels.Error);
-  actionsButtonItems = [
-    {
-      label: 'Calculation log',
-      command: () => this.onCalculationLogClick(),
-    },
-  ];
+  actionsButtonItems: any[] = [];
 
   router = useRouter();
 
@@ -93,9 +88,7 @@ export default class DataObjectEditView extends Vue {
   }
 
   onSaveClick(): void {
-    console.log('save');
     if (this.editComponentRef) {
-      console.log('It is edit component');
       this.editComponentRef.triggerSaveClick();
     }
   }
@@ -125,6 +118,12 @@ export default class DataObjectEditView extends Vue {
     this.isCalculationLogOpen = true;
   }
 
+  onRecalculateClick(): void {
+    if (this.editComponentRef) {
+      this.editComponentRef.triggerRecalculateClick();
+    }
+  }
+
   onLogPanelHide(): void {
     this.isCalculationLogOpen = false;
   }
@@ -152,6 +151,21 @@ export default class DataObjectEditView extends Vue {
   beforeMount(): void {
     this.defineEditRegime();
     console.log('DataObjectEditView before mount', this.editRegime, this.$route.name);
+  }
+
+  mounted(): void {
+    this.actionsButtonItems = [
+      {
+        label: 'Calculation log',
+        icon: 'pi pi-list',
+        command: () => this.onCalculationLogClick(),
+      },
+      {
+        label: 'Recalculate',
+        icon: 'pi pi-replay',
+        command: () => this.onRecalculateClick(),
+      },
+    ];
   }
 }
 </script>

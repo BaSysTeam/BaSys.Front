@@ -24,6 +24,7 @@
   "numberDigits": "Number digits",
   "orderExpression": "Order expression",
   "primaryKey": "Primary key",
+  "recalculate": "Recalculate",
   "render": "Render",
   "required": "Required",
   "save": "Save",
