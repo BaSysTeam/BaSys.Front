@@ -1,4 +1,5 @@
 import DataObject from '@/models/dataObject';
+import { Guid } from 'guid-typescript';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import DependencyInfo from '../../../shared/src/models/dependencyInfo';
 import { DependencyKinds } from '../../../shared/src/enums/dependencyKinds';
@@ -26,8 +27,20 @@ export default class MetaObjectSettingsExampleBuilder {
     if (!tableProductsSettings) {
       return dataObject;
     }
-    const tableProducts = dataObject.tables.products;
-    const firstRow = tableProducts.newRow(tableProductsSettings, DataTypeDefaults.allTypes(), '1', -1);
+    const tableProducts = dataObject.newTable({
+      name: 'products',
+      uid: tableProductsSettings.uid,
+    });
+    const firstRow = tableProducts.newRow(
+      tableProductsSettings,
+      DataTypeDefaults.allTypes(),
+      '1',
+      -1,
+    );
+
+    firstRow.product = 1;
+    firstRow.quantity = 5;
+    firstRow.price = 100;
 
     return dataObject;
   }
@@ -72,6 +85,13 @@ export default class MetaObjectSettingsExampleBuilder {
   private buildTableProducts(settings: MetaObjectStorableSettings): void {
     const tableProducts = new MetaObjectTable({
       name: 'products',
+      uid: Guid.create().toString(),
+    });
+
+    const amountColumn = tableProducts.newColumn({
+      name: 'amount',
+      dataTypeUid: DataTypeDefaults.Decimal.uid,
+      formula: '$r.quantity * $r.price',
     });
 
     tableProducts.newColumn({
@@ -82,27 +102,22 @@ export default class MetaObjectSettingsExampleBuilder {
       name: 'quantity',
       dataTypeUid: DataTypeDefaults.Decimal.uid,
     });
+    quantityColumn.dependencies.push(new DependencyInfo(
+      {
+        kind: DependencyKinds.RowField,
+        fieldUid: amountColumn.uid,
+        tableUid: tableProducts.uid,
+      },
+    ));
+
     const priceColumn = tableProducts.newColumn({
       name: 'price',
       dataTypeUid: DataTypeDefaults.Decimal.uid,
     });
-    const amountColumn = tableProducts.newColumn({
-      name: 'amount',
-      dataTypeUid: DataTypeDefaults.Decimal.uid,
-      formula: '$r.quantity * $r.price',
-    });
-
-    amountColumn.dependencies.push(new DependencyInfo(
+    priceColumn.dependencies.push(new DependencyInfo(
       {
         kind: DependencyKinds.RowField,
-        fieldUid: quantityColumn.uid,
-        tableUid: tableProducts.uid,
-      },
-    ));
-    amountColumn.dependencies.push(new DependencyInfo(
-      {
-        kind: DependencyKinds.RowField,
-        fieldUid: priceColumn.uid,
+        fieldUid: amountColumn.uid,
         tableUid: tableProducts.uid,
       },
     ));

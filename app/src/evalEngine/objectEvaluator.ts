@@ -55,7 +55,6 @@ export default class ObjectEvaluator {
       this.logger.logError(`Cannot find table by uid: ${tableUid}`);
       return;
     }
-
     const column = tableSettings.columns.find((x) => x.name === fieldName);
 
     if (!column) {

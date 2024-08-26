@@ -22,7 +22,7 @@ export default class MetaObjectStorableSettings {
       data = params;
     }
 
-    this.uid = data.uid || '';
+    this.uid = data.uid || Guid.create().toString();
     this.metaObjectKindUid = data.metaObjectKindUid || '';
     this.editMethod = data.editMethod || 0;
     this.title = data.title || '';
