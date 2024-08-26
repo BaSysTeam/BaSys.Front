@@ -84,6 +84,10 @@ export default class MetaObjectStorableSettings {
     return this.detailTables.find((x) => x.uid === uid);
   }
 
+  getTableByName(name: string): MetaObjectTable | undefined {
+    return this.detailTables.find((x) => x.name === name);
+  }
+
   deleteDetailsTable(uid: string): void {
     const table = this.detailTables.find((x) => x.uid === uid);
     if (!table) {

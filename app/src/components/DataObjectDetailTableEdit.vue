@@ -387,35 +387,9 @@ export default class DataObjectDetailTableEdit extends Vue {
       return;
     }
 
-    const newRow: any = {};
-    tableSettings.columns.forEach((column) => {
-      const dataType = this.dataTypes.find((x) => x.uid === column.dataTypeUid);
-      if (dataType) {
-        let currentValue: any = '';
-        if (dataType.uid === DataTypeDefaults.Int.uid
-          || dataType.uid === DataTypeDefaults.Long.uid
-          || dataType.uid === DataTypeDefaults.Decimal.uid) {
-          currentValue = 0;
-        } else if (dataType.uid === DataTypeDefaults.Bool.uid) {
-          currentValue = false;
-        }
-        newRow[column.name] = currentValue;
-        if (!dataType.isPrimitive) {
-          newRow[`${column.name}_display`] = '';
-        }
-      } else {
-        newRow[column.name] = '';
-      }
-    });
-    newRow.object_uid = this.objectUid;
-    newRow.row_number = this.table.rows.length + 1;
-    newRow.id = Guid.create();
-
     const ind = this.table.rows.indexOf(this.selectedRecord);
-    if (ind > -1) {
-      this.table.rows.splice(ind + 1, 0, newRow);
-    } else {
-      this.table.rows.push(newRow);
+    const newRow = this.table.newRow(tableSettings, this.dataTypes, this.objectUid, ind);
+    if (ind === -1) {
       this.tableKey += 1;
     }
 
