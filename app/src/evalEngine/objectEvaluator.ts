@@ -64,6 +64,38 @@ export default class ObjectEvaluator {
     this.existingDependenciesEval(evaluator);
   }
 
+  onTableChanged(tableName: string, tableUid: string): void {
+    this.logger.logDebug(`Table changed ${tableName}`);
+
+    const tableSettings = this.settings.getTable(tableUid);
+    if (!tableSettings) {
+      this.logger.logError(`Cannot find table by uid: ${tableUid}`);
+      return;
+    }
+
+    const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
+    const columnsWithDependencies = tableSettings.columns.filter((x) => x.dependencies.length);
+
+    columnsWithDependencies.forEach((column) => {
+      column.dependencies.forEach((dependency) => {
+        if (dependency.kind === DependencyKinds.HeaderField) {
+          const headerField = this.settings.header.getColumn(dependency.fieldUid);
+          if (headerField) {
+            this.headerFieldEval(headerField, evaluator);
+            this.headerDependenciesEval(headerField, evaluator);
+          }
+        }
+      });
+    });
+
+    this.existingDependenciesEval(evaluator);
+  }
+
+  headerFieldEval(column: MetaObjectTableColumn, evaluator: ExpressionEvaluator): void {
+    const calcResult = evaluator.evaluateExpression(column.formula);
+    this.dataObject.header[column.name] = calcResult;
+  }
+
   headerDependenciesEval(
     columnSettings: MetaObjectTableColumn,
     evaluator: ExpressionEvaluator,
@@ -85,9 +117,7 @@ export default class ObjectEvaluator {
         if (!dependentColumn) {
           this.logger.logError(`Cannot find header column by uid: ${dependency.fieldUid}`);
         } else {
-          const calcResult = evaluator.evaluateExpression(dependentColumn.formula);
-          this.dataObject.header[dependentColumn.name] = calcResult;
-
+          this.headerFieldEval(dependentColumn, evaluator);
           this.headerDependenciesEval(dependentColumn, evaluator);
         }
       } else {

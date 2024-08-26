@@ -42,8 +42,6 @@ export default class DataObject {
         this.tables[table.name] = table;
       });
     }
-    console.log('Tables after init', this.tables);
-    console.log('Data object after init', this);
   }
 
   isDate(value: any): boolean {

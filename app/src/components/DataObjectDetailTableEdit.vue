@@ -420,25 +420,9 @@ export default class DataObjectDetailTableEdit extends Vue {
     }
 
     this.selectedRecord = newRow;
-    console.log('Row added', newRow);
-    console.log('Rows count', this.table.rows.length);
-    console.log('Rows', this.table.rows);
+    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
 
     this.isModifiedChanged(true);
-
-    // this.$nextTick(() => {
-    //   if (this.dataTableRef) {
-    //     console.log('dataTableRef', this.dataTableRef);
-    //
-    //     if (!this.vScroll) {
-    //       this.vScroll = this.dataTableRef.getVirtualScrollerRef();
-    //     }
-    //     console.log('vScroll', this.vScroll);
-    //     if (this.vScroll) {
-    //       // this.vScroll.scrollToIndex(this.table.rows.length - 1);
-    //     }
-    //   }
-    // });
   }
 
   onClearFiltersClick(): void {
@@ -451,6 +435,7 @@ export default class DataObjectDetailTableEdit extends Vue {
       this.table.rows.splice(ind, 1);
       this.isModifiedChanged(true);
     }
+    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
   }
 
   onRowCopyClick(row: any): void {
@@ -468,6 +453,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
     this.selectedRecord = newRow;
     this.isModifiedChanged(true);
+    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
   }
 
   onRowUpClick(row: any): void {

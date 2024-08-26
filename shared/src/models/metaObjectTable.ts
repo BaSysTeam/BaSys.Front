@@ -33,6 +33,10 @@ export default class MetaObjectTable {
     return null;
   }
 
+  getColumn(uid: string): MetaObjectTableColumn | undefined {
+    return this.columns.find((x) => x.uid === uid);
+  }
+
   newColumn(params: any): MetaObjectTableColumn {
     const column = new MetaObjectTableColumn(params);
     this.columns.push(column);
