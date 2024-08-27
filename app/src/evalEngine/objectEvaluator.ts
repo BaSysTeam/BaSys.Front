@@ -163,12 +163,12 @@ export default class ObjectEvaluator {
     this.existingDependenciesEval(evaluator);
   }
 
-  headerFieldEval(column: MetaObjectTableColumn, evaluator: ExpressionEvaluator): void {
+  private headerFieldEval(column: MetaObjectTableColumn, evaluator: ExpressionEvaluator): void {
     const calcResult = evaluator.evaluateExpression(column.formula);
     this.dataObject.header[column.name] = calcResult;
   }
 
-  headerDependenciesEval(
+  private headerDependenciesEval(
     columnSettings: MetaObjectTableColumn,
     evaluator: ExpressionEvaluator,
   ):void {
@@ -199,7 +199,7 @@ export default class ObjectEvaluator {
     });
   }
 
-  rowDependenciesEval(
+  private rowDependenciesEval(
     tableSettings: MetaObjectTable,
     columnSettings: MetaObjectTableColumn,
     row: any,
@@ -231,7 +231,7 @@ export default class ObjectEvaluator {
     });
   }
 
-  existingDependenciesEval(evaluator: ExpressionEvaluator): void {
+  private existingDependenciesEval(evaluator: ExpressionEvaluator): void {
     this.logger.logDebug('DependenciesEval.Start');
     let dependencies = [];
 
@@ -297,7 +297,7 @@ export default class ObjectEvaluator {
     }
   }
 
-  tableRecalculate(
+  private tableRecalculate(
     tableSettings: MetaObjectTable,
     column: MetaObjectTableColumn,
     evaluator: ExpressionEvaluator,
