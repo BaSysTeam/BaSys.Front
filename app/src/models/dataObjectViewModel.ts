@@ -80,12 +80,11 @@ export default class DataObjectViewModel {
         });
         this.tabs.push(newTab);
         // Init empty details table.
-        const newTable = new DataObjectDetailsTable({
+        this.item.newTable({
           uid: detailTable.uid,
           name: detailTable.name,
           title: detailTable.title,
         });
-        this.item.detailsTables.push(newTable);
       });
     }
   }

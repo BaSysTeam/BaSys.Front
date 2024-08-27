@@ -38,8 +38,8 @@ export default class DataObjectHeaderEditComponent extends Vue {
 
   selectItemProvider = new SelectItemsProvider();
 
-  onChange(): void {
-    this.$emit('change');
+  onChange(columnName: string): void {
+    this.$emit('change', columnName);
   }
 }
 </script>
@@ -54,7 +54,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
     <PrimaryKeyInput v-model="item.header[column.name]"
                      :id="column.uid"
                      :is-disabled="!isPrimaryKeyEnabled"
-                     @change="onChange"></PrimaryKeyInput>
+                     @change="onChange(column.name)"></PrimaryKeyInput>
 
   </div>
 
@@ -65,7 +65,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
                autocomplete="off"
                size="small"
                class="w-full"
-               @update:model-value="onChange"
+               @update:model-value="onChange(column.name)"
     />
   </div>
 
@@ -77,7 +77,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
                rows="3"
                size="small"
                class="w-full"
-               @update:model-value="onChange"
+               @update:model-value="onChange(column.name)"
     />
   </div>
 
@@ -88,7 +88,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
                  autocomplete="off"
                  size="small"
                  class="w-full"
-                 @update:model-value="onChange"
+                 @update:model-value="onChange(column.name)"
     />
   </div>
 
@@ -101,7 +101,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
                  autocomplete="off"
                  size="small"
                  class="w-full"
-                 @update:model-value="onChange"
+                 @update:model-value="onChange(column.name)"
     />
   </div>
 
@@ -110,7 +110,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
     <Checkbox :id="column.uid"
               :binary="true"
               v-model="item.header[column.name]"
-              @change="onChange">
+              @change="onChange(column.name)">
     </Checkbox>
   </div>
 
@@ -118,7 +118,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
   <div class="col-12 md:col-4" v-if="column.isSwitch">
     <InputSwitch :id="column.uid"
               v-model="item.header[column.name]"
-              @change="onChange">
+              @change="onChange(column.name)">
     </InputSwitch>
   </div>
 
@@ -132,7 +132,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
               date-format="dd.mm.yy"
               class="w-full"
               v-model="item.header[column.name]"
-              @update:model-value="onChange"></Calendar>
+              @update:model-value="onChange(column.name)"></Calendar>
 
   </div>
 
@@ -145,7 +145,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
               date-format="dd.mm.yy"
               class="w-full"
               v-model="item.header[column.name]"
-              @update:model-value="onChange"></Calendar>
+              @update:model-value="onChange(column.name)"></Calendar>
 
   </div>
 
@@ -155,7 +155,7 @@ export default class DataObjectHeaderEditComponent extends Vue {
                       :data-type-uid="column.dataTypeUid"
                       :provider="selectItemProvider"
                       v-model="item.header[column.name]"
-                      @update:model-value="onChange"></DropdownEditor>
+                      @update:model-value="onChange(column.name)"></DropdownEditor>
   </div>
 
 </template>

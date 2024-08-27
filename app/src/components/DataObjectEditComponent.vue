@@ -2,17 +2,21 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Emit } from 'vue-property-decorator';
 import { useToast } from 'primevue/usetoast';
+import Sidebar from 'primevue/sidebar';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import DataObjectViewModel from '@/models/dataObjectViewModel';
 import DataObject from '@/models/dataObject';
 import DataObjectHeaderEdit from '@/components/DataObjectHeaderEdit.vue';
 import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vue';
+import ObjectEvaluator from '@/evalEngine/objectEvaluator';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 
 @Options({
   components: {
+    Sidebar,
     TabView,
     TabPanel,
     DataObjectHeaderEdit,
@@ -62,6 +66,10 @@ export default class DataObjectEditComponent extends Vue {
   @Prop({ required: true, type: String, default: 'page' })
   renderPlace!: string;
 
+  // Calculation logger.
+  @Prop({ required: true, type: InMemoryLogger })
+  logger!: InMemoryLogger;
+
   regimeValue = 'edit';
 
   isAdd(): boolean {
@@ -92,7 +100,6 @@ export default class DataObjectEditComponent extends Vue {
     objectToSave.init(this.model.item, true);
     objectToSave.convertDatesToIso();
 
-    console.log('objectToSave', objectToSave);
     if (this.model.isNew) {
       // Insert new item.
       const response = await this.dataObjectsProvider.createItem(
@@ -172,6 +179,20 @@ export default class DataObjectEditComponent extends Vue {
     }
   }
 
+  private recalculate(): void {
+    this.isWaitingChanged(true);
+    const objectEvaluator = new ObjectEvaluator(
+      this.logger,
+      this.model.metaObjectSettings,
+      this.model.item,
+    );
+
+    objectEvaluator.onObjectRecalculate();
+    this.toastHelper.success('Object recalculated');
+    this.isWaitingChanged(false);
+    this.isModifiedChanged(true);
+  }
+
   private handleError(response: any): void {
     this.toastHelper.error(response.message);
     console.error(response.presentation);
@@ -189,6 +210,10 @@ export default class DataObjectEditComponent extends Vue {
 
   public triggerSaveClick(): void {
     this.save();
+  }
+
+  public triggerRecalculateClick(): void {
+    this.recalculate();
   }
 
   @Emit('isModifiedChanged')
@@ -228,10 +253,11 @@ export default class DataObjectEditComponent extends Vue {
           <TabPanel key="header" :header="$t('mainTab')">
 
             <DataObjectHeaderEdit :model="model"
-                                      :is-primary-key-enabled="isPrimaryKeyEnabled"
-                                      :render-place="renderPlace"
-                                      @is-modified-changed="onHeaderFieldChange">
-                </DataObjectHeaderEdit>
+                                  :logger="logger"
+                                  :is-primary-key-enabled="isPrimaryKeyEnabled"
+                                  :render-place="renderPlace"
+                                  @is-modified-changed="onHeaderFieldChange">
+            </DataObjectHeaderEdit>
 
           </TabPanel>
           <!--Detail tables tabs-->
@@ -239,8 +265,10 @@ export default class DataObjectEditComponent extends Vue {
                     :key="table.uid"
                     :header="table.title">
             <DataObjectDetailTableEdit :table ="table"
+                                       :logger="logger"
                                        :kind="kind"
                                        :object-uid="requestUid"
+                                       :data-object="model.item"
                                        :meta-object-settings="model.metaObjectSettings"
                                        :data-types="model.dataTypes"
                                        @is-modified-changed="onTableIsModifiedChanged">
@@ -254,6 +282,7 @@ export default class DataObjectEditComponent extends Vue {
   <!--Edit header fields-->
     <DataObjectHeaderEdit v-if="model.tabs.length === 0"
                           :model="model"
+                          :logger="logger"
                           :is-primary-key-enabled="isPrimaryKeyEnabled"
                           :render-place="renderPlace"
                           @is-modified-changed="onHeaderFieldChange"></DataObjectHeaderEdit>

@@ -2,6 +2,8 @@ import DataObjectDetailsTable from './dataObjectDetailsTable';
 
 export default class DataObject {
   header: { [key: string]: any };
+  currentRow: { [key: string]: any };
+  tables: { [key: string]: DataObjectDetailsTable };
   detailsTables: DataObjectDetailsTable[]
 
   constructor(param: any) {
@@ -10,6 +12,8 @@ export default class DataObject {
       data = param;
     }
     this.header = {};
+    this.currentRow = {};
+    this.tables = {};
     this.detailsTables = [];
 
     this.init(data, false);
@@ -23,16 +27,19 @@ export default class DataObject {
       });
     }
 
+    this.tables = {};
     this.detailsTables = [];
     if (data.detailsTables) {
       data.detailsTables.forEach((item: any) => {
+        const table = new DataObjectDetailsTable(item);
         if (includeOnlyModifiedTables) {
           if (item.isModified) {
-            this.detailsTables.push(new DataObjectDetailsTable(item));
+            this.detailsTables.push(table);
           }
         } else {
-          this.detailsTables.push(new DataObjectDetailsTable(item));
+          this.detailsTables.push(table);
         }
+        this.tables[table.name] = table;
       });
     }
   }
@@ -86,15 +93,11 @@ export default class DataObject {
     });
   }
 
-  updateTable(detailsTable: DataObjectDetailsTable): void {
-    const currentTable = this.detailsTables.find(
-      (x) => x.uid === detailsTable.uid,
-    );
+  newTable(params: any): DataObjectDetailsTable {
+    const newTable = new DataObjectDetailsTable(params);
+    this.detailsTables.push(newTable);
+    this.tables[newTable.name] = newTable;
 
-    if (currentTable) {
-      currentTable.rows = detailsTable.rows;
-    } else {
-      this.detailsTables.push(detailsTable);
-    }
+    return newTable;
   }
 }

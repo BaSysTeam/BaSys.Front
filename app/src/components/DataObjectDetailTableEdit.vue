@@ -15,6 +15,7 @@ import Calendar from 'primevue/calendar';
 import Menubar from 'primevue/menubar';
 import Button from 'primevue/button';
 import Badge from 'primevue/badge';
+import DataObject from '@/models/dataObject';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
@@ -28,6 +29,8 @@ import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectSto
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import ObjectEvaluator from '../evalEngine/objectEvaluator';
 
 @Options({
   components:
@@ -76,12 +79,26 @@ export default class DataObjectDetailTableEdit extends Vue {
   })
   dataTypes!: DataType[];
 
+  // DataObject.
+  @Prop({
+    type: Object as PropType<DataObject>,
+    required: true,
+  })
+  dataObject!: DataObject;
+
   // DetailsTable.
   @Prop({
     type: Object as PropType<DataObjectDetailsTable>,
     required: true,
   })
   table!: DataObjectDetailsTable;
+
+  // Logger.
+  @Prop({
+    type: Object as PropType<InMemoryLogger>,
+    required: true,
+  })
+  logger!: InMemoryLogger;
 
   @Ref()
   dataTableRef!:any;
@@ -100,6 +117,12 @@ export default class DataObjectDetailTableEdit extends Vue {
   selectedRecord: any = {};
   windowHeight = window.innerHeight;
   provider = new DataObjectsProvider();
+  objectEvaluator: ObjectEvaluator = new ObjectEvaluator(
+    this.logger,
+    this.metaObjectSettings,
+    this.dataObject,
+  );
+
   selectItemProvider = new SelectItemsProvider();
   toastHelper = new ToastHelper(useToast());
   inputStyle = {
@@ -317,6 +340,12 @@ export default class DataObjectDetailTableEdit extends Vue {
         this.selectedRecord = this.table.rows[0];
       }
     });
+
+    this.objectEvaluator = new ObjectEvaluator(
+      this.logger,
+      this.metaObjectSettings,
+      this.dataObject,
+    );
   }
 
   beforeDestroy(): void {
@@ -338,6 +367,7 @@ export default class DataObjectDetailTableEdit extends Vue {
       row[names.valueName] = newRow[names.valueName];
     }
 
+    this.objectEvaluator.onRowFieldChanged(columnName, this.table.uid, row);
     this.isModifiedChanged(true);
   }
 
@@ -357,58 +387,16 @@ export default class DataObjectDetailTableEdit extends Vue {
       return;
     }
 
-    const newRow: any = {};
-    tableSettings.columns.forEach((column) => {
-      const dataType = this.dataTypes.find((x) => x.uid === column.dataTypeUid);
-      if (dataType) {
-        let currentValue: any = '';
-        if (dataType.uid === DataTypeDefaults.Int.uid
-          || dataType.uid === DataTypeDefaults.Long.uid
-          || dataType.uid === DataTypeDefaults.Decimal.uid) {
-          currentValue = 0;
-        } else if (dataType.uid === DataTypeDefaults.Bool.uid) {
-          currentValue = false;
-        }
-        newRow[column.name] = currentValue;
-        if (!dataType.isPrimitive) {
-          newRow[`${column.name}_display`] = '';
-        }
-      } else {
-        newRow[column.name] = '';
-      }
-    });
-    newRow.object_uid = this.objectUid;
-    newRow.row_number = this.table.rows.length + 1;
-    newRow.id = Guid.create();
-
     const ind = this.table.rows.indexOf(this.selectedRecord);
-    if (ind > -1) {
-      this.table.rows.splice(ind + 1, 0, newRow);
-    } else {
-      this.table.rows.push(newRow);
+    const newRow = this.table.newRow(tableSettings, this.dataTypes, this.objectUid, ind);
+    if (ind === -1) {
       this.tableKey += 1;
     }
 
     this.selectedRecord = newRow;
-    console.log('Row added', newRow);
-    console.log('Rows count', this.table.rows.length);
-    console.log('Rows', this.table.rows);
+    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
 
     this.isModifiedChanged(true);
-
-    // this.$nextTick(() => {
-    //   if (this.dataTableRef) {
-    //     console.log('dataTableRef', this.dataTableRef);
-    //
-    //     if (!this.vScroll) {
-    //       this.vScroll = this.dataTableRef.getVirtualScrollerRef();
-    //     }
-    //     console.log('vScroll', this.vScroll);
-    //     if (this.vScroll) {
-    //       // this.vScroll.scrollToIndex(this.table.rows.length - 1);
-    //     }
-    //   }
-    // });
   }
 
   onClearFiltersClick(): void {
@@ -421,6 +409,7 @@ export default class DataObjectDetailTableEdit extends Vue {
       this.table.rows.splice(ind, 1);
       this.isModifiedChanged(true);
     }
+    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
   }
 
   onRowCopyClick(row: any): void {
@@ -438,6 +427,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
     this.selectedRecord = newRow;
     this.isModifiedChanged(true);
+    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
   }
 
   onRowUpClick(row: any): void {
@@ -462,6 +452,13 @@ export default class DataObjectDetailTableEdit extends Vue {
       this.table.rows[ind] = rowNext;
       this.isModifiedChanged(true);
     }
+  }
+
+  onRowRecalculateClick(row: any): void {
+    this.isWaiting = true;
+    this.objectEvaluator.onRowRecalculate(this.table.name, this.table.uid, row);
+    this.isWaiting = false;
+    this.isModifiedChanged(true);
   }
 
   onPageChanged(args: any): void {
@@ -642,10 +639,17 @@ export default class DataObjectDetailTableEdit extends Vue {
           <span class="pi pi-arrow-up text-primary"></span>
         </a>
         <a href="#"
-           class="bs-row-action"
+           class="mr-2 bs-row-action"
            tabindex="-1"
            @click.prevent="onRowDownClick(data)">
           <span class="pi pi-arrow-down text-primary"></span>
+        </a>
+        <a href="#"
+           class="bs-row-action"
+           tabindex="-1"
+           v-tooltip="$t('recalculate')"
+           @click.prevent="onRowRecalculateClick(data)">
+          <span class="pi pi-replay text-primary"></span>
         </a>
       </template>
     </Column>

@@ -69,10 +69,11 @@ export default class ValuesFormatter {
    * If the input is not a valid date, it returns the input as a string.
    *
    * @param input - The date and time input to format, which can be a string, Date, or any type.
+   * @param withMilliseconds - Indicates that milliseconds will be included to resul string.
    * @returns The formatted date and time string, or the input
    * converted to string if it's not a valid date.
    */
-  static formatDateTime(input: any): string {
+  static formatDateTime(input: any, withMilliseconds = false): string {
     const date = this.parseDate(input);
     if (date == null) {
       return input?.toString() ?? '';
@@ -81,6 +82,11 @@ export default class ValuesFormatter {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
+    if (withMilliseconds) {
+      const milliSeconds = String(date.getMilliseconds()).padStart(3, '0');
+      return `${dateComponents} ${hours}:${minutes}:${seconds}.${milliSeconds}`;
+    }
+
     return `${dateComponents} ${hours}:${minutes}:${seconds}`;
   }
 

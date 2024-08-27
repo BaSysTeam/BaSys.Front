@@ -51,7 +51,7 @@ export default class DataTypeDefaults {
     dbType: DbType.Guid,
   });
 
-  public static AllTypes(): DataType[] {
+  public static allTypes(): DataType[] {
     return [
       DataTypeDefaults.String,
       DataTypeDefaults.Int,
@@ -73,7 +73,7 @@ export default class DataTypeDefaults {
   }
 
   public static IsPrimitiveType(dataTypeUid: string): boolean {
-    const types = DataTypeDefaults.AllTypes();
+    const types = DataTypeDefaults.allTypes();
     const result = types.find((x) => x.uid === dataTypeUid);
 
     if (!result) {

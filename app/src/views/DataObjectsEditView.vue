@@ -3,20 +3,30 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Ref } from 'vue-property-decorator';
 import { useRouter } from 'vue-router';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
+import DataView from 'primevue/dataview';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import InputText from 'primevue/inputtext';
+import Sidebar from 'primevue/sidebar';
+import SplitButton from 'primevue/splitbutton';
 import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
+import LogPanel from '@/components/LogPanel.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components: {
+    LogPanel,
     ViewTitleComponent,
+    DataView,
     Divider,
     Button,
     ButtonGroup,
     InputText,
+    Sidebar,
+    SplitButton,
     DataObjectEditComponent,
   },
 })
@@ -42,10 +52,14 @@ export default class DataObjectEditView extends Vue {
 
   isWaiting = false;
   isModified = false;
+  isCalculationLogOpen = false;
   closeAfterSave = false;
   title = 'BaSYS';
   editRegime = 'edit';
   model = new DataObjectWithMetadata(null);
+  logger = new InMemoryLogger(LogLevels.Error);
+  actionsButtonItems: any[] = [];
+
   router = useRouter();
 
   get isPrimaryKeyEnabled(): boolean {
@@ -74,9 +88,7 @@ export default class DataObjectEditView extends Vue {
   }
 
   onSaveClick(): void {
-    console.log('save');
     if (this.editComponentRef) {
-      console.log('It is edit component');
       this.editComponentRef.triggerSaveClick();
     }
   }
@@ -102,6 +114,20 @@ export default class DataObjectEditView extends Vue {
     this.closeAfterSave = false;
   }
 
+  onCalculationLogClick(): void {
+    this.isCalculationLogOpen = true;
+  }
+
+  onRecalculateClick(): void {
+    if (this.editComponentRef) {
+      this.editComponentRef.triggerRecalculateClick();
+    }
+  }
+
+  onLogPanelHide(): void {
+    this.isCalculationLogOpen = false;
+  }
+
   returnToList(): void {
     this.router.push({
       name: 'data-objects',
@@ -125,6 +151,21 @@ export default class DataObjectEditView extends Vue {
   beforeMount(): void {
     this.defineEditRegime();
     console.log('DataObjectEditView before mount', this.editRegime, this.$route.name);
+  }
+
+  mounted(): void {
+    this.actionsButtonItems = [
+      {
+        label: 'Calculation log',
+        icon: 'pi pi-list',
+        command: () => this.onCalculationLogClick(),
+      },
+      {
+        label: 'Recalculate',
+        icon: 'pi pi-replay',
+        command: () => this.onRecalculateClick(),
+      },
+    ];
   }
 }
 </script>
@@ -163,7 +204,16 @@ export default class DataObjectEditView extends Vue {
             icon="pi pi-save"
             @click="onSaveClick"
           />
+
         </ButtonGroup>
+        <SplitButton
+          class="ml-1"
+          :label="$t('actions')"
+          severity="primary"
+          size="small"
+          outlined
+          :model="actionsButtonItems">
+        </SplitButton>
 
       </div>
     </div>
@@ -178,6 +228,7 @@ export default class DataObjectEditView extends Vue {
                                  :name="name"
                                  :uid="uid"
                                  :copyUid="copyUid"
+                                 :logger="logger"
                                  render-place="page"
                                  @is-modified-changed="onIsModifiedChanged"
                                  @is-waiting-changed="onIsWaitingChanged"
@@ -186,6 +237,11 @@ export default class DataObjectEditView extends Vue {
       </div>
     </div>
   </div>
+
+  <LogPanel :visible="isCalculationLogOpen"
+            :logger="logger"
+            :title="$t('calculationLog')"
+            @hide="onLogPanelHide"></LogPanel>
 </template>
 
 <style scoped>
