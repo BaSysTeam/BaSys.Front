@@ -4,14 +4,13 @@ import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 describe('ObjectEvaluator', () => {
+  const builder = new MetaObjectSettingsExampleBuilder();
+  const settings = builder.buildSettings();
+  const dataObject = builder.buildDataObject(settings);
+  const logger = new InMemoryLogger(LogLevels.Trace);
+  const evaluator = new ObjectEvaluator(logger, settings, dataObject);
+
   it('Recalculate dependencies in header', () => {
-    const builder = new MetaObjectSettingsExampleBuilder();
-    const settings = builder.buildSettings();
-    const dataObject = builder.buildDataObject(settings);
-
-    const logger = new InMemoryLogger(LogLevels.Trace);
-
-    const evaluator = new ObjectEvaluator(logger, settings, dataObject);
     evaluator.onHeaderFieldChanged('discount_personal');
 
     console.log('Calculation log:');
@@ -23,16 +22,11 @@ describe('ObjectEvaluator', () => {
   });
 
   it('Recalculate dependencies in row', () => {
-    const builder = new MetaObjectSettingsExampleBuilder();
-    const settings = builder.buildSettings();
-    const dataObject = builder.buildDataObject(settings);
     dataObject.header.discount = 0.1;
 
     const tableProducts = dataObject.tables.products;
     const firstRow = tableProducts.rows[0];
 
-    const logger = new InMemoryLogger(LogLevels.Trace);
-    const evaluator = new ObjectEvaluator(logger, settings, dataObject);
     evaluator.onRowFieldChanged('price', tableProducts.uid, firstRow);
 
     expect(firstRow.amount).toBeCloseTo(500, 6);
@@ -41,17 +35,19 @@ describe('ObjectEvaluator', () => {
   });
 
   it('Calculate totals in header', () => {
-    const builder = new MetaObjectSettingsExampleBuilder();
-    const settings = builder.buildSettings();
-    const dataObject = builder.buildDataObject(settings);
-    dataObject.header.discount = 0.1;
-
     const tableProducts = dataObject.tables.products;
     const firstRow = tableProducts.rows[0];
 
-    const logger = new InMemoryLogger(LogLevels.Trace);
-    const evaluator = new ObjectEvaluator(logger, settings, dataObject);
     evaluator.onRowFieldChanged('quantity', tableProducts.uid, firstRow);
+
+    expect(dataObject.header.quantity_total).toBeCloseTo(16, 6);
+  });
+
+  it('Calculate totals after row removed', () => {
+    const tableProducts = dataObject.tables.products;
+    tableProducts.rows.splice(2, 1);
+
+    evaluator.onTableChanged(tableProducts.name, tableProducts.uid);
 
     expect(dataObject.header.quantity_total).toBeCloseTo(15, 6);
   });

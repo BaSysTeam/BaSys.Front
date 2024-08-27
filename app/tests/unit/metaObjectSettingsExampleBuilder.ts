@@ -6,7 +6,6 @@ import { DependencyKinds } from '../../../shared/src/enums/dependencyKinds';
 import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
-import DataType from '../../../shared/src/models/dataType';
 
 export default class MetaObjectSettingsExampleBuilder {
   buildSettings(): MetaObjectStorableSettings {
@@ -51,6 +50,16 @@ export default class MetaObjectSettingsExampleBuilder {
     secondRow.product = 2;
     secondRow.quantity = 10;
     secondRow.price = 200;
+
+    const thirdRow = tableProducts.newRow(
+      tableProductsSettings,
+      DataTypeDefaults.allTypes(),
+      '1',
+      -1,
+    );
+    thirdRow.product = 3;
+    thirdRow.quantity = 1;
+    thirdRow.price = 300;
 
     return dataObject;
   }
