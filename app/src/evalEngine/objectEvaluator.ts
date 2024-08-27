@@ -28,8 +28,8 @@ export default class ObjectEvaluator {
   }
 
   /**
-   * Handle changes of a header field. Try to find dependencies
-   * of the field and recalculates all dependencies.
+   * Handle changes of a header field. Recalculates formulas in header and tables
+   * according dependencies.
    * @param name - name of field was changed.
    */
   onHeaderFieldChanged(name: string): void {
@@ -47,15 +47,22 @@ export default class ObjectEvaluator {
     this.existingDependenciesEval(evaluator);
   }
 
+  /**
+   * Handle changes of field value in table row. Recalculates formulas in row and header
+   * according formula dependencies.
+   * @param fieldName - name of field was changed.
+   * @param tableUid - uid of table.
+   * @param row - current row of table.
+   */
   onRowFieldChanged(fieldName: string, tableUid: string, row: any): void {
     this.logger.logDebug(`Row field changed ${fieldName}. TableUid: ${tableUid}`);
 
-    const tableSettings = this.settings.detailTables.find((x) => x.uid === tableUid);
+    const tableSettings = this.settings.getTable(tableUid);
     if (!tableSettings) {
       this.logger.logError(`Cannot find table by uid: ${tableUid}`);
       return;
     }
-    const column = tableSettings.columns.find((x) => x.name === fieldName);
+    const column = tableSettings.getColumnByName(fieldName);
 
     if (!column) {
       this.logger.logError(`Cannot find column by name: ${fieldName}`);
@@ -69,6 +76,12 @@ export default class ObjectEvaluator {
     this.existingDependenciesEval(evaluator);
   }
 
+  /**
+   * Handle table changed: add or remove rows. Recalculates formulas according dependencies.
+   * @param tableName - name of table was changed
+   * ( tableName is necessary for good log messages only).
+   * @param tableUid - uid of table was changed.
+   */
   onTableChanged(tableName: string, tableUid: string): void {
     this.logger.logDebug(`Table changed "${tableName}"`);
 
@@ -96,6 +109,9 @@ export default class ObjectEvaluator {
     this.existingDependenciesEval(evaluator);
   }
 
+  /**
+   * Recalculates all formulas in object.
+   */
   onObjectRecalculate(): void {
     this.logger.logDebug('Object recalculate');
 
@@ -122,6 +138,12 @@ export default class ObjectEvaluator {
     this.existingDependenciesEval(evaluator);
   }
 
+  /**
+   * Recalculates all formulas in table row and dependent formulas.
+   * @param tableName - name of table (it is necessary only for good-looking log message)
+   * @param tableUid - uid of table
+   * @param row - row of the table which need to recalculate.
+   */
   onRowRecalculate(tableName: string, tableUid: string, row: any): void {
     this.logger.logDebug(`Row #${row.row_number} recalculate in table "${tableName}"`);
 
