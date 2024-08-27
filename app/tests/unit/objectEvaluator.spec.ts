@@ -26,6 +26,7 @@ describe('ObjectEvaluator', () => {
     const builder = new MetaObjectSettingsExampleBuilder();
     const settings = builder.buildSettings();
     const dataObject = builder.buildDataObject(settings);
+    dataObject.header.discount = 0.1;
 
     const tableProducts = dataObject.tables.products;
     const firstRow = tableProducts.rows[0];
@@ -35,5 +36,7 @@ describe('ObjectEvaluator', () => {
     evaluator.onRowFieldChanged('price', tableProducts.uid, firstRow);
 
     expect(firstRow.amount).toBeCloseTo(500, 6);
+    expect(firstRow.discount_amount).toBeCloseTo(50, 6);
+    expect(firstRow.amount_final).toBeCloseTo(450, 6);
   });
 });

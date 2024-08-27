@@ -88,11 +88,59 @@ export default class MetaObjectSettingsExampleBuilder {
       uid: Guid.create().toString(),
     });
 
+    const amountFinalColumn = tableProducts.newColumn({
+      name: 'amount_final',
+      dataTypeUid: DataTypeDefaults.Decimal.uid,
+      formula: '$r.amount - $r.discount_amount',
+    });
+
+    const discountAmountColumn = tableProducts.newColumn({
+      name: 'discount_amount',
+      dataTypeUid: DataTypeDefaults.Decimal.uid,
+      formula: '$h.discount * $r.amount',
+    });
+    discountAmountColumn.dependencies.push(
+      new DependencyInfo(
+        {
+          kind: DependencyKinds.RowField,
+          fieldUid: amountFinalColumn.uid,
+          tableUid: tableProducts.uid,
+        },
+      ),
+    );
+
+    const discountHeaderColumn = settings.header.getColumnByName('discount');
+    if (discountHeaderColumn) {
+      discountHeaderColumn.dependencies.push(
+        new DependencyInfo(
+          {
+            kind: DependencyKinds.RowField,
+            fieldUid: discountAmountColumn.uid,
+            tableUid: tableProducts.uid,
+          },
+        ),
+      );
+    }
+
     const amountColumn = tableProducts.newColumn({
       name: 'amount',
       dataTypeUid: DataTypeDefaults.Decimal.uid,
       formula: '$r.quantity * $r.price',
     });
+    amountColumn.dependencies.push(new DependencyInfo(
+      {
+        kind: DependencyKinds.RowField,
+        fieldUid: amountFinalColumn.uid,
+        tableUid: tableProducts.uid,
+      },
+    ));
+    amountColumn.dependencies.push(new DependencyInfo(
+      {
+        kind: DependencyKinds.RowField,
+        fieldUid: discountAmountColumn.uid,
+        tableUid: tableProducts.uid,
+      },
+    ));
 
     tableProducts.newColumn({
       name: 'product',
