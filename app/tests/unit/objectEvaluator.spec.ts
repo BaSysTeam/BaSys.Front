@@ -39,4 +39,20 @@ describe('ObjectEvaluator', () => {
     expect(firstRow.discount_amount).toBeCloseTo(50, 6);
     expect(firstRow.amount_final).toBeCloseTo(450, 6);
   });
+
+  it('Calculate totals in header', () => {
+    const builder = new MetaObjectSettingsExampleBuilder();
+    const settings = builder.buildSettings();
+    const dataObject = builder.buildDataObject(settings);
+    dataObject.header.discount = 0.1;
+
+    const tableProducts = dataObject.tables.products;
+    const firstRow = tableProducts.rows[0];
+
+    const logger = new InMemoryLogger(LogLevels.Trace);
+    const evaluator = new ObjectEvaluator(logger, settings, dataObject);
+    evaluator.onRowFieldChanged('quantity', tableProducts.uid, firstRow);
+
+    expect(dataObject.header.quantity_total).toBeCloseTo(15, 6);
+  });
 });

@@ -42,6 +42,16 @@ export default class MetaObjectSettingsExampleBuilder {
     firstRow.quantity = 5;
     firstRow.price = 100;
 
+    const secondRow = tableProducts.newRow(
+      tableProductsSettings,
+      DataTypeDefaults.allTypes(),
+      '1',
+      -1,
+    );
+    secondRow.product = 2;
+    secondRow.quantity = 10;
+    secondRow.price = 200;
+
     return dataObject;
   }
 
@@ -80,6 +90,12 @@ export default class MetaObjectSettingsExampleBuilder {
       fieldUid: discountColumn.uid,
     }));
     settings.header.columns.push(discountCommonColumn);
+
+    settings.header.newColumn({
+      name: 'quantity_total',
+      dataTypeUid: DataTypeDefaults.Decimal.uid,
+      formula: '$t.products.sum("quantity")',
+    });
   }
 
   private buildTableProducts(settings: MetaObjectStorableSettings): void {
@@ -157,6 +173,16 @@ export default class MetaObjectSettingsExampleBuilder {
         tableUid: tableProducts.uid,
       },
     ));
+    const quantityTotalHeaderColumn = settings.header.getColumnByName('quantity_total');
+    if (quantityTotalHeaderColumn) {
+      quantityColumn.dependencies.push(new DependencyInfo(
+        {
+          kind: DependencyKinds.HeaderField,
+          fieldUid: quantityTotalHeaderColumn.uid,
+          tableUid: settings.header.uid,
+        },
+      ));
+    }
 
     const priceColumn = tableProducts.newColumn({
       name: 'price',
