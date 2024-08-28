@@ -93,6 +93,11 @@ export default class DataTable {
     return this;
   }
 
+  filter(predicate: (row: any) => boolean): DataTable {
+    this._rows = this._rows.filter((row) => predicate(row));
+    return this;
+  }
+
   private fillRowFromArray(data: any[]): void {
     const newRow = this.newRow();
     this._columns.forEach((column: any, index: number) => {

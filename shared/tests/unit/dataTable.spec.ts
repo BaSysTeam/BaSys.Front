@@ -44,4 +44,18 @@ describe('DataTable', () => {
     expect(tableProducts.columns.length).toBe(3);
     expect(tableProducts.rows[0].amount).toBe(undefined);
   });
+
+  it('Clear table', () => {
+    tableProducts.clear();
+    expect(tableProducts.columns.length).toBe(0);
+    expect(tableProducts.rows.length).toBe(0);
+  });
+
+  it('Filter table', () => {
+    tableProducts.filter((row:any) => row.quantity <= 5);
+
+    expect(tableProducts.rows.length).toBe(2);
+    expect(tableProducts.rows[0].product).toEqual('product_1');
+    expect(tableProducts.rows[1].product).toEqual('product_3');
+  });
 });
