@@ -1,7 +1,6 @@
 export default class DataTableColumn {
   name: string;
   dataType: string;
-  formula: string;
   defaultValue: any;
 
   constructor(params: any) {
@@ -13,7 +12,6 @@ export default class DataTableColumn {
     this.dataType = params.dataType || 'string';
     this.checkDataType();
 
-    this.formula = params.formula || '';
     this.defaultValue = params.defaultValue || this.defaultValueOfType(this.dataType);
   }
 
