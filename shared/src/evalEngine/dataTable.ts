@@ -21,7 +21,8 @@ export default class DataTable {
     return this._columns.find((x) => x.name === columnName);
   }
 
-  addColumn(column: DataTableColumn): DataTable {
+  addColumn(params: any): DataTable {
+    const column = new DataTableColumn(params);
     const existingColumn = this.getColumn(column.name);
 
     if (existingColumn) {
@@ -66,6 +67,7 @@ export default class DataTable {
     this._columns.forEach((column: any) => {
       newRow[column.name] = column.defaultValue;
     });
+    this._rows.push(newRow);
 
     return newRow;
   }
