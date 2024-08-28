@@ -1,3 +1,5 @@
+import DataTable from './dataTable';
+
 export default class FunctionLibrary {
   static isEmpty(value: any): boolean {
     if (value) {
@@ -34,5 +36,13 @@ export default class FunctionLibrary {
       }
     }
     return null;
+  }
+
+  static createTable(columns: any[]):DataTable {
+    const dataTable = new DataTable();
+    columns.forEach((column: any) => {
+      dataTable.addColumn(column);
+    });
+    return dataTable;
   }
 }

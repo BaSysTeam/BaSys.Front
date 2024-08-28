@@ -98,6 +98,64 @@ export default class DataTable {
     return this;
   }
 
+  sum(columnName: string): number {
+    this.checkExistingColumn(columnName);
+
+    let result = 0;
+    this._rows.forEach((row: any) => {
+      result += row[columnName];
+    });
+    return result;
+  }
+
+  min(columnName: string): number {
+    this.checkExistingColumn(columnName);
+
+    let minValue = Infinity;
+    this._rows.forEach((row: any) => {
+      if (row[columnName] < minValue) {
+        minValue = row[columnName];
+      }
+    });
+
+    return minValue;
+  }
+
+  max(columnName: string): number {
+    this.checkExistingColumn(columnName);
+
+    let maxValue = -Infinity;
+    this._rows.forEach((row: any) => {
+      if (row[columnName] > maxValue) {
+        maxValue = row[columnName];
+      }
+    });
+
+    return maxValue;
+  }
+
+  avg(columnName: string): number {
+    this.checkExistingColumn(columnName);
+
+    if (!this._rows.length) {
+      throw new Error('No rows found');
+    }
+
+    let sum = 0;
+    let count = 0;
+    this._rows.forEach((row: any) => {
+      sum += row[columnName];
+      count += 1;
+    });
+
+    return sum / count;
+  }
+
+  calculate(predicate: (row: any) => void): DataTable {
+    this._rows.forEach((row: any) => predicate(row));
+    return this;
+  }
+
   private fillRowFromArray(data: any[]): void {
     const newRow = this.newRow();
     this._columns.forEach((column: any, index: number) => {
@@ -114,5 +172,14 @@ export default class DataTable {
         newRow[column.name] = data[column.name];
       }
     });
+  }
+
+  private checkExistingColumn(columnName: string): boolean {
+    const currentColumn = this.getColumn(columnName);
+    if (!currentColumn) {
+      throw new Error(`Column ${columnName} not found`);
+    }
+
+    return true;
   }
 }
