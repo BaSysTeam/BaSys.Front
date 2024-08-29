@@ -151,7 +151,7 @@ export default class DataTable {
     return sum / count;
   }
 
-  calculate(predicate: (row: any) => void): DataTable {
+  processRows(predicate: (row: any) => void): DataTable {
     this._rows.forEach((row: any) => predicate(row));
     return this;
   }

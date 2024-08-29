@@ -100,10 +100,10 @@ describe('DataTable', () => {
     expect(tableProducts.avg('quantity')).toBeCloseTo(5.333333, 6);
   });
 
-  it('Calculate amount', () => {
+  it('Calculate amount by processRows method', () => {
     const amountTotal = tableProducts
       // eslint-disable-next-line no-return-assign
-      .calculate((row:any) => row.amount = row.quantity * row.price)
+      .processRows((row:any) => row.amount = row.quantity * row.price)
       .sum('amount');
 
     expect(amountTotal).toBeCloseTo(3500, 6);
