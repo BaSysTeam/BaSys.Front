@@ -1,5 +1,5 @@
-import { QueryResultKinds } from '@/enums/queryResultKinds';
-import DataTable from 'primevue/datatable';
+import { QueryResultKinds } from '../enums/queryResultKinds';
+import DataTable from './dataTable';
 
 export default class QueryResult {
   kind: QueryResultKinds;

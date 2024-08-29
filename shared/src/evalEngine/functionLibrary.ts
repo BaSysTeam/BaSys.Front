@@ -1,4 +1,4 @@
-import SelectQueryBuilder from '@/evalEngine/selectQueryBuilder';
+import SelectQueryBuilder from './selectQueryBuilder';
 import DataTable from './dataTable';
 
 export default class FunctionLibrary {

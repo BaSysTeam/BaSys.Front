@@ -1,4 +1,4 @@
-import DataTableColumn from '@/evalEngine/dataTableColumn';
+import DataTableColumn from './dataTableColumn';
 
 export default class DataTable {
   private _columns: DataTableColumn[];

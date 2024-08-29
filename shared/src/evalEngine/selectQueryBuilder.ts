@@ -1,5 +1,5 @@
-import SelectQueryModel from '@/evalEngine/selectQueryModel';
-import QueryResult from '@/evalEngine/queryResult';
+import SelectQueryModel from './selectQueryModel';
+import QueryResult from './queryResult';
 
 export default class SelectQueryBuilder {
   model: SelectQueryModel;
