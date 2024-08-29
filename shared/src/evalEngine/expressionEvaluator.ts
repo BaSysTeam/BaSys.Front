@@ -19,6 +19,7 @@ export default class ExpressionEvaluator {
       isNotEmpty,
       iif,
       ifs,
+      createTable,
     } = FunctionLibrary;
 
     let result: any;
