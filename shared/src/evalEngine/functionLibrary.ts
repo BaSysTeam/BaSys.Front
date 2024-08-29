@@ -1,3 +1,4 @@
+import SelectQueryBuilder from '@/evalEngine/selectQueryBuilder';
 import DataTable from './dataTable';
 
 export default class FunctionLibrary {
@@ -44,5 +45,12 @@ export default class FunctionLibrary {
       dataTable.addColumn(column);
     });
     return dataTable;
+  }
+
+  static from(fromExpression: string): SelectQueryBuilder {
+    const builder = new SelectQueryBuilder();
+    builder.from(fromExpression);
+
+    return builder;
   }
 }

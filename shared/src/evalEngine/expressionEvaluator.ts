@@ -20,6 +20,7 @@ export default class ExpressionEvaluator {
       iif,
       ifs,
       createTable,
+      from,
     } = FunctionLibrary;
 
     let result: any;
