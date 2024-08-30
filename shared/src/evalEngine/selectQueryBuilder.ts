@@ -1,5 +1,6 @@
+import QueriesProvider from '../dataProviders/queriesProvider';
 import SelectQueryModel from './selectQueryModel';
-import QueryResult from './queryResult';
+import DataTable from './dataTable';
 
 export default class SelectQueryBuilder {
   model: SelectQueryModel;
@@ -28,9 +29,30 @@ export default class SelectQueryBuilder {
     return this;
   }
 
-  query(): QueryResult {
-    const queryResult = new QueryResult();
+  async query(): Promise<DataTable> {
+    console.log('Start query...');
+    const provider = new QueriesProvider();
+    const result = await provider.execute(this.model);
+    console.log('Query executed...', result);
 
-    return queryResult;
+    const tableResult = new DataTable();
+    if (result.isOK) {
+      if (result.data.columns) {
+        result.data.columns.forEach((column: any) => {
+          tableResult.addColumn(column);
+        });
+        if (result.data.rows) {
+          result.data.rows.forEach((row: any) => {
+            tableResult.addRow(row);
+          });
+        }
+      } else {
+        console.error('No columns in result table');
+      }
+    } else {
+      console.error(result.presentation);
+    }
+
+    return tableResult;
   }
 }

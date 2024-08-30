@@ -18,21 +18,26 @@ const expression = ref('');
 const logger = new InMemoryLogger(LogLevels.Trace);
 
 // Event handlers
-function onExecuteClick(): void {
-  console.log('Execute click');
+async function onExecuteAsyncClick(): Promise<void> {
+  console.log('Execute async click');
   const context = {
     header: {},
     currentRow: {},
     tables: {},
   };
+  logger.logDebug('Execute expression');
   const evaluator = new ExpressionEvaluator(context, logger);
   console.log('Expression to evaluate', expression.value);
   try {
-    const result = evaluator.evaluateExpression(expression.value);
+    const result = await evaluator.evaluateAsyncExpression(expression.value);
     console.log('Expression evaluated', result);
   } catch (e) {
     console.error(`Cannot eval expression: ${expression.value}. Error: ${e}`);
   }
+  console.log('Calculations log:');
+  logger.messages.forEach((message) => {
+    console.log(message.toString());
+  });
 }
 
 </script>
@@ -52,8 +57,10 @@ function onExecuteClick(): void {
         size="small"
         outlined
         icon="pi pi-caret-right"
-        @click="onExecuteClick"
+        class="mr-1"
+        @click="onExecuteAsyncClick"
       />
+
     </div>
   </div>
   <div class="grid">
