@@ -5,11 +5,10 @@ import {
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import Button from 'primevue/button';
+import Card from 'primevue/card';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import DataTable from 'primevue/datatable';
-import Splitter from 'primevue/splitter';
-import SplitterPanel from 'primevue/splitterpanel';
 import ConsoleResultItem from '@/models/consoleResultItem';
 import { Codemirror } from 'vue-codemirror';
 import { javascript as jsLang } from '@codemirror/lang-javascript';
@@ -34,13 +33,17 @@ const codemirrorExtensions = [jsLang(), githubLight];
 const codemirrorEditor: any = ref(null);
 const windowHeight = ref(window.innerHeight);
 const codemirrorStyle = computed(() => ({
-  minHeight: `${windowHeight.value - 150}px`,
+  minHeight: '200px',
   border: '1px solid #ececec',
 }));
-const splitterStyle = computed(() => ({
-  minHeight: `${windowHeight.value - 150}px`,
-  border: 'none',
-  padding: '0',
+const dataTableStyle = computed(() => ({
+  minWidth: '50rem',
+  maxHeight: '200px',
+  marginBottom: '3px',
+}));
+const consoleWrapperStyle = computed(() => ({
+  maxHeight: `${windowHeight.value - 350}px`,
+  overflowY: 'auto',
 }));
 
 // Event handlers
@@ -77,6 +80,13 @@ function onClearResultsClick(): void {
   results.value = [];
 }
 
+function onResultItemDeleteClick(item: ConsoleResultItem): void {
+  const ind = results.value.indexOf(item);
+  if (ind > -1) {
+    results.value.splice(ind, 1);
+  }
+}
+
 </script>
 
 <template>
@@ -106,8 +116,8 @@ function onClearResultsClick(): void {
       <Divider class="m-2"/>
     </div>
 
-    <Splitter :style="splitterStyle">
-      <SplitterPanel :size="30" :min-size="10">
+    <div class="grid">
+      <div class="col-12">
         <codemirror
           ref="codemirrorEditor"
           v-model="expression"
@@ -117,8 +127,11 @@ function onClearResultsClick(): void {
           :tab-size="2"
           :extensions="codemirrorExtensions"
         />
-      </SplitterPanel>
-      <SplitterPanel :size="70">
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col-12">
         <div v-if="results.length">
           <div class="grid">
             <div class="col-12">
@@ -135,18 +148,25 @@ function onClearResultsClick(): void {
           </div>
           <div class="grid">
             <div class="col-12">
-              <div style="border: 1px solid #ececec">
-                <Accordion :active-index="0">
-                  <AccordionTab v-for="item in resultsReverse"
-                                :key="item.uid"
-                                :header="item.expression">
+              <div class="bs-console-results" :style="consoleWrapperStyle">
+                <Card v-for="item in resultsReverse" :key="item.uid">
+                  <template #header>
+                    <Button icon="pi pi-times"
+                            class="mr-1"
+                            severity="danger"
+                            size="small"
+                            text
+                            @click="onResultItemDeleteClick(item)"></Button>
+                    <span style="font-size: 0.8rem">{{item.expression}}</span>
+                  </template>
+                  <template #content>
                     <div v-if="item.isTable">
                       <DataTable :value="item.table._rows"
                                  size="small"
                                  show-gridlines
                                  scrollable
                                  scroll-height="150px"
-                                 tableStyle="min-width: 50rem; max-height: 150px;">
+                                 :tableStyle="dataTableStyle">
                         <Column v-for="column of item.table._columns"
                                 :key="column.name"
                                 :field="column.name"
@@ -156,18 +176,22 @@ function onClearResultsClick(): void {
                     <div v-else>
                       {{ item.resultDisplay }}
                     </div>
-                  </AccordionTab>
-                </Accordion>
+                  </template>
+                </Card>
+
               </div>
             </div>
           </div>
         </div>
-      </SplitterPanel>
-    </Splitter>
+      </div>
+    </div>
 
   </div>
 </template>
 
-<style scoped>
-
+<style>
+.bs-console-results .p-card-header{
+  line-height: 30px;
+  background: #ececec;
+}
 </style>
