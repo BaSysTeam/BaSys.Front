@@ -40,6 +40,7 @@ const dataTableStyle = computed(() => ({
   minWidth: '50rem',
   maxHeight: '200px',
   marginBottom: '3px',
+  fontSize: '0.8rem',
 }));
 const consoleWrapperStyle = computed(() => ({
   maxHeight: `${windowHeight.value - 380}px`,
@@ -49,6 +50,7 @@ const consoleWrapperStyle = computed(() => ({
 
 // Event handlers
 async function onExecuteAsyncClick(): Promise<void> {
+  const executionStart = performance.now();
   isWaiting.value = true;
   console.log('Execute async click');
   const context = {
@@ -60,16 +62,20 @@ async function onExecuteAsyncClick(): Promise<void> {
   const evaluator = new ExpressionEvaluator(context, logger);
   console.log('Expression to evaluate', expression.value);
   results.value.forEach((item: ConsoleResultItem) => { item.isOpen = false; });
+  let resultItem: ConsoleResultItem;
   try {
     const result = await evaluator.evaluateAsyncExpression(expression.value);
     console.log('Expression evaluated', result);
-    const resultItem = new ConsoleResultItem(expression.value, 0, result);
-    results.value.push(resultItem);
+    resultItem = new ConsoleResultItem(expression.value, 0, result);
   } catch (e) {
     console.error(`Cannot eval expression: ${expression.value}. Error: ${e}`);
-    const resultItem = new ConsoleResultItem(expression.value, 0, e);
-    results.value.push(resultItem);
+    resultItem = new ConsoleResultItem(expression.value, 0, e);
   }
+
+  const executionEnd = performance.now();
+  resultItem.executionMilliseconds = (executionEnd - executionStart);
+
+  results.value.push(resultItem);
   console.log('Calculations log:');
   logger.messages.forEach((message) => {
     console.log(message.toString());
@@ -169,6 +175,9 @@ onMounted(() => {
             </div>
             <div class="col">
               <span style="font-size: 0.8rem">{{ item.expression }}</span>
+              <span>&nbsp;</span>
+              <span class="text-primary"
+                    style="font-size:0.7rem">{{item.info}}</span>
             </div>
             <div class="col-fixed" style="width: 40px">
               <Button :icon="item.isOpen ? 'pi pi-angle-down':'pi pi-angle-right'"

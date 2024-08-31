@@ -4,16 +4,16 @@ import DataTable from '../../../shared/src/evalEngine/dataTable';
 export default class ConsoleResultItem {
   uid: string;
   expression: string;
-  executionDuration: number;
+  executionMilliseconds: number;
   resultDisplay!: string;
   table!: DataTable;
   isOpen: boolean;
 
-  constructor(expression: string, executionDuration: number, result: any) {
+  constructor(expression: string, executionMilliseconds: number, result: any) {
     this.uid = Guid.create().toString();
     this.isOpen = true;
     this.expression = expression || '';
-    this.executionDuration = executionDuration || 0;
+    this.executionMilliseconds = executionMilliseconds || 0;
 
     if (result instanceof DataTable) {
       this.table = result;
@@ -24,5 +24,16 @@ export default class ConsoleResultItem {
 
   get isTable(): boolean {
     return !!this.table;
+  }
+
+  get info(): string {
+    let result = '';
+    if (this.isTable) {
+      result = `${this.table.rows.length} rows`;
+    }
+
+    result += ` ${Math.round(this.executionMilliseconds)} ms`;
+
+    return result;
   }
 }
