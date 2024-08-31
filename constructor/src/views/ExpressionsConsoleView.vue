@@ -4,11 +4,9 @@ import {
 } from 'vue';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
 import Divider from 'primevue/divider';
-import DataTable from 'primevue/datatable';
 import ConsoleResultItem from '@/models/consoleResultItem';
+import ConsoleResultItemComponent from '@/components/ConsoleResultItemComponent.vue';
 import { Codemirror } from 'vue-codemirror';
 import { javascript as jsLang } from '@codemirror/lang-javascript';
 import { githubLight } from '@ddietr/codemirror-themes/github-light';
@@ -36,12 +34,7 @@ const codemirrorStyle = computed(() => ({
   minHeight: '200px',
   border: '1px solid #ececec',
 }));
-const dataTableStyle = computed(() => ({
-  minWidth: '50rem',
-  maxHeight: '200px',
-  marginBottom: '3px',
-  fontSize: '0.8rem',
-}));
+
 const consoleWrapperStyle = computed(() => ({
   maxHeight: `${windowHeight.value - 380}px`,
   overflowY: 'auto',
@@ -76,10 +69,6 @@ async function onExecuteAsyncClick(): Promise<void> {
   resultItem.executionMilliseconds = (executionEnd - executionStart);
 
   results.value.push(resultItem);
-  console.log('Calculations log:');
-  logger.messages.forEach((message) => {
-    console.log(message.toString());
-  });
 
   isWaiting.value = false;
 }
@@ -93,10 +82,6 @@ function onResultItemDeleteClick(item: ConsoleResultItem): void {
   if (ind > -1) {
     results.value.splice(ind, 1);
   }
-}
-
-function onResultItemOpenCloseClick(item: ConsoleResultItem): void {
-  item.isOpen = !item.isOpen;
 }
 
 onMounted(() => {
@@ -162,65 +147,16 @@ onMounted(() => {
          :style="consoleWrapperStyle"
          v-if="results.length">
       <div v-for="item in resultsReverse" :key="item.uid">
+        <ConsoleResultItemComponent
+          :item="item"
+          @delete="onResultItemDeleteClick"></ConsoleResultItemComponent>
 
-        <div style="border: 1px solid #ececec;">
-          <div class="grid" style="margin:0; background: #ececec; line-height: 30px;">
-            <div class="col-fixed" style="width: 40px">
-              <Button icon="pi pi-times"
-                      class="mr-1"
-                      severity="danger"
-                      size="small"
-                      text
-                      @click="onResultItemDeleteClick(item)"></Button>
-            </div>
-            <div class="col">
-              <span style="font-size: 0.8rem">{{ item.expression }}</span>
-              <span>&nbsp;</span>
-              <span class="text-primary"
-                    style="font-size:0.7rem">{{item.info}}</span>
-            </div>
-            <div class="col-fixed" style="width: 40px">
-              <Button :icon="item.isOpen ? 'pi pi-angle-down':'pi pi-angle-right'"
-                      class="mr-1"
-                      severity="primary"
-                      size="small"
-                      text
-                      @click="onResultItemOpenCloseClick(item)"></Button>
-            </div>
-          </div>
-          <div class="grid">
-            <div class="col-12">
-              <div v-if="item.isOpen" class="p-2">
-                <div v-if="item.isTable">
-                  <DataTable :value="item.table._rows"
-                             size="small"
-                             show-gridlines
-                             scrollable
-                             scroll-height="150px"
-                             :tableStyle="dataTableStyle">
-                    <Column v-for="column of item.table._columns"
-                            :key="column.name"
-                            :field="column.name"
-                            :header="column.name"></Column>
-                  </DataTable>
-                </div>
-                <div v-else>
-                  {{ item.resultDisplay }}
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
       </div>
     </div>
 
   </div>
 </template>
 
-<style>
-.bs-console-results .p-card-header {
-  line-height: 30px;
-  background: #ececec;
-}
+<style scoped>
+
 </style>
