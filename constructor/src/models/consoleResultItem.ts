@@ -7,9 +7,11 @@ export default class ConsoleResultItem {
   executionDuration: number;
   resultDisplay!: string;
   table!: DataTable;
+  isOpen: boolean;
 
   constructor(expression: string, executionDuration: number, result: any) {
     this.uid = Guid.create().toString();
+    this.isOpen = true;
     this.expression = expression || '';
     this.executionDuration = executionDuration || 0;
 

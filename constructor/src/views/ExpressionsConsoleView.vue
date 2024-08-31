@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import {
-  defineProps, defineEmits, PropType, ref, watch, onBeforeMount, computed,
+  defineProps, defineEmits, PropType, ref, watch, onMounted, computed,
 } from 'vue';
-import Accordion from 'primevue/accordion';
-import AccordionTab from 'primevue/accordiontab';
 import Button from 'primevue/button';
+import SplitButton from 'primevue/splitbutton';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
@@ -28,6 +27,7 @@ const isWaiting = ref(false);
 const logger = new InMemoryLogger(LogLevels.Trace);
 const resultsReverse = computed(() => results.value.slice()
   .reverse());
+const actionsButtonItems = ref([]);
 
 const codemirrorExtensions = [jsLang(), githubLight];
 const codemirrorEditor: any = ref(null);
@@ -42,8 +42,9 @@ const dataTableStyle = computed(() => ({
   marginBottom: '3px',
 }));
 const consoleWrapperStyle = computed(() => ({
-  maxHeight: `${windowHeight.value - 350}px`,
+  maxHeight: `${windowHeight.value - 380}px`,
   overflowY: 'auto',
+  overflowX: 'hidden',
 }));
 
 // Event handlers
@@ -58,6 +59,7 @@ async function onExecuteAsyncClick(): Promise<void> {
   logger.logDebug('Execute expression');
   const evaluator = new ExpressionEvaluator(context, logger);
   console.log('Expression to evaluate', expression.value);
+  results.value.forEach((item: ConsoleResultItem) => { item.isOpen = false; });
   try {
     const result = await evaluator.evaluateAsyncExpression(expression.value);
     console.log('Expression evaluated', result);
@@ -87,6 +89,18 @@ function onResultItemDeleteClick(item: ConsoleResultItem): void {
   }
 }
 
+function onResultItemOpenCloseClick(item: ConsoleResultItem): void {
+  item.isOpen = !item.isOpen;
+}
+
+onMounted(() => {
+  actionsButtonItems.value = [{
+    label: 'Clear results',
+    icon: 'pi pi-times',
+    command: onClearResultsClick,
+  }];
+});
+
 </script>
 
 <template>
@@ -109,6 +123,14 @@ function onResultItemDeleteClick(item: ConsoleResultItem): void {
           class="mr-1"
           @click="onExecuteAsyncClick"
         />
+        <SplitButton
+          class="ml-1"
+          :label="$t('actions')"
+          severity="primary"
+          size="small"
+          outlined
+          :model="actionsButtonItems">
+        </SplitButton>
 
       </div>
     </div>
@@ -130,57 +152,55 @@ function onResultItemDeleteClick(item: ConsoleResultItem): void {
       </div>
     </div>
 
-    <div class="grid">
-      <div class="col-12">
-        <div v-if="results.length">
-          <div class="grid">
-            <div class="col-12">
-              <Button
-                :label="$t('clearAll')"
-                severity="danger"
-                size="small"
-                text
-                icon="pi pi-times"
-                class="mr-1"
-                @click="onClearResultsClick"
-              />
+    <div class="bs-console-results"
+         :style="consoleWrapperStyle"
+         v-if="results.length">
+      <div v-for="item in resultsReverse" :key="item.uid">
+
+        <div style="border: 1px solid #ececec;">
+          <div class="grid" style="margin:0; background: #ececec; line-height: 30px;">
+            <div class="col-fixed" style="width: 40px">
+              <Button icon="pi pi-times"
+                      class="mr-1"
+                      severity="danger"
+                      size="small"
+                      text
+                      @click="onResultItemDeleteClick(item)"></Button>
+            </div>
+            <div class="col">
+              <span style="font-size: 0.8rem">{{ item.expression }}</span>
+            </div>
+            <div class="col-fixed" style="width: 40px">
+              <Button :icon="item.isOpen ? 'pi pi-angle-down':'pi pi-angle-right'"
+                      class="mr-1"
+                      severity="primary"
+                      size="small"
+                      text
+                      @click="onResultItemOpenCloseClick(item)"></Button>
             </div>
           </div>
           <div class="grid">
             <div class="col-12">
-              <div class="bs-console-results" :style="consoleWrapperStyle">
-                <Card v-for="item in resultsReverse" :key="item.uid">
-                  <template #header>
-                    <Button icon="pi pi-times"
-                            class="mr-1"
-                            severity="danger"
-                            size="small"
-                            text
-                            @click="onResultItemDeleteClick(item)"></Button>
-                    <span style="font-size: 0.8rem">{{item.expression}}</span>
-                  </template>
-                  <template #content>
-                    <div v-if="item.isTable">
-                      <DataTable :value="item.table._rows"
-                                 size="small"
-                                 show-gridlines
-                                 scrollable
-                                 scroll-height="150px"
-                                 :tableStyle="dataTableStyle">
-                        <Column v-for="column of item.table._columns"
-                                :key="column.name"
-                                :field="column.name"
-                                :header="column.name"></Column>
-                      </DataTable>
-                    </div>
-                    <div v-else>
-                      {{ item.resultDisplay }}
-                    </div>
-                  </template>
-                </Card>
-
+              <div v-if="item.isOpen" class="p-2">
+                <div v-if="item.isTable">
+                  <DataTable :value="item.table._rows"
+                             size="small"
+                             show-gridlines
+                             scrollable
+                             scroll-height="150px"
+                             :tableStyle="dataTableStyle">
+                    <Column v-for="column of item.table._columns"
+                            :key="column.name"
+                            :field="column.name"
+                            :header="column.name"></Column>
+                  </DataTable>
+                </div>
+                <div v-else>
+                  {{ item.resultDisplay }}
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -190,7 +210,7 @@ function onResultItemDeleteClick(item: ConsoleResultItem): void {
 </template>
 
 <style>
-.bs-console-results .p-card-header{
+.bs-console-results .p-card-header {
   line-height: 30px;
   background: #ececec;
 }
