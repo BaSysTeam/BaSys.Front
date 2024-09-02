@@ -49,7 +49,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { useToast } from 'primevue/usetoast';
 import DataType from '../../../shared/src/models/dataType';
-import { DbType } from '../../../shared/src/enums/DbTypes';
+import { DbType } from '../../../shared/src/enums/dbTypes';
 import DataTypeProvider from '../dataProviders/dataTypeProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';

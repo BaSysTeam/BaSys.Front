@@ -1,3 +1,5 @@
+import QueryParameter from './queryParameter';
+import { DbType } from '../enums/dbTypes';
 import QueriesProvider from '../dataProviders/queriesProvider';
 import SelectQueryModel from './selectQueryModel';
 import DataTable from './dataTable';
@@ -26,6 +28,16 @@ export default class SelectQueryBuilder {
 
   orderBy(orderByExpression: string): SelectQueryBuilder {
     this.model.orderByExpression = orderByExpression;
+    return this;
+  }
+
+  parameter(name: string, value: any): SelectQueryBuilder;
+  parameter(name: string, value: any, dbType: DbType): SelectQueryBuilder;
+
+  parameter(name: string, value: any, dbType?: DbType): SelectQueryBuilder {
+    const newParameter = new QueryParameter(dbType ? { name, value, dbType } : { name, value });
+
+    this.model.parameters.push(newParameter);
     return this;
   }
 

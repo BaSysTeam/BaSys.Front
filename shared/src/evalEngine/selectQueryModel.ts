@@ -1,8 +1,11 @@
+import QueryParameter from './queryParameter';
+
 export default class SelectQueryModel {
   top: number;
   fromExpression: string;
   whereExpression: string;
   orderByExpression: string;
+  parameters: QueryParameter[];
 
   constructor(params: any) {
     let data: any = {};
@@ -14,5 +17,12 @@ export default class SelectQueryModel {
     this.fromExpression = data.fromExpression || '';
     this.whereExpression = data.whereExpression || '';
     this.orderByExpression = data.orderByExpression || '';
+
+    this.parameters = [];
+    if (data.parameters) {
+      data.parameters.forEach((item: any) => {
+        this.parameters.push(new QueryParameter(item));
+      });
+    }
   }
 }
