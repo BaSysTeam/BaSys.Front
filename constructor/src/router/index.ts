@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import MetaObjectEditView from '@/views/MetaObjectEditView.vue';
-import ExpressionConsoleView from '@/views/ExpressionConsoleView.vue';
+import ExpressionsConsoleView from '@/views/ExpressionsConsoleView.vue';
 import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
 import MetadataKindsListView from '../views/MetaObjectKindsListView.vue';
@@ -20,7 +20,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/console',
     name: 'console',
-    component: ExpressionConsoleView,
+    component: ExpressionsConsoleView,
   },
   {
     path: '/metadata-kinds',

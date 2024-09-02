@@ -53,4 +53,8 @@ export default class FunctionLibrary {
 
     return builder;
   }
+
+  static today(): Date {
+    return new Date();
+  }
 }

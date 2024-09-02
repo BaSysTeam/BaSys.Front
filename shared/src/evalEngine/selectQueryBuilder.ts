@@ -30,10 +30,8 @@ export default class SelectQueryBuilder {
   }
 
   async query(): Promise<DataTable> {
-    console.log('Start query...');
     const provider = new QueriesProvider();
     const result = await provider.execute(this.model);
-    console.log('Query executed...', result);
 
     const tableResult = new DataTable();
     if (result.isOK) {
