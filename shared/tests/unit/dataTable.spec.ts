@@ -103,7 +103,7 @@ describe('DataTable', () => {
   it('Calculate amount by processRows method', () => {
     const amountTotal = tableProducts
       // eslint-disable-next-line no-return-assign
-      .processRows((row:any) => row.amount = row.quantity * row.price)
+      .process((row:any) => row.amount = row.quantity * row.price)
       .sum('amount');
 
     expect(amountTotal).toBeCloseTo(3500, 6);

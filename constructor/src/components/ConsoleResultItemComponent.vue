@@ -29,6 +29,11 @@ const props = defineProps(
   },
 );
 
+const contentDisplayStyle = computed(() => ({
+  backgroundColor: props.item?.isError ? '#ffe0e0' : 'white',
+  margin: 0,
+}));
+
 // Emits
 const emit = defineEmits({ delete: (item: ConsoleResultItem) => true });
 
@@ -44,8 +49,8 @@ function onDeleteClick(item: ConsoleResultItem): void {
 </script>
 
 <template>
-  <div style="border: 1px solid #ececec;">
-    <div class="grid" style="margin:0; background: #ececec; line-height: 30px;">
+  <div class="bs-console-result-item">
+    <div  class="grid bs-console-result-item__header">
       <div class="col-fixed" style="width: 40px">
         <Button icon="pi pi-times"
                 class="mr-1"
@@ -69,9 +74,11 @@ function onDeleteClick(item: ConsoleResultItem): void {
                 @click="onOpenCloseClick(item)"></Button>
       </div>
     </div>
-    <div class="grid">
+    <div class="grid"
+         v-if="item.isOpen"
+         :style="contentDisplayStyle">
       <div class="col-12">
-        <div v-if="item.isOpen" class="p-2">
+        <div  class="p-2">
           <div v-if="item.isTable">
             <DataTable :value="item.table._rows"
                        size="small"
@@ -85,7 +92,7 @@ function onDeleteClick(item: ConsoleResultItem): void {
                       :header="column.name"></Column>
             </DataTable>
           </div>
-          <div v-else>
+          <div v-else >
             {{ item.resultDisplay }}
           </div>
         </div>
@@ -96,5 +103,16 @@ function onDeleteClick(item: ConsoleResultItem): void {
 </template>
 
 <style scoped>
+.bs-console-result-item {
+  border-top: 1px solid #b5b5b5;
+  border-left: 1px solid #ececec;
+  border-right: 1px solid #ececec;
+  border-bottom: 1px solid #ececec;
+}
 
+.bs-console-result-item__header{
+  margin:0;
+  background: #ececec;
+  line-height: 30px;
+}
 </style>

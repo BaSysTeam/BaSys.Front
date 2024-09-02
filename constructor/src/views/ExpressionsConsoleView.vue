@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  defineProps, defineEmits, PropType, ref, watch, onMounted, computed,
-} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
@@ -23,6 +21,7 @@ const name = 'ExpressionsConsoleView';
 
 // Data
 const expression = ref('');
+const modelJson = ref('');
 const results = ref<ConsoleResultItem>([]);
 const isWaiting = ref(false);
 const logger = new InMemoryLogger(LogLevels.Trace);
@@ -30,42 +29,64 @@ const resultsReverse = computed(() => results.value.slice()
   .reverse());
 const actionsButtonItems = ref([]);
 
-const codemirrorExtensions = [jsLang(), githubLight];
-const codemirrorEditor: any = ref(null);
+const codemirrorJsonExtensions = [jsonLang(), githubLight];
+const codemirrorJsonEditor: any = ref(null);
+const codemirrorJavaScriptExtensions = [jsLang(), githubLight];
+const codemirrorJavaScriptEditor: any = ref(null);
 const windowHeight = ref(window.innerHeight);
-const codemirrorStyle = computed(() => ({
-  minHeight: '200px',
+const codemirrorEditorStyle = computed(() => ({
+  minHeight: '180px',
+  maxHeight: '180px',
+  height: '180px',
   border: '1px solid #ececec',
+  fontSize: '0.8rem',
 }));
 
-const consoleWrapperStyle = computed(() => ({
-  maxHeight: `${windowHeight.value - 380}px`,
+const consoleResultsWrapperStyle = computed(() => ({
+  maxHeight: `${windowHeight.value - 400}px`,
   overflowY: 'auto',
   overflowX: 'hidden',
 }));
+
+// Methods
+function defaultModel(): any {
+  return {
+    header: {},
+    currentRow: {},
+    tables: {},
+  };
+}
 
 // Event handlers
 async function onExecuteAsyncClick(): Promise<void> {
   const executionStart = performance.now();
   isWaiting.value = true;
-  console.log('Execute async click');
-  const context = {
-    header: {},
-    currentRow: {},
-    tables: {},
-  };
+  let model: any;
+
+  if (modelJson.value) {
+    try {
+      model = JSON.parse(modelJson.value);
+    } catch (e) {
+      console.error(`Cannot parse model. ${e}`);
+      model = defaultModel();
+    }
+  } else {
+    model = defaultModel();
+  }
+
   logger.logDebug('Execute expression');
-  const evaluator = new ExpressionEvaluator(context, logger);
+  const evaluator = new ExpressionEvaluator(model, logger);
   console.log('Expression to evaluate', expression.value);
   results.value.forEach((item: ConsoleResultItem) => { item.isOpen = false; });
+
   let resultItem: ConsoleResultItem;
-  try {
-    const result = await evaluator.evaluateAsyncExpression(expression.value);
+  const result = await evaluator.evaluateAsyncExpression(expression.value);
+
+  if (!evaluator.isError) {
+    resultItem = new ConsoleResultItem(expression.value, false, result);
     console.log('Expression evaluated', result);
-    resultItem = new ConsoleResultItem(expression.value, 0, result);
-  } catch (e) {
-    console.error(`Cannot eval expression: ${expression.value}. Error: ${e}`);
-    resultItem = new ConsoleResultItem(expression.value, 0, e);
+  } else {
+    resultItem = new ConsoleResultItem(expression.value, true, evaluator.error.message);
   }
 
   const executionEnd = performance.now();
@@ -88,6 +109,8 @@ function onResultItemDeleteClick(item: ConsoleResultItem): void {
 }
 
 onMounted(() => {
+  modelJson.value = JSON.stringify(defaultModel(), null, 2);
+
   actionsButtonItems.value = [{
     label: 'Clear results',
     icon: 'pi pi-times',
@@ -98,7 +121,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="bs-console-view-component">
     <div class="grid">
       <div class="col-12">
         <ViewTitleComponent :title="$t('expressionsConsole')"
@@ -135,32 +158,36 @@ onMounted(() => {
     <div class="grid">
       <div class="col-12">
 
-        <codemirror
-          ref="codemirrorEditor"
-          v-model="expression"
-          placeholder="Code goes here..."
-          :style="codemirrorStyle"
-          :indent-with-tab="true"
-          :tab-size="2"
-          :extensions="codemirrorExtensions"
-        />
-
-        <!--
         <TabView>
-          <TabPanel header="Script">
-
+          <TabPanel :header="$t('script')">
+            <codemirror
+              ref="codemirrorJavaScriptEditor"
+              v-model="expression"
+              placeholder="script..."
+              :style="codemirrorEditorStyle"
+              :indent-with-tab="true"
+              :tab-size="2"
+              :extensions="codemirrorJavaScriptExtensions"
+            />
           </TabPanel>
-          <TabPanel header="Model">
-            <h3>Model</h3>
+          <TabPanel :header="$t('model')">
+            <codemirror
+              ref="codemirrorJsonEditor"
+              v-model="modelJson"
+              placeholder="model..."
+              :style="codemirrorEditorStyle"
+              :indent-with-tab="true"
+              :tab-size="2"
+              :extensions="codemirrorJsonExtensions"
+            />
           </TabPanel>
         </TabView>
-        -->
 
       </div>
     </div>
 
     <div class="bs-console-results"
-         :style="consoleWrapperStyle"
+         :style="consoleResultsWrapperStyle"
          v-if="results.length">
       <div v-for="item in resultsReverse" :key="item.uid">
         <ConsoleResultItemComponent
@@ -173,6 +200,8 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-
+<style>
+.bs-console-view-component .p-tabview-header-action{
+  padding: 0.5rem
+}
 </style>

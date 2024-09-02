@@ -9,12 +9,14 @@ export default class ConsoleResultItem {
   resultDisplay!: string;
   table!: DataTable;
   isOpen: boolean;
+  isError: boolean;
 
-  constructor(expression: string, executionMilliseconds: number, result: any) {
+  constructor(expression: string, isError: boolean, result: any) {
     this.uid = Guid.create().toString();
     this.isOpen = true;
     this.expression = expression || '';
-    this.executionMilliseconds = executionMilliseconds || 0;
+    this.executionMilliseconds = 0;
+    this.isError = isError;
 
     if (result instanceof DataTable) {
       this.table = result;
