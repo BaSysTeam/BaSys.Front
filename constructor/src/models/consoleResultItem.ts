@@ -1,5 +1,6 @@
 import { Guid } from 'guid-typescript';
 import DataTable from '../../../shared/src/evalEngine/dataTable';
+import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 
 export default class ConsoleResultItem {
   uid: string;
@@ -17,6 +18,8 @@ export default class ConsoleResultItem {
 
     if (result instanceof DataTable) {
       this.table = result;
+    } else if (result instanceof Date) {
+      this.resultDisplay = ValuesFormatter.formatDateTime(result);
     } else {
       this.resultDisplay = JSON.stringify(result, null, 2);
     }

@@ -1,6 +1,7 @@
 import ExpressionHelper from './expressionHelper';
 import FunctionLibrary from './functionLibrary';
 import InMemoryLogger from '../models/inMemoryLogger';
+import './dateExtensions';
 
 export default class ExpressionEvaluator {
   context: any;
@@ -22,6 +23,7 @@ export default class ExpressionEvaluator {
       ifs,
       createTable,
       from,
+      now,
     } = FunctionLibrary;
 
     let result: any;
@@ -50,6 +52,7 @@ export default class ExpressionEvaluator {
       ifs,
       createTable,
       from,
+      now,
     } = FunctionLibrary;
 
     let result: any;

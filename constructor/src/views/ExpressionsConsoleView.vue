@@ -7,8 +7,11 @@ import SplitButton from 'primevue/splitbutton';
 import Divider from 'primevue/divider';
 import ConsoleResultItem from '@/models/consoleResultItem';
 import ConsoleResultItemComponent from '@/components/ConsoleResultItemComponent.vue';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 import { Codemirror } from 'vue-codemirror';
 import { javascript as jsLang } from '@codemirror/lang-javascript';
+import { json as jsonLang } from '@codemirror/lang-json';
 import { githubLight } from '@ddietr/codemirror-themes/github-light';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
@@ -131,6 +134,7 @@ onMounted(() => {
 
     <div class="grid">
       <div class="col-12">
+
         <codemirror
           ref="codemirrorEditor"
           v-model="expression"
@@ -140,6 +144,18 @@ onMounted(() => {
           :tab-size="2"
           :extensions="codemirrorExtensions"
         />
+
+        <!--
+        <TabView>
+          <TabPanel header="Script">
+
+          </TabPanel>
+          <TabPanel header="Model">
+            <h3>Model</h3>
+          </TabPanel>
+        </TabView>
+        -->
+
       </div>
     </div>
 
