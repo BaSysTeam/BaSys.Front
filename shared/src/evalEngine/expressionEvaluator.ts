@@ -1,6 +1,7 @@
 import ExpressionHelper from './expressionHelper';
 import FunctionLibrary from './functionLibrary';
 import InMemoryLogger from '../models/inMemoryLogger';
+import { DbType as DbTypeEnum } from '../enums/dbTypes';
 import './dateExtensions';
 
 export default class ExpressionEvaluator {
@@ -32,6 +33,8 @@ export default class ExpressionEvaluator {
       today,
     } = FunctionLibrary;
 
+    const DbType = DbTypeEnum;
+
     let result: any;
     this.error = null;
 
@@ -62,6 +65,8 @@ export default class ExpressionEvaluator {
       from,
       today,
     } = FunctionLibrary;
+
+    const DbType = DbTypeEnum;
 
     let result: any;
     this.error = null;
