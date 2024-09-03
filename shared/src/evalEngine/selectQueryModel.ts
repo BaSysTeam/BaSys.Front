@@ -5,6 +5,7 @@ export default class SelectQueryModel {
   fromExpression: string;
   whereExpression: string;
   orderByExpression: string;
+  selectExpressions: string[];
   parameters: QueryParameter[];
 
   constructor(params: any) {
@@ -17,6 +18,13 @@ export default class SelectQueryModel {
     this.fromExpression = data.fromExpression || '';
     this.whereExpression = data.whereExpression || '';
     this.orderByExpression = data.orderByExpression || '';
+
+    this.selectExpressions = [];
+    if (data.selectExpressions) {
+      data.selectExpressions.forEach((item: any) => {
+        this.selectExpressions.push(item);
+      });
+    }
 
     this.parameters = [];
     if (data.parameters) {

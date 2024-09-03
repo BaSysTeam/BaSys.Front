@@ -21,6 +21,13 @@ export default class SelectQueryBuilder {
     return this;
   }
 
+  select(expressions: string[]): SelectQueryBuilder {
+    expressions.forEach((expression) => {
+      this.model.selectExpressions.push(expression);
+    });
+    return this;
+  }
+
   where(whereExpression: string): SelectQueryBuilder {
     this.model.whereExpression = whereExpression;
     return this;
