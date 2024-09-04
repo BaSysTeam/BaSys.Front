@@ -1,4 +1,4 @@
-import { DbType } from '../enums/DbTypes';
+import { DbType } from '../enums/dbTypes';
 
 export default class DataType {
   uid!: string;

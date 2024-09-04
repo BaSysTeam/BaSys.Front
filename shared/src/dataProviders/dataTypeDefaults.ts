@@ -1,5 +1,5 @@
 import DataType from '../models/dataType';
-import { DbType } from '../enums/DbTypes';
+import { DbType } from '../enums/dbTypes';
 
 export default class DataTypeDefaults {
   public static readonly String: DataType = new DataType({
