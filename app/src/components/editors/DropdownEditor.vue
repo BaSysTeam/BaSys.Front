@@ -43,8 +43,8 @@ export default class DropdownEditor extends Vue {
   @Watch('modelValue')
   onPropsChanged(newValue: any): void {
     console.log('Dropdown props changed', newValue);
-    // this.localValue = newValue;
-    // this.getItem();
+    this.localValue = newValue;
+    this.getItem();
   }
 
   async onDropdownBeforeShow(): Promise<void> {

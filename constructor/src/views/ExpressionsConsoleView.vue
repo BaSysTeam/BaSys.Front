@@ -80,7 +80,7 @@ async function onExecuteAsyncClick(): Promise<void> {
   results.value.forEach((item: ConsoleResultItem) => { item.isOpen = false; });
 
   let resultItem: ConsoleResultItem;
-  const result = await evaluator.evaluateAsyncExpression(expression.value);
+  const result = await evaluator.evaluateExpressionAsync(expression.value);
 
   if (!evaluator.isError) {
     resultItem = new ConsoleResultItem(expression.value, false, result);

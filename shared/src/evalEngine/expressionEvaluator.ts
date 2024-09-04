@@ -52,7 +52,7 @@ export default class ExpressionEvaluator {
     return result;
   }
 
-  async evaluateAsyncExpression(expression:string): Promise<any> {
+  async evaluateExpressionAsync(expression:string): Promise<any> {
     const $r = this.context.currentRow;
     const $h = this.context.header;
     const $t = this.context.tables;

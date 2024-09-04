@@ -1,3 +1,6 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
+
 import DataObject from '@/models/dataObject';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
@@ -32,7 +35,7 @@ export default class ObjectEvaluator {
    * according dependencies.
    * @param name - name of field was changed.
    */
-  onHeaderFieldChanged(name: string): void {
+  async onHeaderFieldChangedAsync(name: string): Promise<void> {
     this.logger.logDebug(`Header field changed "${name}"`);
 
     const column = this.settings.header.getColumnByName(name);
@@ -43,8 +46,8 @@ export default class ObjectEvaluator {
 
     this.dataObject.currentRow = {};
     const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
-    this.headerDependenciesEval(column, evaluator);
-    this.existingDependenciesEval(evaluator);
+    await this.headerDependenciesEvalAsync(column, evaluator);
+    await this.existingDependenciesEvalAsync(evaluator);
   }
 
   /**
@@ -54,7 +57,7 @@ export default class ObjectEvaluator {
    * @param tableUid - uid of table.
    * @param row - current row of table.
    */
-  onRowFieldChanged(fieldName: string, tableUid: string, row: any): void {
+  async onRowFieldChangedAsync(fieldName: string, tableUid: string, row: any): Promise<void> {
     this.logger.logDebug(`Row field changed ${fieldName}. TableUid: ${tableUid}`);
 
     const tableSettings = this.settings.getTable(tableUid);
@@ -72,8 +75,8 @@ export default class ObjectEvaluator {
     this.dataObject.currentRow = row;
     const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
 
-    this.rowDependenciesEval(tableSettings, column, row, evaluator);
-    this.existingDependenciesEval(evaluator);
+    await this.rowDependenciesEvalAsync(tableSettings, column, row, evaluator);
+    await this.existingDependenciesEvalAsync(evaluator);
   }
 
   /**
@@ -82,7 +85,7 @@ export default class ObjectEvaluator {
    * ( tableName is necessary for good log messages only).
    * @param tableUid - uid of table was changed.
    */
-  onTableChanged(tableName: string, tableUid: string): void {
+  async onTableChangedAsync(tableName: string, tableUid: string): Promise<void> {
     this.logger.logDebug(`Table changed "${tableName}"`);
 
     const tableSettings = this.settings.getTable(tableUid);
@@ -94,48 +97,51 @@ export default class ObjectEvaluator {
     const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
     const columnsWithDependencies = tableSettings.columns.filter((x) => x.dependencies.length);
 
-    columnsWithDependencies.forEach((column) => {
-      column.dependencies.forEach((dependency) => {
+    for (const column of columnsWithDependencies) {
+      for (const dependency of column.dependencies) {
         if (dependency.kind === DependencyKinds.HeaderField) {
           const headerField = this.settings.header.getColumn(dependency.fieldUid);
           if (headerField) {
-            this.headerFieldEval(headerField, evaluator);
-            this.headerDependenciesEval(headerField, evaluator);
+            await this.headerFieldEvalAsync(headerField, evaluator);
+            await this.headerDependenciesEvalAsync(headerField, evaluator);
           }
         }
-      });
-    });
+      }
+    }
 
-    this.existingDependenciesEval(evaluator);
+    await this.existingDependenciesEvalAsync(evaluator);
   }
 
   /**
    * Recalculates all formulas in object.
    */
-  onObjectRecalculate(): void {
+  async onObjectRecalculateAsync(): Promise<void> {
     this.logger.logDebug('Object recalculate');
 
     // Eval all formulas in header fields.
     const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
-    this.settings.header.columns.forEach((column) => {
-      this.headerDependenciesEval(column, evaluator);
-    });
+
+    for (const column of this.settings.header.columns) {
+      await this.headerDependenciesEvalAsync(column, evaluator);
+    }
 
     // Eval all formulas in all rows in all tables.
-    Object.entries(this.dataObject.tables).forEach(([key, table]) => {
+    // eslint-disable-next-line guard-for-in
+    for (const key in this.dataObject.tables) {
+      const table = this.dataObject.tables[key];
       const tableSettings = this.settings.getTable(table.uid);
       if (tableSettings) {
-        table.rows.forEach((row: any) => {
+        for (const row of table.rows) {
           this.dataObject.currentRow = row;
           this.logger.logDebug(`Recalculate row #${row.row_number} in table "${table.name}"`);
-          tableSettings.columns.forEach((column) => {
-            this.rowDependenciesEval(tableSettings, column, row, evaluator);
-          });
-        });
+          for (const column of tableSettings.columns) {
+            await this.rowDependenciesEvalAsync(tableSettings, column, row, evaluator);
+          }
+        }
       }
-    });
+    }
 
-    this.existingDependenciesEval(evaluator);
+    await this.existingDependenciesEvalAsync(evaluator);
   }
 
   /**
@@ -144,7 +150,7 @@ export default class ObjectEvaluator {
    * @param tableUid - uid of table
    * @param row - row of the table which need to recalculate.
    */
-  onRowRecalculate(tableName: string, tableUid: string, row: any): void {
+  async onRowRecalculateAsync(tableName: string, tableUid: string, row: any): Promise<void> {
     this.logger.logDebug(`Row #${row.row_number} recalculate in table "${tableName}"`);
 
     const tableSettings = this.settings.getTable(tableUid);
@@ -156,22 +162,24 @@ export default class ObjectEvaluator {
     this.dataObject.currentRow = row;
     const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
 
-    tableSettings.columns.forEach((column) => {
-      this.rowDependenciesEval(tableSettings, column, row, evaluator);
-    });
+    for (const column of tableSettings.columns) {
+      await this.rowDependenciesEvalAsync(tableSettings, column, row, evaluator);
+    }
 
-    this.existingDependenciesEval(evaluator);
+    await this.existingDependenciesEvalAsync(evaluator);
   }
 
-  private headerFieldEval(column: MetaObjectTableColumn, evaluator: ExpressionEvaluator): void {
-    const calcResult = evaluator.evaluateExpression(column.formula);
-    this.dataObject.header[column.name] = calcResult;
+  private async headerFieldEvalAsync(
+    column: MetaObjectTableColumn,
+    evaluator: ExpressionEvaluator,
+  ): Promise<void> {
+    this.dataObject.header[column.name] = await evaluator.evaluateExpressionAsync(column.formula);
   }
 
-  private headerDependenciesEval(
+  private async headerDependenciesEvalAsync(
     columnSettings: MetaObjectTableColumn,
     evaluator: ExpressionEvaluator,
-  ):void {
+  ):Promise<void> {
     if (!columnSettings.dependencies) {
       return;
     }
@@ -180,7 +188,8 @@ export default class ObjectEvaluator {
       return;
     }
 
-    columnSettings.dependencies.forEach((dependency: DependencyInfo) => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const dependency of columnSettings.dependencies) {
       if (dependency.kind === DependencyKinds.HeaderField) {
         // Calculate dependent formulas.
         const dependentColumn = this.settings.header.columns.find(
@@ -189,22 +198,24 @@ export default class ObjectEvaluator {
         if (!dependentColumn) {
           this.logger.logError(`Cannot find header column by uid: ${dependency.fieldUid}`);
         } else {
-          this.headerFieldEval(dependentColumn, evaluator);
-          this.headerDependenciesEval(dependentColumn, evaluator);
+          // eslint-disable-next-line no-await-in-loop
+          await this.headerFieldEvalAsync(dependentColumn, evaluator);
+          // eslint-disable-next-line no-await-in-loop
+          await this.headerDependenciesEvalAsync(dependentColumn, evaluator);
         }
       } else {
         // Calculate later.
         this.dependenciesToCalc[dependency.fieldUid] = dependency;
       }
-    });
+    }
   }
 
-  private rowDependenciesEval(
+  private async rowDependenciesEvalAsync(
     tableSettings: MetaObjectTable,
     columnSettings: MetaObjectTableColumn,
     row: any,
     evaluator: ExpressionEvaluator,
-  ):void {
+  ):Promise<void> {
     if (!columnSettings.dependencies) {
       return;
     }
@@ -213,25 +224,27 @@ export default class ObjectEvaluator {
       return;
     }
 
-    columnSettings.dependencies.forEach((dependency: DependencyInfo) => {
+    for (const dependency of columnSettings.dependencies) {
       if (dependency.kind === DependencyKinds.RowField) {
         // Calculate dependent fields.
         const dependentColumn = tableSettings.columns.find((x) => x.uid === dependency.fieldUid);
         if (!dependentColumn) {
           this.logger.logError(`Cannot find table column by uid: ${dependency.fieldUid}`);
         } else {
-          row[dependentColumn.name] = evaluator.evaluateExpression(dependentColumn.formula);
+          row[dependentColumn.name] = await evaluator.evaluateExpressionAsync(
+            dependentColumn.formula,
+          );
 
-          this.rowDependenciesEval(tableSettings, dependentColumn, row, evaluator);
+          await this.rowDependenciesEvalAsync(tableSettings, dependentColumn, row, evaluator);
         }
       } else {
         // Calculate later.
         this.dependenciesToCalc[dependency.fieldUid] = dependency;
       }
-    });
+    }
   }
 
-  private existingDependenciesEval(evaluator: ExpressionEvaluator): void {
+  private async existingDependenciesEvalAsync(evaluator: ExpressionEvaluator): Promise<void> {
     this.logger.logDebug('DependenciesEval.Start');
     let dependencies = [];
 
@@ -249,7 +262,6 @@ export default class ObjectEvaluator {
       this.logger.logDebug(`DependenciesEval.Iteration ${i}`);
 
       // Header dependencies.
-      // eslint-disable-next-line no-restricted-syntax
       for (const dependency of dependencies.filter((x) => x.kind === DependencyKinds.HeaderField)) {
         const dependentColumn = this.settings.header.columns.find(
           (x) => x.uid === dependency.fieldUid,
@@ -258,10 +270,10 @@ export default class ObjectEvaluator {
         if (!dependentColumn) {
           this.logger.logError(`Cannot find header column by uid: ${dependency.fieldUid}`);
         } else {
-          const calcResult = evaluator.evaluateExpression(dependentColumn.formula);
+          const calcResult = await evaluator.evaluateExpressionAsync(dependentColumn.formula);
           this.dataObject.header[dependentColumn.name] = calcResult;
 
-          this.headerDependenciesEval(dependentColumn, evaluator);
+          await this.headerDependenciesEvalAsync(dependentColumn, evaluator);
         }
       }
 
@@ -285,7 +297,7 @@ export default class ObjectEvaluator {
           return;
         }
 
-        this.tableRecalculate(tableSettings, column, evaluator);
+        await this.tableRecalculateAsync(tableSettings, column, evaluator);
       }
 
       dependencies = [];
@@ -297,11 +309,11 @@ export default class ObjectEvaluator {
     }
   }
 
-  private tableRecalculate(
+  private async tableRecalculateAsync(
     tableSettings: MetaObjectTable,
     column: MetaObjectTableColumn,
     evaluator: ExpressionEvaluator,
-  ): void {
+  ): Promise<void> {
     const table = this.dataObject.detailsTables.find(
       (x) => x.uid === tableSettings.uid,
     );
@@ -311,11 +323,10 @@ export default class ObjectEvaluator {
       return;
     }
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const row of table.rows) {
       this.dataObject.currentRow = row;
-      row[column.name] = evaluator.evaluateExpression(column.formula);
-      this.rowDependenciesEval(tableSettings, column, row, evaluator);
+      row[column.name] = await evaluator.evaluateExpressionAsync(column.formula);
+      await this.rowDependenciesEvalAsync(tableSettings, column, row, evaluator);
     }
   }
 }

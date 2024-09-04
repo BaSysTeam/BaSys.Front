@@ -356,7 +356,7 @@ export default class DataObjectDetailTableEdit extends Vue {
     this.windowHeight = window.innerHeight;
   }
 
-  onCellEditComplete(event: any): void {
+  async onCellEditComplete(event: any): Promise<void> {
     const row = event.data;
     const columnName: string = event.field as string;
     const newRow = event.newData;
@@ -365,9 +365,11 @@ export default class DataObjectDetailTableEdit extends Vue {
     row[columnName] = newRow[columnName];
     if (names.valueName) {
       row[names.valueName] = newRow[names.valueName];
+      await this.objectEvaluator.onRowFieldChangedAsync(names.valueName, this.table.uid, row);
+    } else {
+      await this.objectEvaluator.onRowFieldChangedAsync(columnName, this.table.uid, row);
     }
 
-    this.objectEvaluator.onRowFieldChanged(columnName, this.table.uid, row);
     this.isModifiedChanged(true);
   }
 
@@ -379,7 +381,7 @@ export default class DataObjectDetailTableEdit extends Vue {
     row[names.displayName] = selectItem.text;
   }
 
-  onAddClick(): void {
+  async onAddClick(): Promise<void> {
     const tableSettings = this.metaObjectSettings.detailTables.find(
       (x) => x.uid === this.table.uid,
     );
@@ -394,7 +396,7 @@ export default class DataObjectDetailTableEdit extends Vue {
     }
 
     this.selectedRecord = newRow;
-    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
+    await this.objectEvaluator.onTableChangedAsync(this.table.name, this.table.uid);
 
     this.isModifiedChanged(true);
   }
@@ -403,16 +405,16 @@ export default class DataObjectDetailTableEdit extends Vue {
     this.initFilters();
   }
 
-  onRowDeleteClick(row: any): void {
+  async onRowDeleteClick(row: any): Promise<void> {
     const ind = this.table.rows.indexOf(row);
     if (ind > -1) {
       this.table.rows.splice(ind, 1);
       this.isModifiedChanged(true);
     }
-    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
+    await this.objectEvaluator.onTableChangedAsync(this.table.name, this.table.uid);
   }
 
-  onRowCopyClick(row: any): void {
+  async onRowCopyClick(row: any): Promise<void> {
     const newRow: any = {};
     Object.entries(row).forEach(([key, value]) => {
       newRow[key] = value;
@@ -427,7 +429,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
     this.selectedRecord = newRow;
     this.isModifiedChanged(true);
-    this.objectEvaluator.onTableChanged(this.table.name, this.table.uid);
+    await this.objectEvaluator.onTableChangedAsync(this.table.name, this.table.uid);
   }
 
   onRowUpClick(row: any): void {
@@ -456,7 +458,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
   onRowRecalculateClick(row: any): void {
     this.isWaiting = true;
-    this.objectEvaluator.onRowRecalculate(this.table.name, this.table.uid, row);
+    this.objectEvaluator.onRowRecalculateAsync(this.table.name, this.table.uid, row);
     this.isWaiting = false;
     this.isModifiedChanged(true);
   }
