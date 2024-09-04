@@ -140,8 +140,8 @@ export default class DataObjectHeaderEdit extends Vue {
     );
   }
 
-  onHeaderFieldChange(columnName: string): void {
-    this.objectEvaluator.onHeaderFieldChanged(columnName);
+  async onHeaderFieldChange(columnName: string): Promise<void> {
+    await this.objectEvaluator.onHeaderFieldChangedAsync(columnName);
     this.isModifiedChanged(true);
   }
 

@@ -179,7 +179,7 @@ export default class DataObjectEditComponent extends Vue {
     }
   }
 
-  private recalculate(): void {
+  private async recalculate(): Promise<void> {
     this.isWaitingChanged(true);
     const objectEvaluator = new ObjectEvaluator(
       this.logger,
@@ -187,7 +187,7 @@ export default class DataObjectEditComponent extends Vue {
       this.model.item,
     );
 
-    objectEvaluator.onObjectRecalculate();
+    await objectEvaluator.onObjectRecalculateAsync();
     this.toastHelper.success('Object recalculated');
     this.isWaitingChanged(false);
     this.isModifiedChanged(true);
