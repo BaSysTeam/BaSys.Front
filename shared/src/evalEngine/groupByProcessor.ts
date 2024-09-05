@@ -1,15 +1,18 @@
+// eslint-disable-next-line import/no-cycle
 import DataTable from './dataTable';
 import DataTableColumn from './dataTableColumn';
+import GroupingColumn from './groupingColumn';
 
 export default class GroupByProcessor {
   dataTable: DataTable;
-  keyColumns: any[];
-  groupingColumns: any[];
+  keyColumns: GroupingColumn[];
+  groupingColumns: GroupingColumn[];
 
   constructor(dataTable: DataTable, keyColumns: any[], groupingColumns: any[]) {
     this.dataTable = dataTable;
-    this.keyColumns = keyColumns;
-    this.groupingColumns = groupingColumns;
+
+    this.keyColumns = this.parseGroupingColumns(keyColumns);
+    this.groupingColumns = this.parseGroupingColumns(groupingColumns);
   }
 
   process(): DataTable {
@@ -18,11 +21,11 @@ export default class GroupByProcessor {
     const sourceGroupingColumns: DataTableColumn[] = [];
 
     // Find key columns.
-    this.keyColumns.forEach((columnName: string) => {
-      const column = this.dataTable.getColumn(columnName);
+    this.keyColumns.forEach((groupingColumn: GroupingColumn) => {
+      const column = this.dataTable.getColumn(groupingColumn.name);
 
       if (!column) {
-        throw new Error(`Column ${columnName} not found`);
+        throw new Error(`Column ${groupingColumn.name} not found`);
       }
       sourceKeyColumns.push(column);
       groupedTable.addColumn(column);
@@ -33,10 +36,10 @@ export default class GroupByProcessor {
     this.dataTable.addColumn({ name: keyColumnName });
 
     // Find grouping columns.
-    this.groupingColumns.forEach((columnName: any) => {
-      const column = this.dataTable.getColumn(columnName);
+    this.groupingColumns.forEach((gColumn: GroupingColumn) => {
+      const column = this.dataTable.getColumn(gColumn.name);
       if (!column) {
-        throw new Error(`Column ${columnName} not found`);
+        throw new Error(`Column ${gColumn.name} not found`);
       }
 
       sourceGroupingColumns.push(column);
@@ -61,9 +64,6 @@ export default class GroupByProcessor {
 
     // Filter rows by key columns.
     keyMap.forEach((keyObject: any, key:string) => {
-      console.log('iterate over map');
-      console.log('key', key);
-      console.log('keyObject', keyObject);
       const filterResult = this.dataTable.rows.filter((row: any) => row[keyColumnName] === key);
       const totals: any = {};
 
@@ -72,9 +72,31 @@ export default class GroupByProcessor {
       });
 
       filterResult.forEach((row: any) => {
-        sourceGroupingColumns.forEach((sourceColumn: any) => {
-          totals[sourceColumn.name] += row[sourceColumn.name];
+        this.groupingColumns.forEach((gColumn: GroupingColumn) => {
+          const value = row[gColumn.name];
+          if (gColumn.aggregate === 'sum') {
+            totals[gColumn.alias] += value;
+          } else if (gColumn.aggregate === 'avg') {
+            totals[gColumn.alias] += value;
+          } else if (gColumn.aggregate === 'min') {
+            if (totals[gColumn.alias] === undefined || value < totals[gColumn.alias]) {
+              totals[gColumn.alias] = value;
+            }
+          } else if (gColumn.aggregate === 'max') {
+            if (totals[gColumn.alias] === undefined || value > totals[gColumn.alias]) {
+              totals[gColumn.alias] = value;
+            }
+          } else {
+            throw new Error(`Unknown aggregate function ${gColumn.aggregate}`);
+          }
         });
+      });
+
+      this.groupingColumns.forEach((gColumn: GroupingColumn) => {
+        if (gColumn.aggregate === 'avg') {
+          // eslint-disable-next-line operator-assignment
+          totals[gColumn.alias] = totals[gColumn.alias] / filterResult.length;
+        }
       });
 
       const newRow = groupedTable.newRow();
@@ -87,5 +109,25 @@ export default class GroupByProcessor {
     });
 
     return groupedTable;
+  }
+
+  private parseGroupingColumns(source: any[]): GroupingColumn[] {
+    const columns : GroupingColumn[] = [];
+
+    if (!source) {
+      return columns;
+    }
+
+    source.forEach((item) => {
+      if (typeof item === 'string') {
+        const gColumn = new GroupingColumn({ name: item });
+        columns.push(gColumn);
+      } else if (typeof item === 'object') {
+        const gColumn = new GroupingColumn(item);
+        columns.push(gColumn);
+      }
+    });
+
+    return columns;
   }
 }
