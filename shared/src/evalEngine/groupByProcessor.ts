@@ -84,6 +84,8 @@ export default class GroupByProcessor {
         totals[gColumn.alias] = sourceColumn.defaultValue;
         if (gColumn.aggregate === 'min' || gColumn.aggregate === 'max') {
           totals[gColumn.alias] = undefined;
+        } else if (gColumn.aggregate === 'count') {
+          totals[gColumn.alias] = 0;
         }
       });
 
@@ -101,6 +103,10 @@ export default class GroupByProcessor {
           } else if (gColumn.aggregate === 'max') {
             if (totals[gColumn.alias] === undefined || value > totals[gColumn.alias]) {
               totals[gColumn.alias] = value;
+            }
+          } else if (gColumn.aggregate === 'count') {
+            if (value) {
+              totals[gColumn.alias] += 1;
             }
           } else {
             throw new Error(`Unknown aggregate function ${gColumn.aggregate}`);
