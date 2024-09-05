@@ -17,21 +17,20 @@ export default class GroupByProcessor {
 
   process(): DataTable {
     const groupedTable = new DataTable();
-    const sourceKeyColumns: DataTableColumn[] = [];
-    const sourceGroupingColumns: DataTableColumn[] = [];
+    // const sourceGroupingColumns: DataTableColumn[] = [];
 
-    // Find key columns.
+    // Copy key columns.
     this.keyColumns.forEach((groupingColumn: GroupingColumn) => {
       const column = this.dataTable.getColumn(groupingColumn.name);
 
       if (!column) {
         throw new Error(`Column ${groupingColumn.name} not found`);
       }
-      sourceKeyColumns.push(column);
+
       groupedTable.addColumn(column);
     });
 
-    // Create key column.
+    // Create temp column to store composite key.
     const keyColumnName = '__key';
     this.dataTable.addColumn({ name: keyColumnName });
 
@@ -42,8 +41,12 @@ export default class GroupByProcessor {
         throw new Error(`Column ${gColumn.name} not found`);
       }
 
-      sourceGroupingColumns.push(column);
-      groupedTable.addColumn(column);
+      // sourceGroupingColumns.push(column);
+      groupedTable.addColumn({
+        name: gColumn.alias,
+        dataType: column.dataType,
+        defaultValue: column.defaultValue,
+      });
     });
 
     // Collect unique combinations of key columns.
@@ -52,9 +55,9 @@ export default class GroupByProcessor {
     this.dataTable.rows.forEach((row: any) => {
       const keyObject:any = {};
       let key = '';
-      sourceKeyColumns.forEach((sourceColumn: any) => {
-        keyObject[sourceColumn.name] = row[sourceColumn.name];
-        key += `${sourceColumn.name}:${row[sourceColumn.name]}|`;
+      this.keyColumns.forEach((gColumn: GroupingColumn) => {
+        keyObject[gColumn.name] = row[gColumn.name];
+        key += `${gColumn.name}:${row[gColumn.name]}|`;
       });
       if (!keyMap.has(key)) {
         keyMap.set(key, keyObject);
@@ -62,13 +65,26 @@ export default class GroupByProcessor {
       row[keyColumnName] = key;
     });
 
+    const sourceColumnsMap = new Map<string, DataTableColumn>();
+    this.dataTable.columns.forEach((column: any) => {
+      sourceColumnsMap.set(column.name, column);
+    });
+
     // Filter rows by key columns.
     keyMap.forEach((keyObject: any, key:string) => {
       const filterResult = this.dataTable.rows.filter((row: any) => row[keyColumnName] === key);
       const totals: any = {};
 
-      sourceGroupingColumns.forEach((sourceColumn: any) => {
-        totals[sourceColumn.name] = sourceColumn.defaultValue;
+      this.groupingColumns.forEach((gColumn: GroupingColumn) => {
+        const sourceColumn = sourceColumnsMap.get(gColumn.name);
+        if (!sourceColumn) {
+          throw new Error(`Column ${gColumn.name} not found`);
+        }
+
+        totals[gColumn.alias] = sourceColumn.defaultValue;
+        if (gColumn.aggregate === 'min' || gColumn.aggregate === 'max') {
+          totals[gColumn.alias] = undefined;
+        }
       });
 
       filterResult.forEach((row: any) => {

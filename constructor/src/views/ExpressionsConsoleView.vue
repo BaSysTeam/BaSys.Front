@@ -22,12 +22,12 @@ const name = 'ExpressionsConsoleView';
 // Data
 const expression = ref('');
 const modelJson = ref('');
-const results = ref<ConsoleResultItem>([]);
+const results = ref<ConsoleResultItem[]>([]);
 const isWaiting = ref(false);
 const logger = new InMemoryLogger(LogLevels.Trace);
 const resultsReverse = computed(() => results.value.slice()
   .reverse());
-const actionsButtonItems = ref([]);
+const actionsButtonItems = ref<any[]>([]);
 
 const codemirrorJsonExtensions = [jsonLang(), githubLight];
 const codemirrorJsonEditor: any = ref(null);
@@ -42,7 +42,7 @@ const codemirrorEditorStyle = computed(() => ({
   fontSize: '0.8rem',
 }));
 
-const consoleResultsWrapperStyle = computed(() => ({
+const consoleResultsWrapperStyle = computed(():any => ({
   maxHeight: `${windowHeight.value - 400}px`,
   overflowY: 'auto',
   overflowX: 'hidden',
@@ -77,7 +77,8 @@ async function onExecuteAsyncClick(): Promise<void> {
   logger.logDebug('Execute expression');
   const evaluator = new ExpressionEvaluator(model, logger);
   console.log('Expression to evaluate', expression.value);
-  results.value.forEach((item: ConsoleResultItem) => { item.isOpen = false; });
+  (results.value as ConsoleResultItem[])
+    .forEach((item: ConsoleResultItem) => { item.isOpen = false; });
 
   let resultItem: ConsoleResultItem;
   const result = await evaluator.evaluateExpressionAsync(expression.value);

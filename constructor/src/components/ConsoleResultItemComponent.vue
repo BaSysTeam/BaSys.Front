@@ -80,13 +80,13 @@ function onDeleteClick(item: ConsoleResultItem): void {
       <div class="col-12">
         <div  class="p-2">
           <div v-if="item.isTable">
-            <DataTable :value="item.table._rows"
+            <DataTable :value="item.table.rows"
                        size="small"
                        show-gridlines
                        scrollable
                        scroll-height="150px"
                        :tableStyle="dataTableStyle">
-              <Column v-for="column of item.table._columns"
+              <Column v-for="column of item.table.columns"
                       :key="column.name"
                       :field="column.name"
                       :header="column.name"></Column>
