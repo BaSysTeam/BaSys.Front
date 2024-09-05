@@ -1,3 +1,5 @@
+// eslint-disable-next-line import/no-cycle
+import GroupByProcessor from './groupByProcessor';
 import DataTableColumn from './dataTableColumn';
 
 export default class DataTable {
@@ -108,26 +110,28 @@ export default class DataTable {
     return result;
   }
 
-  min(columnName: string): number {
+  min(columnName: string): any {
     this.checkExistingColumn(columnName);
 
-    let minValue = Infinity;
+    let minValue:any;
     this._rows.forEach((row: any) => {
-      if (row[columnName] < minValue) {
-        minValue = row[columnName];
+      const value = row[columnName];
+      if (minValue === undefined || value < minValue) {
+        minValue = value;
       }
     });
 
     return minValue;
   }
 
-  max(columnName: string): number {
+  max(columnName: string): any {
     this.checkExistingColumn(columnName);
 
-    let maxValue = -Infinity;
+    let maxValue: any;
     this._rows.forEach((row: any) => {
-      if (row[columnName] > maxValue) {
-        maxValue = row[columnName];
+      const value = row[columnName];
+      if (maxValue === undefined || value > maxValue) {
+        maxValue = value;
       }
     });
 
@@ -157,80 +161,9 @@ export default class DataTable {
   }
 
   groupBy(keyColumns: string[], groupingColumns: any[]): DataTable {
-    const groupedTable = new DataTable();
-    const sourceKeyColumns: DataTableColumn[] = [];
-    const sourceGroupingColumns: DataTableColumn[] = [];
+    const processor = new GroupByProcessor(this, keyColumns, groupingColumns);
 
-    // Find key columns.
-    keyColumns.forEach((columnName: string) => {
-      const column = this.getColumn(columnName);
-
-      if (!column) {
-        throw new Error(`Column ${columnName} not found`);
-      }
-      sourceKeyColumns.push(column);
-      groupedTable.addColumn(column);
-    });
-
-    // Create key column.
-    const keyColumnName = '__key';
-    this.addColumn({ name: keyColumnName });
-
-    // Find grouping columns.
-    groupingColumns.forEach((columnName: any) => {
-      const column = this.getColumn(columnName);
-      if (!column) {
-        throw new Error(`Column ${columnName} not found`);
-      }
-
-      sourceGroupingColumns.push(column);
-      groupedTable.addColumn(column);
-    });
-
-    // Collect unique combinations of key columns.
-    const keyMap = new Map<string, any>();
-
-    this._rows.forEach((row: any) => {
-      const keyObject:any = {};
-      let key = '';
-      sourceKeyColumns.forEach((sourceColumn: any) => {
-        keyObject[sourceColumn.name] = row[sourceColumn.name];
-        key += `${sourceColumn.name}:${row[sourceColumn.name]}|`;
-      });
-      if (!keyMap.has(key)) {
-        keyMap.set(key, keyObject);
-      }
-      row[keyColumnName] = key;
-    });
-
-    // Filter rows by key columns.
-    keyMap.forEach((keyObject: any, key:string) => {
-      console.log('iterate over map');
-      console.log('key', key);
-      console.log('keyObject', keyObject);
-      const filterResult = this._rows.filter((row: any) => row[keyColumnName] === key);
-      const totals: any = {};
-
-      sourceGroupingColumns.forEach((sourceColumn: any) => {
-        totals[sourceColumn.name] = sourceColumn.defaultValue;
-      });
-
-      filterResult.forEach((row: any) => {
-        sourceGroupingColumns.forEach((sourceColumn: any) => {
-          totals[sourceColumn.name] += row[sourceColumn.name];
-        });
-      });
-
-      const newRow = groupedTable.newRow();
-      Object.entries(keyObject).forEach(([key, value]) => {
-        newRow[key] = value;
-      });
-      Object.entries(totals).forEach(([key, value]) => {
-        newRow[key] = value;
-      });
-    });
-
-    return groupedTable;
+    return processor.process();
   }
 
   private fillRowFromArray(data: any[]): void {
