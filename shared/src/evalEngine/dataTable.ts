@@ -155,6 +155,23 @@ export default class DataTable {
     return sum / count;
   }
 
+  count(columnName = ''): number {
+    if (!columnName) {
+      return this._rows.length;
+    }
+
+    this.checkExistingColumn(columnName);
+
+    let count = 0;
+    this._rows.forEach((row: any) => {
+      if (row[columnName]) {
+        count += 1;
+      }
+    });
+
+    return count;
+  }
+
   process(predicate: (row: any) => void): DataTable {
     this._rows.forEach((row: any) => predicate(row));
     return this;

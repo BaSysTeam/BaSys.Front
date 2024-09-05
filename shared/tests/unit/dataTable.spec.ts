@@ -109,6 +109,19 @@ describe('DataTable', () => {
     expect(tableProducts.avg('quantity')).toBeCloseTo(5.333333, 6);
   });
 
+  it('Count all rows', () => {
+    expect(tableProducts.count()).toEqual(3);
+  });
+
+  it('Count(quantity)', () => {
+    expect(tableProducts.count('quantity')).toEqual(3);
+  });
+
+  it('Count(amount)', () => {
+    tableProducts.rows[0].amount = 1;
+    expect(tableProducts.count('amount')).toEqual(1);
+  });
+
   it('Calculate amount by processRows method', () => {
     const amountTotal = tableProducts
       // eslint-disable-next-line no-return-assign
