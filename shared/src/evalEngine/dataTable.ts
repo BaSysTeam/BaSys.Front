@@ -43,6 +43,21 @@ export default class DataTable {
     return this;
   }
 
+  clone(): DataTable {
+    const newTable = new DataTable();
+
+    this.columns.forEach((column: DataTableColumn) => newTable.addColumn(column));
+    this.rows.forEach((row: any) => {
+      const newRow = newTable.newRow();
+
+      Object.entries(row).forEach(([key, value]) => {
+        newRow[key] = value;
+      });
+    });
+
+    return newTable;
+  }
+
   deleteColumn(columnName: string): DataTable {
     const currentColumn = this.getColumn(columnName);
     if (!currentColumn) {
