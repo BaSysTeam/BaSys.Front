@@ -1,4 +1,5 @@
-// eslint-disable-next-line import/no-cycle
+/* eslint-disable import/no-cycle */
+import UnionProcessor from './unionProcessor';
 import GroupByProcessor from './groupByProcessor';
 import DataTableColumn from './dataTableColumn';
 
@@ -75,7 +76,7 @@ export default class DataTable {
     return this;
   }
 
-  newRow(): any {
+  newRow(pushNewRow = true): any {
     if (!this._columns.length) {
       throw new Error('Add columns to DataTable before add rows');
     }
@@ -84,7 +85,9 @@ export default class DataTable {
     this._columns.forEach((column: any) => {
       newRow[column.name] = column.defaultValue;
     });
-    this._rows.push(newRow);
+    if (pushNewRow) {
+      this._rows.push(newRow);
+    }
 
     return newRow;
   }
@@ -196,6 +199,18 @@ export default class DataTable {
     const processor = new GroupByProcessor(this, keyColumns, groupingColumns);
 
     return processor.process();
+  }
+
+  unionAll(tableToUnion: DataTable): DataTable {
+    const processor = new UnionProcessor(this, tableToUnion);
+
+    return processor.process(true);
+  }
+
+  union(tableToUnion: DataTable): DataTable {
+    const processor = new UnionProcessor(this, tableToUnion);
+
+    return processor.process(false);
   }
 
   private fillRowFromArray(data: any[]): void {
