@@ -27,56 +27,62 @@ export default class JoinProcessor {
 
     switch (joinKind) {
       case 'inner':
-        return this.innerJoin();
       case 'left':
-        return this.leftJoin();
-      case 'right':
-        return this.rightJoin();
       case 'full':
-        return this.fullJoin();
+        return this.performJoin(joinKind);
       default:
         throw new Error(`JoinProcessor. Unknown joinKind: ${joinKind}`);
     }
   }
 
-  private innerJoin(): DataTable {
+  private performJoin(joinKind: string): DataTable {
     const resultTable = new DataTable();
+    const isFullJoin = joinKind === 'full';
+    const isInnerJoin = joinKind === 'inner';
 
     this.createColumns(resultTable);
+    const processedColumnName = '__processed';
+    this.tableToJoin.addColumn({ name: processedColumnName });
 
     this.primaryTable.rows.forEach((primaryRow: any) => {
       const filterResult = this.tableToJoin.rows.filter(
         (joinedRow: any) => this.predicate(primaryRow, joinedRow),
       );
 
-      filterResult.forEach((joinedRow: any) => {
+      if (filterResult.length) {
+        // InnerJoin.
+        filterResult.forEach((joinedRow: any) => {
+          joinedRow[processedColumnName] = true;
+          const newRow = resultTable.newRow(true);
+          Object.entries(primaryRow).forEach(([key, value]) => {
+            newRow[key] = value;
+          });
+          Object.entries(joinedRow).forEach(([key, value]) => {
+            newRow[key] = value;
+          });
+        });
+      } else if (!isInnerJoin) {
+        // LeftJoin and FullJoin. Add unprocessed rows from primaryTable.
         const newRow = resultTable.newRow(true);
         Object.entries(primaryRow).forEach(([key, value]) => {
           newRow[key] = value;
         });
-        Object.entries(joinedRow).forEach(([key, value]) => {
+      }
+    });
+
+    if (isFullJoin) {
+      // FullJoin. Add unprocessed rows from tableToJoin.
+      const unprocessedRows = this.tableToJoin.rows.filter(
+        (joinedRow: any) => joinedRow[processedColumnName] !== true,
+      );
+
+      unprocessedRows.forEach((unprocessedRow: any) => {
+        const newRow = resultTable.newRow(true);
+        Object.entries(unprocessedRow).forEach(([key, value]) => {
           newRow[key] = value;
         });
       });
-    });
-
-    return resultTable;
-  }
-
-  private leftJoin(): DataTable {
-    const resultTable = new DataTable();
-
-    return resultTable;
-  }
-
-  private rightJoin(): DataTable {
-    const resultTable = new DataTable();
-
-    return resultTable;
-  }
-
-  private fullJoin(): DataTable {
-    const resultTable = new DataTable();
+    }
 
     return resultTable;
   }

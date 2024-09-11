@@ -220,6 +220,24 @@ export default class DataTable {
     return processor.process('inner');
   }
 
+  leftJoin(tableToJoin:DataTable, predicate: (primaryRow:any, joinedRow:any)=>boolean): DataTable {
+    const processor = new JoinProcessor(this, tableToJoin, predicate);
+
+    return processor.process('left');
+  }
+
+  rightJoin(tableToJoin:DataTable, predicate: (primaryRow:any, joinedRow:any)=>boolean): DataTable {
+    const processor = new JoinProcessor(tableToJoin, this, predicate);
+
+    return processor.process('left');
+  }
+
+  fullJoin(tableToJoin:DataTable, predicate: (primaryRow:any, joinedRow:any)=>boolean): DataTable {
+    const processor = new JoinProcessor(this, tableToJoin, predicate);
+
+    return processor.process('full');
+  }
+
   private fillRowFromArray(data: any[]): void {
     const newRow = this.newRow();
     this._columns.forEach((column: any, index: number) => {
