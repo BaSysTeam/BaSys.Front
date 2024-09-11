@@ -1,6 +1,7 @@
 /* eslint-disable import/no-cycle */
 import UnionProcessor from './unionProcessor';
 import GroupByProcessor from './groupByProcessor';
+import JoinProcessor from './joinProcessor';
 import DataTableColumn from './dataTableColumn';
 
 export default class DataTable {
@@ -211,6 +212,12 @@ export default class DataTable {
     const processor = new UnionProcessor(this, tableToUnion);
 
     return processor.process(false);
+  }
+
+  innerJoin(tableToJoin:DataTable, predicate: (primaryRow:any, joinedRow:any)=>boolean): DataTable {
+    const processor = new JoinProcessor(this, tableToJoin, predicate);
+
+    return processor.process('inner');
   }
 
   private fillRowFromArray(data: any[]): void {
