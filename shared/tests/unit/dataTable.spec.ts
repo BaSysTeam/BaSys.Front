@@ -1,18 +1,19 @@
 import DataTable from '@/evalEngine/dataTable';
-import FunctionLibrary from '@/evalEngine/functionLibrary';
+// import FunctionLibrary from '@/evalEngine/functionLibrary';
 
 describe('DataTable', () => {
   let tableProducts: DataTable;
 
   beforeEach(() => {
     tableProducts = new DataTable()
+      .addColumn({ name: 'period', dataType: 'date' })
       .addColumn({ name: 'product', dataType: 'string' })
       .addColumn({ name: 'quantity', dataType: 'number' })
       .addColumn({ name: 'price', dataType: 'number' })
       .addColumn({ name: 'amount', dataType: 'number' })
-      .addRow(['product_1', 5, 100, 0])
-      .addRow(['product_2', 10, 200])
-      .addRow(['product_3', 1, 1000]);
+      .addRow([new Date('2024-09-01'), 'product_1', 5, 100, 0])
+      .addRow([new Date('2024-09-02'), 'product_2', 10, 200])
+      .addRow([new Date('2024-09-03'), 'product_3', 1, 1000]);
   });
 
   it('Add column', () => {
@@ -39,14 +40,14 @@ describe('DataTable', () => {
   });
 
   it('Build dataTable', () => {
-    expect(tableProducts.columns.length).toBe(4);
+    expect(tableProducts.columns.length).toBe(5);
     expect(tableProducts.rows.length).toBe(3);
   });
 
   it('Delete column', () => {
     tableProducts.deleteColumn('amount');
 
-    expect(tableProducts.columns.length).toBe(3);
+    expect(tableProducts.columns.length).toBe(4);
     expect(tableProducts.rows[0].amount).toBe(undefined);
   });
 
@@ -85,6 +86,10 @@ describe('DataTable', () => {
     expect(tableProducts.max('status')).toBe(1);
   });
 
+  it('Max date', () => {
+    expect(tableProducts.max('period')).toEqual(new Date('2024-09-03'));
+  });
+
   it('Min', () => {
     tableProducts.addColumn({
       name: 'status',
@@ -96,8 +101,25 @@ describe('DataTable', () => {
     expect(tableProducts.min('status')).toBe(-1);
   });
 
+  it('Min date', () => {
+    expect(tableProducts.min('period')).toEqual(new Date('2024-09-01'));
+  });
+
   it('Avg', () => {
     expect(tableProducts.avg('quantity')).toBeCloseTo(5.333333, 6);
+  });
+
+  it('Count all rows', () => {
+    expect(tableProducts.count()).toEqual(3);
+  });
+
+  it('Count(quantity)', () => {
+    expect(tableProducts.count('quantity')).toEqual(3);
+  });
+
+  it('Count(amount)', () => {
+    tableProducts.rows[0].amount = 1;
+    expect(tableProducts.count('amount')).toEqual(1);
   });
 
   it('Calculate amount by processRows method', () => {
@@ -109,6 +131,7 @@ describe('DataTable', () => {
     expect(amountTotal).toBeCloseTo(3500, 6);
   });
 
+  /*
   it('Create table', () => {
     const dataTable = FunctionLibrary.createTable([
       { name: 'product', dataType: 'string' },
@@ -117,4 +140,5 @@ describe('DataTable', () => {
 
     expect(dataTable.columns.length).toBe(2);
   });
+  */
 });

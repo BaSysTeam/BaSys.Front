@@ -1,3 +1,7 @@
+/* eslint-disable import/no-cycle */
+import UnionProcessor from './unionProcessor';
+import GroupByProcessor from './groupByProcessor';
+import JoinProcessor from './joinProcessor';
 import DataTableColumn from './dataTableColumn';
 
 export default class DataTable {
@@ -41,6 +45,21 @@ export default class DataTable {
     return this;
   }
 
+  clone(): DataTable {
+    const newTable = new DataTable();
+
+    this.columns.forEach((column: DataTableColumn) => newTable.addColumn(column));
+    this.rows.forEach((row: any) => {
+      const newRow = newTable.newRow();
+
+      Object.entries(row).forEach(([key, value]) => {
+        newRow[key] = value;
+      });
+    });
+
+    return newTable;
+  }
+
   deleteColumn(columnName: string): DataTable {
     const currentColumn = this.getColumn(columnName);
     if (!currentColumn) {
@@ -58,7 +77,7 @@ export default class DataTable {
     return this;
   }
 
-  newRow(): any {
+  newRow(pushNewRow = true): any {
     if (!this._columns.length) {
       throw new Error('Add columns to DataTable before add rows');
     }
@@ -67,7 +86,9 @@ export default class DataTable {
     this._columns.forEach((column: any) => {
       newRow[column.name] = column.defaultValue;
     });
-    this._rows.push(newRow);
+    if (pushNewRow) {
+      this._rows.push(newRow);
+    }
 
     return newRow;
   }
@@ -108,26 +129,28 @@ export default class DataTable {
     return result;
   }
 
-  min(columnName: string): number {
+  min(columnName: string): any {
     this.checkExistingColumn(columnName);
 
-    let minValue = Infinity;
+    let minValue:any;
     this._rows.forEach((row: any) => {
-      if (row[columnName] < minValue) {
-        minValue = row[columnName];
+      const value = row[columnName];
+      if (minValue === undefined || value < minValue) {
+        minValue = value;
       }
     });
 
     return minValue;
   }
 
-  max(columnName: string): number {
+  max(columnName: string): any {
     this.checkExistingColumn(columnName);
 
-    let maxValue = -Infinity;
+    let maxValue: any;
     this._rows.forEach((row: any) => {
-      if (row[columnName] > maxValue) {
-        maxValue = row[columnName];
+      const value = row[columnName];
+      if (maxValue === undefined || value > maxValue) {
+        maxValue = value;
       }
     });
 
@@ -151,9 +174,76 @@ export default class DataTable {
     return sum / count;
   }
 
+  count(columnName = ''): number {
+    if (!columnName) {
+      return this._rows.length;
+    }
+
+    this.checkExistingColumn(columnName);
+
+    let count = 0;
+    this._rows.forEach((row: any) => {
+      if (row[columnName]) {
+        count += 1;
+      }
+    });
+
+    return count;
+  }
+
   process(predicate: (row: any) => void): DataTable {
     this._rows.forEach((row: any) => predicate(row));
     return this;
+  }
+
+  groupBy(keyColumns: string[], groupingColumns: any[]): DataTable {
+    const processor = new GroupByProcessor(this, keyColumns, groupingColumns);
+
+    return processor.process();
+  }
+
+  unionAll(tableToUnion: DataTable): DataTable {
+    const processor = new UnionProcessor(this, tableToUnion);
+
+    return processor.process(true);
+  }
+
+  union(tableToUnion: DataTable): DataTable {
+    const processor = new UnionProcessor(this, tableToUnion);
+
+    return processor.process(false);
+  }
+
+  innerJoin(
+    tableToJoin:DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    columnSettings: any[] = [],
+  ): DataTable {
+    return (new JoinProcessor('inner', this, tableToJoin, predicate, columnSettings)).process();
+  }
+
+  leftJoin(
+    tableToJoin:DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    columnSettings: any[] = [],
+  ): DataTable {
+    return (new JoinProcessor('left', this, tableToJoin, predicate, columnSettings)).process();
+  }
+
+  rightJoin(
+    tableToJoin:DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    columnSettings: any[] = [],
+  ): DataTable {
+    return (new JoinProcessor('left', tableToJoin, this, predicate, columnSettings)).process();
+  }
+
+  fullJoin(
+    tableToJoin:DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    columnSettings: any[] = [],
+  ): DataTable {
+    return (new JoinProcessor('full', this, tableToJoin, predicate, columnSettings)).process();
   }
 
   private fillRowFromArray(data: any[]): void {

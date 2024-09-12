@@ -32,7 +32,7 @@ export default class DataTableColumn {
       case 'boolean':
         return false;
       case 'date':
-        return new Date('1980-01-01');
+        return undefined;
       default:
         throw new Error(`Data type ${dataType} not supported in DataTable.`);
     }
