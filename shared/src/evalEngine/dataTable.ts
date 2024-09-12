@@ -214,26 +214,42 @@ export default class DataTable {
     return processor.process(false);
   }
 
-  innerJoin(tableToJoin:DataTable, predicate: (primaryRow:any, joinedRow:any)=>boolean): DataTable {
-    const processor = new JoinProcessor(this, tableToJoin, predicate);
+  innerJoin(
+    tableToJoin:DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    columnSettings: any[] = [],
+  ): DataTable {
+    const processor = new JoinProcessor(this, tableToJoin, predicate, columnSettings);
 
     return processor.process('inner');
   }
 
-  leftJoin(tableToJoin:DataTable, predicate: (primaryRow:any, joinedRow:any)=>boolean): DataTable {
-    const processor = new JoinProcessor(this, tableToJoin, predicate);
+  leftJoin(
+    tableToJoin:DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    columnSettings: any[] = [],
+  ): DataTable {
+    const processor = new JoinProcessor(this, tableToJoin, predicate, columnSettings);
 
     return processor.process('left');
   }
 
-  rightJoin(tableToJoin:DataTable, predicate: (primaryRow:any, joinedRow:any)=>boolean): DataTable {
-    const processor = new JoinProcessor(tableToJoin, this, predicate);
+  rightJoin(
+    tableToJoin:DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    columnSettings: any[] = [],
+  ): DataTable {
+    const processor = new JoinProcessor(tableToJoin, this, predicate, columnSettings);
 
     return processor.process('left');
   }
 
-  fullJoin(tableToJoin:DataTable, predicate: (primaryRow:any, joinedRow:any)=>boolean): DataTable {
-    const processor = new JoinProcessor(this, tableToJoin, predicate);
+  fullJoin(
+    tableToJoin:DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    columnSettings: any[] = [],
+  ): DataTable {
+    const processor = new JoinProcessor(this, tableToJoin, predicate, columnSettings);
 
     return processor.process('full');
   }
