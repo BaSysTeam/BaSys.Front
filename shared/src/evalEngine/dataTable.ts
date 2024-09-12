@@ -219,9 +219,7 @@ export default class DataTable {
     predicate: (primaryRow:any, joinedRow:any)=>boolean,
     columnSettings: any[] = [],
   ): DataTable {
-    const processor = new JoinProcessor(this, tableToJoin, predicate, columnSettings);
-
-    return processor.process('inner');
+    return (new JoinProcessor('inner', this, tableToJoin, predicate, columnSettings)).process();
   }
 
   leftJoin(
@@ -229,9 +227,7 @@ export default class DataTable {
     predicate: (primaryRow:any, joinedRow:any)=>boolean,
     columnSettings: any[] = [],
   ): DataTable {
-    const processor = new JoinProcessor(this, tableToJoin, predicate, columnSettings);
-
-    return processor.process('left');
+    return (new JoinProcessor('left', this, tableToJoin, predicate, columnSettings)).process();
   }
 
   rightJoin(
@@ -239,9 +235,7 @@ export default class DataTable {
     predicate: (primaryRow:any, joinedRow:any)=>boolean,
     columnSettings: any[] = [],
   ): DataTable {
-    const processor = new JoinProcessor(tableToJoin, this, predicate, columnSettings);
-
-    return processor.process('left');
+    return (new JoinProcessor('left', tableToJoin, this, predicate, columnSettings)).process();
   }
 
   fullJoin(
@@ -249,9 +243,7 @@ export default class DataTable {
     predicate: (primaryRow:any, joinedRow:any)=>boolean,
     columnSettings: any[] = [],
   ): DataTable {
-    const processor = new JoinProcessor(this, tableToJoin, predicate, columnSettings);
-
-    return processor.process('full');
+    return (new JoinProcessor('full', this, tableToJoin, predicate, columnSettings)).process();
   }
 
   private fillRowFromArray(data: any[]): void {
