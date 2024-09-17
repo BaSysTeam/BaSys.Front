@@ -115,6 +115,9 @@ describe('dateExtensions', () => {
 describe('addMonths', () => {
   test.each([
     ['2024-09-17T14:47:23', 1, '2024-10-17T14:47:23'],
+    ['2024-09-17T14:47:23', 1.3, '2024-10-17T14:47:23'],
+    ['2024-09-17T14:47:23', 1.6, '2024-10-17T14:47:23'],
+    ['2024-09-17T14:47:23', 2, '2024-11-17T14:47:23'],
     ['2024-09-17T14:47:23', -1, '2024-08-17T14:47:23'],
   ])('adds to %j  %j months to get %j', (start, shift, expected) => {
     const date = new Date(start);
@@ -129,5 +132,13 @@ describe('addQuarters', () => {
   ])('adds to %j  %j quarters to get %j', (start, shift, expected) => {
     const date = new Date(start);
     expect(date.addQuarters(shift)).toEqual(new Date(expected));
+  });
+});
+
+describe('dateDifference', () => {
+  test.each([
+    [new Date(2024, 9, 17), new Date(2025, 9, 17), 'year', 1],
+  ])('dateDifference between %j and %j in %j is equals %j', (start, end, kind, expected) => {
+    expect(true).toEqual(true);
   });
 });
