@@ -3,6 +3,7 @@
 interface Date{
   beginDay(): Date;
   endDay(): Date;
+  beginMonth(): Date;
 }
 
 Date.prototype.beginDay = function beginDay(): Date {
@@ -19,4 +20,8 @@ Date.prototype.endDay = function beginDay(): Date {
     59,
     999,
   );
+};
+
+Date.prototype.beginMonth = function beginMonth():Date {
+  return new Date(this.getFullYear(), this.getMonth(), 1);
 };

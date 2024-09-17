@@ -10,4 +10,9 @@ describe('dateExtensions', () => {
     const date = new Date('2024-09-02T11:32:45');
     expect(date.endDay()).toEqual(new Date('2024-09-02T23:59:59'));
   });
+
+  it('beginMonth', () => {
+    const date = new Date('2024-09-17T11:54:22');
+    expect(date.beginMonth()).toEqual(new Date('2024-09-01T00:00:00'));
+  });
 });
