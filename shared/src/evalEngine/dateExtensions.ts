@@ -3,12 +3,16 @@
 interface Date{
   beginDay(): Date;
   endDay(): Date;
+  addDays(days: number): Date;
   beginMonth(): Date;
   endMonth(): Date;
+  addMonths(months: number): Date;
   beginQuarter():Date;
   endQuarter():Date;
+  addQuarters(quarters: number): Date;
   beginYear(): Date;
   endYear(): Date;
+  addYears(years: number): Date;
 }
 
 Date.prototype.beginDay = function beginDay(): Date {
@@ -27,12 +31,24 @@ Date.prototype.endDay = function endDay(): Date {
   );
 };
 
+Date.prototype.addDays = function addDays(days: number): Date {
+  const result = new Date(this);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+
 Date.prototype.beginMonth = function beginMonth():Date {
   return new Date(this.getFullYear(), this.getMonth(), 1);
 };
 
 Date.prototype.endMonth = function endMonth(): Date {
   return (new Date(this.getFullYear(), this.getMonth() + 1, 0)).endDay();
+};
+
+Date.prototype.addMonths = function addMonths(months):Date {
+  const result = new Date(this);
+  result.setMonth(result.getMonth() + months);
+  return result;
 };
 
 Date.prototype.beginQuarter = function beginQuarter():Date {
@@ -95,6 +111,11 @@ Date.prototype.endQuarter = function endQuarter():Date {
   return (new Date(this.getFullYear(), month, 1)).endMonth();
 };
 
+Date.prototype.addQuarters = function addQuarters(quarters):Date {
+  const result = new Date(this);
+  return result.addMonths(quarters * 3);
+};
+
 Date.prototype.beginYear = function beginYear(): Date {
   return new Date(this.getFullYear(), 0, 1);
 };
@@ -109,4 +130,10 @@ Date.prototype.endYear = function endYear(): Date {
     59,
     999,
   );
+};
+
+Date.prototype.addYears = function addYears(years: number): Date {
+  const result = (new Date(this));
+  result.setFullYear(result.getFullYear() + years);
+  return result;
 };

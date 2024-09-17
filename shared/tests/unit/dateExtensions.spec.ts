@@ -11,6 +11,21 @@ describe('dateExtensions', () => {
     expect(date.endDay()).toEqual(new Date(2024, 8, 2, 23, 59, 59, 999));
   });
 
+  it('addDays plus 1', () => {
+    const date = new Date('2024-09-02T11:32:45');
+    expect(date.addDays(1)).toEqual(new Date(2024, 8, 3, 11, 32, 45));
+  });
+
+  it('addDays plus 30', () => {
+    const date = new Date('2024-09-02T11:32:45');
+    expect(date.addDays(30)).toEqual(new Date(2024, 9, 2, 11, 32, 45));
+  });
+
+  it('addDays minus 1', () => {
+    const date = new Date('2024-09-02T11:32:45');
+    expect(date.addDays(-1)).toEqual(new Date(2024, 8, 1, 11, 32, 45));
+  });
+
   it('beginMonth', () => {
     const date = new Date('2024-09-17T11:54:22');
     expect(date.beginMonth()).toEqual(new Date('2024-09-01T00:00:00'));
@@ -84,5 +99,35 @@ describe('dateExtensions', () => {
   it('endYear', () => {
     const date = new Date('2024-09-02T11:32:45');
     expect(date.endYear()).toEqual(new Date(2024, 11, 31, 23, 59, 59, 999));
+  });
+
+  it('addYears plus 1', () => {
+    const date = new Date('2024-09-02T11:32:45');
+    expect(date.addYears(1)).toEqual(new Date(2025, 8, 2, 11, 32, 45, 0));
+  });
+
+  it('addYears minus 1', () => {
+    const date = new Date('2024-09-02T11:32:45');
+    expect(date.addYears(-1)).toEqual(new Date(2023, 8, 2, 11, 32, 45, 0));
+  });
+});
+
+describe('addMonths', () => {
+  test.each([
+    ['2024-09-17T14:47:23', 1, '2024-10-17T14:47:23'],
+    ['2024-09-17T14:47:23', -1, '2024-08-17T14:47:23'],
+  ])('adds to %j  %j months to get %j', (start, shift, expected) => {
+    const date = new Date(start);
+    expect(date.addMonths(shift)).toEqual(new Date(expected));
+  });
+});
+
+describe('addQuarters', () => {
+  test.each([
+    ['2024-09-17T14:47:23', 1, '2024-12-17T14:47:23'],
+    ['2024-09-17T14:47:23', -1, '2024-06-17T14:47:23'],
+  ])('adds to %j  %j quarters to get %j', (start, shift, expected) => {
+    const date = new Date(start);
+    expect(date.addQuarters(shift)).toEqual(new Date(expected));
   });
 });
