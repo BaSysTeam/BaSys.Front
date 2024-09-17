@@ -75,4 +75,14 @@ describe('dateExtensions', () => {
     const date = new Date('2024-11-17T11:54:22');
     expect(date.endQuarter()).toEqual(new Date(2024, 11, 31, 23, 59, 59, 999));
   });
+
+  it('beginYear', () => {
+    const date = new Date('2024-09-02T11:32:45');
+    expect(date.beginYear()).toEqual(new Date(2024, 0, 1));
+  });
+
+  it('endYear', () => {
+    const date = new Date('2024-09-02T11:32:45');
+    expect(date.endYear()).toEqual(new Date(2024, 11, 31, 23, 59, 59, 999));
+  });
 });

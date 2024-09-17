@@ -94,3 +94,19 @@ Date.prototype.endQuarter = function endQuarter():Date {
 
   return (new Date(this.getFullYear(), month, 1)).endMonth();
 };
+
+Date.prototype.beginYear = function beginYear(): Date {
+  return new Date(this.getFullYear(), 0, 1);
+};
+
+Date.prototype.endYear = function endYear(): Date {
+  return new Date(
+    this.getFullYear(),
+    11,
+    31,
+    23,
+    59,
+    59,
+    999,
+  );
+};
