@@ -30,7 +30,7 @@ export default class ExpressionEvaluator {
       ifs,
       createTable,
       from,
-      today,
+      dateTimeNow,
     } = FunctionLibrary;
 
     const DbType = DbTypeEnum;
@@ -63,7 +63,7 @@ export default class ExpressionEvaluator {
       ifs,
       createTable,
       from,
-      today,
+      dateTimeNow,
     } = FunctionLibrary;
 
     const DbType = DbTypeEnum;
