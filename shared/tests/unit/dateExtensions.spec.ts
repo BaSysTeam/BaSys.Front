@@ -35,4 +35,44 @@ describe('dateExtensions', () => {
     const date = new Date('2023-02-17T11:54:22');
     expect(date.endMonth()).toEqual(new Date(2023, 1, 28, 23, 59, 59, 999));
   });
+
+  it('beginQuarter 1 quarter', () => {
+    const date = new Date('2024-02-17T11:54:22');
+    expect(date.beginQuarter()).toEqual(new Date(2024, 0, 1));
+  });
+
+  it('beginQuarter 2 quarter', () => {
+    const date = new Date('2024-05-17T11:54:22');
+    expect(date.beginQuarter()).toEqual(new Date(2024, 3, 1));
+  });
+
+  it('beginQuarter 3 quarter', () => {
+    const date = new Date('2024-09-17T11:54:22');
+    expect(date.beginQuarter()).toEqual(new Date(2024, 6, 1));
+  });
+
+  it('beginQuarter 4 quarter', () => {
+    const date = new Date('2024-11-17T11:54:22');
+    expect(date.beginQuarter()).toEqual(new Date(2024, 9, 1));
+  });
+
+  it('endQuarter 1 quarter', () => {
+    const date = new Date('2024-02-17T11:54:22');
+    expect(date.endQuarter()).toEqual(new Date(2024, 2, 31, 23, 59, 59, 999));
+  });
+
+  it('endQuarter 2 quarter', () => {
+    const date = new Date('2024-05-17T11:54:22');
+    expect(date.endQuarter()).toEqual(new Date(2024, 5, 30, 23, 59, 59, 999));
+  });
+
+  it('endQuarter 3 quarter', () => {
+    const date = new Date('2024-09-17T11:54:22');
+    expect(date.endQuarter()).toEqual(new Date(2024, 8, 30, 23, 59, 59, 999));
+  });
+
+  it('endQuarter 4 quarter', () => {
+    const date = new Date('2024-11-17T11:54:22');
+    expect(date.endQuarter()).toEqual(new Date(2024, 11, 31, 23, 59, 59, 999));
+  });
 });
