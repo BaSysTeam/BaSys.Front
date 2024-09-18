@@ -57,4 +57,30 @@ export default class FunctionLibrary {
   static dateTimeNow(): Date {
     return new Date();
   }
+
+  static dateDifference(startDate: Date, endDate: Date, kind: 'year' | 'month' | 'quarter' | 'day'): number {
+    const diffInMilliseconds = endDate.getTime() - startDate.getTime();
+
+    switch (kind) {
+      case 'year':
+        return endDate.getFullYear() - startDate.getFullYear();
+
+      case 'month':
+        return (endDate.getFullYear() - startDate.getFullYear())
+          * 12 + (endDate.getMonth() - startDate.getMonth());
+
+      case 'quarter':
+        // eslint-disable-next-line no-case-declarations
+        const startQuarter = Math.floor(startDate.getMonth() / 3);
+        // eslint-disable-next-line no-case-declarations
+        const endQuarter = Math.floor(endDate.getMonth() / 3);
+        return (endDate.getFullYear() - startDate.getFullYear()) * 4 + (endQuarter - startQuarter);
+
+      case 'day':
+        return Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
+
+      default:
+        throw new Error('dateDifference. Invalid interval kind.');
+    }
+  }
 }

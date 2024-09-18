@@ -31,6 +31,7 @@ export default class ExpressionEvaluator {
       createTable,
       from,
       dateTimeNow,
+      dateDifference,
     } = FunctionLibrary;
 
     const DbType = DbTypeEnum;
@@ -64,6 +65,7 @@ export default class ExpressionEvaluator {
       createTable,
       from,
       dateTimeNow,
+      dateDifference,
     } = FunctionLibrary;
 
     const DbType = DbTypeEnum;
