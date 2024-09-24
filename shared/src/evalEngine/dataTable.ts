@@ -108,6 +108,18 @@ export default class DataTable {
     return this;
   }
 
+  load(data: any[]): DataTable {
+    if (!this._columns.length) {
+      throw new Error('Add columns to DataTable before add rows');
+    }
+
+    data.forEach((row: any) => {
+      this.addRow(row);
+    });
+
+    return this;
+  }
+
   clear(): DataTable {
     this._columns = [];
     this._rows = [];
