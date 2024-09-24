@@ -1,4 +1,5 @@
 /* eslint-disable import/no-cycle */
+import DistributionProcessor from './distributionProcessor';
 import UnionProcessor from './unionProcessor';
 import GroupByProcessor from './groupByProcessor';
 import JoinProcessor from './joinProcessor';
@@ -116,6 +117,11 @@ export default class DataTable {
 
   filter(predicate: (row: any) => boolean): DataTable {
     this._rows = this._rows.filter((row) => predicate(row));
+    return this;
+  }
+
+  orderBy(sortFunction: (a: any, b: any) => number): DataTable {
+    this._rows.sort(sortFunction);
     return this;
   }
 
@@ -244,6 +250,42 @@ export default class DataTable {
     columnSettings: any[] = [],
   ): DataTable {
     return (new JoinProcessor('full', this, tableToJoin, predicate, columnSettings)).process();
+  }
+
+  distributeFifo(
+    distributionTable: DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    sortColumn: string,
+    distributionColumn: string,
+    columnSettings: any[] = [],
+  ): DataTable {
+    return (new DistributionProcessor(
+      'fifo',
+      this,
+      distributionTable,
+      predicate,
+      sortColumn,
+      distributionColumn,
+      columnSettings,
+    )).process();
+  }
+
+  distributeLifo(
+    distributionTable: DataTable,
+    predicate: (primaryRow:any, joinedRow:any)=>boolean,
+    sortColumn: string,
+    distributionColumn: string,
+    columnSettings: any[] = [],
+  ): DataTable {
+    return (new DistributionProcessor(
+      'Lifo',
+      this,
+      distributionTable,
+      predicate,
+      sortColumn,
+      distributionColumn,
+      columnSettings,
+    )).process();
   }
 
   private fillRowFromArray(data: any[]): void {
