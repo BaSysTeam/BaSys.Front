@@ -9,6 +9,7 @@ export default class DistributionProcessor {
   predicate: (primaryRow: any, joinedRow: any) => boolean;
   sortColumn: string;
   distributionColumn: string;
+  distributionColumnAlias: string;
   columnsSettings: ColumnDescription[];
 
   constructor(
@@ -26,7 +27,23 @@ export default class DistributionProcessor {
     this.predicate = predicate;
     this.sortColumn = sortColumn;
     this.distributionColumn = distributionColumn;
-    this.columnsSettings = columnSettings;
+
+    this.columnsSettings = [];
+    if (columnSettings && columnSettings.length > 0) {
+      columnSettings.forEach((column) => {
+        this.columnsSettings.push(new ColumnDescription(column));
+      });
+    }
+
+    this.distributionColumnAlias = this.distributionColumn;
+    if (this.columnsSettings.length) {
+      const distributionColumnSettings = this.columnsSettings.find(
+        (column) => column.name === this.distributionColumn,
+      );
+      if (distributionColumnSettings) {
+        this.distributionColumnAlias = distributionColumnSettings.alias;
+      }
+    }
   }
 
   process(): DataTable {
@@ -63,31 +80,66 @@ export default class DistributionProcessor {
         filterResult.forEach((secondaryRow: any) => {
           if (check > 0) {
             const newRow = resultTable.newRow(true);
-            Object.entries(secondaryRow).forEach(([key, value]) => {
-              newRow[key] = value;
-            });
-            Object.entries(primaryRow).forEach(([key, value]) => {
-              newRow[key] = value;
-            });
+            if (this.columnsSettings.length) {
+              this.columnsSettings.forEach((column: ColumnDescription) => {
+                if (column.isPrimaryTable) {
+                  newRow[column.alias] = primaryRow[column.name];
+                } else if (column.isSecondaryTable) {
+                  newRow[column.alias] = secondaryRow[column.name];
+                }
+              });
+            } else {
+              Object.entries(secondaryRow).forEach(([key, value]) => {
+                newRow[key] = value;
+              });
+              Object.entries(primaryRow).forEach(([key, value]) => {
+                newRow[key] = value;
+              });
+            }
 
             const distributionValue = Math.min(check, secondaryRow[this.distributionColumn]);
-            newRow[this.distributionColumn] = distributionValue;
+            newRow[this.distributionColumnAlias] = distributionValue;
             check -= distributionValue;
           }
         });
 
         // Add undistributed data.
         if (check > 0) {
-          const newRow = resultTable.newRow(true);
-          Object.entries(primaryRow).forEach(([key, value]) => {
-            newRow[key] = value;
-          });
-          newRow[this.distributionColumn] = check;
+          this.addUndistributedData(
+            resultTable,
+            primaryRow,
+            check,
+            this.distributionColumnAlias,
+            this.columnsSettings,
+          );
         }
       }
     });
 
     return resultTable;
+  }
+
+  private addUndistributedData(
+    resultTable: DataTable,
+    primaryRow: any,
+    check: number,
+    distributionColumnAlias: string,
+    columnsSettings: ColumnDescription[],
+
+  ): void {
+    const newRow = resultTable.newRow(true);
+    if (columnsSettings.length) {
+      columnsSettings.forEach((column: ColumnDescription) => {
+        if (column.isPrimaryTable) {
+          newRow[column.alias] = primaryRow[column.name];
+        }
+      });
+    } else {
+      Object.entries(primaryRow).forEach(([key, value]) => {
+        newRow[key] = value;
+      });
+    }
+    newRow[distributionColumnAlias] = check;
   }
 
   private sortFunction(a: any, b: any, sortColumn: string, sortOrder: string): number {
