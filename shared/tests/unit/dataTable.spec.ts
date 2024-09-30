@@ -53,7 +53,7 @@ describe('DataTable', () => {
 
   it('Clear table', () => {
     tableProducts.clear();
-    expect(tableProducts.columns.length).toBe(0);
+    expect(tableProducts.columns.length).toBe(5);
     expect(tableProducts.rows.length).toBe(0);
   });
 

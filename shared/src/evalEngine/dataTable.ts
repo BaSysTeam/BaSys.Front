@@ -121,7 +121,6 @@ export default class DataTable {
   }
 
   clear(): DataTable {
-    this._columns = [];
     this._rows = [];
 
     return this;

@@ -41,9 +41,12 @@ export default class FunctionLibrary {
 
   static createTable(columns: any[]):DataTable {
     const dataTable = new DataTable();
-    columns.forEach((column: any) => {
-      dataTable.addColumn(column);
-    });
+    if (columns != null && columns.length) {
+      columns.forEach((column: any) => {
+        dataTable.addColumn(column);
+      });
+    }
+
     return dataTable;
   }
 

@@ -33,4 +33,9 @@ describe('FunctionLibrary.ifs', () => {
     let taxId = 3;
     expect(FunctionLibrary.ifs(taxId === 1, 10, taxId === 2, 20, true, 0)).toEqual(0);
   });
+  it('All conditions are false. No default value. Return null', () => {
+    // eslint-disable-next-line prefer-const
+    let taxId = 3;
+    expect(FunctionLibrary.ifs(taxId === 1, 10, taxId === 2, 20)).toEqual(null);
+  });
 });
