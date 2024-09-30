@@ -11,9 +11,9 @@
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0"
       :style="{ 'width': navPanelWidth + 'px' }">
-      <MetadataTreeComponent :isMenuMinimized="isMenuMinimized"/>
+      <NavigationPanelComponent></NavigationPanelComponent>
       <div v-if="isMenuMinimized">
-        <h4 class="bs-metadatatree-text">Metadata Tree</h4>
+        <h4 class="bs-metadatatree-text">Metadata</h4>
       </div>
     </div>
     <div class="col">
@@ -28,6 +28,7 @@ import { useRouter } from 'vue-router';
 import { usePrimeVue } from 'primevue/config';
 import Toast from 'primevue/toast';
 import MetadataTreeComponent from '@/components/MetadataTreeComponent.vue';
+import NavigationPanelComponent from '@/components/NavigationPanelComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
 import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
@@ -37,12 +38,13 @@ import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
     AppHeaderComponent,
     UserActionsComponent,
     MetadataTreeComponent,
+    NavigationPanelComponent,
     Toast,
   },
 })
 export default class App extends Vue {
   isMenuMinimized = false;
-  navPanelWidth = 300;
+  navPanelWidth = 200;
   router = useRouter();
   primeVue = usePrimeVue();
 
@@ -55,7 +57,7 @@ export default class App extends Vue {
     if (this.isMenuMinimized) {
       this.navPanelWidth = 50;
     } else {
-      this.navPanelWidth = 300;
+      this.navPanelWidth = 200;
     }
   }
 
