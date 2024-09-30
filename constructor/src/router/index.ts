@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import MetaObjectEditView from '@/views/MetaObjectEditView.vue';
+import MetaObjectsListView from '@/views/MetaObjectsListView.vue';
 import ExpressionsConsoleView from '@/views/ExpressionsConsoleView.vue';
 import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
@@ -34,9 +35,15 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
-    path: '/meta-object/edit/:kind/:name',
-    name: 'meta-object-edit',
+    path: '/meta-objects/edit/:kind/:name',
+    name: 'meta-objects-edit',
     component: MetaObjectEditView,
+    props: true,
+  },
+  {
+    path: '/meta-objects/list/:kind',
+    name: 'meta-objects-list',
+    component: MetaObjectsListView,
     props: true,
   },
 ];

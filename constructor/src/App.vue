@@ -11,7 +11,7 @@
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0"
       :style="{ 'width': navPanelWidth + 'px' }">
-      <NavigationPanelComponent></NavigationPanelComponent>
+      <NavigationPanelComponent :is-minimized="isMenuMinimized"></NavigationPanelComponent>
       <div v-if="isMenuMinimized">
         <h4 class="bs-metadatatree-text">Metadata</h4>
       </div>
@@ -89,7 +89,7 @@ body {
   transform: rotate(-90deg);
   width: auto;
   position: fixed;
-  left: -30px;
+  left: -10px;
   top: 100px;
   margin: 0;
 }
