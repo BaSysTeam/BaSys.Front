@@ -5,6 +5,7 @@ import {
 import { useRouter } from 'vue-router';
 import Menu from 'primevue/menu';
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
+import { useI18n } from 'vue-i18n';
 
 // @component
 const name = 'NavigationPanelComponent';
@@ -13,6 +14,7 @@ const metadataGroup = ref<any>({ label: 'Metadata', items: [] });
 const navMenuItems = ref<any[]>([]);
 const router = useRouter();
 const provider = new MetaObjectKindsProvider();
+const { t } = useI18n({ useScope: 'global' });
 
 // Props
 const props = defineProps({ isMinimized: { type: Boolean, default: false } });
@@ -40,13 +42,13 @@ onBeforeMount(() => {
   const systemGroup = {
     label: 'System',
     items: [{
-      label: 'Data types',
+      label: t('dataTypes'),
       command: () => onDataTypesClick(),
     }, {
       label: 'Meta object kinds',
       command: () => onMetadataKindsClick(),
     }, {
-      label: 'Console',
+      label: t('console'),
       command: () => onConsoleClick(),
     }],
   };
