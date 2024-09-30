@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import {
-  ref, onBeforeMount, onMounted, defineProps, defineEmits, PropType, computed,
+  ref, onMounted, defineProps, watch, computed,
 } from 'vue';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import DataTable from 'primevue/datatable';
 import Divider from 'primevue/divider';
 import MetaObject from '@/models/metaObject';
+import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
+import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 
 // @component
@@ -15,13 +17,29 @@ const name = 'MetaObjectsListView';
 // Props
 const props = defineProps({ kind: { type: String, required: true } });
 const isWaiting = ref(false);
-const formTitle = ref<string>('Meta objects');
+const kindTitle = ref('');
 const items = ref<MetaObject[]>([]);
 const selectedRow = ref<any>(null);
 
 const dataTableStyle = computed(() => ({
   height: `${window.innerHeight - 150}px`,
 }));
+
+const formTitle = computed(() => `Meta objects: ${kindTitle.value}`);
+
+const kindProvider = new MetaObjectKindsProvider();
+
+async function updateKindSettingsAsync(kindName: string): Promise<void> {
+  const kindResult = await kindProvider.getSettingsItemByName(kindName);
+
+  if (kindResult.isOK) {
+    kindTitle.value = kindResult.data.title;
+  }
+}
+
+watch(() => props.kind, async (newVal) => {
+  await updateKindSettingsAsync(newVal);
+});
 
 // Event handlers
 function onAddClicked(): void {
@@ -43,6 +61,11 @@ function onRowDblClick(): void {
 function onRowSelect(): void {
   console.log('RowSelect');
 }
+
+// Life cycle hooks
+onMounted(async () => {
+  await updateKindSettingsAsync(props.kind);
+});
 
 </script>
 

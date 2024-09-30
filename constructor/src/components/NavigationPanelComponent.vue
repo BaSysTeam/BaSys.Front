@@ -43,7 +43,7 @@ onBeforeMount(() => {
       label: 'Data types',
       command: () => onDataTypesClick(),
     }, {
-      label: 'Metadata kinds',
+      label: 'Meta object kinds',
       command: () => onMetadataKindsClick(),
     }, {
       label: 'Console',
