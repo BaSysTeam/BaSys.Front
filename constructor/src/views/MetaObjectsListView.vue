@@ -5,9 +5,9 @@ import {
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import MetaObject from '@/models/metaObject';
-import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import { useI18n } from 'vue-i18n';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -19,10 +19,12 @@ const { t } = useI18n({ useScope: 'global' });
 
 // Props
 const props = defineProps({ kind: { type: String, required: true } });
+
+// Data
 const isWaiting = ref(false);
 const kindTitle = ref('');
 const items = ref<MetaObject[]>([]);
-const selectedRow = ref<any>(null);
+const selectedRow = ref<any>({});
 
 const dataTableStyle = computed(() => ({
   height: `${window.innerHeight - 150}px`,
@@ -30,18 +32,27 @@ const dataTableStyle = computed(() => ({
 
 const formTitle = computed(() => `${t('metaObjects')}: ${kindTitle.value}`);
 
-const kindProvider = new MetaObjectKindsProvider();
+const provider = new MetaObjectProvider();
 
-async function updateKindSettingsAsync(kindName: string): Promise<void> {
-  const kindResult = await kindProvider.getSettingsItemByName(kindName);
+async function updateListAsync(kindName: string): Promise<void> {
+  isWaiting.value = true;
 
-  if (kindResult.isOK) {
-    kindTitle.value = kindResult.data.title;
+  const result = await provider.getKindList(kindName);
+  console.log('updateList', result);
+  if (result.isOK) {
+    kindTitle.value = result.data.title;
+    items.value = [];
+    result.data.items.forEach((item: any) => {
+      items.value.push(item);
+    });
+    console.log('items', items.value);
   }
+
+  isWaiting.value = false;
 }
 
 watch(() => props.kind, async (newVal) => {
-  await updateKindSettingsAsync(newVal);
+  await updateListAsync(newVal);
 });
 
 // Event handlers
@@ -67,7 +78,7 @@ function onRowSelect(): void {
 
 // Life cycle hooks
 onMounted(async () => {
-  await updateKindSettingsAsync(props.kind);
+  await updateListAsync(props.kind);
 });
 
 </script>
@@ -120,7 +131,7 @@ onMounted(async () => {
       <div class="card m-1">
         <DataTable
           v-model:selection="selectedRow"
-          v-model:value="items"
+          :value="items"
           :style="dataTableStyle"
           :metaKeySelection="true"
           showGridlines
@@ -136,9 +147,9 @@ onMounted(async () => {
               {{ currentRow.index + 1 }}
             </template>
           </Column>
-          <Column field="title" header="Title"></Column>
-          <Column field="name" header="Name"></Column>
-          <Column field="memo" header="Memo"></Column>
+          <Column field="title" :header="$t('title')"></Column>
+          <Column field="name" :header="$t('name')"></Column>
+          <Column field="memo" :header="$t('memo')"></Column>
 
         </DataTable>
       </div>

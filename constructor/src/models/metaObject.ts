@@ -1,17 +1,19 @@
 export default class MetaObject {
-  metaObjectKindUid!:string;
-  name!:string;
-  title!:string;
-  memo!:string;
+  metaObjectKindUid:string;
+  uid:string;
+  name:string;
+  title:string;
+  memo:string;
 
   constructor(params:any) {
-    let initialData: any = {};
+    let data: any = {};
     if (params != null) {
-      initialData = params;
+      data = params;
     }
-    this.metaObjectKindUid = initialData.metaObjectKindUid || '';
-    this.title = initialData.title || '';
-    this.name = initialData.name || '';
-    this.memo = initialData.memo || '';
+    this.metaObjectKindUid = data.metaObjectKindUid || '';
+    this.uid = data.uid || '';
+    this.title = data.title || '';
+    this.name = data.name || '';
+    this.memo = data.memo || '';
   }
 }
