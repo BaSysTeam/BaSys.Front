@@ -9,12 +9,12 @@ import { useI18n } from 'vue-i18n';
 
 // @component
 const name = 'NavigationPanelComponent';
+const { t } = useI18n({ useScope: 'global' });
 
-const metadataGroup = ref<any>({ label: 'Metadata', items: [] });
+const metadataGroup = ref<any>({ label: t('metadata'), items: [] });
 const navMenuItems = ref<any[]>([]);
 const router = useRouter();
 const provider = new MetaObjectKindsProvider();
-const { t } = useI18n({ useScope: 'global' });
 
 // Props
 const props = defineProps({ isMinimized: { type: Boolean, default: false } });
@@ -40,12 +40,12 @@ onBeforeMount(() => {
   navMenuItems.value.push(metadataGroup.value);
 
   const systemGroup = {
-    label: 'System',
+    label: t('systemMenuGroup'),
     items: [{
       label: t('dataTypes'),
       command: () => onDataTypesClick(),
     }, {
-      label: 'Meta object kinds',
+      label: t('metaObjectKindsShort'),
       command: () => onMetadataKindsClick(),
     }, {
       label: t('console'),

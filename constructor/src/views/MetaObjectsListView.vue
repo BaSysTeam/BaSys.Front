@@ -9,10 +9,13 @@ import Divider from 'primevue/divider';
 import MetaObject from '@/models/metaObject';
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
+import { useI18n } from 'vue-i18n';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 
 // @component
 const name = 'MetaObjectsListView';
+
+const { t } = useI18n({ useScope: 'global' });
 
 // Props
 const props = defineProps({ kind: { type: String, required: true } });
@@ -25,7 +28,7 @@ const dataTableStyle = computed(() => ({
   height: `${window.innerHeight - 150}px`,
 }));
 
-const formTitle = computed(() => `Meta objects: ${kindTitle.value}`);
+const formTitle = computed(() => `${t('metaObjects')}: ${kindTitle.value}`);
 
 const kindProvider = new MetaObjectKindsProvider();
 
@@ -89,7 +92,7 @@ onMounted(async () => {
           @click="onAddClicked"
         />
         <Button
-          label="Edit"
+          :label="$t('edit')"
           severity="primary"
           size="small"
           outlined
@@ -97,7 +100,7 @@ onMounted(async () => {
           @click="onEditClicked"
         />
         <Button
-          label="Delete"
+          :label="$t('delete')"
           severity="danger"
           size="small"
           outlined
@@ -127,7 +130,7 @@ onMounted(async () => {
           @row-dblclick="onRowDblClick"
           @row-select="onRowSelect"
         >
-          <template #empty> No items found. </template>
+          <template #empty> {{$t('noItemsFound')}} </template>
           <Column header="#" style="width: 50px">
             <template #body="currentRow">
               {{ currentRow.index + 1 }}
