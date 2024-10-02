@@ -22,7 +22,7 @@ const props = defineProps({
 
 // Data
 const metaObject = ref<MetaObjectCreateDto>(new MetaObjectCreateDto());
-const header = computed(() => `${t('new')} ${props.kindTitle}`);
+const header = computed(() => `${props.kindTitle}`);
 
 // Emits
 const emit = defineEmits({ close: (item: MetaObjectCreateDto) => true });
@@ -44,7 +44,7 @@ function onCreateClick(): void {
   <div>
     <Dialog
       :visible="true"
-      :style="{width: '25rem'}"
+      :style="{width: '30rem'}"
       :draggable="false"
       :header="header"
       class="pb-0"
@@ -55,11 +55,10 @@ function onCreateClick(): void {
         <div class="field grid">
           <label
             for="fld-title"
-            class="col-fixed bs-required"
-            style="width:110px">
+            class="col-4 bs-required">
             {{$t('title')}}
           </label>
-          <div class="col">
+          <div class="col-8">
             <InputText
               id="fld-title"
               size="small"
@@ -72,11 +71,10 @@ function onCreateClick(): void {
         <div class="field grid">
           <label
             for="name"
-            class="col-fixed bs-required"
-            style="width:110px">
+            class="col-4 bs-required">
             {{$t('name')}}
           </label>
-          <div class="col">
+          <div class="col-8">
             <InputText
               id="name"
               size="small"
@@ -89,11 +87,10 @@ function onCreateClick(): void {
         <div class="field grid">
           <label
             for="comment"
-            class="col-fixed"
-            style="width:110px">
+            class="col-4">
             {{$t('memo')}}
           </label>
-          <div class="col">
+          <div class="col-8">
             <Textarea
               id="comment"
               rows="3"

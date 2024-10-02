@@ -104,7 +104,7 @@ async function onCreateDialogClose(args: MetaObjectCreateDto): Promise<void> {
     if (response.isOK) {
       await router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: args.name } });
     } else {
-      this.toastHelper.error(response.message);
+      toastHelper.error(response.message);
       console.error(response.presentation);
     }
   }
