@@ -11,7 +11,7 @@ import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import MetaObject from '@/models/metaObject';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
-import MetaObjectCreateComponent from '@/components/MetaObjectCreateComponent.vue';
+import MetaObjectCreateDialog from '@/components/MetaObjectCreateDialog.vue';
 import { useI18n } from 'vue-i18n';
 import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -197,10 +197,10 @@ onMounted(async () => {
   </div>
 
   <!--Create dialog-->
-  <MetaObjectCreateComponent v-if="isCreateDialogOpen"
+  <MetaObjectCreateDialog v-if="isCreateDialogOpen"
                              :kind-name="props.kind"
                              :kind-title="kindTitle"
-                             @close="onCreateDialogClose"></MetaObjectCreateComponent>
+                             @close="onCreateDialogClose"></MetaObjectCreateDialog>
 </template>
 
 <style scoped>
