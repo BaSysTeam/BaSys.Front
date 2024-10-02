@@ -3,6 +3,7 @@ import { mixins, Options } from 'vue-class-component';
 import {
   Vue, Prop, Watch,
 } from 'vue-property-decorator';
+import { useRouter } from 'vue-router';
 import { Codemirror } from 'vue-codemirror';
 import { json as jsonLang } from '@codemirror/lang-json';
 import { githubLight } from '@ddietr/codemirror-themes/github-light';
@@ -49,6 +50,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   // settingsJson = '';
   provider = new MetaObjectProvider();
+  router = useRouter();
   confirm = useConfirm();
   dataTypesProvider = new DataTypeProvider();
   settings = new MetaObjectStorableSettings({});
@@ -118,8 +120,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     this.update();
   }
 
+  onReturnClick(): void {
+    this.router.push({ name: 'meta-objects-list', params: { kind: this.kind } });
+  }
+
   onSaveClick():void {
-    console.log('Save click');
     this.save();
   }
 
@@ -338,6 +343,14 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     <div class="grid">
       <div class="col-12">
         <ButtonGroup>
+          <Button
+            :label="$t('back')"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-arrow-left"
+            @click="onReturnClick"
+          />
           <Button
             :label="$t('save')"
             severity="primary"

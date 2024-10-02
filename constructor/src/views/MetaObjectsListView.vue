@@ -2,6 +2,8 @@
 import {
   ref, onMounted, defineProps, watch, computed,
 } from 'vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import DataTable from 'primevue/datatable';
@@ -9,19 +11,25 @@ import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import MetaObject from '@/models/metaObject';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
+import MetaObjectCreateComponent from '@/components/MetaObjectCreateComponent.vue';
 import { useI18n } from 'vue-i18n';
+import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 // @component
 const name = 'MetaObjectsListView';
 
 const { t } = useI18n({ useScope: 'global' });
+const router = useRouter();
+const toastHelper = new ToastHelper(useToast());
 
 // Props
 const props = defineProps({ kind: { type: String, required: true } });
 
 // Data
 const isWaiting = ref(false);
+const isCreateDialogOpen = ref(false);
 const kindTitle = ref('');
 const items = ref<MetaObject[]>([]);
 const selectedRow = ref<any>({});
@@ -38,17 +46,33 @@ async function updateListAsync(kindName: string): Promise<void> {
   isWaiting.value = true;
 
   const result = await provider.getKindList(kindName);
-  console.log('updateList', result);
+
   if (result.isOK) {
     kindTitle.value = result.data.title;
     items.value = [];
     result.data.items.forEach((item: any) => {
       items.value.push(item);
     });
-    console.log('items', items.value);
+
+    if (items.value.length) {
+      const [firstValue] = items.value;
+      selectedRow.value = firstValue;
+    }
   }
 
   isWaiting.value = false;
+}
+
+function isSelectedRowEmpty(): boolean {
+  return Object.keys(selectedRow.value).length === 0;
+}
+
+function navigateToEdit(): void {
+  if (isSelectedRowEmpty()) {
+    return;
+  }
+  const metaObject = selectedRow.value as MetaObject;
+  router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: metaObject.name } });
 }
 
 watch(() => props.kind, async (newVal) => {
@@ -57,11 +81,11 @@ watch(() => props.kind, async (newVal) => {
 
 // Event handlers
 function onAddClicked(): void {
-  console.log('Add clicked');
+  isCreateDialogOpen.value = true;
 }
 
 function onEditClicked(): void {
-  console.log('Add edit');
+  navigateToEdit();
 }
 
 function onDeleteClicked(): void {
@@ -69,11 +93,21 @@ function onDeleteClicked(): void {
 }
 
 function onRowDblClick(): void {
-  console.log('RowDblClick');
+  navigateToEdit();
 }
 
-function onRowSelect(): void {
-  console.log('RowSelect');
+async function onCreateDialogClose(args: MetaObjectCreateDto): Promise<void> {
+  isCreateDialogOpen.value = false;
+  if (args) {
+    console.log('Object to create', args);
+    const response = await provider.create(args);
+    if (response.isOK) {
+      await router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: args.name } });
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+  }
 }
 
 // Life cycle hooks
@@ -139,7 +173,6 @@ onMounted(async () => {
           selectionMode="single"
           dataKey="uid"
           @row-dblclick="onRowDblClick"
-          @row-select="onRowSelect"
         >
           <template #empty> {{$t('noItemsFound')}} </template>
           <Column header="#" style="width: 50px">
@@ -150,11 +183,24 @@ onMounted(async () => {
           <Column field="title" :header="$t('title')"></Column>
           <Column field="name" :header="$t('name')"></Column>
           <Column field="memo" :header="$t('memo')"></Column>
+          <Column field="isActive" :header="$t('isActive')" data-type="boolean">
+            <template #body="{ data }">
+              <div class="flex justify-content-center flex-wrap">
+                <i v-if="data.isActive" class="pi pi-check-circle text-green-500"></i>
+              </div>
+            </template>
+          </Column>
 
         </DataTable>
       </div>
     </div>
   </div>
+
+  <!--Create dialog-->
+  <MetaObjectCreateComponent v-if="isCreateDialogOpen"
+                             :kind-name="props.kind"
+                             :kind-title="kindTitle"
+                             @close="onCreateDialogClose"></MetaObjectCreateComponent>
 </template>
 
 <style scoped>

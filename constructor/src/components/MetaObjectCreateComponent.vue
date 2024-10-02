@@ -11,16 +11,15 @@
     >
       <div>
         <div class="field grid">
-          <span
-            for="title"
+          <label
+            for="fld-title"
             class="col-fixed bs-required"
-            style="width:110px"
-          >
-            Title
-          </span>
+            style="width:110px">
+            {{$t('title')}}
+          </label>
           <div class="col">
             <InputText
-              id="title"
+              id="fld-title"
               size="small"
               class="w-full"
               autocomplete="off"
@@ -29,13 +28,12 @@
           </div>
         </div>
         <div class="field grid">
-          <span
+          <label
             for="name"
             class="col-fixed bs-required"
-            style="width:110px"
-          >
-            Name
-          </span>
+            style="width:110px">
+            {{$t('name')}}
+          </label>
           <div class="col">
             <InputText
               id="name"
@@ -47,17 +45,16 @@
           </div>
         </div>
         <div class="field grid">
-          <span
+          <label
             for="comment"
             class="col-fixed"
-            style="width:110px"
-          >
-            Comment
-          </span>
+            style="width:110px">
+            {{$t('memo')}}
+          </label>
           <div class="col">
             <Textarea
               id="comment"
-              rows="5"
+              rows="3"
               class="w-full"
               v-model="metaObject.memo"
             />
@@ -66,13 +63,15 @@
       </div>
       <template #footer>
         <Button
-          label="Cancel"
+          :label="$t('cancel')"
           severity="secondary"
           size="small"
           outlined
-          @click="$emit('cancel')"
+          @click="$emit('close')"
         />
-        <Button label="Create" size="small" @click="onCreateClick" />
+        <Button :label="$t('create')"
+                size="small"
+                @click="onCreateClick" />
       </template>
     </Dialog>
   </div>
@@ -84,7 +83,8 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
-import MetaObject from '@/models/metaObject';
+import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
+import { useI18n } from 'vue-i18n';
 
 @Options({
   components: {
@@ -94,39 +94,37 @@ import MetaObject from '@/models/metaObject';
     Textarea,
   },
   emits: {
-    cancel: null,
-    create: null,
+    close: null,
   },
   props: {
-    metadataKindTitle: {
+    kindTitle: {
       type: String,
       required: true,
     },
-    metadataKindUid: {
+    kindName: {
       type: String,
       required: true,
     },
   },
 })
 export default class MetaObjectCreateComponent extends Vue {
-  metadataKindTitle!:string;
-  metadataKindUid!:string;
-  header = 'New';
-  metaObject = new MetaObject(null);
+  kindTitle!:string;
+  kindName!:string;
+  metaObject = new MetaObjectCreateDto(null);
 
-  mounted(): void {
-    this.header = `${this.header} ${this.metadataKindTitle}`;
+  get header(): string {
+    return `New ${this.kindTitle}`;
   }
 
   updateVisible(value: boolean): void {
     if (!value) {
-      this.$emit('cancel');
+      this.$emit('close');
     }
   }
 
   onCreateClick(): void {
-    this.metaObject.metaObjectKindUid = this.metadataKindUid;
-    this.$emit('create', this.metaObject);
+    this.metaObject.kind = this.kindName;
+    this.$emit('close', this.metaObject);
   }
 }
 </script>

@@ -4,6 +4,7 @@ export default class MetaObject {
   name:string;
   title:string;
   memo:string;
+  isActive: boolean;
 
   constructor(params:any) {
     let data: any = {};
@@ -15,5 +16,6 @@ export default class MetaObject {
     this.title = data.title || '';
     this.name = data.name || '';
     this.memo = data.memo || '';
+    this.isActive = data.isActive || false;
   }
 }

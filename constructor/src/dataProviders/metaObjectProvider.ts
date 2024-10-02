@@ -1,5 +1,6 @@
 import axios from 'axios';
 import MetaObjectListViewModel from '@/models/metaObjectListViewModel';
+import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
@@ -25,6 +26,19 @@ export default class MetaObjectProvider {
 
     try {
       const { data } = await axios.get(`${this.BASE_URL}/${kindName}/${objectName}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async create(createDto: MetaObjectCreateDto): Promise<ResultWrapper<number>> {
+    let result = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.post(this.BASE_URL, createDto);
       result = data;
     } catch (error) {
       console.error('error', error);
