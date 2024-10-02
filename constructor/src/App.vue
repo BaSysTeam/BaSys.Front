@@ -27,7 +27,6 @@ import { Options, Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
 import { usePrimeVue } from 'primevue/config';
 import Toast from 'primevue/toast';
-import MetadataTreeComponent from '@/components/MetadataTreeComponent.vue';
 import NavigationPanelComponent from '@/components/NavigationPanelComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
@@ -37,7 +36,6 @@ import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
   components: {
     AppHeaderComponent,
     UserActionsComponent,
-    MetadataTreeComponent,
     NavigationPanelComponent,
     Toast,
   },
