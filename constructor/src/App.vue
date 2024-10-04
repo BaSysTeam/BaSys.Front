@@ -1,7 +1,7 @@
 <template>
   <Toast />
   <AppHeaderComponent
-    title="BaSys: Constructor"
+    title="BaSYS: Constructor"
     @burgerClicked="onBurgerClicked"
   >
     <template #userActions>

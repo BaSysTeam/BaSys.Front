@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, defineProps, watch, computed,
+  ref, onMounted, onBeforeMount, defineProps, watch, computed,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -8,8 +8,12 @@ import { useConfirm } from 'primevue/useconfirm';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import DataTable from 'primevue/datatable';
+import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
+import InputText from 'primevue/inputtext';
+import TriStateCheckbox from 'primevue/tristatecheckbox';
+import SplitButton from 'primevue/splitbutton';
 import MetaObject from '@/models/metaObject';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import MetaObjectCreateDialog from '@/components/MetaObjectCreateDialog.vue';
@@ -18,18 +22,17 @@ import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
-// @component
-const name = 'MetaObjectsListView';
-
-const { t } = useI18n({ useScope: 'global' });
-const router = useRouter();
-const confirmVue = useConfirm();
-const toastHelper = new ToastHelper(useToast());
-
 // Props
 const props = defineProps({
   kind: { type: String, required: true },
 });
+
+// Infrastructure
+const { t } = useI18n({ useScope: 'global' });
+const router = useRouter();
+const confirmVue = useConfirm();
+const toastHelper = new ToastHelper(useToast());
+const provider = new MetaObjectProvider();
 
 // Data
 const isWaiting = ref(false);
@@ -43,11 +46,12 @@ const dataTableStyle = computed(() => ({
   height: `${windowHeight.value - 150}px`,
 }));
 const dataTableScrollHeight = computed(() => `${windowHeight.value - 150}px`);
+const filters = ref<any>({});
 
 const formTitle = computed(() => `${t('metaObjects')}: ${kindTitle.value}`);
+const actionsItems = ref([]);
 
-const provider = new MetaObjectProvider();
-
+// Methods
 function setCurrentRow(): void {
   if (!items.value.length) {
     return;
@@ -126,6 +130,31 @@ async function deleteItemAsync(): Promise<void> {
   }
 }
 
+const initFilters = ():void => {
+  console.log('init filters');
+  filters.value = {
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    title: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+    },
+    name: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+    },
+    memo: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
+    },
+    isActive: { value: null, matchMode: FilterMatchMode.EQUALS, columnDataType: 'boolean' },
+  };
+};
+
+watch(() => props.kind, async (newVal) => {
+  await updateListAsync(newVal);
+});
+
+// Event handlers
 function onResize(): void {
   windowHeight.value = window.innerHeight;
 }
@@ -134,11 +163,6 @@ function beforeDestroy(): void {
   window.removeEventListener('resize', onResize);
 }
 
-watch(() => props.kind, async (newVal) => {
-  await updateListAsync(newVal);
-});
-
-// Event handlers
 function onAddClicked(): void {
   isCreateDialogOpen.value = true;
 }
@@ -202,12 +226,37 @@ async function onCreateDialogClose(args: MetaObjectCreateDto): Promise<void> {
   }
 }
 
+function onUpdateClick(): void {
+  updateListAsync(props.kind);
+}
+
+function onDropFiltersClick(): void {
+  initFilters();
+}
+
 // Life cycle hooks
+onBeforeMount(() => {
+  actionsItems.value = [
+    {
+      label: t('update'),
+      icon: 'pi pi-sync',
+      command: onUpdateClick,
+    },
+    {
+      label: t('clearFilters'),
+      icon: 'pi pi-filter-slash',
+      command: onDropFiltersClick,
+    },
+  ];
+});
+
 onMounted(async () => {
   window.addEventListener('resize', onResize);
   windowHeight.value = window.innerHeight;
   await updateListAsync(props.kind);
 });
+
+initFilters();
 
 </script>
 
@@ -254,6 +303,14 @@ onMounted(async () => {
         icon="pi pi-play"
         @click="onRunClick"
       />
+      <SplitButton
+        :label="$t('actions')"
+        severity="primary"
+        size="small"
+        class="ml-1"
+        outlined
+        :model="actionsItems"
+      />
     </div>
   </div>
   <!--Divider-->
@@ -266,6 +323,7 @@ onMounted(async () => {
       <div class="card m-1">
         <DataTable
           v-model:selection="selectedRow"
+          v-model:filters="filters"
           :value="items"
           :style="dataTableStyle"
           :scroll-height="dataTableScrollHeight"
@@ -274,6 +332,7 @@ onMounted(async () => {
           scrollable
           size="small"
           selectionMode="single"
+          filterDisplay="menu"
           dataKey="uid"
           @row-dblclick="onRowDblClick"
         >
@@ -283,14 +342,40 @@ onMounted(async () => {
               {{ currentRow.index + 1 }}
             </template>
           </Column>
-          <Column field="title" :header="$t('title')"></Column>
-          <Column field="name" :header="$t('name')"></Column>
-          <Column field="memo" :header="$t('memo')"></Column>
+          <Column field="title" :header="$t('title')">
+            <template #filter="{filterModel}">
+              <InputText v-model="filterModel.value"
+                         type="text"
+                         class="p-column-filter" />
+            </template>
+          </Column>
+          <Column field="name" :header="$t('name')">
+            <template #filter="{filterModel}">
+              <InputText v-model="filterModel.value"
+                         type="text"
+                         class="p-column-filter" />
+            </template>
+          </Column>
+          <Column field="memo" :header="$t('memo')">
+            <template #filter="{filterModel}">
+              <InputText v-model="filterModel.value"
+                         type="text"
+                         class="p-column-filter" />
+            </template>
+          </Column>
           <Column field="isActive" :header="$t('isActive')" data-type="boolean">
             <template #body="{ data }">
               <div class="flex justify-content-center flex-wrap">
                 <i v-if="data.isActive" class="pi pi-check-circle text-green-500"></i>
               </div>
+            </template>
+            <template #filter="{filterModel}">
+              <div  style="min-width: 150px">
+                <label for="verified-filter" class="font-bold"> {{$t('isActive')}} </label>
+                <span>&nbsp;</span>
+                <TriStateCheckbox v-model="filterModel.value" inputId="verified-filter" />
+              </div>
+
             </template>
           </Column>
 

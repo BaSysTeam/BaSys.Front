@@ -9,6 +9,7 @@
   "cancel": "Cancel",
   "clear": "Clear",
   "clearAll": "Clear all",
+  "clearFilters": "Clear filters",
   "console": "Console",
   "copy": "Copy",
   "columns": "Columns",
@@ -51,6 +52,7 @@
   "title": "Title",
   "generateUidConfirm": "I understand that changing the Uid in the database will result in the creation of new storages for logs and files. Access to the current storages of logs and files will be lost",
   "changePassword": "Change password",
+  "update": "Update",
   "unique": "Unique",
   "uiControl": "Control"
 }
