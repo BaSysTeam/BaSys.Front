@@ -92,6 +92,10 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     return `${this.metaObjectKindTitle}.${this.settings.title}`;
   }
 
+  get isCopy(): boolean {
+    return this.$route.name === 'meta-objects-copy';
+  }
+
   initTableMenu(): void {
     this.tableGroups.items = [];
     this.tableGroups.items.push({
@@ -270,7 +274,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   async update(): Promise<void> {
     console.log('meta-object-update', this.kind, this.name);
+    console.log('meta-object isCopy', this.isCopy);
     this.isWaiting = true;
+    if (this.isCopy) {
+      this.isModified = true;
+    }
 
     // Get datatypes
     if (!this.dataTypes.length) {
@@ -289,6 +297,10 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     if (response.isOK) {
       console.log('GetMetaObject response', response.data);
       this.settings = new MetaObjectStorableSettings(response.data);
+      if (this.isCopy) {
+        this.settings.name = '';
+        this.settings.title = `Copy - ${this.settings.title}`;
+      }
       this.initTableMenu();
       this.metaObjectKindTitle = response.data.metaObjectKindTitle;
       if (this.activeTab === 'table_settings') {

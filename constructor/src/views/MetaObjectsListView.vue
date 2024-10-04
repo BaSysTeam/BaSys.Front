@@ -109,6 +109,14 @@ function navigateToEdit(): void {
   router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: metaObject.name } });
 }
 
+function navigateToCopy(): void {
+  if (isSelectedRowEmpty()) {
+    return;
+  }
+  const metaObject = selectedRow.value as MetaObject;
+  router.push({ name: 'meta-objects-copy', params: { kind: props.kind, name: metaObject.name } });
+}
+
 async function deleteItemAsync(): Promise<void> {
   console.log('Delete item async');
   const metaObject = selectedRow.value as MetaObject;
@@ -208,6 +216,10 @@ function onRunClick(): void {
   window.open(url, '_blank');
 }
 
+function onCopyClick(): void {
+  navigateToCopy();
+}
+
 function onRowDblClick(): void {
   navigateToEdit();
 }
@@ -296,6 +308,15 @@ onMounted(async () => {
           @click="onDeleteClicked"
         />
       </ButtonGroup>
+      <Button
+        class="ml-1"
+        v-tooltip="$t('copy')"
+        severity="primary"
+        size="small"
+        outlined
+        icon="pi pi-clone"
+        @click="onCopyClick"
+      />
       <Button
         class="ml-1"
         severity="success"

@@ -41,6 +41,12 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
+    path: '/meta-objects/copy/:kind/:name',
+    name: 'meta-objects-copy',
+    component: MetaObjectEditView,
+    props: true,
+  },
+  {
     path: '/meta-objects/list/:kind',
     name: 'meta-objects-list',
     component: MetaObjectsListView,
