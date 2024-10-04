@@ -121,7 +121,11 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
   }
 
   onReturnClick(): void {
-    this.router.push({ name: 'meta-objects-list', params: { kind: this.kind } });
+    this.router.push({
+      name: 'meta-objects-list',
+      params: { kind: this.kind },
+      query: { current: this.settings.name },
+    });
   }
 
   onSaveClick():void {

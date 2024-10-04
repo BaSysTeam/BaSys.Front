@@ -27,7 +27,9 @@ const confirmVue = useConfirm();
 const toastHelper = new ToastHelper(useToast());
 
 // Props
-const props = defineProps({ kind: { type: String, required: true } });
+const props = defineProps({
+  kind: { type: String, required: true },
+});
 
 // Data
 const isWaiting = ref(false);
@@ -44,6 +46,33 @@ const formTitle = computed(() => `${t('metaObjects')}: ${kindTitle.value}`);
 
 const provider = new MetaObjectProvider();
 
+function setCurrentRow(): void {
+  if (!items.value.length) {
+    return;
+  }
+
+  let flagDone = false;
+
+  // Get current name from query parameters.
+  const { query } = router.currentRoute.value;
+  const currentName = query.current;
+
+  // Find item by name and set as current.
+  if (currentName) {
+    const searchResult = items.value.find((item) => item.name === currentName);
+    if (searchResult) {
+      selectedRow.value = searchResult;
+      flagDone = true;
+    }
+  }
+
+  if (!flagDone) {
+    // Set first item by default.
+    const [firstValue] = items.value;
+    selectedRow.value = firstValue;
+  }
+}
+
 async function updateListAsync(kindName: string): Promise<void> {
   isWaiting.value = true;
 
@@ -56,10 +85,7 @@ async function updateListAsync(kindName: string): Promise<void> {
       items.value.push(item);
     });
 
-    if (items.value.length) {
-      const [firstValue] = items.value;
-      selectedRow.value = firstValue;
-    }
+    setCurrentRow();
   }
 
   isWaiting.value = false;
