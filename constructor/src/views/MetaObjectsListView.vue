@@ -248,6 +248,8 @@ onBeforeMount(() => {
       command: onDropFiltersClick,
     },
   ];
+
+  initFilters();
 });
 
 onMounted(async () => {
@@ -255,8 +257,6 @@ onMounted(async () => {
   windowHeight.value = window.innerHeight;
   await updateListAsync(props.kind);
 });
-
-initFilters();
 
 </script>
 
