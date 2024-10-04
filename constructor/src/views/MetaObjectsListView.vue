@@ -37,10 +37,12 @@ const isCreateDialogOpen = ref(false);
 const kindTitle = ref('');
 const items = ref<MetaObject[]>([]);
 const selectedRow = ref<any>({});
+const windowHeight = ref(window.innerHeight);
 
 const dataTableStyle = computed(() => ({
-  height: `${window.innerHeight - 150}px`,
+  height: `${windowHeight.value - 150}px`,
 }));
+const dataTableScrollHeight = computed(() => `${windowHeight.value - 150}px`);
 
 const formTitle = computed(() => `${t('metaObjects')}: ${kindTitle.value}`);
 
@@ -124,6 +126,14 @@ async function deleteItemAsync(): Promise<void> {
   }
 }
 
+function onResize(): void {
+  windowHeight.value = window.innerHeight;
+}
+
+function beforeDestroy(): void {
+  window.removeEventListener('resize', onResize);
+}
+
 watch(() => props.kind, async (newVal) => {
   await updateListAsync(newVal);
 });
@@ -194,6 +204,8 @@ async function onCreateDialogClose(args: MetaObjectCreateDto): Promise<void> {
 
 // Life cycle hooks
 onMounted(async () => {
+  window.addEventListener('resize', onResize);
+  windowHeight.value = window.innerHeight;
   await updateListAsync(props.kind);
 });
 
@@ -256,8 +268,10 @@ onMounted(async () => {
           v-model:selection="selectedRow"
           :value="items"
           :style="dataTableStyle"
+          :scroll-height="dataTableScrollHeight"
           :metaKeySelection="true"
           showGridlines
+          scrollable
           size="small"
           selectionMode="single"
           dataKey="uid"
