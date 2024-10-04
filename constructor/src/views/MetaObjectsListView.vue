@@ -4,6 +4,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import DataTable from 'primevue/datatable';
@@ -22,6 +23,7 @@ const name = 'MetaObjectsListView';
 
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
+const confirmVue = useConfirm();
 const toastHelper = new ToastHelper(useToast());
 
 // Props
@@ -75,6 +77,27 @@ function navigateToEdit(): void {
   router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: metaObject.name } });
 }
 
+async function deleteItemAsync(): Promise<void> {
+  console.log('Delete item async');
+  const metaObject = selectedRow.value as MetaObject;
+  const response = await provider.deleteAsync(props.kind, metaObject.name);
+  if (response.isOK) {
+    // Delete item from array of items.
+    toastHelper.success(response.message);
+    const ind = items.value.indexOf(selectedRow.value);
+    if (ind > -1) {
+      items.value.splice(ind, 1);
+      if (items.value.length) {
+        const [firstValue] = items.value;
+        selectedRow.value = firstValue;
+      }
+    }
+  } else {
+    toastHelper.error(response.message);
+    console.error(response.presentation);
+  }
+}
+
 watch(() => props.kind, async (newVal) => {
   await updateListAsync(newVal);
 });
@@ -88,8 +111,32 @@ function onEditClicked(): void {
   navigateToEdit();
 }
 
-function onDeleteClicked(): void {
+async function onDeleteClicked(): Promise<void> {
   console.log('Delete clicked');
+
+  if (isSelectedRowEmpty()) {
+    return;
+  }
+
+  console.log('Show confirm');
+  // eslint-disable-next-line no-restricted-globals,no-alert
+  const answer = confirm(t('deleteItemQuestion'));
+  if (answer) {
+    await deleteItemAsync();
+  }
+  // TODO: Debug vue confirm. Now it doesn't work.
+  /*
+  confirmVue.require({
+    message: 'Delete item?',
+    header: 'Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Cancel',
+    acceptLabel: 'Delete',
+    accept: () => deleteItemAsync,
+  });
+  */
 }
 
 function onRowDblClick(): void {

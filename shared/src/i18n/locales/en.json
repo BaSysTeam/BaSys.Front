@@ -18,6 +18,7 @@
   "dataType": "Data type",
   "dataTypes": "Data types",
   "delete": "Delete",
+  "deleteItemQuestion": "Delete item?",
   "deleteRow": "Delete row",
   "displayExpression": "Display expression",
   "isActive": "Is active",

@@ -59,4 +59,17 @@ export default class MetaObjectProvider {
 
     return result;
   }
+
+  async deleteAsync(kindName: string, objectName: string): Promise<ResultWrapper<number>> {
+    let result: ResultWrapper<number> = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.delete(`${this.BASE_URL}/${kindName}/${objectName}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
 }

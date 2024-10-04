@@ -19,6 +19,7 @@
   "dataType": "Тип данных",
   "dataTypes": "Типы данных",
   "delete": "Удалить",
+  "deleteItemQuestion": "Удалить элемент?",
   "deleteRow": "Удалить строку",
   "displayExpression": "Выражение отображения",
   "isActive": "Активно",
