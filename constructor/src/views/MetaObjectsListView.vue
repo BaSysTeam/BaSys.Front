@@ -139,6 +139,15 @@ async function onDeleteClicked(): Promise<void> {
   */
 }
 
+function onRunClick(): void {
+  if (isSelectedRowEmpty()) {
+    return;
+  }
+  const metaObject = selectedRow.value as MetaObject;
+  const url = `app#/data-objects/${props.kind}/${metaObject.name}`;
+  window.open(url, '_blank');
+}
+
 function onRowDblClick(): void {
   navigateToEdit();
 }
@@ -200,6 +209,13 @@ onMounted(async () => {
           @click="onDeleteClicked"
         />
       </ButtonGroup>
+      <Button
+        class="ml-1"
+        severity="success"
+        size="small"
+        icon="pi pi-play"
+        @click="onRunClick"
+      />
     </div>
   </div>
   <!--Divider-->
