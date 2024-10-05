@@ -1,7 +1,7 @@
 <template>
   <Toast />
   <AppHeaderComponent
-    title="BaSys: Constructor"
+    title="BaSYS: Constructor"
     @burgerClicked="onBurgerClicked"
   >
     <template #userActions>
@@ -11,9 +11,9 @@
   <div class="grid h-screen" style="margin:0">
     <div class="bs-nav-panel col-fixed" style="padding:0"
       :style="{ 'width': navPanelWidth + 'px' }">
-      <MetadataTreeComponent :isMenuMinimized="isMenuMinimized"/>
+      <NavigationPanelComponent :is-minimized="isMenuMinimized"></NavigationPanelComponent>
       <div v-if="isMenuMinimized">
-        <h4 class="bs-metadatatree-text">Metadata Tree</h4>
+        <h4 class="bs-metadatatree-text">Metadata</h4>
       </div>
     </div>
     <div class="col">
@@ -27,7 +27,7 @@ import { Options, Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
 import { usePrimeVue } from 'primevue/config';
 import Toast from 'primevue/toast';
-import MetadataTreeComponent from '@/components/MetadataTreeComponent.vue';
+import NavigationPanelComponent from '@/components/NavigationPanelComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
 import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
@@ -36,13 +36,13 @@ import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
   components: {
     AppHeaderComponent,
     UserActionsComponent,
-    MetadataTreeComponent,
+    NavigationPanelComponent,
     Toast,
   },
 })
 export default class App extends Vue {
   isMenuMinimized = false;
-  navPanelWidth = 300;
+  navPanelWidth = 200;
   router = useRouter();
   primeVue = usePrimeVue();
 
@@ -55,7 +55,7 @@ export default class App extends Vue {
     if (this.isMenuMinimized) {
       this.navPanelWidth = 50;
     } else {
-      this.navPanelWidth = 300;
+      this.navPanelWidth = 200;
     }
   }
 
@@ -87,12 +87,18 @@ body {
   transform: rotate(-90deg);
   width: auto;
   position: fixed;
-  left: -30px;
+  left: -10px;
   top: 100px;
   margin: 0;
 }
 
 .p-accordion-content{
   padding-bottom:0;
+}
+
+.bs-required:after {
+  content: "*";
+  color: red;
+  font-size: 12pt;
 }
 </style>
