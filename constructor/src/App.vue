@@ -95,4 +95,10 @@ body {
 .p-accordion-content{
   padding-bottom:0;
 }
+
+.bs-required:after {
+  content: "*";
+  color: red;
+  font-size: 12pt;
+}
 </style>

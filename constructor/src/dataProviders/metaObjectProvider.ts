@@ -1,6 +1,5 @@
 import axios from 'axios';
 import MetaObjectListViewModel from '@/models/metaObjectListViewModel';
-import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 

@@ -16,9 +16,7 @@ import TriStateCheckbox from 'primevue/tristatecheckbox';
 import SplitButton from 'primevue/splitbutton';
 import MetaObject from '@/models/metaObject';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
-import MetaObjectCreateDialog from '@/components/MetaObjectCreateDialog.vue';
 import { useI18n } from 'vue-i18n';
-import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
@@ -36,7 +34,6 @@ const provider = new MetaObjectProvider();
 
 // Data
 const isWaiting = ref(false);
-const isCreateDialogOpen = ref(false);
 const kindTitle = ref('');
 const kindUid = ref('');
 const items = ref<MetaObject[]>([]);
@@ -230,20 +227,6 @@ function onRowDblClick(): void {
   navigateToEdit();
 }
 
-async function onCreateDialogClose(args: MetaObjectCreateDto): Promise<void> {
-  isCreateDialogOpen.value = false;
-  if (args) {
-    console.log('Object to create', args);
-    const response = await provider.create(args);
-    if (response.isOK) {
-      await router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: args.name } });
-    } else {
-      toastHelper.error(response.message);
-      console.error(response.presentation);
-    }
-  }
-}
-
 function onUpdateClick(): void {
   updateListAsync(props.kind);
 }
@@ -411,11 +394,6 @@ onMounted(async () => {
     </div>
   </div>
 
-  <!--Create dialog-->
-  <MetaObjectCreateDialog v-if="isCreateDialogOpen"
-                             :kind-uid="kindUid"
-                             :kind-title="kindTitle"
-                             @close="onCreateDialogClose"></MetaObjectCreateDialog>
 </template>
 
 <style scoped>
