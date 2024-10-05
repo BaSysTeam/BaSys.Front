@@ -1,4 +1,5 @@
 import { Guid } from 'guid-typescript';
+import MetaObjectKindStandardColumn from './metaObjectKindStandardColumn';
 import MetaObjectTableColumnRenderSettings from './metaObjectTableColumnRenderSettings';
 import DependencyInfo from './dependencyInfo';
 
@@ -43,5 +44,18 @@ export default class MetaObjectTableColumn {
         this.dependencies.push(new DependencyInfo(item));
       });
     }
+  }
+
+  fillByStandardColumn(standardColumn: MetaObjectKindStandardColumn): void {
+    this.uid = standardColumn.uid;
+    this.title = standardColumn.title;
+    this.name = standardColumn.name;
+    this.dataTypeUid = standardColumn.dataTypeUid;
+    this.stringLength = standardColumn.stringLength;
+    this.numberDigits = standardColumn.numberDigits;
+    this.primaryKey = standardColumn.isPrimaryKey;
+    this.required = standardColumn.isRequired;
+    this.unique = standardColumn.isUnique;
+    this.isStandard = true;
   }
 }

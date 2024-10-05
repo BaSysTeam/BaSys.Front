@@ -34,11 +34,11 @@ export default class MetaObjectProvider {
     return result;
   }
 
-  async create(createDto: MetaObjectCreateDto): Promise<ResultWrapper<number>> {
+  async create(settings: MetaObjectStorableSettings): Promise<ResultWrapper<number>> {
     let result = new ResultWrapper<number>();
 
     try {
-      const { data } = await axios.post(this.BASE_URL, createDto);
+      const { data } = await axios.post(this.BASE_URL, settings);
       result = data;
     } catch (error) {
       console.error('error', error);

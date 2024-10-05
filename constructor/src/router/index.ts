@@ -35,6 +35,12 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
+    path: '/meta-objects/add/:kind',
+    name: 'meta-objects-add',
+    component: MetaObjectEditView,
+    props: true,
+  },
+  {
     path: '/meta-objects/edit/:kind/:name',
     name: 'meta-objects-edit',
     component: MetaObjectEditView,

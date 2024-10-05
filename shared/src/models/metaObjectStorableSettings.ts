@@ -22,7 +22,7 @@ export default class MetaObjectStorableSettings {
       data = params;
     }
 
-    this.uid = data.uid || Guid.create().toString();
+    this.uid = data.uid || '';
     this.metaObjectKindUid = data.metaObjectKindUid || '';
     this.editMethod = data.editMethod || 0;
     this.title = data.title || '';
@@ -35,6 +35,10 @@ export default class MetaObjectStorableSettings {
 
     this.detailTables = data.detailTables
       ? data.detailTables.map((item: any) => new MetaObjectTable(item)) : [];
+  }
+
+  get isNew():boolean {
+    return !this.uid;
   }
 
   newDetailTable(objectPrimaryKeyDataTypeUid: string): MetaObjectTable {

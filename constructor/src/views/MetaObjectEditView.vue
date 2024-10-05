@@ -14,15 +14,19 @@ import Divider from 'primevue/divider';
 import Menu from 'primevue/menu';
 import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
+import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
 import MainTab from '@/components/metaObjectEditComponents/mainTab.vue';
 import HeaderFieldsTab from '@/components/metaObjectEditComponents/headerFieldsTab.vue';
 import TableSettingsTab from '@/components/metaObjectEditComponents/TableSettingsTab.vue';
 import JsonTab from '@/components/metaObjectEditComponents/jsonTab.vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { Guid } from 'guid-typescript';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
+import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
+import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
@@ -50,6 +54,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   // settingsJson = '';
   provider = new MetaObjectProvider();
+  kindsProvider = new MetaObjectKindsProvider();
   router = useRouter();
   confirm = useConfirm();
   dataTypesProvider = new DataTypeProvider();
@@ -94,6 +99,10 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
 
   get isCopy(): boolean {
     return this.$route.name === 'meta-objects-copy';
+  }
+
+  get isNew(): boolean {
+    return this.$route.name === 'meta-objects-add';
   }
 
   initTableMenu(): void {
@@ -257,16 +266,31 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
     // this.settings = new MetaObjectStorableSettings(JSON.parse(this.settingsJson));
 
     console.log('save settings', this.settings);
-    const response = await this.provider.update(this.settings);
-    this.isWaiting = false;
+    if (this.settings.isNew) {
+      const response = await this.provider.create(this.settings);
+      this.isWaiting = false;
 
-    if (response.isOK) {
-      this.isModified = false;
-      this.toastHelper.success(response.message);
-      result = true;
+      if (response.isOK) {
+        this.isModified = false;
+        this.toastHelper.success(response.message);
+        await this.router.push({ name: 'meta-objects-edit', params: { kind: this.kind, name: this.settings.name } });
+        result = true;
+      } else {
+        this.toastHelper.error(response.message);
+        console.error(response.presentation);
+      }
     } else {
-      this.toastHelper.error(response.message);
-      console.error(response.presentation);
+      const response = await this.provider.update(this.settings);
+      this.isWaiting = false;
+
+      if (response.isOK) {
+        this.isModified = false;
+        this.toastHelper.success(response.message);
+        result = true;
+      } else {
+        this.toastHelper.error(response.message);
+        console.error(response.presentation);
+      }
     }
 
     return result;
@@ -289,6 +313,42 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
         this.toastHelper.error(dataTypeResponse.message);
         console.error(dataTypeResponse.presentation);
       }
+    }
+
+    if (this.isNew) {
+      const kindResponse = await this.kindsProvider.getSettingsItemByName(this.kind);
+      console.log('kind response', kindResponse);
+
+      this.isWaiting = false;
+      if (!kindResponse.isOK) {
+        this.toastHelper.error(kindResponse.message);
+        console.error(kindResponse.presentation);
+        return;
+      }
+
+      const kindSettings = new MetaObjectKindSettings(kindResponse.data);
+
+      this.isModified = true;
+      const headerTable = new MetaObjectTable({
+        title: 'header',
+        name: 'header',
+        uid: Guid.create().toString(),
+      });
+
+      kindSettings.standardColumns.forEach((stColumn) => {
+        const headerColumn = new MetaObjectTableColumn(null);
+        headerColumn.fillByStandardColumn(stColumn);
+        headerTable.columns.push(headerColumn);
+      });
+
+      this.settings = new MetaObjectStorableSettings({
+        header: headerTable,
+        metaObjectKindUid: kindSettings.uid,
+      });
+      this.metaObjectKindTitle = kindResponse.data.title;
+
+      this.initTableMenu();
+      return;
     }
 
     const response = await this.provider.getMetaObjectSettings(this.kind, this.name);

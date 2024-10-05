@@ -7,7 +7,7 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
-import MetaObjectCreateDto from '@/models/metaObjectCreateDto';
+import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 
 // @component
 const name = 'ConsoleResultItemComponent';
@@ -16,16 +16,16 @@ const { t } = useI18n({ useScope: 'global' });
 
 // props
 const props = defineProps({
-  kindName: { type: String, required: true },
+  kindUid: { type: String, required: true },
   kindTitle: { type: String, required: true },
 });
 
 // Data
-const metaObject = ref<MetaObjectCreateDto>(new MetaObjectCreateDto());
+const settings = ref<MetaObjectStorableSettings>(new MetaObjectStorableSettings());
 const header = computed(() => `${props.kindTitle}`);
 
 // Emits
-const emit = defineEmits({ close: (item: MetaObjectCreateDto) => true });
+const emit = defineEmits({ close: (item: MetaObjectStorableSettings) => true });
 
 function updateVisible(value: boolean): void {
   if (!value) {
@@ -34,8 +34,8 @@ function updateVisible(value: boolean): void {
 }
 
 function onCreateClick(): void {
-  metaObject.value.kind = props.kindName;
-  emit('close', metaObject.value);
+  settings.value.metaObjectKindUid = props.kindUid;
+  emit('close', settings.value);
 }
 
 </script>
@@ -64,7 +64,7 @@ function onCreateClick(): void {
               size="small"
               class="w-full"
               autocomplete="off"
-              v-model="metaObject.title"
+              v-model="settings.title"
             />
           </div>
         </div>
@@ -80,7 +80,7 @@ function onCreateClick(): void {
               size="small"
               class="w-full"
               autocomplete="off"
-              v-model="metaObject.name"
+              v-model="settings.name"
             />
           </div>
         </div>
@@ -95,7 +95,7 @@ function onCreateClick(): void {
               id="comment"
               rows="3"
               class="w-full"
-              v-model="metaObject.memo"
+              v-model="settings.memo"
             />
           </div>
         </div>

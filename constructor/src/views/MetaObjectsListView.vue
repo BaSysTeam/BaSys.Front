@@ -38,6 +38,7 @@ const provider = new MetaObjectProvider();
 const isWaiting = ref(false);
 const isCreateDialogOpen = ref(false);
 const kindTitle = ref('');
+const kindUid = ref('');
 const items = ref<MetaObject[]>([]);
 const selectedRow = ref<any>({});
 const windowHeight = ref(window.innerHeight);
@@ -86,6 +87,7 @@ async function updateListAsync(kindName: string): Promise<void> {
 
   if (result.isOK) {
     kindTitle.value = result.data.title;
+    kindUid.value = result.data.metaObjectKindUid;
     items.value = [];
     result.data.items.forEach((item: any) => {
       items.value.push(item);
@@ -107,6 +109,10 @@ function navigateToEdit(): void {
   }
   const metaObject = selectedRow.value as MetaObject;
   router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: metaObject.name } });
+}
+
+function navigateToAdd(): void {
+  router.push({ name: 'meta-objects-add', params: { kind: props.kind } });
 }
 
 function navigateToCopy(): void {
@@ -172,7 +178,7 @@ function beforeDestroy(): void {
 }
 
 function onAddClicked(): void {
-  isCreateDialogOpen.value = true;
+  navigateToAdd();
 }
 
 function onEditClicked(): void {
@@ -407,7 +413,7 @@ onMounted(async () => {
 
   <!--Create dialog-->
   <MetaObjectCreateDialog v-if="isCreateDialogOpen"
-                             :kind-name="props.kind"
+                             :kind-uid="kindUid"
                              :kind-title="kindTitle"
                              @close="onCreateDialogClose"></MetaObjectCreateDialog>
 </template>
