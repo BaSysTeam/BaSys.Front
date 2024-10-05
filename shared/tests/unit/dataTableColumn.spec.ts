@@ -53,6 +53,29 @@ describe('DataTableColumn', () => {
         dataType: 'date',
       },
     );
-    expect(newColumn.defaultValue).toEqual(new Date('1980-01-01'));
+    expect(newColumn.defaultValue).toEqual(undefined);
+  });
+
+  it('Parse empty column throw exception', () => {
+    expect(() => {
+      // eslint-disable-next-line no-new
+      DataTableColumn.parse(' ');
+    }).toThrow();
+  });
+  it('Parse column description with name', () => {
+    const newColumn = DataTableColumn.parse('Product ');
+    expect(newColumn.name).toEqual('Product');
+  });
+
+  it('Parse column description with name and dataType', () => {
+    const newColumn = DataTableColumn.parse('amount number ');
+    expect(newColumn.name).toEqual('amount');
+    expect(newColumn.dataType).toEqual('number');
+  });
+
+  it('Parse column ignore all words after second', () => {
+    const newColumn = DataTableColumn.parse('amount number something');
+    expect(newColumn.name).toEqual('amount');
+    expect(newColumn.dataType).toEqual('number');
   });
 });
