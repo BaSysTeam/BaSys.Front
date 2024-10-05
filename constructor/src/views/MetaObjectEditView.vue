@@ -360,6 +360,7 @@ export default class MetaObjectEditView extends mixins(ResizeWindow) {
       if (this.isCopy) {
         this.settings.name = '';
         this.settings.title = `Copy - ${this.settings.title}`;
+        this.settings.uid = '';
       }
       this.initTableMenu();
       this.metaObjectKindTitle = response.data.metaObjectKindTitle;

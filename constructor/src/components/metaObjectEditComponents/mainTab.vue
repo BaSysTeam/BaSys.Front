@@ -39,6 +39,20 @@ function onChange():void {
 <div class="grid">
   <div class="col-8">
 
+    <!--Uid-->
+    <div class="field grid">
+      <label for="fld-uid" class="col-4 bs-label">Uid</label>
+      <div class="col-8">
+        <InputText id="fld-uid"
+                   size="small"
+                   autocomplete="off"
+                   disabled
+                   class="w-full"
+                   v-model="settings.uid"
+                   @change="onChange"></InputText>
+      </div>
+    </div>
+
     <!--Title-->
     <div class="field grid">
       <label for="fld-title" class="col-4 bs-label bs-required">{{$t('title')}}</label>
