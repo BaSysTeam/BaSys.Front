@@ -8,7 +8,7 @@ import Button from 'primevue/button';
 import Toolbar from 'primevue/toolbar';
 import Listbox from 'primevue/listbox';
 import { useConfirm } from 'primevue/useconfirm';
-import ColumnPropertiesPanel from '@/components/metaObjectEditComponents/columnPropertiesPanel.vue';
+import ColumnPropertiesPanel from '@/components/metaObjectEditComponents/ColumnPropertiesPanel.vue';
 import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 import DataType from '../../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';

@@ -3,9 +3,9 @@ import {
   ref, onMounted, onBeforeMount, defineProps, watch, computed,
 } from 'vue';
 import { useRouter } from 'vue-router';
-import { Codemirror } from 'vue-codemirror';
-import { json as jsonLang } from '@codemirror/lang-json';
-import { githubLight } from '@ddietr/codemirror-themes/github-light';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
@@ -15,13 +15,10 @@ import Menu from 'primevue/menu';
 import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
-import MainTab from '@/components/metaObjectEditComponents/mainTab.vue';
-import HeaderFieldsTab from '@/components/metaObjectEditComponents/headerFieldsTab.vue';
+import MainTab from '@/components/metaObjectEditComponents/MainTab.vue';
+import HeaderFieldsTab from '@/components/metaObjectEditComponents/HeaderFieldsTab.vue';
 import TableSettingsTab from '@/components/metaObjectEditComponents/TableSettingsTab.vue';
-import JsonTab from '@/components/metaObjectEditComponents/jsonTab.vue';
-import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue/useconfirm';
-import { useI18n } from 'vue-i18n';
+import JsonTab from '@/components/metaObjectEditComponents/JsonTab.vue';
 import { Guid } from 'guid-typescript';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
@@ -45,8 +42,6 @@ const router = useRouter();
 const confirmVue = useConfirm();
 const dataTypesProvider = new DataTypeProvider();
 const toastHelper = new ToastHelper(useToast());
-const codemirrorExtensions = [jsonLang(), githubLight];
-const codemirrorEditor: any = null;
 
 // Data
 const isModified = ref(false);
@@ -64,17 +59,18 @@ const tableGroups = ref<any>({
 });
 
 const actions = ref<any[]>([]);
-
 const navMenuItems = ref<any[]>([]);
 
-const codemirrorStyle = computed(() => (
-  { height: `${window.innerHeight - 150}px` }
-));
 const formTitle = computed(() => `${metaObjectKindTitle.value}.${settings.value.title}`);
 
 // Methods
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 let initTableMenu = ():void => {};
+
+function registerError(response: any): void {
+  toastHelper.error(response.message);
+  console.error(response.presentation);
+}
 
 function isCopy(): boolean {
   return router.currentRoute.value.name === 'meta-objects-copy';
@@ -105,9 +101,6 @@ async function save(): Promise<boolean> {
   let result = false;
   isWaiting.value = true;
 
-  // this.settings = new MetaObjectStorableSettings(JSON.parse(this.settingsJson));
-
-  console.log('save settings', settings.value);
   if (settings.value.isNew) {
     const response = await provider.create(settings.value);
     isWaiting.value = false;
@@ -118,8 +111,7 @@ async function save(): Promise<boolean> {
       await router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: settings.value.name } });
       result = true;
     } else {
-      toastHelper.error(response.message);
-      console.error(response.presentation);
+      registerError(response);
     }
   } else {
     const response = await provider.update(settings.value);
@@ -130,8 +122,7 @@ async function save(): Promise<boolean> {
       toastHelper.success(response.message);
       result = true;
     } else {
-      toastHelper.error(response.message);
-      console.error(response.presentation);
+      registerError(response);
     }
   }
 
@@ -150,19 +141,16 @@ async function update(): Promise<void> {
     if (dataTypeResponse.isOK) {
       dataTypes.value = dataTypeResponse.data;
     } else {
-      toastHelper.error(dataTypeResponse.message);
-      console.error(dataTypeResponse.presentation);
+      registerError(dataTypeResponse);
     }
   }
 
   if (isNew()) {
     const kindResponse = await kindsProvider.getSettingsItemByName(props.kind);
-    console.log('kind response', kindResponse);
 
     isWaiting.value = false;
     if (!kindResponse.isOK) {
-      toastHelper.error(kindResponse.message);
-      console.error(kindResponse.presentation);
+      registerError(kindResponse);
       return;
     }
 
@@ -195,7 +183,6 @@ async function update(): Promise<void> {
   isWaiting.value = false;
 
   if (response.isOK) {
-    console.log('GetMetaObject response', response.data);
     settings.value = new MetaObjectStorableSettings(response.data);
     if (isCopy()) {
       settings.value.name = '';
@@ -208,17 +195,15 @@ async function update(): Promise<void> {
       activeTab.value = 'main';
     }
   } else {
-    toastHelper.error(response.message);
-    console.error(response.presentation);
+    registerError(response);
   }
-  console.log('update', response);
 }
 
-watch(() => props.kind, async (newVal) => {
+watch(() => props.kind, async () => {
   await update();
 });
 
-watch(() => props.name, async (newVal) => {
+watch(() => props.name, async () => {
   await update();
 });
 
@@ -241,7 +226,6 @@ function onRunClick(): void {
 }
 
 function onTableTabClick(detailTableUid: string): void {
-  console.log('Table tab click', detailTableUid);
   const currentTable = settings.value.detailTables.find(
     (detailTable) => detailTable.uid === detailTableUid,
   );
@@ -257,11 +241,10 @@ function onUpdateClick(): void {
 }
 
 function onNavTabClick(args: string): void {
-  console.log(args, 'Tab click');
   activeTab.value = args;
 }
 
-function onDetailsTableAdd(): void {
+function addDetailsTable(): void {
   const pk = settings.value.header.getPrimaryKey();
   if (!pk) {
     return;
@@ -274,6 +257,19 @@ function onDetailsTableAdd(): void {
   initTableMenu();
 }
 
+function onDetailsTableAdd(): void {
+  confirmVue.require({
+    message: t('addTableQuestion'),
+    header: t('confirmation'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-success',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('add'),
+    accept: () => addDetailsTable(),
+  });
+}
+
 function onSettingsChanged(): void {
   isModified.value = true;
 }
@@ -282,25 +278,6 @@ function onTableCopy(uid: string): void {
   isModified.value = true;
   selectedTable.value = settings.value.copyDetailsTable(uid);
   initTableMenu();
-}
-
-function initTableMenuOld(): void {
-  tableGroups.value.items = [];
-  tableGroups.value.items.push({
-    label: 'Add',
-    icon: 'pi pi-plus',
-    command: () => onDetailsTableAdd(),
-  });
-
-  settings.value.detailTables.forEach((detailTable) => {
-    const tableMenuItem = {
-      label: detailTable.title,
-      icon: 'pi pi-table',
-      command: () => onTableTabClick(detailTable.uid),
-    };
-
-    tableGroups.value.items.push(tableMenuItem);
-  });
 }
 
 function deleteTable(uid: string): void {
@@ -329,10 +306,8 @@ function onTableDelete(uid: string): void {
   });
 }
 
-function onJsonChanged(args: string): void {
+function onJsonChanged(): void {
   isModified.value = true;
-  console.log('JSON text changed', args);
-  const settingsTmp = new MetaObjectStorableSettings(JSON.parse(args));
 }
 
 // Life cycle hooks
@@ -366,7 +341,7 @@ onBeforeMount(() => {
       command: () => onUpdateClick(),
     },
     {
-      label: 'json',
+      label: 'JSON',
       icon: 'pi pi-download',
       command: () => downloadJson(),
     },
