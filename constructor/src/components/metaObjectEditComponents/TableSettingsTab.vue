@@ -151,11 +151,13 @@ onBeforeMount(() => {
     <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
       <template #start>
         <Button icon="pi pi-copy"
+                v-tooltip.top="$t('copy')"
                 severity="primary"
                 size="small"
                 text
                 @click="onCopyTableClick" />
         <Button icon="pi pi-times"
+                v-tooltip.top="$t('delete')"
                 severity="danger"
                 size="small"
                 text
@@ -195,27 +197,32 @@ onBeforeMount(() => {
     <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
       <template #start>
         <Button icon="pi pi-plus"
+                v-tooltip.top="$t('add')"
                 severity="primary"
                 size="small"
                 text
                 @click="onAddColumnClick" />
         <Button icon="pi pi-copy"
+                v-tooltip.top="$t('copy')"
                 severity="primary"
                 size="small"
                 text
                 @click="onCopyColumnClick" />
         <Button icon="pi pi-times"
+                v-tooltip.top="$t('delete')"
                 severity="danger"
                 size="small"
                 text
                 @click="onDeleteColumnClick" />
         <Button class="ml-2"
+                v-tooltip.top="$t('up')"
                 icon="pi pi-arrow-up"
                 severity="primary"
                 size="small"
                 text
                 @click="onUpColumnClick" />
         <Button icon="pi pi-arrow-down"
+                v-tooltip.top="$t('down')"
                 severity="primary"
                 size="small"
                 text

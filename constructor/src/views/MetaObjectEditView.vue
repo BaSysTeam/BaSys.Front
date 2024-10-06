@@ -9,6 +9,7 @@ import { githubLight } from '@ddietr/codemirror-themes/github-light';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
+import ConfirmDialog from 'primevue/confirmdialog';
 import Divider from 'primevue/divider';
 import Menu from 'primevue/menu';
 import DataTypeProvider from '@/dataProviders/dataTypeProvider';
@@ -20,6 +21,7 @@ import TableSettingsTab from '@/components/metaObjectEditComponents/TableSetting
 import JsonTab from '@/components/metaObjectEditComponents/jsonTab.vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
 import { Guid } from 'guid-typescript';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
@@ -28,7 +30,6 @@ import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectSto
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
-import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
 
 // Props
 const props = defineProps({
@@ -37,6 +38,7 @@ const props = defineProps({
 });
 
 // Infrastructure
+const { t } = useI18n({ useScope: 'global' });
 const provider = new MetaObjectProvider();
 const kindsProvider = new MetaObjectKindsProvider();
 const router = useRouter();
@@ -57,7 +59,7 @@ const dataTypes = ref<DataType[]>([]);
 const metaObjectKindTitle = ref('');
 const activeTab = ref('main');
 const tableGroups = ref<any>({
-  label: 'Details tables',
+  label: t('detailsTables'),
   items: [],
 });
 
@@ -316,13 +318,13 @@ function deleteTable(uid: string): void {
 
 function onTableDelete(uid: string): void {
   confirmVue.require({
-    message: 'Delete table?',
-    header: 'Confirmation',
+    message: t('deleteTableQuestion'),
+    header: t('confirmation'),
     icon: 'pi pi-exclamation-triangle',
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
-    acceptLabel: 'Delete',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('delete'),
     accept: () => deleteTable(uid),
   });
 }
@@ -336,19 +338,19 @@ function onJsonChanged(args: string): void {
 // Life cycle hooks
 onBeforeMount(() => {
   navMenuItems.value.push({
-    label: 'Main',
+    label: t('main'),
     command: () => onNavTabClick('main'),
   });
 
   navMenuItems.value.push({
-    label: 'Fields',
+    label: t('columns'),
     command: () => onNavTabClick('fields'),
   });
 
   navMenuItems.value.push(tableGroups.value);
 
   const otherGroup = {
-    label: 'Other',
+    label: t('other'),
     items: [{
       label: 'JSON',
       command: () => onNavTabClick('json'),
@@ -359,7 +361,7 @@ onBeforeMount(() => {
 
   actions.value = [
     {
-      label: 'update',
+      label: t('update'),
       icon: 'pi pi-sync',
       command: () => onUpdateClick(),
     },
@@ -373,7 +375,7 @@ onBeforeMount(() => {
   initTableMenu = () => {
     tableGroups.value.items = [];
     tableGroups.value.items.push({
-      label: 'Add',
+      label: t('add'),
       icon: 'pi pi-plus',
       command: () => onDetailsTableAdd(),
     });
@@ -391,7 +393,6 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  console.log('mounted');
   update();
 });
 
@@ -479,6 +480,7 @@ onMounted(() => {
       </div>
     </div>
   </div>
+  <ConfirmDialog></ConfirmDialog>
 </template>
 
 <style scoped>

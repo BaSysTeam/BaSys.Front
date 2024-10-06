@@ -134,27 +134,32 @@ onBeforeMount(() => {
       <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
         <template #start>
           <Button icon="pi pi-plus"
+                  v-tooltip.top="$t('add')"
                   severity="primary"
                   size="small"
                   text
                   @click="onAddClick" />
           <Button icon="pi pi-copy"
+                  v-tooltip.top="$t('copy')"
                   severity="primary"
                   size="small"
                   text
                   @click="onCopyClick" />
           <Button icon="pi pi-times"
+                  v-tooltip.top="$t('delete')"
                   severity="danger"
                   size="small"
                   text
                   @click="onDeleteClick" />
           <Button class="ml-2"
+                  v-tooltip.top="$t('up')"
                   icon="pi pi-arrow-up"
                   severity="primary"
                   size="small"
                   text
                   @click="onUpClick" />
           <Button icon="pi pi-arrow-down"
+                  v-tooltip.top="$t('down')"
                   severity="primary"
                   size="small"
                   text
