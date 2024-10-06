@@ -1,3 +1,4 @@
+import DataTableColumn from './dataTableColumn';
 import SelectQueryBuilder from './selectQueryBuilder';
 import DataTable from './dataTable';
 
@@ -39,12 +40,25 @@ export default class FunctionLibrary {
     return null;
   }
 
-  static createTable(columns: any[]):DataTable {
-    const dataTable = new DataTable();
-    if (columns != null && columns.length) {
-      columns.forEach((column: any) => {
-        dataTable.addColumn(column);
-      });
+  static createTable(input: any):DataTable {
+    let dataTable = new DataTable();
+
+    if (Array.isArray(input)) {
+      if (input != null && input.length) {
+        input.forEach((column: any) => {
+          if (typeof column === 'object' && column instanceof Object) {
+            dataTable.addColumn(column);
+          } else if (typeof column === 'string') {
+            const newColumn = DataTableColumn.parse(column);
+            dataTable.addColumn(newColumn);
+          } else {
+            throw new Error('Wrong column description');
+          }
+        });
+      }
+    } else if (typeof input === 'string') {
+      const parts = input.split(',');
+      dataTable = FunctionLibrary.createTable(parts);
     }
 
     return dataTable;

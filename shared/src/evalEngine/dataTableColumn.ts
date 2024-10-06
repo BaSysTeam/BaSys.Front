@@ -15,6 +15,21 @@ export default class DataTableColumn {
     this.defaultValue = params.defaultValue || this.defaultValueOfType(this.dataType);
   }
 
+  static parse(input:string): DataTableColumn {
+    if (!input) {
+      throw new Error('Column description cannot be empty.');
+    }
+
+    const parts = input.trim().split(' ');
+
+    const columnData = {
+      name: parts[0],
+      dataType: parts.length > 1 ? parts[1].trim().toLowerCase() : 'string',
+    };
+
+    return new DataTableColumn(columnData);
+  }
+
   private checkDataType(): void {
     const availableTypes = ['string', 'number', 'boolean', 'date'];
 
