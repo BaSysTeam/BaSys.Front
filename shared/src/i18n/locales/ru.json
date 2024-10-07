@@ -33,6 +33,7 @@
   "isStandard": "Стандартный",
   "isStoreData": "Хранит данные",
   "fields": "Поля",
+  "fillStandard": "Заполнить стандартные",
   "formula": "Формула",
   "back": "Вернуться",
   "logLevel": "Регистрировать",

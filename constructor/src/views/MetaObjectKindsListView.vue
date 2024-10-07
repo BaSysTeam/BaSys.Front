@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, watch, computed,
+  ref, onMounted, onDeactivated, onBeforeMount, defineProps, watch, computed,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -27,6 +27,7 @@ const isWaiting = ref(true);
 const selectedRow = ref<any>({});
 const metadataKinds = ref<MetaObjectKind[]>([]);
 const windowHeight = ref(window.innerHeight);
+const actionsItems = ref<any[]>([]);
 
 // Methods
 function isSelectedRowEmpty(): boolean {
@@ -107,15 +108,45 @@ function onResize(): void {
   windowHeight.value = window.innerHeight;
 }
 
-function beforeDestroy(): void {
-  window.removeEventListener('resize', onResize);
+function onUpdateClick(): void {
+  actionUpdate();
+}
+
+async function onFillStandardClick(): Promise<void> {
+  console.log('FillStandardClick');
+  const response = await dataProvider.createStandard();
+  if (response.isOK) {
+    toastHelper.success(response.message);
+    await actionUpdate();
+  } else {
+    toastHelper.error(response.message);
+    console.error(response.presentation);
+  }
 }
 
 // Life cycle hooks
+onBeforeMount(() => {
+  actionsItems.value = [
+    {
+      label: t('update'),
+      icon: 'pi pi-sync',
+      command: onUpdateClick,
+    },
+    {
+      label: t('fillStandard'),
+      command: onFillStandardClick,
+    },
+  ];
+});
+
 onMounted(() => {
   window.addEventListener('resize', onResize);
   windowHeight.value = window.innerHeight;
   actionUpdate();
+});
+
+onDeactivated(() => {
+  window.removeEventListener('resize', onResize);
 });
 
 </script>
@@ -157,6 +188,14 @@ onMounted(() => {
             @click="onDeleteClicked"
           />
         </ButtonGroup>
+        <SplitButton
+          :label="$t('actions')"
+          severity="primary"
+          size="small"
+          class="ml-1"
+          outlined
+          :model="actionsItems"
+        />
       </div>
     </div>
     <div class="grid">
