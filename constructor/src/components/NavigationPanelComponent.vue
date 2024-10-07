@@ -45,7 +45,7 @@ onBeforeMount(() => {
       label: t('dataTypes'),
       command: () => onDataTypesClick(),
     }, {
-      label: t('metaObjectKindsShort'),
+      label: t('metaObjectKinds'),
       command: () => onMetadataKindsClick(),
     }, {
       label: t('console'),
