@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import MetaObjectEditView from '@/views/MetaObjectEditView.vue';
 import MetaObjectsListView from '@/views/MetaObjectsListView.vue';
 import ExpressionsConsoleView from '@/views/ExpressionsConsoleView.vue';
+import MetaObjectMenuEditView from '@/views/MetaObjectMenuEditView.vue';
 import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
 import MetadataKindsListView from '../views/MetaObjectKindsListView.vue';
@@ -32,6 +33,24 @@ const routes: Array<RouteRecordRaw> = [
     path: '/metadata-kinds/edit/:name',
     name: 'metadata-kinds-edit',
     component: MetadataKindsEditView,
+    props: true,
+  },
+  {
+    path: '/meta-objects-menu/add',
+    name: 'meta-objects-menu-add',
+    component: MetaObjectMenuEditView,
+    props: true,
+  },
+  {
+    path: '/meta-objects-menu/edit/:name',
+    name: 'meta-objects-menu-edit',
+    component: MetaObjectMenuEditView,
+    props: true,
+  },
+  {
+    path: '/meta-objects-menu/copy/:name',
+    name: 'meta-objects-menu-copy',
+    component: MetaObjectMenuEditView,
     props: true,
   },
   {
