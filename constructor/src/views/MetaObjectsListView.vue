@@ -47,7 +47,7 @@ const dataTableScrollHeight = computed(() => `${windowHeight.value - 150}px`);
 const filters = ref<any>({});
 
 const formTitle = computed(() => `${t('metaObjects')}: ${kindTitle.value}`);
-const actionsItems = ref([]);
+const actionsItems = ref<any[]>([]);
 
 // Methods
 function setCurrentRow(): void {
