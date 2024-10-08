@@ -1,13 +1,14 @@
 import { Guid } from 'guid-typescript';
-import MenuSubItem from '@/models/menuModel/menuSubItem';
+import MenuColumn from './menuColumn';
 
 export default class MenuGroupItem {
   uid: string;
   title: string;
-  cssClass: string;
+  iconClass: string;
   url: string;
+  isSeparator: boolean;
   isVisible: boolean;
-  items: MenuSubItem[][]
+  items: MenuColumn[]
 
   constructor(params: any) {
     let data: any = {};
@@ -17,18 +18,15 @@ export default class MenuGroupItem {
 
     this.uid = data.uid || Guid.create().toString();
     this.title = data.title || '';
-    this.cssClass = data.cssClass || '';
+    this.iconClass = data.iconClass || '';
     this.url = data.url || '';
+    this.isSeparator = data.isSeparator || false;
     this.isVisible = data.isVisible || true;
 
     this.items = [];
     if (data.items != null) {
-      data.items.forEach((subArray:any[]) => {
-        const currentArray: any[] = [];
-        subArray.forEach((item:any) => {
-          currentArray.push(new MenuSubItem(item));
-        });
-        this.items.push(currentArray);
+      data.items.forEach((item:any) => {
+        this.items.push(new MenuColumn(item));
       });
     }
   }

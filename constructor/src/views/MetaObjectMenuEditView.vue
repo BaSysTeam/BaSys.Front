@@ -12,9 +12,13 @@ import SplitButton from 'primevue/splitbutton';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Divider from 'primevue/divider';
 import Menu from 'primevue/menu';
+import MainTab from '@/components/metaObjectMenuEditComponents/MainTab.vue';
+import MenuSettingsTab from '@/components/metaObjectMenuEditComponents/MenuSettingsTab.vue';
+import JsonViewComponent from '@/components/JsonViewComponent.vue';
 import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import MenuSettings from '../../../shared/src/models/menuModel/menuSettings';
 
 // Props
 const props = defineProps({
@@ -30,9 +34,11 @@ const dataTypesProvider = new DataTypeProvider();
 
 // Data
 const kind = 'menu';
+const activeTab = ref('main');
+const settings = ref<MenuSettings>(new MenuSettings(null));
 const isModified = ref(false);
 const isWaiting = ref(true);
-const formTitle = computed(() => 'Menu');
+const formTitle = computed(() => `Menu.${settings.value.title}`);
 const actionItems = ref<any[]>([]);
 const navMenuItems = ref<any[]>([]);
 
@@ -43,6 +49,10 @@ function isCopy(): boolean {
 
 function isNew(): boolean {
   return router.currentRoute.value.name === 'meta-objects-add';
+}
+
+function update(): void {
+  isWaiting.value = false;
 }
 
 // Event handlers
@@ -71,6 +81,14 @@ function downloadJson(): void {
   console.log('Download json');
 }
 
+function onNavTabClick(args: string): void {
+  activeTab.value = args;
+}
+
+function onSettingsChanged(): void {
+  isModified.value = true;
+}
+
 // Life cycle hooks
 onBeforeMount(() => {
   actionItems.value = [
@@ -85,6 +103,24 @@ onBeforeMount(() => {
       command: () => downloadJson(),
     },
   ];
+
+  navMenuItems.value = [{
+    label: t('main'),
+    command: () => onNavTabClick('main'),
+  },
+  {
+    label: t('menuSettings'),
+    command: () => onNavTabClick('settings'),
+  },
+  {
+    label: 'JSON',
+    command: () => onNavTabClick('json'),
+  },
+  ];
+});
+
+onMounted(() => {
+  update();
 });
 
 </script>
@@ -139,8 +175,30 @@ onBeforeMount(() => {
     </div>
   </div>
 
+  <!--Divider-->
   <div class="grid">
     <Divider class="m-2" />
+  </div>
+
+  <!--Settings-->
+  <div class="grid">
+    <div class="col-fixed bs-nav-panel h-screen" style="width: 220px;">
+      <Menu :model="navMenuItems"></Menu>
+    </div>
+    <div class="col">
+      <div v-if="activeTab=='main'">
+        <MainTab :settings="settings"
+                 @change="onSettingsChanged"></MainTab>
+      </div>
+      <div v-if="activeTab=='settings'">
+        <MenuSettingsTab :settings="settings"
+                         @change="onSettingsChanged"></MenuSettingsTab>
+      </div>
+      <div v-if="activeTab == 'json'">
+        <JsonViewComponent></JsonViewComponent>
+      </div>
+
+    </div>
   </div>
 
 </div>
