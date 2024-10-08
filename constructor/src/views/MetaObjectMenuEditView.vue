@@ -36,6 +36,7 @@ const dataTypesProvider = new DataTypeProvider();
 const kind = 'menu';
 const activeTab = ref('main');
 const settings = ref<MenuSettings>(new MenuSettings(null));
+const jsonSettings = ref<string>('');
 const isModified = ref(false);
 const isWaiting = ref(true);
 const formTitle = computed(() => `Menu.${settings.value.title}`);
@@ -81,8 +82,12 @@ function downloadJson(): void {
   console.log('Download json');
 }
 
-function onNavTabClick(args: string): void {
-  activeTab.value = args;
+function onNavTabClick(tabName: string): void {
+  console.log('tab clicked', tabName);
+  if (tabName === 'json') {
+    jsonSettings.value = JSON.stringify(settings.value, null, 2);
+  }
+  activeTab.value = tabName;
 }
 
 function onSettingsChanged(): void {
@@ -195,7 +200,7 @@ onMounted(() => {
                          @change="onSettingsChanged"></MenuSettingsTab>
       </div>
       <div v-if="activeTab == 'json'">
-        <JsonViewComponent></JsonViewComponent>
+        <JsonViewComponent :json="jsonSettings"></JsonViewComponent>
       </div>
 
     </div>
