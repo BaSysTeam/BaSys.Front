@@ -1,11 +1,12 @@
 import { Guid } from 'guid-typescript';
+import { MenuSettingsLinkKinds } from './menuSettingsLinkKinds';
 
-export default class MenuLinkItem {
+export default class MenuSettingsLinkItem {
   uid: string;
+  kind: MenuSettingsLinkKinds;
   title: string;
   iconClass: string;
   url: string;
-  isSeparator: boolean;
   isVisible: boolean;
 
   constructor(params: any) {
@@ -15,10 +16,10 @@ export default class MenuLinkItem {
     }
 
     this.uid = data.uid || Guid.create().toString();
+    this.kind = data.kind || MenuSettingsLinkKinds.Link;
     this.title = data.title || '';
     this.iconClass = data.iconClass || '';
     this.url = data.url || '';
-    this.isSeparator = data.isSeparator || false;
     this.isVisible = data.isActive || true;
   }
 }

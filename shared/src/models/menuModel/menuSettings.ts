@@ -1,13 +1,13 @@
 import { Guid } from 'guid-typescript';
-import MenuGroupItem from './menuGroupItem';
+import MenuSettingsGroupItem from './menuSettingsGroupItem';
 
 export default class MenuSettings {
   uid:string;
   title:string;
   name:string;
   memo:string;
-  isVisible:boolean;
-  menuGroups: MenuGroupItem[];
+  isActive:boolean;
+  menuGroups: MenuSettingsGroupItem[];
 
   constructor(params: any) {
     let data: any = {};
@@ -19,12 +19,13 @@ export default class MenuSettings {
     this.title = data.title || '';
     this.name = data.name || '';
     this.memo = data.memo || '';
-    this.isVisible = data.isVisible || true;
+    this.isActive = data.isActive || true;
 
     this.menuGroups = [];
+
     if (data.menuGroups != null) {
       data.menuGroups.forEach((menuGroup:any) => {
-        this.menuGroups.push(new MenuGroupItem(menuGroup));
+        this.menuGroups.push(new MenuSettingsGroupItem(menuGroup));
       });
     }
   }

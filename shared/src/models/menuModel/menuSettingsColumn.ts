@@ -1,9 +1,9 @@
 import { Guid } from 'guid-typescript';
-import MenuSubItem from './menuSubItem';
+import MenuSettingsSubItem from './menuSettingsSubItem';
 
-export default class MenuColumn {
+export default class MenuSettingsColumn {
   uid: string;
-  items: MenuSubItem[];
+  items: MenuSettingsSubItem[];
   constructor(params: any) {
     let data: any = {};
     if (params != null) {
@@ -15,7 +15,7 @@ export default class MenuColumn {
     this.items = [];
     if (data.items != null) {
       data.items.forEach((item:any) => {
-        this.items.push(new MenuSubItem(item));
+        this.items.push(new MenuSettingsSubItem(item));
       });
     }
   }
