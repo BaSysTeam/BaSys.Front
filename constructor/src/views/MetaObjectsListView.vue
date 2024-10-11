@@ -114,7 +114,7 @@ function navigateToEdit(): void {
 
 function navigateToAdd(): void {
   if (props.kind === 'menu') {
-    router.push({ name: 'meta-objects-menu-add', params: { kind: props.kind } });
+    router.push({ name: 'meta-menus-add', params: { kind: props.kind } });
   } else {
     router.push({ name: 'meta-objects-add', params: { kind: props.kind } });
   }
@@ -126,7 +126,7 @@ function navigateToCopy(): void {
   }
   const metaObject = selectedRow.value as MetaObject;
   if (props.kind === 'menu') {
-    router.push({ name: 'meta-objects-menu-copy', params: { name: metaObject.name } });
+    router.push({ name: 'meta-menus-copy', params: { name: metaObject.name } });
   } else {
     router.push({ name: 'meta-objects-copy', params: { kind: props.kind, name: metaObject.name } });
   }

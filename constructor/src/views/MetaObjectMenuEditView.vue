@@ -47,11 +47,11 @@ const navMenuItems = ref<any[]>([]);
 
 // Methods
 function isCopyRoute(): boolean {
-  return router.currentRoute.value.name === 'meta-objects-menu-copy';
+  return router.currentRoute.value.name === 'meta-menus-copy';
 }
 
 function isNewRoute(): boolean {
-  return router.currentRoute.value.name === 'meta-objects-menu-add';
+  return router.currentRoute.value.name === 'meta-menus-add';
 }
 
 function registerError(response: any): void {
@@ -70,7 +70,7 @@ async function saveAsync(): Promise<boolean> {
     if (response.isOK) {
       isModified.value = false;
       toastHelper.success(response.message);
-      await router.push({ name: 'meta-objects-menu-edit', params: { name: settings.value.name } });
+      await router.push({ name: 'meta-menus-edit', params: { name: settings.value.name } });
       result = true;
     } else {
       registerError(response);
