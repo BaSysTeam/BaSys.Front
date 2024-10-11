@@ -10,6 +10,8 @@ import SplitButton from 'primevue/splitbutton';
 import Listbox from 'primevue/listbox';
 import Badge from 'primevue/badge';
 import ConfirmDialog from 'primevue/confirmdialog';
+import MenuSettingsPropertiesPanel
+  from '@/components/metaObjectMenuEditComponents/MenuSettingsPropertiesPanel.vue';
 import MenuSettings from '../../../../shared/src/models/menuModel/menuSettings';
 import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 
@@ -103,6 +105,10 @@ function onMenuGroupDownClick(): void {
   emit('change');
 }
 
+function onChange(): void {
+  emit('change');
+}
+
 // Life cycle hooks.
 onBeforeMount(() => {
   addMenuGroupItems.value = [
@@ -173,6 +179,13 @@ onBeforeMount(() => {
         </div>
       </template>
     </Listbox>
+  </div>
+
+  <div class="col-3 h-screen" style="border-right: 1px solid #ececec;"></div>
+
+  <div class="col-6">
+    <MenuSettingsPropertiesPanel :menu-group="selectedGroup"
+                                 @change="onChange"></MenuSettingsPropertiesPanel>
   </div>
 </div>
 
