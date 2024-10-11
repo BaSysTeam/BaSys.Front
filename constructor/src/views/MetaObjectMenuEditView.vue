@@ -15,6 +15,7 @@ import Menu from 'primevue/menu';
 import MainTab from '@/components/metaObjectMenuEditComponents/MainTab.vue';
 import MenuSettingsTab from '@/components/metaObjectMenuEditComponents/MenuSettingsTab.vue';
 import JsonViewComponent from '@/components/JsonViewComponent.vue';
+import MetaMenusProvider from '@/dataProviders/metaMenusProvider';
 import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -22,7 +23,7 @@ import MenuSettings from '../../../shared/src/models/menuModel/menuSettings';
 
 // Props
 const props = defineProps({
-  name: { type: String, required: true },
+  name: { type: String, required: false, default: '' },
 });
 
 // Infrastructure
@@ -31,6 +32,7 @@ const router = useRouter();
 const confirmVue = useConfirm();
 const toastHelper = new ToastHelper(useToast());
 const dataTypesProvider = new DataTypeProvider();
+const menuProvider = new MetaMenusProvider();
 
 // Data
 const kind = 'menu';
@@ -44,17 +46,70 @@ const actionItems = ref<any[]>([]);
 const navMenuItems = ref<any[]>([]);
 
 // Methods
-function isCopy(): boolean {
-  return router.currentRoute.value.name === 'meta-objects-copy';
+function isCopyRoute(): boolean {
+  return router.currentRoute.value.name === 'meta-objects-menu-copy';
 }
 
-function isNew(): boolean {
-  return router.currentRoute.value.name === 'meta-objects-add';
+function isNewRoute(): boolean {
+  return router.currentRoute.value.name === 'meta-objects-menu-add';
 }
 
-function update(): void {
+function registerError(response: any): void {
+  toastHelper.error(response.message);
+  console.error(response.presentation);
+}
+
+async function saveAsync(): Promise<boolean> {
+  let result = false;
+  isWaiting.value = true;
+
+  if (isNewRoute()) {
+    const response = await menuProvider.create(settings.value);
+    isWaiting.value = false;
+
+    if (response.isOK) {
+      isModified.value = false;
+      toastHelper.success(response.message);
+      await router.push({ name: 'meta-objects-menu-edit', params: { name: settings.value.name } });
+      result = true;
+    } else {
+      registerError(response);
+    }
+  } else {
+    const response = await menuProvider.update(settings.value);
+    isWaiting.value = false;
+
+    if (response.isOK) {
+      isModified.value = false;
+      toastHelper.success(response.message);
+      result = true;
+    } else {
+      registerError(response);
+    }
+  }
+
+  return result;
+}
+
+async function updateAsync(): Promise<void> {
   isWaiting.value = false;
+
+  if (isNewRoute()) {
+    return;
+  }
+
+  const response = await menuProvider.getItem(props.name);
+
+  if (response.isOK) {
+    settings.value = new MenuSettings(response.data);
+  } else {
+    registerError(response);
+  }
 }
+
+watch(() => props.name, async () => {
+  await updateAsync();
+});
 
 // Event handlers
 function onReturnClick(): void {
@@ -66,8 +121,9 @@ function onReturnClick(): void {
   });
 }
 
-function onSaveClick(): void {
+async function onSaveClick(): Promise<void> {
   console.log('Save clicked');
+  await saveAsync();
 }
 
 function onRunClick(): void {
@@ -124,8 +180,8 @@ onBeforeMount(() => {
   ];
 });
 
-onMounted(() => {
-  update();
+onMounted(async () => {
+  await updateAsync();
 });
 
 </script>
