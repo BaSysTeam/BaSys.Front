@@ -1,4 +1,5 @@
 import { Guid } from 'guid-typescript';
+import { MenuSettingsGroupKinds } from './menuSettingsGroupKinds';
 import MenuSettingsGroupItem from './menuSettingsGroupItem';
 
 export default class MenuSettings {
@@ -7,7 +8,7 @@ export default class MenuSettings {
   name:string;
   memo:string;
   isActive:boolean;
-  menuGroups: MenuSettingsGroupItem[];
+  items: MenuSettingsGroupItem[];
 
   constructor(params: any) {
     let data: any = {};
@@ -21,12 +22,49 @@ export default class MenuSettings {
     this.memo = data.memo || '';
     this.isActive = data.isActive || true;
 
-    this.menuGroups = [];
+    this.items = [];
 
-    if (data.menuGroups != null) {
-      data.menuGroups.forEach((menuGroup:any) => {
-        this.menuGroups.push(new MenuSettingsGroupItem(menuGroup));
+    if (data.items != null) {
+      data.items.forEach((menuGroup:any) => {
+        this.items.push(new MenuSettingsGroupItem(menuGroup));
       });
+    }
+  }
+
+  addGroup(): MenuSettingsGroupItem {
+    const newGroup = new MenuSettingsGroupItem(
+      { title: 'Menu group', kind: MenuSettingsGroupKinds.Group },
+    );
+
+    this.items.push(newGroup);
+
+    return newGroup;
+  }
+
+  addItem(): MenuSettingsGroupItem {
+    const newGroup = new MenuSettingsGroupItem(
+      { title: 'Menu item', kind: MenuSettingsGroupKinds.Link },
+    );
+
+    this.items.push(newGroup);
+
+    return newGroup;
+  }
+
+  addSeparator(): MenuSettingsGroupItem {
+    const newGroup = new MenuSettingsGroupItem(
+      { title: 'separator', kind: MenuSettingsGroupKinds.Separator },
+    );
+
+    this.items.push(newGroup);
+
+    return newGroup;
+  }
+
+  deleteItem(item: MenuSettingsGroupItem): void {
+    const index = this.items.indexOf(item);
+    if (index > -1) {
+      this.items.splice(index, 1);
     }
   }
 }

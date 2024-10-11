@@ -106,7 +106,7 @@ function navigateToEdit(): void {
   }
   const metaObject = selectedRow.value as MetaObject;
   if (props.kind === 'menu') {
-    router.push({ name: 'meta-objects-menu-edit', params: { name: metaObject.name } });
+    router.push({ name: 'meta-menus-edit', params: { name: metaObject.name } });
   } else {
     router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: metaObject.name } });
   }
