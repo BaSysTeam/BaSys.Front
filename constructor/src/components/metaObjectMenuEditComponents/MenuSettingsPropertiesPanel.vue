@@ -6,8 +6,13 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
+import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import SelectButton from 'primevue/selectbutton';
 import FieldGridComponent from '@/components/FieldGridComponent.vue';
+import InputSwitch from 'primevue/inputswitch';
+import MetaObjectKind from '@/models/metaObjectKind';
 import MenuSettingsGroupItem from '../../../../shared/src/models/menuModel/menuSettingsGroupItem';
 
 // Props
@@ -15,7 +20,16 @@ const props = defineProps({
   menuGroup: {
     type: Object as PropType<MenuSettingsGroupItem>,
   },
+  kindsSource: {
+    type: Object as PropType<MetaObjectKind>,
+  },
 });
+
+// Infrastructure
+const { t } = useI18n({ useScope: 'global' });
+
+// Data
+const groupKindOptions = ref<any[]>([]);
 
 // Emits
 const emit = defineEmits({ change: () => true });
@@ -25,17 +39,45 @@ function onChange():void {
   emit('change');
 }
 
+// Life cycle hooks
+onBeforeMount(() => {
+  groupKindOptions.value = [
+    {
+      label: t('menu'),
+      value: 3,
+    },
+    {
+      label: t('item'),
+      value: 1,
+    },
+    {
+      label: t('separator'),
+      value: 2,
+    },
+  ];
+});
+
 </script>
 
 <template>
   <Accordion :multiple="true" :active-index="[0, 1, 2]">
-    <AccordionTab header="Group">
-      <div class="grid" v-if="menuGroup">
+    <AccordionTab :header="t('group')" v-if="menuGroup">
+      <div class="grid">
         <div class="col-12">
+          <!--Group kind-->
+          <SelectButton :options="groupKindOptions"
+                        option-label="label"
+                        option-value="value"
+                        v-model="menuGroup.kind"
+                        @change="onChange"></SelectButton>
+        </div>
+      </div>
+      <div class="grid" v-if="menuGroup.kind != 2">
+        <div class="col-12">
+
           <!--Title-->
           <FieldGridComponent :title="$t('title')"
-                              label-for="group-title"
-                              :required="true">
+                              label-for="group-title">
             <InputText id="group-title"
                        size="small"
                        autocomplete="off"
@@ -46,8 +88,7 @@ function onChange():void {
 
           <!--Icon class-->
           <FieldGridComponent :title="$t('icon')"
-                              label-for="group-icon-class"
-                              :required="true">
+                              label-for="group-icon-class">
             <InputText id="group-icon-class"
                        size="small"
                        autocomplete="off"
@@ -59,13 +100,57 @@ function onChange():void {
           <!--Link-->
           <FieldGridComponent :title="$t('link')"
                               label-for="group-link"
-                              :required="true">
+                              :required="true" v-if="menuGroup.kind === 1">
             <InputText id="group-link"
                        size="small"
                        autocomplete="off"
                        class="w-full"
-                       v-model="menuGroup.link"
+                       v-model="menuGroup.url"
                        @change="onChange"></InputText>
+          </FieldGridComponent>
+
+          <!--Auto-fill-->
+          <FieldGridComponent :title="$t('autoFill')"
+                              label-for="group-auto-fill"
+                              v-if="menuGroup.kind == 3">
+            <InputSwitch id="group-auto-fill"
+                         v-model="menuGroup.autoFill"
+                         @change="onChange"></InputSwitch>
+
+          </FieldGridComponent>
+
+          <!--Meta object kind-->
+          <FieldGridComponent :title="$t('metaObjectKind')"
+                              label-for="group-meta-object-kind"
+                              :required="true"
+                              v-if="menuGroup.kind == 3 && menuGroup.autoFill">
+            <Dropdown v-model="menuGroup.metaObjectKindUid"
+                      :options="kindsSource"
+                      option-label="title"
+                      option-value="uid"
+                      class="w-full"
+                      size="small"
+                      @change="onChange"></Dropdown>
+
+          </FieldGridComponent>
+
+          <!--Items per column-->
+          <FieldGridComponent :title="$t('itemsPerColumn')"
+                              label-for="group-items-per-column"
+                              :required="true"
+                              v-if="menuGroup.kind == 3 && menuGroup.autoFill">
+            <InputNumber id="group-items-per-column"
+                         v-model="menuGroup.itemsPerColumn"
+                         size="small"
+                         @change="onChange"></InputNumber>
+          </FieldGridComponent>
+
+          <!--Is visible-->
+          <FieldGridComponent :title="$t('isVisible')"
+                              label-for="group-is-visible">
+            <InputSwitch id="group-is-visible"
+                         v-model="menuGroup.isVisible"
+                         @change="onChange"></InputSwitch>
           </FieldGridComponent>
 
         </div>

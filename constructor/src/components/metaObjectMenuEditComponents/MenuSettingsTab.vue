@@ -12,6 +12,7 @@ import Badge from 'primevue/badge';
 import ConfirmDialog from 'primevue/confirmdialog';
 import MenuSettingsPropertiesPanel
   from '@/components/metaObjectMenuEditComponents/MenuSettingsPropertiesPanel.vue';
+import MetaObjectKind from '@/models/metaObjectKind';
 import MenuSettings from '../../../../shared/src/models/menuModel/menuSettings';
 import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 
@@ -20,6 +21,9 @@ const props = defineProps({
   settings: {
     type: Object as PropType<MenuSettings>,
     required: true,
+  },
+  kindsSource: {
+    type: Object as PropType<MetaObjectKind>,
   },
 });
 
@@ -50,7 +54,6 @@ function deleteMenuGroup(): void {
 
 // Event handlers
 function onMenuGroupAddClick(kind: string): void {
-  console.log('MenuGroupAddClick', kind);
   let newGroup: any;
   switch (kind) {
     case 'group':
@@ -175,7 +178,8 @@ onBeforeMount(() => {
       <template #option="{option, index}">
         <div>
           <Badge :value="index+1" severity="info"></Badge>
-          <span class="ml-2">{{option.title}}</span>
+          <span class="ml-2" v-if="option.kind == 2">--------------</span>
+          <span class="ml-2" v-if="option.kind != 2">{{option.title}}</span>
         </div>
       </template>
     </Listbox>
@@ -185,6 +189,7 @@ onBeforeMount(() => {
 
   <div class="col-6">
     <MenuSettingsPropertiesPanel :menu-group="selectedGroup"
+                                 :kinds-source="kindsSource"
                                  @change="onChange"></MenuSettingsPropertiesPanel>
   </div>
 </div>

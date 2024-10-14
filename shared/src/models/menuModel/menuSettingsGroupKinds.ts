@@ -1,5 +1,5 @@
 export enum MenuSettingsGroupKinds{
-  Link= 0,
-  Separator = 1,
-  Group = 2,
+  Link= 1,
+  Separator = 2,
+  Group = 3,
 }

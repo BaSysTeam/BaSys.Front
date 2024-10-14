@@ -16,7 +16,8 @@ import MainTab from '@/components/metaObjectMenuEditComponents/MainTab.vue';
 import MenuSettingsTab from '@/components/metaObjectMenuEditComponents/MenuSettingsTab.vue';
 import JsonViewComponent from '@/components/JsonViewComponent.vue';
 import MetaMenusProvider from '@/dataProviders/metaMenusProvider';
-import DataTypeProvider from '@/dataProviders/dataTypeProvider';
+import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
+import MetaObjectKind from '@/models/metaObjectKind';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import MenuSettings from '../../../shared/src/models/menuModel/menuSettings';
@@ -31,12 +32,13 @@ const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const confirmVue = useConfirm();
 const toastHelper = new ToastHelper(useToast());
-const dataTypesProvider = new DataTypeProvider();
+const kindsProvider = new MetaObjectKindsProvider();
 const menuProvider = new MetaMenusProvider();
 
 // Data
 const kind = 'menu';
 const activeTab = ref('main');
+const kindsSource = ref<MetaObjectKind[]>([]);
 const settings = ref<MenuSettings>(new MenuSettings(null));
 const jsonSettings = ref<string>('');
 const isModified = ref(false);
@@ -93,6 +95,18 @@ async function saveAsync(): Promise<boolean> {
 
 async function updateAsync(): Promise<void> {
   isWaiting.value = false;
+
+  const responseKinds = await kindsProvider.getCollection();
+
+  if (responseKinds.isOK) {
+    console.log('responseKinds', responseKinds);
+    kindsSource.value = [];
+    responseKinds.data.forEach((item) => {
+      kindsSource.value.push(new MetaObjectKind(item));
+    });
+  } else {
+    registerError(responseKinds);
+  }
 
   if (isNewRoute()) {
     return;
@@ -253,6 +267,7 @@ onMounted(async () => {
       </div>
       <div v-if="activeTab=='settings'">
         <MenuSettingsTab :settings="settings"
+                         :kinds-source="kindsSource"
                          @change="onSettingsChanged"></MenuSettingsTab>
       </div>
       <div v-if="activeTab == 'json'">

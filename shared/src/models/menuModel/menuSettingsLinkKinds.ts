@@ -1,4 +1,4 @@
 export enum MenuSettingsLinkKinds {
-  Link = 0,
-  Separator = 1,
+  Link = 1,
+  Separator = 2,
 }

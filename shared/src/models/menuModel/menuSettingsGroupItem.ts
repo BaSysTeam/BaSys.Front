@@ -9,6 +9,9 @@ export default class MenuSettingsGroupItem {
   iconClass: string;
   url: string;
   isVisible: boolean;
+  autoFill: boolean;
+  itemsPerColumn: number;
+  metaObjectKindUid: string;
   items: MenuSettingsColumn[]
 
   constructor(params: any) {
@@ -23,6 +26,10 @@ export default class MenuSettingsGroupItem {
     this.iconClass = data.iconClass || '';
     this.url = data.url || '';
     this.isVisible = data.isVisible || true;
+
+    this.autoFill = data.autoFill || false;
+    this.itemsPerColumn = data.itemsPerColumn || 10;
+    this.metaObjectKindUid = data.metaObjectKindUid || '';
 
     this.items = [];
     if (data.items != null) {
