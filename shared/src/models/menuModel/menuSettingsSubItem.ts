@@ -1,4 +1,5 @@
 import { Guid } from 'guid-typescript';
+import { MenuSettingsLinkKinds } from './menuSettingsLinkKinds';
 import MenuSettingsLinkItem from './menuSettingsLinkItem';
 
 export default class MenuSettingsSubItem {
@@ -23,5 +24,31 @@ export default class MenuSettingsSubItem {
         this.items.push(new MenuSettingsLinkItem(item));
       });
     }
+  }
+
+  newItem(): MenuSettingsLinkItem {
+    const newItem = new MenuSettingsLinkItem(
+      {
+        title: `Item ${this.items.length + 1}`,
+        kind: MenuSettingsLinkKinds.Link,
+      },
+    );
+
+    this.items.push(newItem);
+
+    return newItem;
+  }
+
+  newSeparator(): MenuSettingsLinkItem {
+    const newItem = new MenuSettingsLinkItem(
+      {
+        title: `Separator ${this.items.length + 1}`,
+        kind: MenuSettingsLinkKinds.Separator,
+      },
+    );
+
+    this.items.push(newItem);
+
+    return newItem;
   }
 }

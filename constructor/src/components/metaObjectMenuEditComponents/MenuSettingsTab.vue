@@ -82,6 +82,30 @@ function onMenuGroupAddClick(kind: string): void {
 }
 
 function onMenuColumnAddClick(kind: string): void {
+  switch (kind) {
+    case 'column':
+      if (selectedGroup.value) {
+        selectedMenuColumn.value = selectedGroup.value.newColumn();
+      }
+      break;
+    case 'subGroup':
+      if (selectedMenuColumn.value) {
+        selectedSubItem.value = selectedMenuColumn.value.newSubItem();
+      }
+      break;
+    case 'item':
+      if (selectedSubItem.value) {
+        selectedItem.value = selectedSubItem.value.newItem();
+      }
+      break;
+    case 'separator':
+      if (selectedSubItem.value) {
+        selectedItem.value = selectedSubItem.value.newSeparator();
+      }
+      break;
+    default:
+      throw new Error(`Unknown group kind ${kind}`);
+  }
   emit('change');
 }
 
@@ -134,6 +158,10 @@ function onMenuSubItemClick(option:any, menuColumn:any): void {
   console.log('OnMenuSubItemClick', option, menuColumn);
   selectedSubItem.value = option;
   selectedMenuColumn.value = menuColumn;
+}
+
+function onSubItemDeleteClick(option:any, menuColumn:any): void {
+  console.log('OnSubItemDeleteClick', option, menuColumn);
 }
 
 // Life cycle hooks.
@@ -248,6 +276,7 @@ onBeforeMount(() => {
       </Toolbar>
 
       <Card :key="menuColumn.uid"
+            class="mb-1"
             v-for="menuColumn in selectedGroup.items">
         <template #content>
           <Listbox :options="menuColumn.items"
@@ -297,4 +326,9 @@ onBeforeMount(() => {
 .bs-menu-settings-tab .p-card-body{
   padding: 0!important;
 }
+
+.bs-menu-settings-tab .bs-selected{
+  background-color: #ececec;
+}
+
 </style>

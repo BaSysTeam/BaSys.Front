@@ -1,4 +1,6 @@
 import { Guid } from 'guid-typescript';
+import MenuSettingsLinkItem from './menuSettingsLinkItem';
+import { MenuSettingsLinkKinds } from './menuSettingsLinkKinds';
 import MenuSettingsSubItem from './menuSettingsSubItem';
 
 export default class MenuSettingsColumn {
@@ -18,5 +20,19 @@ export default class MenuSettingsColumn {
         this.items.push(new MenuSettingsSubItem(item));
       });
     }
+  }
+
+  newSubItem(): MenuSettingsSubItem {
+    const item = new MenuSettingsLinkItem({ title: 'Item 1', kind: MenuSettingsLinkKinds.Link });
+    const subItem = new MenuSettingsSubItem(
+      {
+        title: `Sub group ${this.items.length + 1}`,
+        items: [item],
+      },
+    );
+
+    this.items.push(subItem);
+
+    return subItem;
   }
 }

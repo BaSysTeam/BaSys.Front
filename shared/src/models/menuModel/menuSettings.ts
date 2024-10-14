@@ -36,12 +36,12 @@ export default class MenuSettings {
   }
 
   addGroup(): MenuSettingsGroupItem {
-    const item = new MenuSettingsLinkItem({ title: 'Item', kind: MenuSettingsLinkKinds.Link });
-    const sumItem = new MenuSettingsSubItem({ title: 'Sub group', items: [item] });
+    const item = new MenuSettingsLinkItem({ title: 'Item 1', kind: MenuSettingsLinkKinds.Link });
+    const sumItem = new MenuSettingsSubItem({ title: 'Sub group 1', items: [item] });
     const menuColumn = new MenuSettingsColumn({ items: [sumItem] });
 
     const newGroup = new MenuSettingsGroupItem(
-      { title: 'Menu group', kind: MenuSettingsGroupKinds.Group, items: [menuColumn] },
+      { title: `Menu ${this.items.length + 1}`, kind: MenuSettingsGroupKinds.Group, items: [menuColumn] },
     );
 
     this.items.push(newGroup);
@@ -51,7 +51,7 @@ export default class MenuSettings {
 
   addItem(): MenuSettingsGroupItem {
     const newGroup = new MenuSettingsGroupItem(
-      { title: 'Menu item', kind: MenuSettingsGroupKinds.Link },
+      { title: 'Item', kind: MenuSettingsGroupKinds.Link },
     );
 
     this.items.push(newGroup);
@@ -61,7 +61,7 @@ export default class MenuSettings {
 
   addSeparator(): MenuSettingsGroupItem {
     const newGroup = new MenuSettingsGroupItem(
-      { title: 'separator', kind: MenuSettingsGroupKinds.Separator },
+      { title: 'Separator', kind: MenuSettingsGroupKinds.Separator },
     );
 
     this.items.push(newGroup);

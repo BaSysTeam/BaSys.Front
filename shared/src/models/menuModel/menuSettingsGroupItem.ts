@@ -1,6 +1,9 @@
 import { Guid } from 'guid-typescript';
-import { MenuSettingsGroupKinds } from './menuSettingsGroupKinds';
+import MenuSettingsLinkItem from './menuSettingsLinkItem';
+import { MenuSettingsLinkKinds } from './menuSettingsLinkKinds';
+import MenuSettingsSubItem from './menuSettingsSubItem';
 import MenuSettingsColumn from './menuSettingsColumn';
+import { MenuSettingsGroupKinds } from './menuSettingsGroupKinds';
 
 export default class MenuSettingsGroupItem {
   uid: string;
@@ -37,5 +40,15 @@ export default class MenuSettingsGroupItem {
         this.items.push(new MenuSettingsColumn(item));
       });
     }
+  }
+
+  newColumn(): MenuSettingsColumn {
+    const item = new MenuSettingsLinkItem({ title: 'Item 1', kind: MenuSettingsLinkKinds.Link });
+    const sumItem = new MenuSettingsSubItem({ title: 'Sub group 1', items: [item] });
+    const menuColumn = new MenuSettingsColumn({ items: [sumItem] });
+
+    this.items.push(menuColumn);
+
+    return menuColumn;
   }
 }
