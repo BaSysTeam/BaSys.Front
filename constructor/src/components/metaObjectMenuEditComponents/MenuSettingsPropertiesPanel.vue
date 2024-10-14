@@ -14,11 +14,19 @@ import FieldGridComponent from '@/components/FieldGridComponent.vue';
 import InputSwitch from 'primevue/inputswitch';
 import MetaObjectKind from '@/models/metaObjectKind';
 import MenuSettingsGroupItem from '../../../../shared/src/models/menuModel/menuSettingsGroupItem';
+import MenuSettingsSubItem from '../../../../shared/src/models/menuModel/menuSettingsSubItem';
+import MenuSettingsLinkItem from '../../../../shared/src/models/menuModel/menuSettingsLinkItem';
 
 // Props
 const props = defineProps({
   menuGroup: {
     type: Object as PropType<MenuSettingsGroupItem>,
+  },
+  subGroup: {
+    type: Object as PropType<MenuSettingsSubItem>,
+  },
+  linkItem: {
+    type: Object as PropType<MenuSettingsLinkItem>,
   },
   kindsSource: {
     type: Object as PropType<MetaObjectKind>,
@@ -61,7 +69,7 @@ onBeforeMount(() => {
 
 <template>
   <Accordion :multiple="true" :active-index="[0, 1, 2]">
-    <AccordionTab :header="t('group')" v-if="menuGroup">
+    <AccordionTab :header="$t('menu')" v-if="menuGroup">
       <div class="grid">
         <div class="col-12">
           <!--Group kind-->
@@ -156,6 +164,42 @@ onBeforeMount(() => {
         </div>
       </div>
 
+    </AccordionTab>
+
+    <!--Sub group-->
+    <AccordionTab :header="$t('subGroup')" v-if="subGroup">
+      <div class="grid">
+        <div class="col-12">
+          <!--Title-->
+          <FieldGridComponent :title="$t('title')"
+                              label-for="sub-group-title">
+            <InputText id="sub-group-title"
+                       size="small"
+                       autocomplete="off"
+                       class="w-full"
+                       v-model="subGroup.title"
+                       @change="onChange"></InputText>
+          </FieldGridComponent>
+        </div>
+      </div>
+    </AccordionTab>
+
+    <!--Link item-->
+    <AccordionTab :header="$t('item')" v-if="linkItem">
+      <div class="grid">
+        <div class="col-12">
+          <!--Title-->
+          <FieldGridComponent :title="$t('title')"
+                              label-for="link-title">
+            <InputText id="link-title"
+                       size="small"
+                       autocomplete="off"
+                       class="w-full"
+                       v-model="linkItem.title"
+                       @change="onChange"></InputText>
+          </FieldGridComponent>
+        </div>
+      </div>
     </AccordionTab>
   </Accordion>
 </template>

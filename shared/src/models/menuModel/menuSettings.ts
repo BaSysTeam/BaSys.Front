@@ -1,4 +1,8 @@
 import { Guid } from 'guid-typescript';
+import MenuSettingsColumn from './menuSettingsColumn';
+import MenuSettingsSubItem from './menuSettingsSubItem';
+import MenuSettingsLinkItem from './menuSettingsLinkItem';
+import { MenuSettingsLinkKinds } from './menuSettingsLinkKinds';
 import { MenuSettingsGroupKinds } from './menuSettingsGroupKinds';
 import MenuSettingsGroupItem from './menuSettingsGroupItem';
 
@@ -32,8 +36,12 @@ export default class MenuSettings {
   }
 
   addGroup(): MenuSettingsGroupItem {
+    const item = new MenuSettingsLinkItem({ title: 'Item', kind: MenuSettingsLinkKinds.Link });
+    const sumItem = new MenuSettingsSubItem({ title: 'Sub group', items: [item] });
+    const menuColumn = new MenuSettingsColumn({ items: [sumItem] });
+
     const newGroup = new MenuSettingsGroupItem(
-      { title: 'Menu group', kind: MenuSettingsGroupKinds.Group },
+      { title: 'Menu group', kind: MenuSettingsGroupKinds.Group, items: [menuColumn] },
     );
 
     this.items.push(newGroup);
