@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, PropType, defineEmits, watch, computed,
+  ref, onMounted, onBeforeMount, defineProps, PropType, defineEmits, watch, computed, onDeactivated,
 } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
@@ -38,11 +38,21 @@ const { t } = useI18n({ useScope: 'global' });
 
 // Data
 const groupKindOptions = ref<any[]>([]);
+const itemKindOptions = ref<any[]>([]);
+const windowHeight = ref(window.innerHeight);
+const containerStyle = computed(() => ({
+  height: `${windowHeight.value - 150}px`,
+  overflowY: 'auto',
+}));
 
 // Emits
 const emit = defineEmits({ change: () => true });
 
 // Event handlers
+function onResize(): void {
+  windowHeight.value = window.innerHeight;
+}
+
 function onChange():void {
   emit('change');
 }
@@ -63,11 +73,32 @@ onBeforeMount(() => {
       value: 2,
     },
   ];
+
+  itemKindOptions.value = [
+    {
+      label: t('item'),
+      value: 1,
+    },
+    {
+      label: t('separator'),
+      value: 2,
+    },
+  ];
+});
+
+onMounted(async () => {
+  window.addEventListener('resize', onResize);
+  windowHeight.value = window.innerHeight;
+});
+
+onDeactivated(() => {
+  window.removeEventListener('resize', onResize);
 });
 
 </script>
 
 <template>
+  <div :style="containerStyle">
   <Accordion :multiple="true" :active-index="[0, 1, 2]">
     <AccordionTab :header="$t('menu')" v-if="menuGroup">
       <div class="grid">
@@ -180,6 +211,14 @@ onBeforeMount(() => {
                        v-model="subGroup.title"
                        @change="onChange"></InputText>
           </FieldGridComponent>
+
+          <!--Is visible-->
+          <FieldGridComponent :title="$t('isVisible')"
+                              label-for="link-is-visible">
+            <InputSwitch id="link-is-visible"
+                         v-model="subGroup.isVisible"
+                         @change="onChange"></InputSwitch>
+          </FieldGridComponent>
         </div>
       </div>
     </AccordionTab>
@@ -188,9 +227,20 @@ onBeforeMount(() => {
     <AccordionTab :header="$t('item')" v-if="linkItem">
       <div class="grid">
         <div class="col-12">
+          <!--Group kind-->
+          <SelectButton :options="itemKindOptions"
+                        option-label="label"
+                        option-value="value"
+                        v-model="linkItem.kind"
+                        @change="onChange"></SelectButton>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="col-12">
           <!--Title-->
           <FieldGridComponent :title="$t('title')"
-                              label-for="link-title">
+                              label-for="link-title"
+                              v-if="linkItem.kind == 1">
             <InputText id="link-title"
                        size="small"
                        autocomplete="off"
@@ -198,10 +248,43 @@ onBeforeMount(() => {
                        v-model="linkItem.title"
                        @change="onChange"></InputText>
           </FieldGridComponent>
+
+          <!--Icon class-->
+          <FieldGridComponent :title="$t('icon')"
+                              label-for="link-icon-class"
+                              v-if="linkItem.kind == 1">
+            <InputText id="link-icon-class"
+                       size="small"
+                       autocomplete="off"
+                       class="w-full"
+                       v-model="linkItem.iconClass"
+                       @change="onChange"></InputText>
+          </FieldGridComponent>
+
+          <!--Link-->
+          <FieldGridComponent :title="$t('link')"
+                              label-for="group-link"
+                              :required="true" v-if="linkItem.kind === 1">
+            <InputText id="group-link"
+                       size="small"
+                       autocomplete="off"
+                       class="w-full"
+                       v-model="linkItem.url"
+                       @change="onChange"></InputText>
+          </FieldGridComponent>
+
+          <!--Is visible-->
+          <FieldGridComponent :title="$t('isVisible')"
+                              label-for="link-is-visible">
+            <InputSwitch id="link-is-visible"
+                         v-model="linkItem.isVisible"
+                         @change="onChange"></InputSwitch>
+          </FieldGridComponent>
         </div>
       </div>
     </AccordionTab>
   </Accordion>
+  </div>
 </template>
 
 <style scoped>
