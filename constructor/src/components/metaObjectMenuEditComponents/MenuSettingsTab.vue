@@ -38,6 +38,7 @@ const { t } = useI18n({ useScope: 'global' });
 // Data
 const addMenuGroupItems = ref<any[]>([]);
 const addMenuColumnItems = ref<any[]>([]);
+const deleteMenuColumnItems = ref<any[]>([]);
 const selectedGroup = ref<any>(null);
 const selectedMenuColumn = ref<MenuSettingsColumn>(null);
 const selectedSubItem = ref<MenuSettingsSubItem>(null);
@@ -58,6 +59,38 @@ function deleteMenuGroup(): void {
     const [firstItem] = props.settings.items;
     selectedGroup.value = firstItem;
   }
+}
+
+function getSubItemClass(currentSubItem: MenuSettingsSubItem): string {
+  if (!currentSubItem) {
+    return '';
+  }
+
+  if (!selectedSubItem.value) {
+    return '';
+  }
+
+  if (currentSubItem.uid === selectedSubItem.value.uid) {
+    return 'bs-selected';
+  }
+
+  return '';
+}
+
+function getItemClass(currentItem: MenuSettingsLinkItem): string {
+  if (!currentItem) {
+    return '';
+  }
+
+  if (!selectedItem.value) {
+    return '';
+  }
+
+  if (currentItem.uid === selectedItem.value.uid) {
+    return 'bs-selected';
+  }
+
+  return '';
 }
 
 // Event handlers
@@ -104,7 +137,53 @@ function onMenuColumnAddClick(kind: string): void {
       }
       break;
     default:
-      throw new Error(`Unknown group kind ${kind}`);
+      throw new Error(`Unknown item kind ${kind}`);
+  }
+  emit('change');
+}
+
+function onMenuColumnDeleteClick(kind: string): void {
+  // eslint-disable-next-line no-restricted-globals
+  const answer = confirm('Delete item ?');
+
+  if (!answer) {
+    return;
+  }
+
+  switch (kind) {
+    case 'column':
+      if (selectedGroup.value && selectedMenuColumn.value) {
+        selectedGroup.value.deleteColumn(selectedMenuColumn.value);
+
+        if (selectedGroup.value.items.length) {
+          // eslint-disable-next-line prefer-destructuring
+          selectedMenuColumn.value = selectedGroup.value.items[0];
+        }
+      }
+
+      break;
+    case 'subGroup':
+      if (selectedMenuColumn.value && selectedSubItem.value) {
+        selectedMenuColumn.value.delete(selectedSubItem.value);
+
+        if (selectedMenuColumn.value.items.length) {
+          // eslint-disable-next-line prefer-destructuring
+          selectedSubItem.value = selectedMenuColumn.value.items[0];
+        }
+      }
+      break;
+    case 'item':
+      if (selectedSubItem.value && selectedItem.value) {
+        selectedSubItem.value.delete(selectedItem.value);
+
+        if (selectedSubItem.value.items.length) {
+          // eslint-disable-next-line prefer-destructuring
+          selectedSubItem.value = selectedSubItem.value.items[0];
+        }
+      }
+      break;
+    default:
+      throw new Error(`Unknown item kind ${kind}`);
   }
   emit('change');
 }
@@ -150,18 +229,23 @@ function onChange(): void {
 
 function onMenuItemClick(option:any, menuColumn:any): void {
   console.log('OnMenuItemClick', option, menuColumn);
+  console.log('menuColumn', menuColumn);
   selectedItem.value = option;
-  selectedMenuColumn.value = menuColumn.value;
+  selectedMenuColumn.value = menuColumn;
+
+  // Find selected sub-item
+  selectedMenuColumn.value.items.forEach((subItem) => {
+    const findResult = subItem.items.find((item) => item.uid === selectedItem.value.uid);
+    if (findResult) {
+      selectedSubItem.value = subItem;
+    }
+  });
 }
 
 function onMenuSubItemClick(option:any, menuColumn:any): void {
   console.log('OnMenuSubItemClick', option, menuColumn);
   selectedSubItem.value = option;
   selectedMenuColumn.value = menuColumn;
-}
-
-function onSubItemDeleteClick(option:any, menuColumn:any): void {
-  console.log('OnSubItemDeleteClick', option, menuColumn);
 }
 
 // Life cycle hooks.
@@ -197,6 +281,21 @@ onBeforeMount(() => {
     {
       label: t('separator'),
       command: () => onMenuColumnAddClick('separator'),
+    },
+  ];
+
+  deleteMenuColumnItems.value = [
+    {
+      label: t('column'),
+      command: () => onMenuColumnDeleteClick('column'),
+    },
+    {
+      label: t('subGroup'),
+      command: () => onMenuColumnDeleteClick('subGroup'),
+    },
+    {
+      label: t('item'),
+      command: () => onMenuColumnDeleteClick('item'),
     },
   ];
 });
@@ -271,6 +370,15 @@ onBeforeMount(() => {
             outlined
             :model="addMenuColumnItems"
           />
+          <SplitButton
+            v-tooltip.top="$t('delete')"
+            label="X"
+            severity="danger"
+            size="small"
+            class="ml-1"
+            outlined
+            :model="deleteMenuColumnItems"
+          />
         </template>
 
       </Toolbar>
@@ -286,6 +394,7 @@ onBeforeMount(() => {
             <template #optiongroup="{option}">
               <div role="button"
                    tabindex="0"
+                   :class="getSubItemClass(option)"
                    @keydown.enter="onMenuSubItemClick(option, menuColumn)"
                    @keydown.space="onMenuSubItemClick(option, menuColumn)"
                    @click="onMenuSubItemClick(option, menuColumn)">
@@ -295,6 +404,7 @@ onBeforeMount(() => {
             <template #option="{option}">
               <div role="button"
                    tabindex="0"
+                   :class="getItemClass(option)"
                    @keydown.enter="onMenuItemClick(option, menuColumn)"
                    @keydown.space="onMenuItemClick(option, menuColumn)"
                    @click="onMenuItemClick(option, menuColumn)">

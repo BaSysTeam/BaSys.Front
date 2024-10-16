@@ -51,4 +51,11 @@ export default class MenuSettingsGroupItem {
 
     return menuColumn;
   }
+
+  deleteColumn(item: MenuSettingsColumn): void {
+    const ind = this.items.indexOf(item);
+    if (ind > -1) {
+      this.items.splice(ind, 1);
+    }
+  }
 }

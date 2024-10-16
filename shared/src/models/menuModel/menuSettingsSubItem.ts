@@ -51,4 +51,11 @@ export default class MenuSettingsSubItem {
 
     return newItem;
   }
+
+  delete(item: MenuSettingsLinkItem): void {
+    const index = this.items.indexOf(item);
+    if (index > -1) {
+      this.items.splice(index, 1);
+    }
+  }
 }

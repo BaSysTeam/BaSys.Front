@@ -35,4 +35,11 @@ export default class MenuSettingsColumn {
 
     return subItem;
   }
+
+  delete(item: MenuSettingsSubItem): void {
+    const index = this.items.indexOf(item);
+    if (index > -1) {
+      this.items.splice(index, 1);
+    }
+  }
 }
