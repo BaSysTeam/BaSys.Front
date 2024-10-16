@@ -26,10 +26,10 @@ export default class MenuSettingsSubItem {
     }
   }
 
-  newItem(): MenuSettingsLinkItem {
+  newItem(itemTitle: string): MenuSettingsLinkItem {
     const newItem = new MenuSettingsLinkItem(
       {
-        title: `Item ${this.items.length + 1}`,
+        title: `${itemTitle} ${this.items.length + 1}`,
         kind: MenuSettingsLinkKinds.Link,
       },
     );
@@ -39,10 +39,10 @@ export default class MenuSettingsSubItem {
     return newItem;
   }
 
-  newSeparator(): MenuSettingsLinkItem {
+  newSeparator(itemTitle: string): MenuSettingsLinkItem {
     const newItem = new MenuSettingsLinkItem(
       {
-        title: `Separator ${this.items.length + 1}`,
+        title: `${itemTitle} ${this.items.length + 1}`,
         kind: MenuSettingsLinkKinds.Separator,
       },
     );

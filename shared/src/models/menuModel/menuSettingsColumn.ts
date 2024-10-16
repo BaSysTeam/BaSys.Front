@@ -22,11 +22,14 @@ export default class MenuSettingsColumn {
     }
   }
 
-  newSubItem(): MenuSettingsSubItem {
-    const item = new MenuSettingsLinkItem({ title: 'Item 1', kind: MenuSettingsLinkKinds.Link });
+  newSubItem(subGroupTitle: string, itemTitle: string): MenuSettingsSubItem {
+    const item = new MenuSettingsLinkItem({
+      title: `${itemTitle} 1`,
+      kind: MenuSettingsLinkKinds.Link,
+    });
     const subItem = new MenuSettingsSubItem(
       {
-        title: `Sub group ${this.items.length + 1}`,
+        title: `${subGroupTitle} ${this.items.length + 1}`,
         items: [item],
       },
     );

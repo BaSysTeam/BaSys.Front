@@ -43,6 +43,14 @@ const selectedGroup = ref<any>(null);
 const selectedMenuColumn = ref<MenuSettingsColumn>(null);
 const selectedSubItem = ref<MenuSettingsSubItem>(null);
 const selectedItem = ref<MenuSettingsLinkItem>(null);
+const windowHeight = ref(window.innerHeight);
+const columnsContainerStyle = computed(() => ({
+  height: `${windowHeight.value - 200}px`,
+  overflowY: 'auto',
+}));
+const menuListStyle = computed(() => ({
+  height: `${windowHeight.value - 200}px`,
+}));
 
 // Emits
 const emit = defineEmits({ change: () => true });
@@ -98,13 +106,13 @@ function onMenuGroupAddClick(kind: string): void {
   let newGroup: any;
   switch (kind) {
     case 'group':
-      newGroup = props.settings.addGroup();
+      newGroup = props.settings.addGroup(t('menu'), t('subGroup'), t('item'));
       break;
     case 'item':
-      newGroup = props.settings.addItem();
+      newGroup = props.settings.addItem(t('item'));
       break;
     case 'separator':
-      newGroup = props.settings.addSeparator();
+      newGroup = props.settings.addSeparator(t('separator'));
       break;
     default:
       throw new Error(`Unknown group kind ${kind}`);
@@ -118,22 +126,22 @@ function onMenuColumnAddClick(kind: string): void {
   switch (kind) {
     case 'column':
       if (selectedGroup.value) {
-        selectedMenuColumn.value = selectedGroup.value.newColumn();
+        selectedMenuColumn.value = selectedGroup.value.newColumn(t('subGroup'), t('item'));
       }
       break;
     case 'subGroup':
       if (selectedMenuColumn.value) {
-        selectedSubItem.value = selectedMenuColumn.value.newSubItem();
+        selectedSubItem.value = selectedMenuColumn.value.newSubItem(t('subGroup'), t('item'));
       }
       break;
     case 'item':
       if (selectedSubItem.value) {
-        selectedItem.value = selectedSubItem.value.newItem();
+        selectedItem.value = selectedSubItem.value.newItem(t('item'));
       }
       break;
     case 'separator':
       if (selectedSubItem.value) {
-        selectedItem.value = selectedSubItem.value.newSeparator();
+        selectedItem.value = selectedSubItem.value.newSeparator(t('separator'));
       }
       break;
     default:
@@ -228,8 +236,6 @@ function onChange(): void {
 }
 
 function onMenuItemClick(option:any, menuColumn:any): void {
-  console.log('OnMenuItemClick', option, menuColumn);
-  console.log('menuColumn', menuColumn);
   selectedItem.value = option;
   selectedMenuColumn.value = menuColumn;
 
@@ -243,9 +249,19 @@ function onMenuItemClick(option:any, menuColumn:any): void {
 }
 
 function onMenuSubItemClick(option:any, menuColumn:any): void {
-  console.log('OnMenuSubItemClick', option, menuColumn);
   selectedSubItem.value = option;
   selectedMenuColumn.value = menuColumn;
+}
+
+function onMenuGroupSelect(evt: any): void {
+  if (evt == null || evt.value == null) {
+    return;
+  }
+  if (evt.value.kind === 1 || evt.value.kind === 2) {
+    selectedItem.value = null;
+    selectedSubItem.value = null;
+    selectedMenuColumn.value = null;
+  }
 }
 
 // Life cycle hooks.
@@ -344,11 +360,15 @@ onBeforeMount(() => {
     <Listbox v-if="settings"
              v-model="selectedGroup"
              :options="settings.items"
-             option-label="title">
+             :list-style="menuListStyle"
+             option-label="title"
+             @change="onMenuGroupSelect">
       <template #option="{option, index}">
         <div>
           <Badge :value="index+1" severity="info"></Badge>
           <span class="ml-2" v-if="option.kind == 2">--------------</span>
+          <span v-if="option.iconClass">&nbsp;</span>
+          <span :class="option.iconClass" v-if="option.iconClass"></span>
           <span class="ml-2" v-if="option.kind != 2">{{option.title}}</span>
         </div>
       </template>
@@ -383,6 +403,7 @@ onBeforeMount(() => {
 
       </Toolbar>
 
+      <div :style="columnsContainerStyle">
       <Card :key="menuColumn.uid"
             class="mb-1"
             v-for="menuColumn in selectedGroup.items">
@@ -408,13 +429,16 @@ onBeforeMount(() => {
                    @keydown.enter="onMenuItemClick(option, menuColumn)"
                    @keydown.space="onMenuItemClick(option, menuColumn)"
                    @click="onMenuItemClick(option, menuColumn)">
-                <span>{{option.title}}</span>
+                <span class="ml-2" v-if="option.kind == 2">--------------</span>
+                <span :class="option.iconClass" v-if="option.iconClass"></span>
+                <span class="ml-2" v-if="option.kind != 2">{{option.title}}</span>
               </div>
             </template>
           </Listbox>
         </template>
 
       </Card>
+      </div>
     </div>
 
   </div>

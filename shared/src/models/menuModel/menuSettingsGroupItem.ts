@@ -42,9 +42,9 @@ export default class MenuSettingsGroupItem {
     }
   }
 
-  newColumn(): MenuSettingsColumn {
-    const item = new MenuSettingsLinkItem({ title: 'Item 1', kind: MenuSettingsLinkKinds.Link });
-    const sumItem = new MenuSettingsSubItem({ title: 'Sub group 1', items: [item] });
+  newColumn(subGroupTitle: string, itemTitle: string): MenuSettingsColumn {
+    const item = new MenuSettingsLinkItem({ title: `${itemTitle} 1`, kind: MenuSettingsLinkKinds.Link });
+    const sumItem = new MenuSettingsSubItem({ title: `${subGroupTitle} 1`, items: [item] });
     const menuColumn = new MenuSettingsColumn({ items: [sumItem] });
 
     this.items.push(menuColumn);

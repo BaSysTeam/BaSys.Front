@@ -35,13 +35,17 @@ export default class MenuSettings {
     }
   }
 
-  addGroup(): MenuSettingsGroupItem {
-    const item = new MenuSettingsLinkItem({ title: 'Item 1', kind: MenuSettingsLinkKinds.Link });
-    const sumItem = new MenuSettingsSubItem({ title: 'Sub group 1', items: [item] });
+  addGroup(
+    menuTitle: string,
+    subGroupTitle: string,
+    itemTitle: string,
+  ): MenuSettingsGroupItem {
+    const item = new MenuSettingsLinkItem({ title: `${itemTitle} 1`, kind: MenuSettingsLinkKinds.Link });
+    const sumItem = new MenuSettingsSubItem({ title: `${subGroupTitle} 1`, items: [item] });
     const menuColumn = new MenuSettingsColumn({ items: [sumItem] });
 
     const newGroup = new MenuSettingsGroupItem(
-      { title: `Menu ${this.items.length + 1}`, kind: MenuSettingsGroupKinds.Group, items: [menuColumn] },
+      { title: menuTitle, kind: MenuSettingsGroupKinds.Group, items: [menuColumn] },
     );
 
     this.items.push(newGroup);
@@ -49,9 +53,9 @@ export default class MenuSettings {
     return newGroup;
   }
 
-  addItem(): MenuSettingsGroupItem {
+  addItem(itemTitle: string): MenuSettingsGroupItem {
     const newGroup = new MenuSettingsGroupItem(
-      { title: 'Item', kind: MenuSettingsGroupKinds.Link },
+      { title: itemTitle, kind: MenuSettingsGroupKinds.Link },
     );
 
     this.items.push(newGroup);
@@ -59,9 +63,9 @@ export default class MenuSettings {
     return newGroup;
   }
 
-  addSeparator(): MenuSettingsGroupItem {
+  addSeparator(separatorTitle: string): MenuSettingsGroupItem {
     const newGroup = new MenuSettingsGroupItem(
-      { title: 'Separator', kind: MenuSettingsGroupKinds.Separator },
+      { title: separatorTitle, kind: MenuSettingsGroupKinds.Separator },
     );
 
     this.items.push(newGroup);
