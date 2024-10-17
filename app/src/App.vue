@@ -105,4 +105,8 @@ body, html {
   text-align: right !important;
 }
 
+.p-megamenu-panel{
+  z-index: 10;
+}
+
 </style>
