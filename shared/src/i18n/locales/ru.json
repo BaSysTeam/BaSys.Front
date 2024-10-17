@@ -1,7 +1,9 @@
 {
   "actions": "Действия",
   "add": "Добавить",
+  "administration": "Администрирование",
   "addTableQuestion": "Добавить таблицу?",
+  "application": "Приложение",
   "autoFill": "Автозаполнение",
   "back": "Вернуться",
   "calculationLog": "Лог вычислений",
@@ -52,6 +54,7 @@
   "main": "Основные",
   "mainTab": "Основные",
   "memo": "Комментарий",
+  "manage": "Управление",
   "menuSettings": "Настройки меню",
   "metaObjectKind": "Вид метаданных",
   "metaObjectKinds": "Виды метаданных",

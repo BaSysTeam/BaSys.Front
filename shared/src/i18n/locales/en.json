@@ -1,7 +1,9 @@
 {
   "actions": "Actions",
   "add": "Add",
+  "administration": "Administration",
   "addTableQuestion": "Add table?",
+  "application": "Application",
   "autoFill": "Auto fill",
   "back": "Back",
   "calculationLog": "Calculation log",
@@ -50,6 +52,7 @@
   "logLevel": "Log level",
   "main": "Main",
   "mainTab": "Main",
+  "manage": "Manage",
   "menuSettings": "Menu settings",
   "memo": "Memo",
   "metaObjectKind": "Meta object kind",

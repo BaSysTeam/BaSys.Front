@@ -15,6 +15,7 @@ const metadataGroup = ref<any>({ label: t('metadata'), items: [] });
 const navMenuItems = ref<any[]>([]);
 const router = useRouter();
 const provider = new MetaObjectKindsProvider();
+const isUserAdmin = ref<boolean>(true);
 
 // Props
 const props = defineProps({ isMinimized: { type: Boolean, default: false } });
@@ -27,8 +28,7 @@ function onMetadataKindsClick(): void {
   router.push({ name: 'metadata-kinds' });
 }
 
-function onMetadataKindClick(args): void {
-  console.log('onMetadataKindClick', args);
+function onMetadataKindClick(args: any): void {
   router.push({ name: 'meta-objects-list', params: { kind: args.item.name } });
 }
 
@@ -54,6 +54,21 @@ onBeforeMount(() => {
   };
 
   navMenuItems.value.push(systemGroup);
+
+  navMenuItems.value.push({ separator: true });
+  navMenuItems.value.push({
+    label: t('application'),
+    icon: 'pi pi-desktop',
+    url: '/app#',
+  });
+
+  if (isUserAdmin.value) {
+    navMenuItems.value.push({
+      label: t('manage'),
+      icon: 'pi pi-users',
+      url: '/admin##',
+    });
+  }
 });
 
 onMounted(async () => {
