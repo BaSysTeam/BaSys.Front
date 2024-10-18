@@ -1,7 +1,7 @@
 <template>
   <div class="grid">
-    <div class="col-12">
-      <h3>Welcome, {{ userName }}!</h3>
+    <div class="col-12 text-center">
+      <h2>{{$t('welcome')}}, {{ userName }}!</h2>
     </div>
 
   </div>

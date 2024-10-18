@@ -101,6 +101,26 @@ function getItemClass(currentItem: MenuSettingsLinkItem): string {
   return '';
 }
 
+function findSubItem(menuItem: any, menuColumn: any): any {
+  if (menuColumn == null) {
+    return null;
+  }
+
+  if (menuItem == null) {
+    return null;
+  }
+
+  let currentSubItem: any = null;
+  menuColumn.items.forEach((subItem: any) => {
+    const findResult = subItem.items.find((item: any) => item.uid === menuItem.uid);
+    if (findResult) {
+      currentSubItem = subItem;
+    }
+  });
+
+  return currentSubItem;
+}
+
 // Event handlers
 function onMenuGroupAddClick(kind: string): void {
   let newGroup: any;
@@ -264,6 +284,76 @@ function onMenuGroupSelect(evt: any): void {
   }
 }
 
+function onMenuItemUpClick(option: any, menuColumn: any): void {
+  const subItem = findSubItem(option, menuColumn);
+
+  if (!subItem) {
+    return;
+  }
+
+  UpDownHelper.up(subItem.items, option);
+  emit('change');
+}
+
+function onMenuItemDownClick(option: any, menuColumn: any): void {
+  const subItem = findSubItem(option, menuColumn);
+
+  if (!subItem) {
+    return;
+  }
+
+  UpDownHelper.down(subItem.items, option);
+  emit('change');
+}
+
+function onMenuSubItemUpClick(menuSubItem: any, menuColumn: any): void {
+  if (!menuSubItem) {
+    return;
+  }
+
+  if (!menuColumn) {
+    return;
+  }
+
+  UpDownHelper.up(menuColumn.items, menuSubItem);
+  emit('change');
+}
+
+function onMenuSubItemDownClick(menuSubItem: any, menuColumn: any): void {
+  if (!menuSubItem) {
+    return;
+  }
+
+  if (!menuColumn) {
+    return;
+  }
+
+  UpDownHelper.down(menuColumn.items, menuSubItem);
+  emit('change');
+}
+
+function onMenuColumnUpClick():void {
+  if (!selectedItem.value) {
+    return;
+  }
+  if (!selectedSubItem.value) {
+    return;
+  }
+
+  UpDownHelper.up(selectedGroup.value.items, selectedMenuColumn.value);
+}
+
+function onMenuColumnDownClick():void {
+  if (!selectedItem.value) {
+    return;
+  }
+  if (!selectedSubItem.value) {
+    return;
+  }
+
+  UpDownHelper.down(selectedGroup.value.items, selectedMenuColumn.value);
+}
+
 // Life cycle hooks.
 onBeforeMount(() => {
   addMenuGroupItems.value = [
@@ -397,6 +487,20 @@ onBeforeMount(() => {
             outlined
             :model="deleteMenuColumnItems"
           />
+
+          <a href="#"
+             class="mr-2 ml-2 bs-row-action"
+             tabindex="-1"
+             @click.prevent="onMenuColumnUpClick()">
+            <span class="pi pi-arrow-up text-primary bs-icon"></span>
+          </a>
+          <a href="#"
+             class="mr-2 bs-row-action"
+             tabindex="-1"
+             @click.prevent="onMenuColumnDownClick()">
+            <span class="pi pi-arrow-down text-primary bs-icon"></span>
+          </a>
+
         </template>
 
       </Toolbar>
@@ -418,6 +522,20 @@ onBeforeMount(() => {
                    @keydown.space="onMenuSubItemClick(option, menuColumn)"
                    @click="onMenuSubItemClick(option, menuColumn)">
                 <span>{{option.title}}</span>
+
+                <a href="#"
+                   class="mr-2 bs-row-action"
+                   tabindex="-1"
+                   @click.prevent="onMenuSubItemDownClick(option, menuColumn)">
+                  <span class="pi pi-arrow-down text-primary bs-icon"></span>
+                </a>
+                <a href="#"
+                   class="mr-2 bs-row-action"
+                   tabindex="-1"
+                   @click.prevent="onMenuSubItemUpClick(option, menuColumn)">
+                  <span class="pi pi-arrow-up text-primary bs-icon"></span>
+                </a>
+
               </div>
             </template>
             <template #option="{option}">
@@ -430,6 +548,20 @@ onBeforeMount(() => {
                 <span class="ml-2" v-if="option.kind == 2">--------------</span>
                 <span :class="option.iconClass" v-if="option.iconClass"></span>
                 <span class="ml-2" v-if="option.kind != 2">{{option.title}}</span>
+
+                <a href="#"
+                   class="mr-2 bs-row-action"
+                   tabindex="-1"
+                   @click.prevent="onMenuItemDownClick(option, menuColumn)">
+                  <span class="pi pi-arrow-down text-primary bs-icon"></span>
+                </a>
+                <a href="#"
+                   class="mr-2 bs-row-action"
+                   tabindex="-1"
+                   @click.prevent="onMenuItemUpClick(option, menuColumn)">
+                  <span class="pi pi-arrow-up text-primary bs-icon"></span>
+                </a>
+
               </div>
             </template>
           </Listbox>
@@ -461,6 +593,14 @@ onBeforeMount(() => {
 
 .bs-menu-settings-tab .bs-selected{
   background-color: #ececec;
+}
+
+.bs-menu-settings-tab .bs-row-action{
+  float: right;
+}
+
+.bs-menu-settings-tab .bs-icon{
+  font-size: 0.8rem;
 }
 
 </style>

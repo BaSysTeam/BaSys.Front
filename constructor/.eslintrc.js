@@ -20,6 +20,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'vuejs-accessibility/form-control-has-label': 'off',
     'vuejs-accessibility/label-has-for': 'off',
+    'vuejs-accessibility/anchor-has-content': 'off',
     'vue/no-mutating-props': 'off',
     'linebreak-style': ['off', 'windows'],
     '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
