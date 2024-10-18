@@ -136,24 +136,32 @@ function onReturnClick(): void {
 }
 
 async function onSaveClick(): Promise<void> {
-  console.log('Save clicked');
   await saveAsync();
 }
 
-function onRunClick(): void {
-  console.log('Run clicked');
-}
-
-function onUpdateClick(): void {
-  console.log('Update clicked');
+async function onUpdateClick(): Promise<void> {
+  await updateAsync();
 }
 
 function downloadJson(): void {
-  console.log('Download json');
+  jsonSettings.value = JSON.stringify(settings.value, null, 2);
+
+  const blob = new Blob([jsonSettings.value], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  // Create a link and trigger the download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${settings.value.title}.json`; // Name of the file to be downloaded
+  document.body.appendChild(link);
+  link.click();
+
+  // Clean up by removing the link and revoking the URL
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function onNavTabClick(tabName: string): void {
-  console.log('tab clicked', tabName);
   if (tabName === 'json') {
     jsonSettings.value = JSON.stringify(settings.value, null, 2);
   }
@@ -232,13 +240,6 @@ onMounted(async () => {
           @click="onSaveClick"
         />
       </ButtonGroup>
-      <Button
-        class="ml-1"
-        severity="success"
-        size="small"
-        icon="pi pi-play"
-        @click="onRunClick"
-      />
       <SplitButton
         :label="$t('actions')"
         severity="primary"

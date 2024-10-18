@@ -68,10 +68,6 @@ onBeforeMount(() => {
       label: t('item'),
       value: 1,
     },
-    {
-      label: t('separator'),
-      value: 2,
-    },
   ];
 
   itemKindOptions.value = [
