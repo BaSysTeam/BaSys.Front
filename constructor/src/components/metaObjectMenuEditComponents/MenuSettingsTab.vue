@@ -40,15 +40,15 @@ const addMenuGroupItems = ref<any[]>([]);
 const addMenuColumnItems = ref<any[]>([]);
 const deleteMenuColumnItems = ref<any[]>([]);
 const selectedGroup = ref<any>(null);
-const selectedMenuColumn = ref<MenuSettingsColumn>(null);
-const selectedSubItem = ref<MenuSettingsSubItem>(null);
-const selectedItem = ref<MenuSettingsLinkItem>(null);
+const selectedMenuColumn = ref<any>(null);
+const selectedSubItem = ref<any>(null);
+const selectedItem = ref<any>(null);
 const windowHeight = ref(window.innerHeight);
-const columnsContainerStyle = computed(() => ({
+const columnsContainerStyle = computed(():any => ({
   height: `${windowHeight.value - 200}px`,
   overflowY: 'auto',
 }));
-const menuListStyle = computed(() => ({
+const menuListStyle = computed(():any => ({
   height: `${windowHeight.value - 200}px`,
 }));
 
@@ -240,8 +240,8 @@ function onMenuItemClick(option:any, menuColumn:any): void {
   selectedMenuColumn.value = menuColumn;
 
   // Find selected sub-item
-  selectedMenuColumn.value.items.forEach((subItem) => {
-    const findResult = subItem.items.find((item) => item.uid === selectedItem.value.uid);
+  selectedMenuColumn.value.items.forEach((subItem: any) => {
+    const findResult = subItem.items.find((item: any) => item.uid === selectedItem.value.uid);
     if (findResult) {
       selectedSubItem.value = subItem;
     }
@@ -326,7 +326,6 @@ onBeforeMount(() => {
       <template #start>
         <SplitButton
           v-tooltip.top="$t('add')"
-          label="+"
           icon = "pi pi-plus"
           severity="primary"
           size="small"
@@ -382,7 +381,6 @@ onBeforeMount(() => {
         <template #start>
           <SplitButton
             v-tooltip.top="$t('add')"
-            label="+"
             icon = "pi pi-plus"
             severity="primary"
             size="small"
@@ -392,7 +390,7 @@ onBeforeMount(() => {
           />
           <SplitButton
             v-tooltip.top="$t('delete')"
-            label="X"
+            icon ="pi pi-times"
             severity="danger"
             size="small"
             class="ml-1"
