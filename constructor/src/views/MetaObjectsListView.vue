@@ -319,6 +319,7 @@ onMounted(async () => {
         @click="onCopyClick"
       />
       <Button
+        v-if="kind !='menu'"
         class="ml-1"
         severity="success"
         size="small"
