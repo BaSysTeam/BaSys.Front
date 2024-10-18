@@ -105,11 +105,19 @@ function navigateToEdit(): void {
     return;
   }
   const metaObject = selectedRow.value as MetaObject;
-  router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: metaObject.name } });
+  if (props.kind === 'menu') {
+    router.push({ name: 'meta-menus-edit', params: { name: metaObject.name } });
+  } else {
+    router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: metaObject.name } });
+  }
 }
 
 function navigateToAdd(): void {
-  router.push({ name: 'meta-objects-add', params: { kind: props.kind } });
+  if (props.kind === 'menu') {
+    router.push({ name: 'meta-menus-add', params: { kind: props.kind } });
+  } else {
+    router.push({ name: 'meta-objects-add', params: { kind: props.kind } });
+  }
 }
 
 function navigateToCopy(): void {
@@ -117,7 +125,11 @@ function navigateToCopy(): void {
     return;
   }
   const metaObject = selectedRow.value as MetaObject;
-  router.push({ name: 'meta-objects-copy', params: { kind: props.kind, name: metaObject.name } });
+  if (props.kind === 'menu') {
+    router.push({ name: 'meta-menus-copy', params: { name: metaObject.name } });
+  } else {
+    router.push({ name: 'meta-objects-copy', params: { kind: props.kind, name: metaObject.name } });
+  }
 }
 
 async function deleteItemAsync(): Promise<void> {
@@ -307,6 +319,7 @@ onMounted(async () => {
         @click="onCopyClick"
       />
       <Button
+        v-if="kind !='menu'"
         class="ml-1"
         severity="success"
         size="small"

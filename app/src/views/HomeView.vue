@@ -1,18 +1,11 @@
 <template>
   <div class="grid">
-    <div class="col-12"></div>
-    <h3>Wellcome, {{ userName }}!</h3>
-  </div>
-  <Divider></Divider>
-  <div class="grid">
-    <div class="col-12">
-      <Button label="Logout"
-      size="small"
-      severity="primary"
-      outlined icon="pi pi-sign-out"
-      @click="onLogoutClick"></Button>
+    <div class="col-12 text-center">
+      <h2>{{$t('welcome')}}, {{ userName }}!</h2>
     </div>
+
   </div>
+
 </template>
 
 <script lang="ts">

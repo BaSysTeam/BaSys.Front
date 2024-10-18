@@ -130,10 +130,16 @@ export default class App extends Vue {
     },
     { separator: true },
     {
-      label: 'Logout',
-      icon: 'pi pi-sign-out',
-      command: () => this.logOut(),
+      label: 'Application',
+      icon: 'pi pi-desktop',
+      url: '/app#',
     },
+    {
+      label: 'Constructor',
+      icon: 'pi pi-wrench',
+      url: '/constructor#',
+    },
+
   ]);
 
   mounted(): void {
@@ -147,18 +153,6 @@ export default class App extends Vue {
       this.navPanelWidth = 50;
     } else {
       this.navPanelWidth = 200;
-    }
-  }
-
-  async logOut(): Promise<void> {
-    console.log('Log out clicked');
-    const accountProvider = new AccountProvider();
-    const response = await accountProvider.logout();
-    if (response.isOK) {
-      window.location.href = window.location.origin;
-    } else {
-      this.toastHelper.error(response.message);
-      console.error(response.presentation);
     }
   }
 
