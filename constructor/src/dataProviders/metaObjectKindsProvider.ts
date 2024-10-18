@@ -58,6 +58,19 @@ export default class MetaObjectKindsProvider {
     return result;
   }
 
+  async createStandard(): Promise<ResultWrapper<number>> {
+    let result = new ResultWrapper<number>();
+
+    try {
+      const { data } = await axios.post(`${this.BASE_URL}/Standard`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
   async update(settings: MetaObjectKindSettings): Promise<ResultWrapper<number>> {
     let result = new ResultWrapper<number>();
 

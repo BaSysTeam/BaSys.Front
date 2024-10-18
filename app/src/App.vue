@@ -8,8 +8,15 @@
       <UserActionsComponent @profileClicked="router.push('/usersettings')"/>
     </template>
   </AppHeaderComponent>
-  <div class="grid h-screen" style="margin:0; padding: 10px">
-    <div class="col-12">
+  <div class="grid h-screen" style="margin:0">
+    <div class="bs-nav-panel col-fixed" style="padding:0"
+         :style="{ 'width': navPanelWidth + 'px' }">
+      <NavigationPanelComponent :is-minimized="isMenuMinimized"></NavigationPanelComponent>
+      <div v-if="isMenuMinimized">
+        <h4 class="bs-nav-panel-minimized-text">Menu</h4>
+      </div>
+    </div>
+    <div class="col">
       <router-view />
     </div>
   </div>
@@ -21,6 +28,7 @@ import { useRouter } from 'vue-router';
 import { usePrimeVue } from 'primevue/config';
 import Toast from 'primevue/toast';
 import Menu from 'primevue/menu';
+import NavigationPanelComponent from '@/components/NavigationPanelComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
 import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
@@ -31,6 +39,7 @@ import LocaleSwitcher from '../../shared/src/i18n/localeSwitcher';
     UserActionsComponent,
     Toast,
     Menu,
+    NavigationPanelComponent,
   },
 })
 export default class App extends Vue {
@@ -74,6 +83,19 @@ body, html {
   min-width: 1280px;
 }
 
+.bs-nav-panel {
+  border-right: 1px solid var(--surface-200);
+}
+
+.bs-nav-panel-minimized-text {
+  transform: rotate(-90deg);
+  width: auto;
+  position: fixed;
+  left: -10px;
+  top: 100px;
+  margin: 0;
+}
+
 .bs-required:after {
   content: "*";
   color: red;
@@ -81,6 +103,10 @@ body, html {
 }
 .p-inputnumber-input{
   text-align: right !important;
+}
+
+.p-megamenu-panel{
+  z-index: 10;
 }
 
 </style>

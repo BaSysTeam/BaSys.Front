@@ -26,8 +26,16 @@ export default class DataTable {
     return this._columns.find((x) => x.name === columnName);
   }
 
-  addColumn(params: any): DataTable {
-    const column = new DataTableColumn(params);
+  addColumn(input: any): DataTable {
+    let column: DataTableColumn;
+    if (typeof input === 'string') {
+      column = DataTableColumn.parse(input);
+    } else if (typeof input === 'object' && input instanceof Object) {
+      column = new DataTableColumn(input);
+    } else {
+      throw new Error('Wrong column description');
+    }
+
     const existingColumn = this.getColumn(column.name);
 
     if (existingColumn) {
