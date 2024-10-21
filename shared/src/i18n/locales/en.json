@@ -23,6 +23,7 @@
   "data": "Data",
   "dataType": "Data type",
   "dataTypes": "Data types",
+  "default": "Default",
   "delete": "Delete",
   "deleteItemQuestion": "Delete item?",
   "deleteRow": "Delete row",

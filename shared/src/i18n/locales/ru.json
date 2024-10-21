@@ -24,6 +24,7 @@
   "data": "Данные",
   "dataType": "Тип данных",
   "dataTypes": "Типы данных",
+  "default": "По-умолчанию",
   "delete": "Удалить",
   "deleteItemQuestion": "Удалить элемент?",
   "deleteRow": "Удалить строку",

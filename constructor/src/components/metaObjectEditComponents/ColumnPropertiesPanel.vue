@@ -10,6 +10,7 @@ import InputGroup from 'primevue/inputgroup';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import InputSwitch from 'primevue/inputswitch';
+import FieldGridComponent from '@/components/FieldGridComponent.vue';
 import FormulaEditDialog from '@/components/metaObjectEditComponents/FormulaEditDialog.vue';
 import ControlKind from '../../../../shared/src/models/controlKind';
 import ControlKindDefaults from '../../../../shared/src/dataProviders/controlKindDefaults';
@@ -225,6 +226,17 @@ onBeforeMount(() => {
                      @change="onChange"></InputSwitch>
       </div>
     </div>
+
+    <!-- Default value -->
+    <FieldGridComponent :title="$t('default')" label-for="prop-default">
+      <InputText id="prop-default"
+                 size="small"
+                 autocomplete="off"
+                 class="w-full"
+                 :disabled="isColumnDisabled()"
+                 v-model="column.defaultValue"
+                 @change="onChange"></InputText>
+    </FieldGridComponent>
 
     <!--Formula-->
     <div class="field grid">
