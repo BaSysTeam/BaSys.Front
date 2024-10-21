@@ -1,5 +1,6 @@
 import { Guid } from 'guid-typescript';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
+import { DbType } from '../../../shared/src/enums/dbTypes';
 import DataType from '../../../shared/src/models/dataType';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 
@@ -40,6 +41,53 @@ export default class DataObjectDetailsTable {
     return result;
   }
 
+  private parseBoolean(str: string): boolean {
+    if (!str) {
+      return false;
+    }
+
+    switch (str.toLowerCase()) {
+      case 'true':
+      case '1':
+      case 'yes':
+        return true;
+      case 'false':
+      case '0':
+      case 'no':
+        return false;
+      default:
+        return false; // or throw an error for invalid input
+    }
+  }
+
+  private parseDefaultValue(defaultValue: string, dbType: DbType): any {
+    let result: any = '';
+
+    if (defaultValue === 'now') {
+      result = new Date();
+      return result;
+    }
+
+    switch (dbType) {
+      case DbType.Int16:
+      case DbType.Int32:
+      case DbType.Int64:
+      case DbType.Decimal:
+        result = Number(defaultValue);
+        break;
+      case DbType.Boolean:
+        result = this.parseBoolean(defaultValue);
+        break;
+      case DbType.DateTime:
+        result = new Date(defaultValue);
+        break;
+      default:
+        result = '';
+    }
+
+    return result;
+  }
+
   newRow(
     tableSettings: MetaObjectTable,
     dataTypes: DataType[],
@@ -51,13 +99,17 @@ export default class DataObjectDetailsTable {
       const dataType = dataTypes.find((x) => x.uid === column.dataTypeUid);
       if (dataType) {
         let currentValue: any = '';
-        if (dataType.uid === DataTypeDefaults.Int.uid
-          || dataType.uid === DataTypeDefaults.Long.uid
-          || dataType.uid === DataTypeDefaults.Decimal.uid) {
+
+        if (column.defaultValue) {
+          currentValue = this.parseDefaultValue(column.defaultValue, dataType.dbType);
+        } else if (dataType.uid === DataTypeDefaults.Int.uid
+            || dataType.uid === DataTypeDefaults.Long.uid
+            || dataType.uid === DataTypeDefaults.Decimal.uid) {
           currentValue = 0;
         } else if (dataType.uid === DataTypeDefaults.Bool.uid) {
           currentValue = false;
         }
+
         newRow[column.name] = currentValue;
         if (!dataType.isPrimitive) {
           newRow[`${column.name}_display`] = '';

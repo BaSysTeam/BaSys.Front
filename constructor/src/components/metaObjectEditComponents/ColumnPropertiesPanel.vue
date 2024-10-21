@@ -233,7 +233,6 @@ onBeforeMount(() => {
                  size="small"
                  autocomplete="off"
                  class="w-full"
-                 :disabled="isColumnDisabled()"
                  v-model="column.defaultValue"
                  @change="onChange"></InputText>
     </FieldGridComponent>
@@ -270,7 +269,6 @@ onBeforeMount(() => {
                   size="small"
                   class="w-full"
                   :options="controlKinds"
-                  :disabled="isColumnDisabled()"
                   option-label="title"
                   option-value="uid"
                   v-model="column.renderSettings.controlKindUid"
