@@ -20,6 +20,7 @@ import HeaderFieldsTab from '@/components/metaObjectEditComponents/HeaderFieldsT
 import TableSettingsTab from '@/components/metaObjectEditComponents/TableSettingsTab.vue';
 import JsonTab from '@/components/metaObjectEditComponents/JsonTab.vue';
 import { Guid } from 'guid-typescript';
+import CommandsTab from '@/components/metaObjectEditComponents/CommandsTab.vue';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
 import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
@@ -322,6 +323,11 @@ onBeforeMount(() => {
     command: () => onNavTabClick('fields'),
   });
 
+  navMenuItems.value.push({
+    label: t('commands'),
+    command: () => onNavTabClick('commands'),
+  });
+
   navMenuItems.value.push(tableGroups.value);
 
   const otherGroup = {
@@ -441,6 +447,10 @@ onMounted(() => {
           <HeaderFieldsTab :settings="settings"
                            :data-types="dataTypes"
                            @change="onSettingsChanged"></HeaderFieldsTab>
+        </div>
+        <div v-if="activeTab == 'commands'">
+          <CommandsTab :settings="settings"
+                       @change="onSettingsChanged"></CommandsTab>
         </div>
         <div v-if="activeTab == 'json'">
           <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>

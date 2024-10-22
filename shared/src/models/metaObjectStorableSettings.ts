@@ -2,6 +2,7 @@ import { Guid } from 'guid-typescript';
 import MetaObjectTableColumn from './metaObjectTableColumn';
 import DataTypeDefaults from '../dataProviders/dataTypeDefaults';
 import MetaObjectTable from './metaObjectTable';
+import MetaObjectCommand from './metaObjectCommand';
 
 export default class MetaObjectStorableSettings {
   uid:string;
@@ -15,6 +16,7 @@ export default class MetaObjectStorableSettings {
   isActive:boolean;
   header: MetaObjectTable;
   detailTables: Array<MetaObjectTable>
+  commands:Array<MetaObjectCommand>
 
   constructor(params: any) {
     let data: any = {};
@@ -35,10 +37,24 @@ export default class MetaObjectStorableSettings {
 
     this.detailTables = data.detailTables
       ? data.detailTables.map((item: any) => new MetaObjectTable(item)) : [];
+
+    this.commands = [];
+    if (data.commands) {
+      data.commands.forEach((item: any) => this.commands.push(new MetaObjectCommand(item)));
+    }
   }
 
   get isNew():boolean {
     return !this.uid;
+  }
+
+  get allTables(): MetaObjectTable[] {
+    const collection = [];
+
+    collection.push(this.header);
+    this.detailTables.forEach((table) => { collection.push(table); });
+
+    return collection;
   }
 
   newDetailTable(objectPrimaryKeyDataTypeUid: string): MetaObjectTable {
@@ -116,5 +132,19 @@ export default class MetaObjectStorableSettings {
     this.detailTables.push(newTable);
 
     return newTable;
+  }
+
+  newCommand(params: any): MetaObjectCommand {
+    const command = new MetaObjectCommand(params);
+    this.commands.push(command);
+
+    return command;
+  }
+
+  deleteCommand(command: MetaObjectCommand): void {
+    const ind = this.commands.indexOf(command);
+    if (ind > -1) {
+      this.commands.splice(ind, 1);
+    }
   }
 }
