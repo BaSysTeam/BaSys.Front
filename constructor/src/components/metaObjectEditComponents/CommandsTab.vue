@@ -12,6 +12,7 @@ import Badge from 'primevue/badge';
 import CommandPropertiesPanel
   from '@/components/metaObjectEditComponents/CommandPropertiesPanel.vue';
 import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
+import MetaObjectCommand from '../../../../shared/src/models/metaObjectCommand';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
 
 // Infrastructure
@@ -33,6 +34,16 @@ const emit = defineEmits({ change: () => true });
 const selectedItem:any = ref(null);
 
 // Methods
+function buildCommandTitle(command: MetaObjectCommand): string {
+  const table = props.settings.getTable(command.tableUid);
+  console.log('Build command title', command);
+
+  if (!table) {
+    return command.title;
+  }
+
+  return `${table.title}.${command.title}`;
+}
 
 // Event handlers
 function onAddClick(): void {
@@ -140,7 +151,7 @@ function onChange(): void {
       <template #option="{option, index}">
         <div>
           <Badge :value="index+1" severity="info"></Badge>
-          <span class="ml-2">{{option.title}}</span>
+          <span class="ml-2">{{buildCommandTitle(option)}}</span>
           <span class="pi pi-check ml-2" style="float:right" v-if="option.isActive"></span>
         </div>
       </template>
