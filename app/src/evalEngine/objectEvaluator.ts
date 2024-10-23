@@ -6,7 +6,6 @@ import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
 import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
-import DependencyInfo from '../../../shared/src/models/dependencyInfo';
 import ExpressionEvaluator from '../../../shared/src/evalEngine/expressionEvaluator';
 import { DependencyKinds } from '../../../shared/src/enums/dependencyKinds';
 

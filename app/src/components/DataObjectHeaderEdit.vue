@@ -23,6 +23,7 @@ import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vu
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import { PropType } from 'vue';
 import ObjectEvaluator from '../evalEngine/objectEvaluator';
+import ExpressionEvaluator from '../../../shared/src/evalEngine/expressionEvaluator';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import MetaObjectCommand from '../../../shared/src/models/metaObjectCommand';
 
@@ -145,15 +146,13 @@ export default class DataObjectHeaderEdit extends Vue {
 
     this.headerCommands = [];
     newValue.metaObjectSettings.commands.forEach((command) => {
-      if (command.tableUid === newValue.metaObjectSettings.header.uid) {
+      if (command.isActive && command.tableUid === newValue.metaObjectSettings.header.uid) {
         this.headerCommands.push({
           label: command.title,
           command: () => this.executeCommandAsync(command),
         });
       }
     });
-
-    console.log('header commands', this.headerCommands);
   }
 
   async onHeaderFieldChange(columnName: string): Promise<void> {
@@ -163,6 +162,10 @@ export default class DataObjectHeaderEdit extends Vue {
 
   async executeCommandAsync(command: MetaObjectCommand): Promise<void> {
     console.log(`Executed ${command.title}`);
+    const expressionEvaluator = new ExpressionEvaluator(this.model.item, this.logger);
+    await expressionEvaluator.evaluateExpressionAsync(command.expression);
+
+    await this.objectEvaluator.onObjectRecalculateAsync();
   }
 
   onFieldsSortChangeClick(args: number): void {
@@ -185,11 +188,6 @@ export default class DataObjectHeaderEdit extends Vue {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
 
-      // this.objectEvaluator = new ObjectEvaluator(
-      //   this.logger,
-      //   this.model.metaObjectSettings,
-      //   this.model.item,
-      // );
       this.onModelChanged(this.model);
     });
   }

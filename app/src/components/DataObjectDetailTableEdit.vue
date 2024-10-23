@@ -26,6 +26,7 @@ import SplitButton from 'primevue/splitbutton';
 import { Guid } from 'guid-typescript';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import DataType from '../../../shared/src/models/dataType';
+import ExpressionEvaluator from '../../../shared/src/evalEngine/expressionEvaluator';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import MetaObjectCommand from '../../../shared/src/models/metaObjectCommand';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -314,6 +315,10 @@ export default class DataObjectDetailTableEdit extends Vue {
 
   async executeTableCommandAsync(command: MetaObjectCommand): Promise<void> {
     console.log('ExecuteTableCommandAsync', command);
+    const expressionEvaluator = new ExpressionEvaluator(this.dataObject, this.logger);
+    await expressionEvaluator.evaluateExpressionAsync(command.expression);
+
+    await this.objectEvaluator.onObjectRecalculateAsync();
   }
 
   init(): void {
@@ -322,7 +327,7 @@ export default class DataObjectDetailTableEdit extends Vue {
 
     this.tableCommands.items = [];
     this.metaObjectSettings.commands.forEach((command) => {
-      if (command.tableUid === this.table.uid) {
+      if (command.isActive && command.tableUid === this.table.uid) {
         this.tableCommands.items.push({
           label: command.title,
           command: () => this.executeTableCommandAsync(command),
