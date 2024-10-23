@@ -11,6 +11,7 @@ import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import Checkbox from 'primevue/checkbox';
 import Calendar from 'primevue/calendar';
+import SplitButton from 'primevue/splitbutton';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import Toolbar from 'primevue/toolbar';
@@ -23,6 +24,7 @@ import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import { PropType } from 'vue';
 import ObjectEvaluator from '../evalEngine/objectEvaluator';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import MetaObjectCommand from '../../../shared/src/models/metaObjectCommand';
 
 @Options({
   components: {
@@ -36,6 +38,7 @@ import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
     IconField,
     Checkbox,
     Calendar,
+    SplitButton,
     TabView,
     TabPanel,
     Toolbar,
@@ -76,6 +79,7 @@ export default class DataObjectHeaderEdit extends Vue {
   sortKind = 1;
   windowHeight = window.innerHeight;
   objectEvaluator!: ObjectEvaluator;
+  headerCommands: any[] = [];
 
   get fieldsContainerStyle(): any {
     if (this.renderPlace === 'page') {
@@ -138,11 +142,27 @@ export default class DataObjectHeaderEdit extends Vue {
       newValue.metaObjectSettings,
       newValue.item,
     );
+
+    this.headerCommands = [];
+    newValue.metaObjectSettings.commands.forEach((command) => {
+      if (command.tableUid === newValue.metaObjectSettings.header.uid) {
+        this.headerCommands.push({
+          label: command.title,
+          command: () => this.executeCommandAsync(command),
+        });
+      }
+    });
+
+    console.log('header commands', this.headerCommands);
   }
 
   async onHeaderFieldChange(columnName: string): Promise<void> {
     await this.objectEvaluator.onHeaderFieldChangedAsync(columnName);
     this.isModifiedChanged(true);
+  }
+
+  async executeCommandAsync(command: MetaObjectCommand): Promise<void> {
+    console.log(`Executed ${command.title}`);
   }
 
   onFieldsSortChangeClick(args: number): void {
@@ -165,11 +185,12 @@ export default class DataObjectHeaderEdit extends Vue {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
 
-      this.objectEvaluator = new ObjectEvaluator(
-        this.logger,
-        this.model.metaObjectSettings,
-        this.model.item,
-      );
+      // this.objectEvaluator = new ObjectEvaluator(
+      //   this.logger,
+      //   this.model.metaObjectSettings,
+      //   this.model.item,
+      // );
+      this.onModelChanged(this.model);
     });
   }
 }
@@ -209,6 +230,15 @@ export default class DataObjectHeaderEdit extends Vue {
                       <span class="pi pi-sort-alpha-up"
                             :class="{'text-primary': sortKind == 4}"></span>
           </a>
+
+          <SplitButton
+            :label="$t('actions')"
+            severity="primary"
+            size="small"
+            class="ml-1"
+            outlined
+            :model="headerCommands"
+          />
         </template>
 
         <template #end>

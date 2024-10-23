@@ -22,10 +22,12 @@ import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 import SelectItem from '@/models/selectItem';
+import SplitButton from 'primevue/splitbutton';
 import { Guid } from 'guid-typescript';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
+import MetaObjectCommand from '../../../shared/src/models/metaObjectCommand';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
@@ -46,6 +48,7 @@ import ObjectEvaluator from '../evalEngine/objectEvaluator';
       Menubar,
       Button,
       Badge,
+      SplitButton,
     },
 })
 export default class DataObjectDetailTableEdit extends Vue {
@@ -140,6 +143,11 @@ export default class DataObjectDetailTableEdit extends Vue {
   };
 
   menuItems: any[] = [];
+  tableCommands: any = {
+    label: 'Actions',
+    items: [],
+  };
+
   vScroll: any;
 
   get dataTableStyle(): object {
@@ -156,8 +164,7 @@ export default class DataObjectDetailTableEdit extends Vue {
   @Watch('tableUid')
   @Watch('metaObjectSettings')
   onPropChange(): void {
-    this.initColumns();
-    this.initFilters();
+    this.init();
     this.loadData();
   }
 
@@ -305,6 +312,40 @@ export default class DataObjectDetailTableEdit extends Vue {
     }
   }
 
+  async executeTableCommandAsync(command: MetaObjectCommand): Promise<void> {
+    console.log('ExecuteTableCommandAsync', command);
+  }
+
+  init(): void {
+    this.initColumns();
+    this.initFilters();
+
+    this.tableCommands.items = [];
+    this.metaObjectSettings.commands.forEach((command) => {
+      if (command.tableUid === this.table.uid) {
+        this.tableCommands.items.push({
+          label: command.title,
+          command: () => this.executeTableCommandAsync(command),
+        });
+      }
+    });
+
+    this.menuItems = [];
+    this.menuItems.push({
+      icon: 'pi pi-plus',
+      class: 'text-primary',
+      command: () => this.onAddClick(),
+    }, {
+      label: 'Filters',
+      icon: 'pi pi-filter-slash',
+      class: 'text-primary',
+      command: () => this.onClearFiltersClick(),
+    });
+    if (this.tableCommands.items.length) {
+      this.menuItems.push(this.tableCommands);
+    }
+  }
+
   isColumnDataTypeNumber(param: any): boolean {
     return param.columnDataType === 'number';
   }
@@ -321,18 +362,9 @@ export default class DataObjectDetailTableEdit extends Vue {
     this.$nextTick(() => {
       window.addEventListener('resize', this.onResize);
     });
-    this.initColumns();
-    this.initFilters();
-    this.menuItems.push({
-      icon: 'pi pi-plus',
-      class: 'text-primary',
-      command: () => this.onAddClick(),
-    }, {
-      label: 'Filters',
-      icon: 'pi pi-filter-slash',
-      class: 'text-primary',
-      command: () => this.onClearFiltersClick(),
-    });
+
+    this.init();
+
     this.loadData();
     this.$nextTick(() => {
       if (this.table.rows.length) {
@@ -665,5 +697,9 @@ export default class DataObjectDetailTableEdit extends Vue {
 
 .p-tabview-nav-link  {
   padding: 0.5rem!important;
+}
+
+.p-submenu-list{
+  z-index: 10;
 }
 </style>

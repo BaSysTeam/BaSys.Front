@@ -36,7 +36,6 @@ const selectedItem:any = ref(null);
 // Methods
 function buildCommandTitle(command: MetaObjectCommand): string {
   const table = props.settings.getTable(command.tableUid);
-  console.log('Build command title', command);
 
   if (!table) {
     return command.title;
