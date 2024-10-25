@@ -208,6 +208,23 @@ export default class DataObjectEditComponent extends Vue {
     this.isModifiedChanged(true);
   }
 
+  onIsModifiedChanged(args: boolean): void {
+    this.isModifiedChanged(args);
+  }
+
+  onIsWaitingChanged(args: boolean): void {
+    this.isWaitingChanged(args);
+  }
+
+  onSaveTriggered(): void {
+    console.log('on Save triggered');
+    this.save();
+  }
+
+  onCustomEvent(): void {
+    console.log('on CustomEvent');
+  }
+
   public triggerSaveClick(): void {
     this.save();
   }
@@ -256,7 +273,9 @@ export default class DataObjectEditComponent extends Vue {
                                   :logger="logger"
                                   :is-primary-key-enabled="isPrimaryKeyEnabled"
                                   :render-place="renderPlace"
-                                  @is-modified-changed="onHeaderFieldChange">
+                                  @is-modified-changed="onIsModifiedChanged"
+                                  @is-waiting-changed="onIsWaitingChanged"
+                                  @save-trigger="onSaveTriggered">
             </DataObjectHeaderEdit>
 
           </TabPanel>
@@ -285,27 +304,12 @@ export default class DataObjectEditComponent extends Vue {
                           :logger="logger"
                           :is-primary-key-enabled="isPrimaryKeyEnabled"
                           :render-place="renderPlace"
-                          @is-modified-changed="onHeaderFieldChange"></DataObjectHeaderEdit>
+                          @is-modified-changed="onIsModifiedChanged"
+                          @is-waiting-changed="onIsWaitingChanged"
+                          @save-trigger="onSaveTriggered"></DataObjectHeaderEdit>
 
 </template>
 
 <style scoped>
-/*
-.bs-tabview-bottom .p-tabview-nav {
-  order: 2;
-}
 
-.bs-tabview-bottom .p-tabview-panels {
-  order: 1;
-}
-
-.bs-tabview-bottom .p-tabview {
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-.bs-tabview-bottom .p-tabview /deep/ .p-tabview-nav {
-  border-top: 1px solid #ececec !important;
-}
-*/
 </style>

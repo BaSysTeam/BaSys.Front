@@ -2,6 +2,7 @@ import { Guid } from 'guid-typescript';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
 import { DbType } from '../../../shared/src/enums/dbTypes';
 import DataType from '../../../shared/src/models/dataType';
+import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import DataTable from '../../../shared/src/evalEngine/dataTable';
 
 export default class DataObjectDetailsTable {
@@ -41,15 +42,18 @@ export default class DataObjectDetailsTable {
     return result;
   }
 
-  clear(): void {
+  clear(): DataObjectDetailsTable {
     this.rows = [];
+    this.isModified = true;
+    return this;
   }
 
-  load(dataTable: DataTable): void {
-    this.clear();
+  load(dataTable: DataTable): DataObjectDetailsTable {
     dataTable.rows.forEach((dataTableRow: any) => {
       this.rows.push(dataTableRow);
     });
+    this.isModified = true;
+    return this;
   }
 
   private parseBoolean(str: string): boolean {

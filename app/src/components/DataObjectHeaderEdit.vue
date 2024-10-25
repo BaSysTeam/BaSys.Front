@@ -23,7 +23,7 @@ import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vu
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import { PropType } from 'vue';
 import ObjectEvaluator from '../evalEngine/objectEvaluator';
-import ExpressionEvaluator from '../../../shared/src/evalEngine/expressionEvaluator';
+import CommandProcessor from '../../../shared/src/evalEngine/commandProcessor';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import MetaObjectCommand from '../../../shared/src/models/metaObjectCommand';
 
@@ -136,6 +136,21 @@ export default class DataObjectHeaderEdit extends Vue {
     return newValue;
   }
 
+  @Emit('isWaitingChanged')
+  isWaitingChanged(newValue: boolean): boolean {
+    return newValue;
+  }
+
+  @Emit('saveTrigger')
+  saveTriggered(): boolean {
+    console.log('saveTrigger');
+    return true;
+  }
+
+  async recalculate(): Promise<void> {
+    await this.objectEvaluator.onObjectRecalculateAsync();
+  }
+
   @Watch('model')
   onModelChanged(newValue: DataObjectViewModel): void {
     this.objectEvaluator = new ObjectEvaluator(
@@ -162,10 +177,21 @@ export default class DataObjectHeaderEdit extends Vue {
 
   async executeCommandAsync(command: MetaObjectCommand): Promise<void> {
     console.log(`Executed ${command.title}`);
-    const expressionEvaluator = new ExpressionEvaluator(this.model.item, this.logger);
-    await expressionEvaluator.evaluateExpressionAsync(command.expression);
+    const additionalFunctions = {
+      isModified: this.isModifiedChanged,
+      isWaiting: this.isWaitingChanged,
+      recalculate: this.recalculate,
+      save: this.saveTriggered,
+    };
 
-    await this.objectEvaluator.onObjectRecalculateAsync();
+    const commandProcessor = new CommandProcessor(
+      this.model.item,
+      additionalFunctions,
+      this.logger,
+    );
+    await commandProcessor.executeAsync(command.expression);
+
+    // await this.objectEvaluator.onObjectRecalculateAsync();
   }
 
   onFieldsSortChangeClick(args: number): void {
@@ -237,6 +263,7 @@ export default class DataObjectHeaderEdit extends Vue {
             outlined
             :model="headerCommands"
           />
+
         </template>
 
         <template #end>
