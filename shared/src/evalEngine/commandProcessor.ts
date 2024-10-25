@@ -36,6 +36,8 @@ export default class CommandProcessor {
       isWaiting,
       recalculate,
       save,
+      close,
+      refresh,
     } = this.additionalFunctions;
 
     const DbType = DbTypeEnum;

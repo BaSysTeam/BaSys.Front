@@ -65,6 +65,22 @@ function onExpressionDialogSave(expression: string): void {
       <div class="grid">
         <div class="col-12">
 
+          <!-- TableUid -->
+          <FieldGridComponent :title="$t('for')"
+                              label-for="command-table-uid"
+                              :required="true">
+
+            <Dropdown id="command-table-uid"
+                      size="small"
+                      class="w-full"
+                      :options="settings.allTables"
+                      option-label="title"
+                      option-value="uid"
+                      v-model="command.tableUid"
+                      @change="onChange"></Dropdown>
+
+          </FieldGridComponent>
+
           <!-- Title -->
           <FieldGridComponent :title="$t('title')"
                               label-for="command-title"
@@ -87,22 +103,6 @@ function onExpressionDialogSave(expression: string): void {
                        class="w-full"
                        v-model="command.name"
                        @change="onChange"></InputText>
-          </FieldGridComponent>
-
-          <!-- TableUid -->
-          <FieldGridComponent :title="$t('for')"
-                              label-for="command-table-uid"
-                              :required="true">
-
-            <Dropdown id="command-table-uid"
-                      size="small"
-                      class="w-full"
-                      :options="settings.allTables"
-                      option-label="title"
-                      option-value="uid"
-                      v-model="command.tableUid"
-                      @change="onChange"></Dropdown>
-
           </FieldGridComponent>
 
           <!-- Memo -->
@@ -161,5 +161,7 @@ function onExpressionDialogSave(expression: string): void {
 </template>
 
 <style scoped>
-
+.field.grid {
+  margin-bottom: 0.5rem;
+}
 </style>

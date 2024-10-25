@@ -217,12 +217,15 @@ export default class DataObjectEditComponent extends Vue {
   }
 
   onSaveTriggered(): void {
-    console.log('on Save triggered');
     this.save();
   }
 
-  onCustomEvent(): void {
-    console.log('on CustomEvent');
+  async onRefreshTriggered(): Promise<void> {
+    await this.init();
+  }
+
+  onCloseTriggered(): void {
+    this.closeTrigger();
   }
 
   public triggerSaveClick(): void {
@@ -255,6 +258,11 @@ export default class DataObjectEditComponent extends Vue {
     return result;
   }
 
+  @Emit('closeTrigger')
+  closeTrigger(): void {
+    console.log('Close trigger');
+  }
+
   onTableIsModifiedChanged(args: boolean): void {
     this.isModifiedChanged(args);
   }
@@ -275,7 +283,9 @@ export default class DataObjectEditComponent extends Vue {
                                   :render-place="renderPlace"
                                   @is-modified-changed="onIsModifiedChanged"
                                   @is-waiting-changed="onIsWaitingChanged"
-                                  @save-trigger="onSaveTriggered">
+                                  @save-trigger="onSaveTriggered"
+                                  @refresh-trigger="onRefreshTriggered"
+                                  @close-trigger="onCloseTriggered">
             </DataObjectHeaderEdit>
 
           </TabPanel>
@@ -306,7 +316,9 @@ export default class DataObjectEditComponent extends Vue {
                           :render-place="renderPlace"
                           @is-modified-changed="onIsModifiedChanged"
                           @is-waiting-changed="onIsWaitingChanged"
-                          @save-trigger="onSaveTriggered"></DataObjectHeaderEdit>
+                          @save-trigger="onSaveTriggered"
+                          @refresh-trigger="onRefreshTriggered"
+                          @close-trigger="onCloseTriggered"></DataObjectHeaderEdit>
 
 </template>
 

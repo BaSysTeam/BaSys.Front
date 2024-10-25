@@ -93,6 +93,10 @@ export default class DataObjectEditDialog extends Vue {
     this.closeAfterSave = false;
   }
 
+  onCloseTriggered(): void {
+    this.$emit('close');
+  }
+
   onCalculationLogClick(): void {
     this.isCalculationLogOpen = true;
   }
@@ -159,7 +163,8 @@ export default class DataObjectEditDialog extends Vue {
                                  render-place="dialog"
                                  @isModifiedChanged="onIsModifiedChanged"
                                  @isWaitingChanged="onIsWaitingChanged"
-                                 @saved="onSaved"></DataObjectEditComponent>
+                                 @saved="onSaved"
+                                 @close-trigger="onCloseTriggered"></DataObjectEditComponent>
       </div>
       <template #footer>
         <div>

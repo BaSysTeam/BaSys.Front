@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeUnmount,
+  ref, onMounted, onBeforeUnmount, computed,
   defineProps, defineEmits, watch, PropType,
 } from 'vue';
+import { useToast } from 'primevue/usetoast';
 import InputGroup from 'primevue/inputgroup';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
@@ -16,9 +17,11 @@ import ObjectEvaluator from '../evalEngine/objectEvaluator';
 import CommandProcessor from '../../../shared/src/evalEngine/commandProcessor';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import MetaObjectCommand from '../../../shared/src/models/metaObjectCommand';
+import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 // Infrastructure
 let objectEvaluator: ObjectEvaluator;
+const toastHelper = new ToastHelper(useToast());
 
 // Props
 const props = defineProps({
@@ -33,11 +36,14 @@ const searchString = ref<string>('');
 const sortKind = ref<number>(1);
 const windowHeight = ref<number>(window.innerHeight);
 const headerCommands = ref<any[]>([]);
+const headerCommandsExists = computed(() => headerCommands.value.length > 0);
 
 // Emit
 const emit = defineEmits<{(event: 'isModifiedChanged', newValue: boolean): void;
   (event: 'isWaitingChanged', newValue: boolean): void;
   (event: 'saveTrigger'): void;
+  (event: 'refreshTrigger'): void;
+  (event: 'closeTrigger'): void;
 }>();
 
 // Methods
@@ -102,8 +108,16 @@ function isWaitingChanged(newValue: boolean): void {
   emit('isWaitingChanged', newValue);
 }
 
-function saveTriggered(): void {
+function saveTrigger(): void {
   emit('saveTrigger');
+}
+
+function refreshTrigger(): void {
+  emit('refreshTrigger');
+}
+
+function closeTrigger(): void {
+  emit('closeTrigger');
 }
 
 async function executeCommandAsync(command: MetaObjectCommand): Promise<void> {
@@ -112,7 +126,9 @@ async function executeCommandAsync(command: MetaObjectCommand): Promise<void> {
     isModified: isModifiedChanged,
     isWaiting: isWaitingChanged,
     recalculate,
-    save: saveTriggered,
+    save: saveTrigger,
+    refresh: refreshTrigger,
+    close: closeTrigger,
   };
 
   const commandProcessor = new CommandProcessor(
@@ -121,6 +137,11 @@ async function executeCommandAsync(command: MetaObjectCommand): Promise<void> {
     props.logger,
   );
   await commandProcessor.executeAsync(command.expression);
+
+  if (commandProcessor.error) {
+    const message = `Command "${command.title}" error: ${commandProcessor.error}`;
+    toastHelper.error(message);
+  }
 }
 
 // Event handlers
@@ -208,7 +229,7 @@ onBeforeUnmount(() => {
                             :class="{'text-primary': sortKind == 4}"></span>
           </a>
 
-          <SplitButton
+          <SplitButton v-if="headerCommandsExists"
             :label="$t('actions')"
             severity="primary"
             size="small"

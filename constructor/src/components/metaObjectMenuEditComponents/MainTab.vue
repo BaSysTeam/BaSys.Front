@@ -90,5 +90,7 @@ function onChange(): void {
 </template>
 
 <style scoped>
-
+.field.grid {
+  margin-bottom: 0.5rem;
+}
 </style>
