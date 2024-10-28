@@ -300,7 +300,11 @@ export default class DataObjectEditComponent extends Vue {
                                        :data-object="model.item"
                                        :meta-object-settings="model.metaObjectSettings"
                                        :data-types="model.dataTypes"
-                                       @is-modified-changed="onTableIsModifiedChanged">
+                                       @is-modified-changed="onTableIsModifiedChanged"
+                                       @is-waiting-changed="onIsWaitingChanged"
+                                       @save-trigger="onSaveTriggered"
+                                       @refresh-trigger="onRefreshTriggered"
+                                       @close-trigger="onCloseTriggered">
             </DataObjectDetailTableEdit>
           </TabPanel>
         </TabView>
