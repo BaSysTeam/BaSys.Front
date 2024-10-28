@@ -17,6 +17,7 @@ import Menubar from 'primevue/menubar';
 import Badge from 'primevue/badge';
 import DataObject from '@/models/dataObject';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
+import DataObjectPickUpDialog from '@/components/DataObjectPickUpDialog.vue';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
@@ -80,6 +81,7 @@ const columns = ref<MetaObjectColumnViewModel[]>([]);
 const filters = ref<any>({});
 const selectedRecord = ref<any>({});
 const windowHeight = ref(window.innerHeight);
+const isPickUpOpen = ref<boolean>(false);
 
 const inputStyle = ref<any>({
   width: '100%',
@@ -145,6 +147,10 @@ function refreshTrigger(): void {
 
 function closeTrigger(): void {
   emit('closeTrigger');
+}
+
+function openPickUp(): void {
+  isPickUpOpen.value = true;
 }
 
 function initColumns(): void {
@@ -307,6 +313,7 @@ async function executeTableCommandAsync(command: MetaObjectCommand): Promise<voi
     save: saveTrigger,
     refresh: refreshTrigger,
     close: closeTrigger,
+    openPickUp,
   };
 
   const commandProcessor = new CommandProcessor(
@@ -493,6 +500,10 @@ function onPageChanged(args: any): void {
   if (props.table.rows.length > args.first) {
     selectedRecord.value = props.table.rows[args.first];
   }
+}
+
+function onPickUpClose(): void {
+  isPickUpOpen.value = false;
 }
 
 // Life cycle hooks
@@ -708,6 +719,10 @@ onBeforeUnmount(() => {
       </template>
     </Column>
   </DataTable>
+
+  <DataObjectPickUpDialog v-if="isPickUpOpen"
+                          @close="onPickUpClose"></DataObjectPickUpDialog>
+
 </template>
 
 <style>

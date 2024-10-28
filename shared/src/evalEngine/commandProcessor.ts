@@ -38,6 +38,7 @@ export default class CommandProcessor {
       save,
       close,
       refresh,
+      openPickUp,
     } = this.additionalFunctions;
 
     const DbType = DbTypeEnum;
