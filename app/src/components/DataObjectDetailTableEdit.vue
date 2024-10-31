@@ -33,6 +33,7 @@ import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import ObjectEvaluator from '../evalEngine/objectEvaluator';
 import CommandProcessor from '../../../shared/src/evalEngine/commandProcessor';
+import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
@@ -40,6 +41,8 @@ const provider = new DataObjectsProvider();
 const selectItemProvider = new SelectItemsProvider();
 const toastHelper = new ToastHelper(useToast());
 let objectEvaluator: ObjectEvaluator;
+let pickUpDataTable: BaSysDataTable;
+let pickUpTableName: string;
 
 // Props
 const props = defineProps({
@@ -149,8 +152,10 @@ function closeTrigger(): void {
   emit('closeTrigger');
 }
 
-function openPickUp(): void {
+function openPickUp(source: BaSysDataTable, destination: string): void {
   isPickUpOpen.value = true;
+  pickUpDataTable = source;
+  pickUpTableName = destination;
 }
 
 function initColumns(): void {
@@ -721,6 +726,8 @@ onBeforeUnmount(() => {
   </DataTable>
 
   <DataObjectPickUpDialog v-if="isPickUpOpen"
+                          :data-table="pickUpDataTable"
+                          :table-name="pickUpTableName"
                           @close="onPickUpClose"></DataObjectPickUpDialog>
 
 </template>

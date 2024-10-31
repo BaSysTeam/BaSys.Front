@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed,
+  ref, onMounted, onBeforeMount, defineProps, defineEmits,
+  watch, computed, PropType,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -8,6 +9,10 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
+import BaSysDataTableColumn from '../../../shared/src/evalEngine/dataTableColumn';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
@@ -15,7 +20,10 @@ const router = useRouter();
 const confirmVue = useConfirm();
 
 // Props
-const props = defineProps({});
+const props = defineProps({
+  dataTable: { type: Object as PropType<BaSysDataTable>, required: true },
+  tableName: { type: String, required: true },
+});
 
 // Emit
 const emit = defineEmits(
@@ -27,6 +35,9 @@ const emit = defineEmits(
 
 // Data
 const formTitle = ref<string>('Pick up');
+const rows = ref<any[]>([]);
+const columns = ref<any[]>([]);
+const windowHeight = ref(window.innerHeight);
 
 // Methods
 function updateVisible(value: boolean): void {
@@ -35,12 +46,68 @@ function updateVisible(value: boolean): void {
   }
 }
 
+function dataTableStyle(): any {
+  return {
+    height: `${windowHeight.value - 420}px`,
+    fontSize: '14px',
+  };
+}
+
+function dataTableScrollHeight(): string {
+  return `${windowHeight.value - 320}px`;
+}
+
+function initColumns(sourceTable: BaSysDataTable): void {
+  if (!sourceTable) {
+    return;
+  }
+
+  columns.value = [];
+  sourceTable.columns.forEach((column: BaSysDataTableColumn): void => {
+    columns.value.push({ name: column.name });
+  });
+
+  console.log('columns pick up', columns.value);
+}
+
+function init(sourceTable: BaSysDataTable): void {
+  if (!sourceTable) {
+    return;
+  }
+
+  rows.value = [];
+  sourceTable.rows.forEach((row) => {
+    rows.value.push(row);
+  });
+
+  initColumns(sourceTable);
+}
+
+function formatValue(row: any, field: string): any {
+  console.log('formatValue', row, field, row[field]);
+  return row[field];
+}
+
 // Event handlers
+watch(
+  () => props.dataTable,
+  (newValue) => {
+    init(newValue);
+  },
+  {
+    immediate: true,
+  },
+);
+
 function onCloseClick(): void {
   emit('close');
 }
 
 // Life cycle hooks
+onMounted(() => {
+  init(props.dataTable);
+});
+
 </script>
 
 <template>
@@ -55,7 +122,32 @@ function onCloseClick(): void {
     :style="{width: '50rem'}"
     @update:visible="updateVisible">
     <div>
-     Pick up
+     <DataTable
+       :value="rows"
+       :style="dataTableStyle()"
+       :scroll-height="dataTableScrollHeight()"
+       :metaKeySelection="true"
+       :rows="15"
+       paginator
+       showGridlines
+       selectionMode="single"
+       scrollable
+       scrollHeight="flex"
+       filterDisplay="menu"
+       size="small"
+     >
+       <template #empty>{{ $t('noItemsFound') }}</template>
+       <Column
+         v-for="col of columns"
+         :key="col.name"
+         :field="col.name"
+         :header="col.name">
+         <template #body="{ data, field }">
+             {{ formatValue(data, field) }}
+         </template>
+
+       </Column>
+     </DataTable>
     </div>
     <template #footer>
       <Button
