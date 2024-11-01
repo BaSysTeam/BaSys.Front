@@ -144,6 +144,7 @@ export default class DataObjectEditDialog extends Vue {
       :visible="true"
       :draggable="false"
       :style="{width: '50rem'}"
+      :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
       @update:visible="updateVisible"
     >
       <template #header>

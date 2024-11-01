@@ -51,7 +51,6 @@ function updateVisible(value: boolean): void {
 
 function dataTableStyle(): any {
   return {
-    height: `${windowHeight.value - 420}px`,
     fontSize: '14px',
   };
 }
@@ -151,6 +150,7 @@ onMounted(() => {
     :visible="true"
     :draggable="false"
     :style="{width: '80%'}"
+    :contentStyle="{ height: '500px' }"
     @update:visible="updateVisible">
     <div>
      <DataTable
@@ -158,9 +158,10 @@ onMounted(() => {
        :value="rows"
        v-model:selection="selection"
        :style="dataTableStyle()"
-       :scroll-height="dataTableScrollHeight()"
+       scroll-height="flex"
        :metaKeySelection="true"
-       :rows="15"
+       :rows="10"
+       :rowsPerPageOptions="[10, 20, 50, 100, 500]"
        paginator
        showGridlines
        scrollable
