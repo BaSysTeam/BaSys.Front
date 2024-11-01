@@ -75,6 +75,7 @@
   "numberDigits": "Number digits",
   "orderExpression": "Order expression",
   "other": "Other",
+  "pickUp": "Pick up",
   "pickUpAddTooltip": "Add selected data to table",
   "pickUpFillTooltip": "Clear table and add selected data",
   "prefix": "Prefix",

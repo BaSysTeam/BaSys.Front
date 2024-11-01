@@ -36,7 +36,7 @@ const emit = defineEmits(
 );
 
 // Data
-const formTitle = ref<string>('Pick up');
+const formTitle = ref<string>(t('pickUp'));
 const rows = ref<any[]>([]);
 const columns = ref<any[]>([]);
 const selection = ref<any[]>([]);
