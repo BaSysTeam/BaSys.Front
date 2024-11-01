@@ -143,6 +143,10 @@ export default class ObjectEvaluator {
     await this.existingDependenciesEvalAsync(evaluator);
   }
 
+  /**
+   * Recalculates all formulas in the table.
+   * @param tableName
+   */
   async onTableRecalculateAsync(tableName: string): Promise<void> {
     const table = this.dataObject.tables[tableName];
     if (!table) {

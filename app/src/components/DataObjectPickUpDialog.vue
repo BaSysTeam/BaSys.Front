@@ -131,7 +131,7 @@ onMounted(() => {
     :header="formTitle"
     :visible="true"
     :draggable="false"
-    :style="{width: '50rem'}"
+    :style="{width: '80%'}"
     @update:visible="updateVisible">
     <div>
      <DataTable
@@ -173,6 +173,7 @@ onMounted(() => {
         @click="onCloseClick"
       />
       <Button
+        v-tooltip.top="$t('pickUpAddTooltip')"
         :label="$t('add')"
         severity="primary"
         size="small"
@@ -180,6 +181,7 @@ onMounted(() => {
         @click="onAddClick"
       />
       <Button
+        v-tooltip.top="$t('pickUpFillTooltip')"
         :label="$t('fill')"
         severity="primary"
         size="small"

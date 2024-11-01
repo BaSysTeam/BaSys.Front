@@ -305,12 +305,12 @@ async function loadPickUpDataAsync(
   isPickUpOpen.value = false;
   const table = props.dataObject.tables[tableName];
   if (!table) {
-    toastHelper.error(`Cannot find table ${tableName}`);
+    toastHelper.error(`${t('cannotFindTable')}: ${tableName}`);
     return;
   }
 
   if (data == null || data.length === 0) {
-    toastHelper.warning('No data to fill');
+    toastHelper.warning(t('noDataToFill'));
     return;
   }
 
