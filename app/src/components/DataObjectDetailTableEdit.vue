@@ -297,6 +297,32 @@ async function loadData(): Promise<void> {
   isWaiting.value = false;
 }
 
+async function loadPickUpDataAsync(
+  data: any[],
+  tableName: string,
+  clearTable: boolean,
+): Promise<void> {
+  isPickUpOpen.value = false;
+  const table = props.dataObject.tables[tableName];
+  if (!table) {
+    toastHelper.error(`Cannot find table ${tableName}`);
+    return;
+  }
+
+  if (data == null || data.length === 0) {
+    toastHelper.warning('No data to fill');
+    return;
+  }
+
+  if (clearTable) {
+    table.clear();
+  }
+  table.load(data);
+
+  isModifiedChanged(true);
+  await objectEvaluator.onTableRecalculateAsync(table.name);
+}
+
 function isColumnDataTypeNumber(param: any): boolean {
   return param.columnDataType === 'number';
 }
@@ -509,6 +535,16 @@ function onPageChanged(args: any): void {
 
 function onPickUpClose(): void {
   isPickUpOpen.value = false;
+}
+
+async function onPickUpAdd(data: any[], tableName: string): Promise<void> {
+  isPickUpOpen.value = false;
+  await loadPickUpDataAsync(data, tableName, false);
+}
+
+async function onPickUpFill(data: any[], tableName: string): Promise<void> {
+  isPickUpOpen.value = false;
+  await loadPickUpDataAsync(data, tableName, true);
 }
 
 // Life cycle hooks
@@ -728,7 +764,9 @@ onBeforeUnmount(() => {
   <DataObjectPickUpDialog v-if="isPickUpOpen"
                           :data-table="pickUpDataTable"
                           :table-name="pickUpTableName"
-                          @close="onPickUpClose"></DataObjectPickUpDialog>
+                          @close="onPickUpClose"
+                          @add="onPickUpAdd"
+                          @fill="onPickUpFill"></DataObjectPickUpDialog>
 
 </template>
 

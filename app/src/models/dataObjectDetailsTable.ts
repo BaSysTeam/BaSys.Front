@@ -48,11 +48,19 @@ export default class DataObjectDetailsTable {
     return this;
   }
 
-  load(dataTable: DataTable): DataObjectDetailsTable {
-    dataTable.rows.forEach((dataTableRow: any) => {
-      this.rows.push(dataTableRow);
-    });
-    this.isModified = true;
+  load(source: any): DataObjectDetailsTable {
+    if (source instanceof DataTable) {
+      source.rows.forEach((dataTableRow: any) => {
+        this.rows.push(dataTableRow);
+      });
+      this.isModified = true;
+    } else if (Array.isArray(source)) {
+      source.forEach((row: any) => {
+        this.rows.push(row);
+      });
+      this.isModified = true;
+    }
+
     return this;
   }
 

@@ -11,6 +11,7 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import { Guid } from 'guid-typescript';
 import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
 import BaSysDataTableColumn from '../../../shared/src/evalEngine/dataTableColumn';
 
@@ -29,7 +30,8 @@ const props = defineProps({
 const emit = defineEmits(
   {
     close: () => true,
-    save: (value: string) => true,
+    add: (data: any[], tableName: string) => true,
+    fill: (data: any[], tableName: string) => true,
   },
 );
 
@@ -37,6 +39,7 @@ const emit = defineEmits(
 const formTitle = ref<string>('Pick up');
 const rows = ref<any[]>([]);
 const columns = ref<any[]>([]);
+const selection = ref<any[]>([]);
 const windowHeight = ref(window.innerHeight);
 
 // Methods
@@ -77,6 +80,8 @@ function init(sourceTable: BaSysDataTable): void {
 
   rows.value = [];
   sourceTable.rows.forEach((row) => {
+    // eslint-disable-next-line no-underscore-dangle
+    row._key = Guid.create().toString();
     rows.value.push(row);
   });
 
@@ -84,8 +89,15 @@ function init(sourceTable: BaSysDataTable): void {
 }
 
 function formatValue(row: any, field: string): any {
-  console.log('formatValue', row, field, row[field]);
   return row[field];
+}
+
+function onAddClick(): void {
+  emit('add', selection.value, props.tableName);
+}
+
+function onFillClick(): void {
+  emit('fill', selection.value, props.tableName);
 }
 
 // Event handlers
@@ -123,20 +135,21 @@ onMounted(() => {
     @update:visible="updateVisible">
     <div>
      <DataTable
+       data-key="_key"
        :value="rows"
+       v-model:selection="selection"
        :style="dataTableStyle()"
        :scroll-height="dataTableScrollHeight()"
        :metaKeySelection="true"
        :rows="15"
        paginator
        showGridlines
-       selectionMode="single"
        scrollable
-       scrollHeight="flex"
        filterDisplay="menu"
        size="small"
      >
        <template #empty>{{ $t('noItemsFound') }}</template>
+       <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
        <Column
          v-for="col of columns"
          :key="col.name"
@@ -160,12 +173,18 @@ onMounted(() => {
         @click="onCloseClick"
       />
       <Button
-        :label="$t('save')"
+        :label="$t('add')"
         severity="primary"
         size="small"
         outlined
-        icon="pi pi-save"
-        @click="onCloseClick"
+        @click="onAddClick"
+      />
+      <Button
+        :label="$t('fill')"
+        severity="primary"
+        size="small"
+        outlined
+        @click="onFillClick"
       />
     </template>
   </Dialog>

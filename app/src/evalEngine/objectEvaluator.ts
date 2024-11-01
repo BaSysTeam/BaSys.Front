@@ -143,6 +143,27 @@ export default class ObjectEvaluator {
     await this.existingDependenciesEvalAsync(evaluator);
   }
 
+  async onTableRecalculateAsync(tableName: string): Promise<void> {
+    const table = this.dataObject.tables[tableName];
+    if (!table) {
+      this.logger.logError(`Cannot find table: ${tableName}`);
+      return;
+    }
+    const tableSettings = this.settings.getTable(table.uid);
+    if (tableSettings) {
+      const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
+      for (const row of table.rows) {
+        this.dataObject.currentRow = row;
+        this.logger.logDebug(`Recalculate row #${row.row_number} in table "${table.name}"`);
+        for (const column of tableSettings.columns) {
+          await this.rowDependenciesEvalAsync(tableSettings, column, row, evaluator);
+        }
+      }
+
+      await this.existingDependenciesEvalAsync(evaluator);
+    }
+  }
+
   /**
    * Recalculates all formulas in table row and dependent formulas.
    * @param tableName - name of table (it is necessary only for good-looking log message)
