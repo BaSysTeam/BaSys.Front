@@ -60,6 +60,18 @@ function dataTableScrollHeight(): string {
   return `${windowHeight.value - 320}px`;
 }
 
+function parseDisplayName(displayName: string): { valueName: string, displayName: string } {
+  const names = {
+    valueName: '',
+    displayName,
+  };
+  const ind = displayName.lastIndexOf('_display');
+  if (ind > -1) {
+    names.valueName = displayName.substring(0, ind);
+  }
+  return names;
+}
+
 function initColumns(sourceTable: BaSysDataTable): void {
   if (!sourceTable) {
     return;
@@ -67,7 +79,14 @@ function initColumns(sourceTable: BaSysDataTable): void {
 
   columns.value = [];
   sourceTable.columns.forEach((column: BaSysDataTableColumn): void => {
-    columns.value.push({ name: column.name });
+    if (!sourceTable.getColumn(`${column.name}_display`)) {
+      const names = parseDisplayName(column.name);
+      if (names.valueName) {
+        columns.value.push({ name: column.name, title: names.valueName });
+      } else {
+        columns.value.push({ name: column.name, title: column.name });
+      }
+    }
   });
 
   console.log('columns pick up', columns.value);
@@ -154,7 +173,7 @@ onMounted(() => {
          v-for="col of columns"
          :key="col.name"
          :field="col.name"
-         :header="col.name">
+         :header="col.title">
          <template #body="{ data, field }">
              {{ formatValue(data, field) }}
          </template>
