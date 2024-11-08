@@ -1,9 +1,12 @@
+import PickUpColumnSettings from './pickUpColumnSettings';
+
 export default class PickUpSettings {
   title: string;
   width: string;
   height: string;
   rowsPerPage: number;
   rowsPerPageSource: number[];
+  columns: PickUpColumnSettings[];
 
   constructor(param: any) {
     let data: any = {};
@@ -21,6 +24,13 @@ export default class PickUpSettings {
       this.rowsPerPageSource = data.rowsPerPageSource;
     } else {
       this.rowsPerPageSource = [10, 20, 50, 100, 500];
+    }
+
+    this.columns = [];
+    if (data.columns) {
+      data.columns.forEach((column: any) => {
+        this.columns.push(new PickUpColumnSettings(column));
+      });
     }
   }
 }

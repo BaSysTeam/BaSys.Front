@@ -23,6 +23,7 @@ import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 import SelectItem from '@/models/selectItem';
+import PickUpSettings from '@/models/pickUpSettings';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
@@ -43,6 +44,7 @@ const toastHelper = new ToastHelper(useToast());
 let objectEvaluator: ObjectEvaluator;
 let pickUpDataTable: BaSysDataTable;
 let pickUpTableName: string;
+let pickUpSettings: PickUpSettings | null;
 
 // Props
 const props = defineProps({
@@ -152,10 +154,15 @@ function closeTrigger(): void {
   emit('closeTrigger');
 }
 
-function openPickUp(source: BaSysDataTable, destination: string): void {
+function openPickUp(
+  source: BaSysDataTable,
+  destination: string,
+  settings: PickUpSettings | null = null,
+): void {
   isPickUpOpen.value = true;
   pickUpDataTable = source;
   pickUpTableName = destination;
+  pickUpSettings = settings;
 }
 
 function initColumns(): void {
@@ -764,6 +771,7 @@ onBeforeUnmount(() => {
   <DataObjectPickUpDialog v-if="isPickUpOpen"
                           :data-table="pickUpDataTable"
                           :table-name="pickUpTableName"
+                          :settings="pickUpSettings"
                           @close="onPickUpClose"
                           @add="onPickUpAdd"
                           @fill="onPickUpFill"></DataObjectPickUpDialog>

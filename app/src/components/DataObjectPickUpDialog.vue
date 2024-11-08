@@ -12,6 +12,7 @@ import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { Guid } from 'guid-typescript';
+import PickUpSettings from '@/models/pickUpSettings';
 import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
 import BaSysDataTableColumn from '../../../shared/src/evalEngine/dataTableColumn';
 
@@ -23,6 +24,7 @@ const confirmVue = useConfirm();
 // Props
 const props = defineProps({
   dataTable: { type: Object as PropType<BaSysDataTable>, required: true },
+  settings: { type: Object as PropType<PickUpSettings>, required: false },
   tableName: { type: String, required: true },
 });
 
@@ -35,12 +37,23 @@ const emit = defineEmits(
   },
 );
 
+// Defaults
+const defaultDialogWidth = '80%';
+const defaultDialogHeight = '80%';
+const defaultRowsPerPage = 10;
+const defaultRowsPerPageSource = [10, 20, 50, 100];
+
 // Data
 const formTitle = ref<string>(t('pickUp'));
 const rows = ref<any[]>([]);
 const columns = ref<any[]>([]);
 const selection = ref<any[]>([]);
-const windowHeight = ref(window.innerHeight);
+const dialogWidth = ref(defaultDialogWidth);
+const dialogHeight = ref(defaultDialogHeight);
+const rowsPerPage = ref(defaultRowsPerPage);
+const rowsPerPageSource = ref<number[]>(defaultRowsPerPageSource);
+const dialogStyle = computed(() => ({ width: dialogWidth.value }));
+const contentStyle = computed(() => ({ height: dialogHeight.value }));
 
 // Methods
 function updateVisible(value: boolean): void {
@@ -53,10 +66,6 @@ function dataTableStyle(): any {
   return {
     fontSize: '14px',
   };
-}
-
-function dataTableScrollHeight(): string {
-  return `${windowHeight.value - 320}px`;
 }
 
 function parseDisplayName(displayName: string): { valueName: string, displayName: string } {
@@ -91,7 +100,7 @@ function initColumns(sourceTable: BaSysDataTable): void {
   console.log('columns pick up', columns.value);
 }
 
-function init(sourceTable: BaSysDataTable): void {
+function init(sourceTable: BaSysDataTable, settings: PickUpSettings | undefined): void {
   if (!sourceTable) {
     return;
   }
@@ -102,6 +111,14 @@ function init(sourceTable: BaSysDataTable): void {
     row._key = Guid.create().toString();
     rows.value.push(row);
   });
+
+  if (settings) {
+    formTitle.value = settings.title || t('pickUp');
+    dialogWidth.value = settings.width || defaultDialogWidth;
+    dialogHeight.value = settings.height || defaultDialogHeight;
+    rowsPerPage.value = settings.rowsPerPage || defaultRowsPerPage;
+    rowsPerPageSource.value = settings.rowsPerPageSource || defaultRowsPerPageSource;
+  }
 
   initColumns(sourceTable);
 }
@@ -122,7 +139,7 @@ function onFillClick(): void {
 watch(
   () => props.dataTable,
   (newValue) => {
-    init(newValue);
+    init(newValue, props.settings);
   },
   {
     immediate: true,
@@ -135,7 +152,7 @@ function onCloseClick(): void {
 
 // Life cycle hooks
 onMounted(() => {
-  init(props.dataTable);
+  init(props.dataTable, props.settings);
 });
 
 </script>
@@ -149,8 +166,8 @@ onMounted(() => {
     :header="formTitle"
     :visible="true"
     :draggable="false"
-    :style="{width: '80%'}"
-    :contentStyle="{ height: '500px' }"
+    :style="dialogStyle"
+    :contentStyle="contentStyle"
     @update:visible="updateVisible">
     <div>
      <DataTable
@@ -160,8 +177,8 @@ onMounted(() => {
        :style="dataTableStyle()"
        scroll-height="flex"
        :metaKeySelection="true"
-       :rows="10"
-       :rowsPerPageOptions="[10, 20, 50, 100, 500]"
+       :rows="rowsPerPage"
+       :rowsPerPageOptions="rowsPerPageSource"
        paginator
        showGridlines
        scrollable
