@@ -103,12 +103,21 @@ function initColumns(sourceTable: BaSysDataTable, settings: PickUpSettings | und
     // Init columns by settings.
 
     settings.columns.forEach((columnSettings: PickUpColumnSettings): void => {
-      const newColumn = { name: columnSettings.name, title: columnSettings.title };
+      const newColumn = {
+        name: columnSettings.name,
+        title: columnSettings.title,
+        style: { width: 'auto', minWidth: 'auto', maxWidth: 'auto' },
+      };
+
+      if (columnSettings.width) {
+        newColumn.style.width = columnSettings.width;
+        newColumn.style.minWidth = columnSettings.width;
+        newColumn.style.maxWidth = columnSettings.width;
+      }
+
       columns.value.push(newColumn);
     });
   }
-
-  console.log('columns pick up', columns.value);
 }
 
 function init(sourceTable: BaSysDataTable, settings: PickUpSettings | undefined): void {
@@ -202,7 +211,8 @@ onMounted(() => {
          v-for="col of columns"
          :key="col.name"
          :field="col.name"
-         :header="col.title">
+         :header="col.title"
+         :style="col.style">
          <template #body="{ data, field }">
              {{ formatValue(data, field) }}
          </template>
