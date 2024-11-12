@@ -4,8 +4,10 @@ export default class PickUpColumnSettings {
   uid: string;
   name: string;
   title: string;
-  width: string;
   dataType: string;
+  style: any;
+  isBoolean: boolean;
+  isNumber: boolean;
 
   constructor(param: any) {
     let data: any = {};
@@ -16,7 +18,17 @@ export default class PickUpColumnSettings {
     this.uid = data.uid || Guid.create().toString();
     this.name = data.name || '';
     this.title = data.title || '';
-    this.width = data.width || '';
     this.dataType = data.dataType || '';
+
+    this.style = { width: 'auto', minWidth: 'auto', maxWidth: 'auto' };
+
+    if (data.width) {
+      this.style.width = data.width;
+      this.style.minWidth = data.width;
+      this.style.maxWidth = data.width;
+    }
+
+    this.isBoolean = this.dataType === 'boolean';
+    this.isNumber = this.dataType === 'number';
   }
 }

@@ -14,7 +14,7 @@ import Column from 'primevue/column';
 import { Guid } from 'guid-typescript';
 import PickUpSettings from '@/models/pickUpSettings';
 import PickUpColumnSettings from '@/models/pickUpColumnSettings';
-import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
+import PickUpColumnSettingsViewModel from '@/models/pickUpColumnSettingsViewModel';
 import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
 import BaSysDataTableColumn from '../../../shared/src/evalEngine/dataTableColumn';
 
@@ -101,16 +101,16 @@ function initColumns(sourceTable: BaSysDataTable, settings: PickUpSettings | und
 
     sourceTable.columns.forEach((column: BaSysDataTableColumn): void => {
       if (!sourceTable.getColumn(`${column.name}_display`)) {
-        let isCheckbox = false;
+        let dataType = '';
         if (sourceTable.rows.length) {
           const firstRow = sourceTable.rows[0];
           const currentValue = firstRow[column.name];
           if (typeof currentValue === 'boolean') {
-            isCheckbox = true;
+            dataType = 'boolean';
           }
         }
 
-        const newColumn = { name: column.name, title: '', isCheckbox };
+        const newColumn = new PickUpColumnSettingsViewModel({ name: column.name, title: '', dataType });
         const names = parseDisplayName(column.name);
         if (names.valueName) {
           newColumn.title = names.valueName;
@@ -122,24 +122,12 @@ function initColumns(sourceTable: BaSysDataTable, settings: PickUpSettings | und
     });
   } else {
     // Init columns by settings.
-
     settings.columns.forEach((columnSettings: PickUpColumnSettings): void => {
-      const newColumn = {
-        name: columnSettings.name,
-        title: columnSettings.title,
-        style: { width: 'auto', minWidth: 'auto', maxWidth: 'auto' },
-        isCheckbox: columnSettings.isBoolean,
-      };
-
-      if (columnSettings.width) {
-        newColumn.style.width = columnSettings.width;
-        newColumn.style.minWidth = columnSettings.width;
-        newColumn.style.maxWidth = columnSettings.width;
-      }
-
-      columns.value.push(newColumn);
+      columns.value.push(new PickUpColumnSettingsViewModel(columnSettings));
     });
   }
+
+  console.log('columns', columns.value);
 }
 
 function init(sourceTable: BaSysDataTable, settings: PickUpSettings | undefined): void {
@@ -237,7 +225,7 @@ onMounted(() => {
          :style="col.style">
          <template #body="{ data, field }">
 
-           <template v-if="getColumn(field).isCheckbox">
+           <template v-if="getColumn(field).isBoolean">
              <span v-if="data[field]" class="pi pi-check text-primary"></span>
            </template>
            <template v-else>
