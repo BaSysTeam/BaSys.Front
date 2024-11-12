@@ -13,6 +13,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { Guid } from 'guid-typescript';
 import PickUpSettings from '@/models/pickUpSettings';
+import PickUpColumnSettings from '@/models/pickUpColumnSettings';
 import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
 import BaSysDataTableColumn from '../../../shared/src/evalEngine/dataTableColumn';
 
@@ -80,22 +81,32 @@ function parseDisplayName(displayName: string): { valueName: string, displayName
   return names;
 }
 
-function initColumns(sourceTable: BaSysDataTable): void {
+function initColumns(sourceTable: BaSysDataTable, settings: PickUpSettings | undefined): void {
   if (!sourceTable) {
     return;
   }
 
   columns.value = [];
-  sourceTable.columns.forEach((column: BaSysDataTableColumn): void => {
-    if (!sourceTable.getColumn(`${column.name}_display`)) {
-      const names = parseDisplayName(column.name);
-      if (names.valueName) {
-        columns.value.push({ name: column.name, title: names.valueName });
-      } else {
-        columns.value.push({ name: column.name, title: column.name });
+  if (!settings) {
+    // Auto-init columns
+    sourceTable.columns.forEach((column: BaSysDataTableColumn): void => {
+      if (!sourceTable.getColumn(`${column.name}_display`)) {
+        const names = parseDisplayName(column.name);
+        if (names.valueName) {
+          columns.value.push({ name: column.name, title: names.valueName });
+        } else {
+          columns.value.push({ name: column.name, title: column.name });
+        }
       }
-    }
-  });
+    });
+  } else {
+    // Init columns by settings.
+
+    settings.columns.forEach((columnSettings: PickUpColumnSettings): void => {
+      const newColumn = { name: columnSettings.name, title: columnSettings.title };
+      columns.value.push(newColumn);
+    });
+  }
 
   console.log('columns pick up', columns.value);
 }
@@ -120,7 +131,7 @@ function init(sourceTable: BaSysDataTable, settings: PickUpSettings | undefined)
     rowsPerPageSource.value = settings.rowsPerPageSource || defaultRowsPerPageSource;
   }
 
-  initColumns(sourceTable);
+  initColumns(sourceTable, settings);
 }
 
 function formatValue(row: any, field: string): any {
