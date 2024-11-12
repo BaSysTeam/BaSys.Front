@@ -14,6 +14,7 @@ import Column from 'primevue/column';
 import { Guid } from 'guid-typescript';
 import PickUpSettings from '@/models/pickUpSettings';
 import PickUpColumnSettings from '@/models/pickUpColumnSettings';
+import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
 import BaSysDataTableColumn from '../../../shared/src/evalEngine/dataTableColumn';
 
@@ -69,6 +70,14 @@ function dataTableStyle(): any {
   };
 }
 
+function getColumn(name: string): any {
+  let column = columns.value.find((x) => x.name === name);
+  if (!column) {
+    column = { name: 'unknown', title: 'unknown', isCheckbox: false };
+  }
+  return column;
+}
+
 function parseDisplayName(displayName: string): { valueName: string, displayName: string } {
   const names = {
     valueName: '',
@@ -89,14 +98,26 @@ function initColumns(sourceTable: BaSysDataTable, settings: PickUpSettings | und
   columns.value = [];
   if (!settings) {
     // Auto-init columns
+
     sourceTable.columns.forEach((column: BaSysDataTableColumn): void => {
       if (!sourceTable.getColumn(`${column.name}_display`)) {
+        let isCheckbox = false;
+        if (sourceTable.rows.length) {
+          const firstRow = sourceTable.rows[0];
+          const currentValue = firstRow[column.name];
+          if (typeof currentValue === 'boolean') {
+            isCheckbox = true;
+          }
+        }
+
+        const newColumn = { name: column.name, title: '', isCheckbox };
         const names = parseDisplayName(column.name);
         if (names.valueName) {
-          columns.value.push({ name: column.name, title: names.valueName });
+          newColumn.title = names.valueName;
         } else {
-          columns.value.push({ name: column.name, title: column.name });
+          newColumn.title = column.name;
         }
+        columns.value.push(newColumn);
       }
     });
   } else {
@@ -107,6 +128,7 @@ function initColumns(sourceTable: BaSysDataTable, settings: PickUpSettings | und
         name: columnSettings.name,
         title: columnSettings.title,
         style: { width: 'auto', minWidth: 'auto', maxWidth: 'auto' },
+        isCheckbox: columnSettings.isBoolean,
       };
 
       if (columnSettings.width) {
@@ -214,7 +236,14 @@ onMounted(() => {
          :header="col.title"
          :style="col.style">
          <template #body="{ data, field }">
+
+           <template v-if="getColumn(field).isCheckbox">
+             <span v-if="data[field]" class="pi pi-check text-primary"></span>
+           </template>
+           <template v-else>
              {{ formatValue(data, field) }}
+           </template>
+
          </template>
 
        </Column>
