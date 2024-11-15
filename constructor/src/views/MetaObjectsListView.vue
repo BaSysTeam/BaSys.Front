@@ -154,7 +154,6 @@ async function deleteItemAsync(): Promise<void> {
 }
 
 const initFilters = ():void => {
-  console.log('init filters');
   filters.value = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     title: {
@@ -171,6 +170,8 @@ const initFilters = ():void => {
     },
     isActive: { value: null, matchMode: FilterMatchMode.EQUALS, columnDataType: 'boolean' },
   };
+
+  console.log('filters', filters.value);
 };
 
 watch(() => props.kind, async (newVal) => {
