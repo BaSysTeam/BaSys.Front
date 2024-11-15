@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
-  defineProps, defineEmits, PropType, ref, watch, onBeforeMount,
+  defineProps, defineEmits, PropType, ref,
+  onBeforeUnmount, onMounted,
 } from 'vue';
 import { Guid } from 'guid-typescript';
 import { useConfirm } from 'primevue/useconfirm';
@@ -32,8 +33,15 @@ const emit = defineEmits({ change: () => true });
 
 // Data
 const selectedItem:any = ref(null);
+const windowHeight = ref(window.innerHeight);
 
 // Methods
+function listStyle(): any {
+  return {
+    height: `${windowHeight.value - 200}px`,
+  };
+}
+
 function buildCommandTitle(command: MetaObjectCommand): string {
   const table = props.settings.getTable(command.tableUid);
 
@@ -98,7 +106,18 @@ function onChange(): void {
   emit('change');
 }
 
+function onResize(): void {
+  windowHeight.value = window.innerHeight;
+}
+
 // Life cycle events
+onMounted(() => {
+  window.addEventListener('resize', onResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize); // Clean up on unmount
+});
 
 </script>
 
@@ -146,6 +165,7 @@ function onChange(): void {
     <Listbox v-if="settings"
              v-model="selectedItem"
              :options="settings.commands"
+             :list-style="listStyle()"
              option-label="title">
       <template #option="{option, index}">
         <div>

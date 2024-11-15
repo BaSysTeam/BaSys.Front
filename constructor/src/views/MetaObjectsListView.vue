@@ -133,7 +133,6 @@ function navigateToCopy(): void {
 }
 
 async function deleteItemAsync(): Promise<void> {
-  console.log('Delete item async');
   const metaObject = selectedRow.value as MetaObject;
   const response = await provider.deleteAsync(props.kind, metaObject.name);
   if (response.isOK) {
@@ -170,8 +169,6 @@ const initFilters = ():void => {
     },
     isActive: { value: null, matchMode: FilterMatchMode.EQUALS, columnDataType: 'boolean' },
   };
-
-  console.log('filters', filters.value);
 };
 
 watch(() => props.kind, async (newVal) => {
