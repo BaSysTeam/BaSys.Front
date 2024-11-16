@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   defineProps, defineEmits, PropType, ref,
-  onBeforeUnmount, onMounted,
+  onBeforeUnmount, onMounted, onBeforeMount,
 } from 'vue';
 import { Guid } from 'guid-typescript';
 import { useConfirm } from 'primevue/useconfirm';
@@ -9,6 +9,7 @@ import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
 import Toolbar from 'primevue/toolbar';
 import Listbox from 'primevue/listbox';
+import SplitButton from 'primevue/splitbutton';
 import Badge from 'primevue/badge';
 import CommandPropertiesPanel
   from '@/components/metaObjectEditComponents/CommandPropertiesPanel.vue';
@@ -34,6 +35,7 @@ const emit = defineEmits({ change: () => true });
 // Data
 const selectedItem:any = ref(null);
 const windowHeight = ref(window.innerHeight);
+const addCommandItems = ref<any[]>([]);
 
 // Methods
 function listStyle(): any {
@@ -53,8 +55,8 @@ function buildCommandTitle(command: MetaObjectCommand): string {
 }
 
 // Event handlers
-function onAddClick(): void {
-  const newCommand = props.settings.newCommand(null);
+function onAddClick(kind: number): void {
+  const newCommand = props.settings.newCommand(kind);
   newCommand.title = `${t('command')} ${props.settings.commands.length}`;
   selectedItem.value = newCommand;
 
@@ -111,6 +113,23 @@ function onResize(): void {
 }
 
 // Life cycle events
+onBeforeMount(() => {
+  addCommandItems.value = [
+    {
+      label: t('customCommand'),
+      command: () => onAddClick(0),
+    },
+    {
+      label: t('fill'),
+      command: () => onAddClick(1),
+    },
+    {
+      label: t('pickUp'),
+      command: () => onAddClick(2),
+    },
+  ];
+});
+
 onMounted(() => {
   window.addEventListener('resize', onResize);
 });
@@ -127,12 +146,21 @@ onBeforeUnmount(() => {
     <!--List command panel-->
     <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
       <template #start>
-        <Button icon="pi pi-plus"
-                v-tooltip.top="$t('add')"
-                severity="primary"
-                size="small"
-                text
-                @click="onAddClick" />
+        <SplitButton
+          v-tooltip.top="$t('add')"
+          icon = "pi pi-plus"
+          severity="primary"
+          size="small"
+          class="ml-1"
+          outlined
+          :model="addCommandItems"
+        />
+<!--        <Button icon="pi pi-plus"-->
+<!--                v-tooltip.top="$t('add')"-->
+<!--                severity="primary"-->
+<!--                size="small"-->
+<!--                text-->
+<!--                @click="onAddClick" />-->
         <Button icon="pi pi-copy"
                 v-tooltip.top="$t('copy')"
                 severity="primary"

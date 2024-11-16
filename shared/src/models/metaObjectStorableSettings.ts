@@ -1,4 +1,6 @@
 import { Guid } from 'guid-typescript';
+import MetaObjectCommandParameter from './metaObjectCommandParameter';
+import { DbType } from '../enums/dbTypes';
 import MetaObjectTableColumn from './metaObjectTableColumn';
 import DataTypeDefaults from '../dataProviders/dataTypeDefaults';
 import MetaObjectTable from './metaObjectTable';
@@ -134,8 +136,25 @@ export default class MetaObjectStorableSettings {
     return newTable;
   }
 
-  newCommand(params: any): MetaObjectCommand {
-    const command = new MetaObjectCommand(params);
+  newCommand(kind: number): MetaObjectCommand {
+    const data: any = { kind, parameters: [] };
+    const dsParameter = new MetaObjectCommandParameter({ name: 'data_source', value: '' });
+    const clearParameter = new MetaObjectCommandParameter(
+      { name: 'clear', value: 'false', dbType: DbType.Boolean },
+    );
+    switch (kind) {
+      case 1:
+        data.parameters.push(dsParameter);
+        data.parameters.push(clearParameter);
+        break;
+      case 2:
+        data.parameters.push(dsParameter);
+        break;
+      default:
+        break;
+    }
+
+    const command = new MetaObjectCommand(data);
     this.commands.push(command);
 
     return command;

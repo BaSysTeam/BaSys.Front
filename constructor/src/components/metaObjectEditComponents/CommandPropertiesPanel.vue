@@ -34,6 +34,7 @@ const props = defineProps({
 
 // Data
 const isExpressionDialogOpen = ref<boolean>(false);
+const commandKinds = ref<any[]>([]);
 
 // Emits
 const emit = defineEmits({ change: () => true });
@@ -57,6 +58,13 @@ function onExpressionDialogSave(expression: string): void {
   emit('change');
 }
 
+// Life cycle hooks
+onBeforeMount(() => {
+  commandKinds.value.push({ value: 0, title: t('customCommand') });
+  commandKinds.value.push({ value: 1, title: t('fill') });
+  commandKinds.value.push({ value: 2, title: t('pickUp') });
+});
+
 </script>
 
 <template>
@@ -64,6 +72,23 @@ function onExpressionDialogSave(expression: string): void {
     <AccordionTab :header="$t('command')">
       <div class="grid">
         <div class="col-12">
+
+          <!-- Kind -->
+          <FieldGridComponent :title="$t('kind')"
+                              label-for="command-table-kind"
+                              :required="true">
+
+            <Dropdown id="command-table-kind"
+                      size="small"
+                      class="w-full"
+                      disabled
+                      :options="commandKinds"
+                      option-label="title"
+                      option-value="value"
+                      v-model="command.kind"
+                      @change="onChange"></Dropdown>
+
+          </FieldGridComponent>
 
           <!-- TableUid -->
           <FieldGridComponent :title="$t('for')"
