@@ -14,7 +14,9 @@ import Textarea from 'primevue/textarea';
 import InputSwitch from 'primevue/inputswitch';
 import FormulaEditDialog from '@/components/metaObjectEditComponents/FormulaEditDialog.vue';
 import MetaObjectCommand from '../../../../shared/src/models/metaObjectCommand';
+import CommandExpressionBuilder from '../../../../shared/src/evalEngine/commandExpressionBuilder';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
+import { MetaObjectCommandParameterNames as ParamNames } from '../../../../shared/src/models/metaObjectCommandParameterNames';
 
 // Infrastructure
 const confirmVue = useConfirm();
@@ -35,26 +37,113 @@ const props = defineProps({
 // Data
 const isExpressionDialogOpen = ref<boolean>(false);
 const commandKinds = ref<any[]>([]);
+const dataSource = ref<string>('');
+const fillClearFlag = ref(false);
+const formulaEditName = ref<string>();
+const formulaEditExpression = ref<string>('');
+const formulaEditTitle = ref<string>('');
 
 // Emits
 const emit = defineEmits({ change: () => true });
 
+// Methods
+function init(command: MetaObjectCommand): void {
+  switch (command.kind) {
+    case 1:
+      dataSource.value = command.getParameterValue(ParamNames.DATA_SOURCE);
+      fillClearFlag.value = command.getParameterValue(ParamNames.CLEAR) === 'true';
+      break;
+    case 2:
+      dataSource.value = command.getParameterValue(ParamNames.DATA_SOURCE);
+      break;
+    default:
+      break;
+  }
+}
+
 // Event handlers
+watch(
+  () => props.command,
+  (newValue) => { init(newValue); },
+);
+
 function onChange(): void {
   emit('change');
 }
 
 function onExpressionEditClick(): void {
   isExpressionDialogOpen.value = true;
+  formulaEditExpression.value = props.command.expression;
+  formulaEditTitle.value = props.command.title;
+  formulaEditName.value = 'expression';
 }
 
 function onExpressionDialogClose(): void {
   isExpressionDialogOpen.value = false;
 }
 
-function onExpressionDialogSave(expression: string): void {
+function onDataSourceEditClick(): void {
+  isExpressionDialogOpen.value = true;
+  formulaEditExpression.value = dataSource.value;
+  formulaEditTitle.value = t('dataSource');
+  formulaEditName.value = 'dataSource';
+}
+
+function onConvertToCodeClick(): void {
+  const table = props.settings.getTable(props.command.tableUid);
+  if (!table) {
+    console.error(`ConvertToCode.Cannot find table by uid: ${props.command.tableUid}`);
+    return;
+  }
+
+  switch (props.command.kind) {
+    case 1:
+      props.command.kind = 0;
+      props.command.expression = CommandExpressionBuilder.BuildFillCommandExpression(
+        dataSource.value,
+        table.name,
+        fillClearFlag.value,
+      );
+      emit('change');
+      break;
+    case 2:
+      props.command.kind = 0;
+      props.command.expression = CommandExpressionBuilder.BuildPickUpCommandExpression(
+        dataSource.value,
+        table.name,
+      );
+      emit('change');
+      break;
+    default:
+      break;
+  }
+}
+
+function onDataSourceChange(): void {
+  props.command.setParameterValue(ParamNames.DATA_SOURCE, dataSource.value);
+  emit('change');
+}
+
+function onExpressionDialogSave(expression: string, fieldName: string): void {
   isExpressionDialogOpen.value = false;
-  props.command.expression = expression;
+
+  switch (fieldName) {
+    case 'expression':
+      props.command.expression = expression;
+      break;
+    case 'dataSource':
+      dataSource.value = expression;
+      onDataSourceChange();
+      break;
+    default:
+      break;
+  }
+
+  emit('change');
+}
+
+function onClearFlagChange(): void {
+  props.command.setParameterValue(ParamNames.CLEAR, fillClearFlag.value.toString());
   emit('change');
 }
 
@@ -63,6 +152,8 @@ onBeforeMount(() => {
   commandKinds.value.push({ value: 0, title: t('customCommand') });
   commandKinds.value.push({ value: 1, title: t('fill') });
   commandKinds.value.push({ value: 2, title: t('pickUp') });
+
+  init(props.command);
 });
 
 </script>
@@ -155,7 +246,8 @@ onBeforeMount(() => {
         </div>
       </div>
     </AccordionTab>
-    <AccordionTab :header="$t('expression')">
+    <!-- Expression tab -->
+    <AccordionTab :header="$t('expression')" v-if="command.kind == 0">
       <div class="grid">
         <div class="col-12">
           <Button :label="$t('edit')"
@@ -176,10 +268,50 @@ onBeforeMount(() => {
         </div>
       </div>
     </AccordionTab>
+    <!-- Data source tab -->
+    <AccordionTab :header="$t('dataSource')" v-if="command.kind == 1 || command.kind == 2">
+      <div class="grid">
+        <div class="col-12">
+          <Button :label="$t('edit')"
+                  icon="pi pi-pencil" size="small"
+                  outlined
+                  @click="onDataSourceEditClick"></Button>
+
+          <Button :label="$t('convertToCode')"
+                  class="ml-1"
+                  icon="pi pi-code" size="small"
+                  outlined
+                  @click="onConvertToCodeClick"></Button>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="col-12">
+           <Textarea id="command-expression"
+                     size="small"
+                     autocomplete="off"
+                     class="w-full"
+                     rows="5"
+                     v-model="dataSource"
+                     @change="onDataSourceChange"></Textarea>
+        </div>
+      </div>
+      <div class="grid" v-if="command.kind == 1">
+        <div class="col-12">
+          <!-- Clear flag -->
+          <FieldGridComponent :title="$t('clear')"
+                              label-for="command-clear-flag">
+            <InputSwitch id="command-clear-flag"
+                         v-model="fillClearFlag"
+                         @change="onClearFlagChange"></InputSwitch>
+          </FieldGridComponent>
+        </div>
+      </div>
+    </AccordionTab>
   </Accordion>
 
-  <FormulaEditDialog :title="command.title"
-                     :expression="command.expression"
+  <FormulaEditDialog :title="formulaEditTitle"
+                     :expression="formulaEditExpression"
+                     :name="formulaEditName"
                      v-if="isExpressionDialogOpen"
                      @close="onExpressionDialogClose"
                      @save="onExpressionDialogSave"></FormulaEditDialog>

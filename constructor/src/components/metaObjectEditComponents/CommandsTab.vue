@@ -67,10 +67,13 @@ function onCopyClick(): void {
   if (!selectedItem.value) {
     return;
   }
-  const copyCommand = props.settings.newCommand(selectedItem.value);
+  const copyCommand = new MetaObjectCommand(selectedItem.value);
   copyCommand.uid = Guid.create().toString();
   copyCommand.name = '';
-  copyCommand.title = `${t('copy')} - ${selectedItem.value.title}`;
+  copyCommand.title = `${t('copyNoun')} - ${selectedItem.value.title}`;
+  props.settings.commands.push(copyCommand);
+
+  selectedItem.value = copyCommand;
 
   emit('change');
 }

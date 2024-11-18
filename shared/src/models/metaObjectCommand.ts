@@ -34,4 +34,20 @@ export default class MetaObjectCommand {
       });
     }
   }
+
+  setParameterValue(name: string, value: string): void {
+    const parameter = this.parameters.find((param: any) => param.name === name);
+    if (parameter) {
+      parameter.value = value;
+    }
+  }
+
+  getParameterValue(name: string): string {
+    const parameter = this.parameters.find((param: any) => param.name === name);
+    if (parameter) {
+      return parameter.value;
+    }
+
+    return '';
+  }
 }

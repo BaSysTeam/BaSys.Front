@@ -5,6 +5,7 @@ import MetaObjectTableColumn from './metaObjectTableColumn';
 import DataTypeDefaults from '../dataProviders/dataTypeDefaults';
 import MetaObjectTable from './metaObjectTable';
 import MetaObjectCommand from './metaObjectCommand';
+import { MetaObjectCommandParameterNames as ParamNames } from './metaObjectCommandParameterNames';
 
 export default class MetaObjectStorableSettings {
   uid:string;
@@ -138,9 +139,9 @@ export default class MetaObjectStorableSettings {
 
   newCommand(kind: number): MetaObjectCommand {
     const data: any = { kind, parameters: [] };
-    const dsParameter = new MetaObjectCommandParameter({ name: 'data_source', value: '' });
+    const dsParameter = new MetaObjectCommandParameter({ name: ParamNames.DATA_SOURCE, value: '' });
     const clearParameter = new MetaObjectCommandParameter(
-      { name: 'clear', value: 'false', dbType: DbType.Boolean },
+      { name: ParamNames.CLEAR, value: 'false', dbType: DbType.Boolean },
     );
     switch (kind) {
       case 1:

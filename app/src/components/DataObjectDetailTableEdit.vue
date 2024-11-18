@@ -32,8 +32,10 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import { MetaObjectCommandParameterNames } from '../../../shared/src/models/metaObjectCommandParameterNames';
 import ObjectEvaluator from '../evalEngine/objectEvaluator';
 import CommandProcessor from '../../../shared/src/evalEngine/commandProcessor';
+import CommandExpressionBuilder from '../../../shared/src/evalEngine/commandExpressionBuilder';
 import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
 
 // Infrastructure
@@ -359,7 +361,28 @@ async function executeTableCommandAsync(command: MetaObjectCommand): Promise<voi
     additionalFunctions,
     props.logger,
   );
-  await commandProcessor.executeAsync(command.expression);
+
+  let commandExpression = '';
+  switch (command.kind) {
+    case 1:
+      commandExpression = CommandExpressionBuilder.BuildFillCommandExpression(
+        command.getParameterValue(MetaObjectCommandParameterNames.DATA_SOURCE),
+        props.table.name,
+        command.getParameterValue(MetaObjectCommandParameterNames.CLEAR) === 'true',
+      );
+      break;
+    case 2:
+      commandExpression = CommandExpressionBuilder.BuildPickUpCommandExpression(
+        command.getParameterValue(MetaObjectCommandParameterNames.DATA_SOURCE),
+        props.table.name,
+      );
+      break;
+    default:
+      commandExpression = command.expression;
+      break;
+  }
+
+  await commandProcessor.executeAsync(commandExpression);
 
   if (commandProcessor.error) {
     const message = `Command "${command.title}" error: ${commandProcessor.error}`;
