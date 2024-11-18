@@ -89,7 +89,7 @@ function onDataSourceEditClick(): void {
   formulaEditName.value = 'dataSource';
 }
 
-function onConvertToCodeClick(): void {
+function convertToCode(): void {
   const table = props.settings.getTable(props.command.tableUid);
   if (!table) {
     console.error(`ConvertToCode.Cannot find table by uid: ${props.command.tableUid}`);
@@ -117,6 +117,19 @@ function onConvertToCodeClick(): void {
     default:
       break;
   }
+}
+
+function onConvertToCodeClick(): void {
+  confirmVue.require({
+    message: `${t('convertToCode')}?`,
+    header: t('confirmation'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('convert'),
+    accept: () => { convertToCode(); },
+  });
 }
 
 function onDataSourceChange(): void {

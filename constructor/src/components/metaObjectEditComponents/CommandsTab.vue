@@ -79,12 +79,20 @@ function onCopyClick(): void {
 }
 
 function onDeleteClick(): void {
-  console.log('onDeleteClick');
-
   if (!selectedItem.value) {
     return;
   }
-  props.settings.deleteCommand(selectedItem.value);
+
+  confirmVue.require({
+    message: t('deleteCommandQuestion'),
+    header: t('confirmation'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('delete'),
+    accept: () => { props.settings.deleteCommand(selectedItem.value); },
+  });
 
   emit('change');
 }
