@@ -29,7 +29,7 @@ const props = defineProps({
     type: Object as PropType<MenuSettingsLinkItem>,
   },
   kindsSource: {
-    type: Object as PropType<MetaObjectKind>,
+    type: Object as PropType<MetaObjectKind[]>,
   },
 });
 
@@ -40,7 +40,7 @@ const { t } = useI18n({ useScope: 'global' });
 const groupKindOptions = ref<any[]>([]);
 const itemKindOptions = ref<any[]>([]);
 const windowHeight = ref(window.innerHeight);
-const containerStyle = computed(() => ({
+const containerStyle = computed(():any => ({
   height: `${windowHeight.value - 150}px`,
   overflowY: 'auto',
 }));

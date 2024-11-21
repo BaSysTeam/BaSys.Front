@@ -133,7 +133,6 @@ function navigateToCopy(): void {
 }
 
 async function deleteItemAsync(): Promise<void> {
-  console.log('Delete item async');
   const metaObject = selectedRow.value as MetaObject;
   const response = await provider.deleteAsync(props.kind, metaObject.name);
   if (response.isOK) {
@@ -154,7 +153,6 @@ async function deleteItemAsync(): Promise<void> {
 }
 
 const initFilters = ():void => {
-  console.log('init filters');
   filters.value = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     title: {

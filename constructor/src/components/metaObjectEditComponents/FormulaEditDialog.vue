@@ -17,6 +17,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  name: {
+    type: String,
+    required: false,
+  },
   title: {
     type: String,
     required: true,
@@ -38,7 +42,7 @@ const codemirrorStyle = computed(() => ({
 const emit = defineEmits(
   {
     close: () => true,
-    save: (value: string) => true,
+    save: (value: string, name: string | undefined) => true,
   },
 );
 
@@ -47,7 +51,7 @@ function onCloseClick(): void {
 }
 
 function onSaveClick(): void {
-  emit('save', expressionValue.value);
+  emit('save', expressionValue.value, props.name);
 }
 
 function onEditorInput(): void {

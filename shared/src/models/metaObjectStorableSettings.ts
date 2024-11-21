@@ -1,7 +1,11 @@
 import { Guid } from 'guid-typescript';
+import MetaObjectCommandParameter from './metaObjectCommandParameter';
+import { DbType } from '../enums/dbTypes';
 import MetaObjectTableColumn from './metaObjectTableColumn';
 import DataTypeDefaults from '../dataProviders/dataTypeDefaults';
 import MetaObjectTable from './metaObjectTable';
+import MetaObjectCommand from './metaObjectCommand';
+import { MetaObjectCommandParameterNames as ParamNames } from './metaObjectCommandParameterNames';
 
 export default class MetaObjectStorableSettings {
   uid:string;
@@ -15,6 +19,7 @@ export default class MetaObjectStorableSettings {
   isActive:boolean;
   header: MetaObjectTable;
   detailTables: Array<MetaObjectTable>
+  commands:Array<MetaObjectCommand>
 
   constructor(params: any) {
     let data: any = {};
@@ -35,10 +40,24 @@ export default class MetaObjectStorableSettings {
 
     this.detailTables = data.detailTables
       ? data.detailTables.map((item: any) => new MetaObjectTable(item)) : [];
+
+    this.commands = [];
+    if (data.commands) {
+      data.commands.forEach((item: any) => this.commands.push(new MetaObjectCommand(item)));
+    }
   }
 
   get isNew():boolean {
     return !this.uid;
+  }
+
+  get allTables(): MetaObjectTable[] {
+    const collection = [];
+
+    collection.push(this.header);
+    this.detailTables.forEach((table) => { collection.push(table); });
+
+    return collection;
   }
 
   newDetailTable(objectPrimaryKeyDataTypeUid: string): MetaObjectTable {
@@ -85,11 +104,11 @@ export default class MetaObjectStorableSettings {
   }
 
   getTable(uid: string): MetaObjectTable | undefined {
-    return this.detailTables.find((x) => x.uid === uid);
+    return this.allTables.find((x) => x.uid === uid);
   }
 
   getTableByName(name: string): MetaObjectTable | undefined {
-    return this.detailTables.find((x) => x.name === name);
+    return this.allTables.find((x) => x.name === name);
   }
 
   deleteDetailsTable(uid: string): void {
@@ -116,5 +135,36 @@ export default class MetaObjectStorableSettings {
     this.detailTables.push(newTable);
 
     return newTable;
+  }
+
+  newCommand(kind: number): MetaObjectCommand {
+    const data: any = { kind, parameters: [] };
+    const dsParameter = new MetaObjectCommandParameter({ name: ParamNames.DATA_SOURCE, value: '' });
+    const clearParameter = new MetaObjectCommandParameter(
+      { name: ParamNames.CLEAR, value: 'false', dbType: DbType.Boolean },
+    );
+    switch (kind) {
+      case 1:
+        data.parameters.push(dsParameter);
+        data.parameters.push(clearParameter);
+        break;
+      case 2:
+        data.parameters.push(dsParameter);
+        break;
+      default:
+        break;
+    }
+
+    const command = new MetaObjectCommand(data);
+    this.commands.push(command);
+
+    return command;
+  }
+
+  deleteCommand(command: MetaObjectCommand): void {
+    const ind = this.commands.indexOf(command);
+    if (ind > -1) {
+      this.commands.splice(ind, 1);
+    }
   }
 }

@@ -57,4 +57,11 @@ export default class ExpressionHelper {
   static prepareAsyncExpression(expression: string): string {
     return ExpressionHelper.addAsyncWrapper(ExpressionHelper.addReturnStatement(expression));
   }
+
+  static buildExecuteDataSourceFunction(dataSource: string): string {
+    const expression = `async function executeDataSource(){
+    ${ExpressionHelper.addReturnStatement(dataSource)}
+    }`;
+    return expression;
+  }
 }

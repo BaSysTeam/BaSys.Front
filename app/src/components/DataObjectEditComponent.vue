@@ -208,6 +208,26 @@ export default class DataObjectEditComponent extends Vue {
     this.isModifiedChanged(true);
   }
 
+  onIsModifiedChanged(args: boolean): void {
+    this.isModifiedChanged(args);
+  }
+
+  onIsWaitingChanged(args: boolean): void {
+    this.isWaitingChanged(args);
+  }
+
+  onSaveTriggered(): void {
+    this.save();
+  }
+
+  async onRefreshTriggered(): Promise<void> {
+    await this.init();
+  }
+
+  onCloseTriggered(): void {
+    this.closeTrigger();
+  }
+
   public triggerSaveClick(): void {
     this.save();
   }
@@ -238,6 +258,11 @@ export default class DataObjectEditComponent extends Vue {
     return result;
   }
 
+  @Emit('closeTrigger')
+  closeTrigger(): void {
+    console.log('Close trigger');
+  }
+
   onTableIsModifiedChanged(args: boolean): void {
     this.isModifiedChanged(args);
   }
@@ -256,7 +281,11 @@ export default class DataObjectEditComponent extends Vue {
                                   :logger="logger"
                                   :is-primary-key-enabled="isPrimaryKeyEnabled"
                                   :render-place="renderPlace"
-                                  @is-modified-changed="onHeaderFieldChange">
+                                  @is-modified-changed="onIsModifiedChanged"
+                                  @is-waiting-changed="onIsWaitingChanged"
+                                  @save-trigger="onSaveTriggered"
+                                  @refresh-trigger="onRefreshTriggered"
+                                  @close-trigger="onCloseTriggered">
             </DataObjectHeaderEdit>
 
           </TabPanel>
@@ -271,7 +300,11 @@ export default class DataObjectEditComponent extends Vue {
                                        :data-object="model.item"
                                        :meta-object-settings="model.metaObjectSettings"
                                        :data-types="model.dataTypes"
-                                       @is-modified-changed="onTableIsModifiedChanged">
+                                       @is-modified-changed="onTableIsModifiedChanged"
+                                       @is-waiting-changed="onIsWaitingChanged"
+                                       @save-trigger="onSaveTriggered"
+                                       @refresh-trigger="onRefreshTriggered"
+                                       @close-trigger="onCloseTriggered">
             </DataObjectDetailTableEdit>
           </TabPanel>
         </TabView>
@@ -285,27 +318,14 @@ export default class DataObjectEditComponent extends Vue {
                           :logger="logger"
                           :is-primary-key-enabled="isPrimaryKeyEnabled"
                           :render-place="renderPlace"
-                          @is-modified-changed="onHeaderFieldChange"></DataObjectHeaderEdit>
+                          @is-modified-changed="onIsModifiedChanged"
+                          @is-waiting-changed="onIsWaitingChanged"
+                          @save-trigger="onSaveTriggered"
+                          @refresh-trigger="onRefreshTriggered"
+                          @close-trigger="onCloseTriggered"></DataObjectHeaderEdit>
 
 </template>
 
 <style scoped>
-/*
-.bs-tabview-bottom .p-tabview-nav {
-  order: 2;
-}
 
-.bs-tabview-bottom .p-tabview-panels {
-  order: 1;
-}
-
-.bs-tabview-bottom .p-tabview {
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-.bs-tabview-bottom .p-tabview /deep/ .p-tabview-nav {
-  border-top: 1px solid #ececec !important;
-}
-*/
 </style>

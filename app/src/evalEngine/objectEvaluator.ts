@@ -6,7 +6,6 @@ import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import MetaObjectTable from '../../../shared/src/models/metaObjectTable';
 import MetaObjectTableColumn from '../../../shared/src/models/metaObjectTableColumn';
-import DependencyInfo from '../../../shared/src/models/dependencyInfo';
 import ExpressionEvaluator from '../../../shared/src/evalEngine/expressionEvaluator';
 import { DependencyKinds } from '../../../shared/src/enums/dependencyKinds';
 
@@ -142,6 +141,31 @@ export default class ObjectEvaluator {
     }
 
     await this.existingDependenciesEvalAsync(evaluator);
+  }
+
+  /**
+   * Recalculates all formulas in the table.
+   * @param tableName
+   */
+  async onTableRecalculateAsync(tableName: string): Promise<void> {
+    const table = this.dataObject.tables[tableName];
+    if (!table) {
+      this.logger.logError(`Cannot find table: ${tableName}`);
+      return;
+    }
+    const tableSettings = this.settings.getTable(table.uid);
+    if (tableSettings) {
+      const evaluator = new ExpressionEvaluator(this.dataObject, this.logger);
+      for (const row of table.rows) {
+        this.dataObject.currentRow = row;
+        this.logger.logDebug(`Recalculate row #${row.row_number} in table "${table.name}"`);
+        for (const column of tableSettings.columns) {
+          await this.rowDependenciesEvalAsync(tableSettings, column, row, evaluator);
+        }
+      }
+
+      await this.existingDependenciesEvalAsync(evaluator);
+    }
   }
 
   /**

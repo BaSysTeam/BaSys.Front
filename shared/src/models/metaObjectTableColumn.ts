@@ -13,6 +13,7 @@ export default class MetaObjectTableColumn {
   primaryKey:boolean;
   required:boolean;
   unique:boolean;
+  defaultValue: string;
   isStandard:boolean;
   renderSettings:MetaObjectTableColumnRenderSettings;
   formula:string;
@@ -33,6 +34,7 @@ export default class MetaObjectTableColumn {
     this.primaryKey = data.primaryKey || false;
     this.required = data.required || false;
     this.unique = data.unique || false;
+    this.defaultValue = data.defaultValue || null;
     this.isStandard = data.isStandard || false;
 
     this.renderSettings = new MetaObjectTableColumnRenderSettings(data.renderSettings);
