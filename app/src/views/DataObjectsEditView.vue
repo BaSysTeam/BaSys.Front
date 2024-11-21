@@ -114,6 +114,10 @@ export default class DataObjectEditView extends Vue {
     this.closeAfterSave = false;
   }
 
+  onCloseTriggered(): void {
+    this.returnToList();
+  }
+
   onCalculationLogClick(): void {
     this.isCalculationLogOpen = true;
   }
@@ -233,7 +237,8 @@ export default class DataObjectEditView extends Vue {
                                  @is-modified-changed="onIsModifiedChanged"
                                  @is-waiting-changed="onIsWaitingChanged"
                                  @title-changed="onTitleChanged"
-                                 @saved="onSaved"></DataObjectEditComponent>
+                                 @saved="onSaved"
+                                 @close-trigger="onCloseTriggered"></DataObjectEditComponent>
       </div>
     </div>
   </div>

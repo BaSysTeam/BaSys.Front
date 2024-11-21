@@ -1,10 +1,11 @@
-<script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+<script setup lang="ts">
 import {
-  Prop, Watch, Emit, Ref,
-} from 'vue-property-decorator';
-import { PropType } from 'vue';
+  ref, onMounted, defineProps, PropType,
+  watch, defineEmits, nextTick, onBeforeUnmount,
+} from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
+import { Guid } from 'guid-typescript';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
@@ -13,463 +14,596 @@ import Checkbox from 'primevue/checkbox';
 import InputSwitch from 'primevue/inputswitch';
 import Calendar from 'primevue/calendar';
 import Menubar from 'primevue/menubar';
-import Button from 'primevue/button';
 import Badge from 'primevue/badge';
 import DataObject from '@/models/dataObject';
 import DataObjectDetailsTable from '@/models/dataObjectDetailsTable';
+import DataObjectPickUpDialog from '@/components/DataObjectPickUpDialog.vue';
 import DataObjectsProvider from '@/dataProviders/dataObjectsProvider';
 import SelectItemsProvider from '@/dataProviders/selectItemsProvider';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import DropdownEditor from '@/components/editors/DropdownEditor.vue';
 import SelectItem from '@/models/selectItem';
-import { Guid } from 'guid-typescript';
+import PickUpSettings from '@/models/pickUpSettings';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import DataType from '../../../shared/src/models/dataType';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
+import MetaObjectCommand from '../../../shared/src/models/metaObjectCommand';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import { MetaObjectCommandParameterNames } from '../../../shared/src/models/metaObjectCommandParameterNames';
 import ObjectEvaluator from '../evalEngine/objectEvaluator';
+import CommandProcessor from '../../../shared/src/evalEngine/commandProcessor';
+import CommandExpressionBuilder from '../../../shared/src/evalEngine/commandExpressionBuilder';
+import BaSysDataTable from '../../../shared/src/evalEngine/dataTable';
 
-@Options({
-  components:
-    {
-      DropdownEditor,
-      DataTable,
-      Column,
-      InputText,
-      InputNumber,
-      Checkbox,
-      InputSwitch,
-      Calendar,
-      Menubar,
-      Button,
-      Badge,
-    },
-})
-export default class DataObjectDetailTableEdit extends Vue {
-  // Name of metadata object kind.
-  @Prop({
-    required: true,
+// Infrastructure
+const { t } = useI18n({ useScope: 'global' });
+const provider = new DataObjectsProvider();
+const selectItemProvider = new SelectItemsProvider();
+const toastHelper = new ToastHelper(useToast());
+let objectEvaluator: ObjectEvaluator;
+let pickUpDataTable: BaSysDataTable;
+let pickUpTableName: string;
+let pickUpSettings: PickUpSettings | null;
+
+// Props
+const props = defineProps({
+  kind: {
     type: String,
-    default: '',
-  })
-  kind!: string;
-
-  // Identifier of the object.
-  @Prop({
     required: true,
+  },
+  objectUid: {
     type: String,
-    default: '',
-  })
-  objectUid!: string;
-
-  // Metadata object.
-  @Prop({
+    required: true,
+  },
+  metaObjectSettings: {
     type: Object as PropType<MetaObjectStorableSettings>,
     required: true,
-  })
-  metaObjectSettings!: MetaObjectStorableSettings;
-
-  // Data types.
-  @Prop({
+  },
+  dataTypes: {
     type: Object as PropType<DataType[]>,
     required: true,
-  })
-  dataTypes!: DataType[];
-
-  // DataObject.
-  @Prop({
+  },
+  dataObject: {
     type: Object as PropType<DataObject>,
     required: true,
-  })
-  dataObject!: DataObject;
-
-  // DetailsTable.
-  @Prop({
+  },
+  table: {
     type: Object as PropType<DataObjectDetailsTable>,
     required: true,
-  })
-  table!: DataObjectDetailsTable;
-
-  // Logger.
-  @Prop({
+  },
+  logger: {
     type: Object as PropType<InMemoryLogger>,
     required: true,
-  })
-  logger!: InMemoryLogger;
+  },
+});
 
-  @Ref()
-  dataTableRef!:any;
+// Data
+const dataTableRef = ref<any>(null);
+const tableKey = ref(0);
+const isWaiting = ref(false);
+const columns = ref<MetaObjectColumnViewModel[]>([]);
+const filters = ref<any>({});
+const selectedRecord = ref<any>({});
+const windowHeight = ref(window.innerHeight);
+const isPickUpOpen = ref<boolean>(false);
 
-  get tableRows(): any[] {
-    if (this.table != null) {
-      return this.table.rows;
-    }
-    return [];
+const inputStyle = ref<any>({
+  width: '100%',
+  fontSize: '14px',
+  borderRadius: 0,
+  padding: '5px',
+});
+
+const menuItems = ref<any[]>([]);
+const tableCommands = ref<any>({
+  label: t('actions'),
+  items: [],
+});
+
+const emit = defineEmits<{(event: 'isModifiedChanged', newValue: boolean): void;
+  (event: 'isWaitingChanged', newValue: boolean): void;
+  (event: 'saveTrigger'): void;
+  (event: 'refreshTrigger'): void;
+  (event: 'closeTrigger'): void;
+}>();
+
+// Methods
+function tableRows(): any[] {
+  if (props.table != null) {
+    return props.table.rows;
   }
+  return [];
+}
 
-  tableKey = 0;
-  isWaiting = false;
-  columns: MetaObjectColumnViewModel[] = [];
-  filters:any = {};
-  selectedRecord: any = {};
-  windowHeight = window.innerHeight;
-  provider = new DataObjectsProvider();
-  objectEvaluator: ObjectEvaluator = new ObjectEvaluator(
-    this.logger,
-    this.metaObjectSettings,
-    this.dataObject,
-  );
-
-  selectItemProvider = new SelectItemsProvider();
-  toastHelper = new ToastHelper(useToast());
-  inputStyle = {
-    width: '100%',
+function dataTableStyle(): any {
+  return {
+    height: `${windowHeight.value - 420}px`,
     fontSize: '14px',
-    borderRadius: 0,
-    padding: '5px',
   };
+}
 
-  virtualScrollerOptions = {
-    itemSize: 30,
-    delay: 0,
-    disabled: false,
-    numToleratedItems: 20,
-  };
+function dataTableScrollHeight(): string {
+  return `${windowHeight.value - 320}px`;
+}
 
-  menuItems: any[] = [];
-  vScroll: any;
+function isModifiedChanged(newValue: boolean): boolean {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.table.isModified = newValue;
+  emit('isModifiedChanged', newValue);
+  return newValue;
+}
 
-  get dataTableStyle(): object {
-    return {
-      height: `${this.windowHeight - 420}px`,
-      fontSize: '14px',
-    };
+async function recalculate(): Promise<void> {
+  await objectEvaluator.onObjectRecalculateAsync();
+}
+
+function isWaitingChanged(newValue: boolean): void {
+  emit('isWaitingChanged', newValue);
+}
+
+function saveTrigger(): void {
+  emit('saveTrigger');
+}
+
+function refreshTrigger(): void {
+  emit('refreshTrigger');
+}
+
+function closeTrigger(): void {
+  emit('closeTrigger');
+}
+
+function openPickUp(
+  source: BaSysDataTable,
+  destination: string,
+  settings: PickUpSettings | null = null,
+): void {
+  isPickUpOpen.value = true;
+  pickUpDataTable = source;
+  pickUpTableName = destination;
+  pickUpSettings = settings;
+}
+
+function initColumns(): void {
+  columns.value = [];
+  console.log('MetaObjectSettings', props.metaObjectSettings);
+  if (!props.metaObjectSettings) {
+    return;
   }
 
-  get dataTableScrollHeight(): string {
-    return `${this.windowHeight - 320}px`;
+  // Get current table.
+  const tableSettings = props.metaObjectSettings.detailTables.find(
+    (x) => x.uid === props.table.uid,
+  );
+  if (!tableSettings) {
+    return;
   }
 
-  @Watch('tableUid')
-  @Watch('metaObjectSettings')
-  onPropChange(): void {
-    this.initColumns();
-    this.initFilters();
-    this.loadData();
-  }
-
-  @Emit('isModifiedChanged')
-  isModifiedChanged(newValue: boolean): boolean {
-    this.table.isModified = newValue;
-    return newValue;
-  }
-
-  initColumns(): void {
-    this.columns = [];
-    console.log('MetaObjectSettings', this.metaObjectSettings);
-    if (!this.metaObjectSettings) {
+  // eslint-disable-next-line no-restricted-syntax
+  tableSettings.columns.forEach((column) => {
+    if (column.name === 'id'
+    || column.name === 'object_uid'
+    || column.name === 'row_number') {
       return;
     }
+    const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);
 
-    // Get current table.
-    const tableSettings = this.metaObjectSettings.detailTables.find(
-      (x) => x.uid === this.table.uid,
+    const columnName = isPrimitive ? column.name : `${column.name}_display`;
+
+    const columnViewModel = new MetaObjectColumnViewModel(
+      column,
+      props.dataTypes,
     );
-    if (!tableSettings) {
-      return;
+
+    columnViewModel.name = columnName;
+    columnViewModel.setDefaultStyle();
+
+    if (columnViewModel.name === 'row_number') {
+      columnViewModel.setWidth('50px');
+      columnViewModel.title = '#';
+      columnViewModel.isInt = false;
+      columnViewModel.isNumber = false;
+      columnViewModel.readonly = true;
     }
+
+    columns.value.push(columnViewModel);
+  });
+}
+
+function getColumn(name: string): MetaObjectColumnViewModel {
+  const column = columns.value.find((x) => x.name === name);
+  if (!column) {
+    return new MetaObjectColumnViewModel(null, props.dataTypes);
+  }
+  return column;
+}
+
+function parseDisplayName(displayName: string): { valueName: string, displayName: string } {
+  const names = {
+    valueName: '',
+    displayName,
+  };
+  const ind = displayName.lastIndexOf('_display');
+  if (ind > -1) {
+    names.valueName = displayName.substring(0, ind);
+  }
+  return names;
+}
+
+function formatValue(row: any, field: string): string {
+  const column = getColumn(field);
+
+  const value = row[field];
+  if (column.isInt) {
+    return ValuesFormatter.formatNumber(value, 0);
+  }
+  if (column.isNumber) {
+    return ValuesFormatter.formatNumber(value, column.numberDigits);
+  }
+  if (column.isDateInput) {
+    return ValuesFormatter.formatDate(value);
+  }
+  if (column.isDateTimeInput) {
+    return ValuesFormatter.formatDateTime(value);
+  }
+
+  return value;
+}
+
+function initFilters(): void {
+  if (tableRows().length > 0) {
+    const first = tableRows()[0];
 
     // eslint-disable-next-line no-restricted-syntax
-    tableSettings.columns.forEach((column) => {
-      if (column.name === 'id'
-        || column.name === 'object_uid'
-        || column.name === 'row_number') {
-        return;
+    for (const [key, value] of Object.entries(first)) {
+      if (typeof value === 'number') {
+        filters.value[key] = {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS, columnDataType: 'number' }],
+        };
       }
-      const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);
-
-      const columnName = isPrimitive ? column.name : `${column.name}_display`;
-
-      const columnViewModel = new MetaObjectColumnViewModel(
-        column,
-        this.dataTypes,
-      );
-
-      columnViewModel.name = columnName;
-      columnViewModel.setDefaultStyle();
-
-      if (columnViewModel.name === 'row_number') {
-        columnViewModel.setWidth('50px');
-        columnViewModel.title = '#';
-        columnViewModel.isInt = false;
-        columnViewModel.isNumber = false;
-        columnViewModel.readonly = true;
+      if (typeof value === 'string') {
+        filters.value[key] = {
+          operator: FilterOperator.AND,
+          constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH, columnDataType: 'string' }],
+        };
       }
-
-      this.columns.push(columnViewModel);
-    });
-  }
-
-  async loadData(): Promise<void> {
-    if (this.table.rows.length > 0) {
-      return;
-    }
-    this.isWaiting = true;
-    const response = await this.provider.getDetailsTable(
-      this.kind,
-      this.metaObjectSettings.name,
-      this.objectUid,
-      this.table.name,
-    );
-    if (response.isOK) {
-      this.table.rows = response.data.rows;
-      this.initFilters();
-    } else {
-      this.toastHelper.error(response.message);
-      console.error(response.presentation);
-    }
-    this.$nextTick(() => {
-      if (this.table.rows.length) {
-        // eslint-disable-next-line prefer-destructuring
-        this.selectedRecord = this.table.rows[0];
+      if (typeof value === 'boolean') {
+        filters.value[key] = { value: null, matchMode: FilterMatchMode.NOT_EQUALS, columnDataType: 'boolean' };
       }
-    });
-    this.isWaiting = false;
-  }
-
-  getColumn(name: string): MetaObjectColumnViewModel {
-    const column = this.columns.find((x) => x.name === name);
-    if (!column) {
-      return new MetaObjectColumnViewModel(null, this.dataTypes);
-    }
-    return column;
-  }
-
-  parseDisplayName(displayName: string): { valueName: string, displayName: string } {
-    const names = {
-      valueName: '',
-      displayName,
-    };
-    const ind = displayName.lastIndexOf('_display');
-    if (ind > -1) {
-      names.valueName = displayName.substring(0, ind);
-    }
-    return names;
-  }
-
-  formatValue(row: any, field: string): string {
-    const column = this.getColumn(field);
-
-    const value = row[field];
-    if (column.isInt) {
-      return ValuesFormatter.formatNumber(value, 0);
-    }
-    if (column.isNumber) {
-      return ValuesFormatter.formatNumber(value, column.numberDigits);
-    }
-    if (column.isDateInput) {
-      return ValuesFormatter.formatDate(value);
-    }
-    if (column.isDateTimeInput) {
-      return ValuesFormatter.formatDateTime(value);
-    }
-
-    return value;
-  }
-
-  initFilters(): void {
-    if (this.tableRows.length > 0) {
-      const first = this.tableRows[0];
-
-      // eslint-disable-next-line no-restricted-syntax
-      for (const [key, value] of Object.entries(first)) {
-        if (typeof value === 'number') {
-          this.filters[key] = {
-            operator: FilterOperator.AND,
-            constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS, columnDataType: 'number' }],
-          };
-        }
-        if (typeof value === 'string') {
-          this.filters[key] = {
-            operator: FilterOperator.AND,
-            constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH, columnDataType: 'string' }],
-          };
-        }
-        if (typeof value === 'boolean') {
-          this.filters[key] = { value: null, matchMode: FilterMatchMode.NOT_EQUALS, columnDataType: 'boolean' };
-        }
-      }
-    }
-  }
-
-  isColumnDataTypeNumber(param: any): boolean {
-    return param.columnDataType === 'number';
-  }
-
-  isColumnDataTypeString(param: any): boolean {
-    return param.columnDataType === 'string';
-  }
-
-  isColumnDataTypeBoolean(param: any): boolean {
-    return param.columnDataType === 'boolean';
-  }
-
-  mounted(): void {
-    this.$nextTick(() => {
-      window.addEventListener('resize', this.onResize);
-    });
-    this.initColumns();
-    this.initFilters();
-    this.menuItems.push({
-      icon: 'pi pi-plus',
-      class: 'text-primary',
-      command: () => this.onAddClick(),
-    }, {
-      label: 'Filters',
-      icon: 'pi pi-filter-slash',
-      class: 'text-primary',
-      command: () => this.onClearFiltersClick(),
-    });
-    this.loadData();
-    this.$nextTick(() => {
-      if (this.table.rows.length) {
-        // eslint-disable-next-line prefer-destructuring
-        this.selectedRecord = this.table.rows[0];
-      }
-    });
-
-    this.objectEvaluator = new ObjectEvaluator(
-      this.logger,
-      this.metaObjectSettings,
-      this.dataObject,
-    );
-  }
-
-  beforeDestroy(): void {
-    window.removeEventListener('resize', this.onResize);
-  }
-
-  onResize(): void {
-    this.windowHeight = window.innerHeight;
-  }
-
-  async onCellEditComplete(event: any): Promise<void> {
-    const row = event.data;
-    const columnName: string = event.field as string;
-    const newRow = event.newData;
-
-    const names = this.parseDisplayName(columnName);
-    row[columnName] = newRow[columnName];
-    if (names.valueName) {
-      row[names.valueName] = newRow[names.valueName];
-      await this.objectEvaluator.onRowFieldChangedAsync(names.valueName, this.table.uid, row);
-    } else {
-      await this.objectEvaluator.onRowFieldChangedAsync(columnName, this.table.uid, row);
-    }
-
-    this.isModifiedChanged(true);
-  }
-
-  onDropDownSelected(row: any, field: string, selectItem: SelectItem): void {
-    const names = this.parseDisplayName(field);
-    if (names.valueName) {
-      row[names.valueName] = selectItem.value;
-    }
-    row[names.displayName] = selectItem.text;
-  }
-
-  async onAddClick(): Promise<void> {
-    const tableSettings = this.metaObjectSettings.detailTables.find(
-      (x) => x.uid === this.table.uid,
-    );
-    if (!tableSettings) {
-      return;
-    }
-
-    const ind = this.table.rows.indexOf(this.selectedRecord);
-    const newRow = this.table.newRow(tableSettings, this.dataTypes, this.objectUid, ind);
-    if (ind === -1) {
-      this.tableKey += 1;
-    }
-
-    this.selectedRecord = newRow;
-    await this.objectEvaluator.onTableChangedAsync(this.table.name, this.table.uid);
-
-    this.isModifiedChanged(true);
-  }
-
-  onClearFiltersClick(): void {
-    this.initFilters();
-  }
-
-  async onRowDeleteClick(row: any): Promise<void> {
-    const ind = this.table.rows.indexOf(row);
-    if (ind > -1) {
-      this.table.rows.splice(ind, 1);
-      this.isModifiedChanged(true);
-    }
-    await this.objectEvaluator.onTableChangedAsync(this.table.name, this.table.uid);
-  }
-
-  async onRowCopyClick(row: any): Promise<void> {
-    const newRow: any = {};
-    Object.entries(row).forEach(([key, value]) => {
-      newRow[key] = value;
-    });
-    newRow.row_number = this.table.rows.length + 1;
-    newRow.id = Guid.create();
-
-    const ind = this.table.rows.indexOf(row);
-    if (ind > -1) {
-      this.table.rows.splice(ind + 1, 0, newRow);
-    }
-
-    this.selectedRecord = newRow;
-    this.isModifiedChanged(true);
-    await this.objectEvaluator.onTableChangedAsync(this.table.name, this.table.uid);
-  }
-
-  onRowUpClick(row: any): void {
-    const ind = this.table.rows.indexOf(row);
-    if (ind > 0) {
-      const nextInd = ind - 1;
-      const rowNext = this.table.rows[nextInd];
-
-      this.table.rows[nextInd] = row;
-      this.table.rows[ind] = rowNext;
-      this.isModifiedChanged(true);
-    }
-  }
-
-  onRowDownClick(row: any): void {
-    const ind = this.table.rows.indexOf(row);
-    const nextInd = ind + 1;
-    if (nextInd > 0 && nextInd <= this.table.rows.length - 1) {
-      const rowNext = this.table.rows[nextInd];
-
-      this.table.rows[nextInd] = row;
-      this.table.rows[ind] = rowNext;
-      this.isModifiedChanged(true);
-    }
-  }
-
-  onRowRecalculateClick(row: any): void {
-    this.isWaiting = true;
-    this.objectEvaluator.onRowRecalculateAsync(this.table.name, this.table.uid, row);
-    this.isWaiting = false;
-    this.isModifiedChanged(true);
-  }
-
-  onPageChanged(args: any): void {
-    console.log('Page changed', args);
-    if (this.table.rows.length > args.first) {
-      this.selectedRecord = this.table.rows[args.first];
     }
   }
 }
+
+async function loadData(): Promise<void> {
+  if (props.table.rows.length > 0) {
+    return;
+  }
+  isWaiting.value = true;
+  const response = await provider.getDetailsTable(
+    props.kind,
+    props.metaObjectSettings.name,
+    props.objectUid,
+    props.table.name,
+  );
+  if (response.isOK) {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.table.rows = response.data.rows;
+    initFilters();
+  } else {
+    toastHelper.error(response.message);
+    console.error(response.presentation);
+  }
+  await nextTick(() => {
+    if (props.table.rows.length) {
+      // eslint-disable-next-line prefer-destructuring
+      selectedRecord.value = props.table.rows[0];
+    }
+  });
+  isWaiting.value = false;
+}
+
+async function loadPickUpDataAsync(
+  data: any[],
+  tableName: string,
+  clearTable: boolean,
+): Promise<void> {
+  isPickUpOpen.value = false;
+  const table = props.dataObject.tables[tableName];
+  if (!table) {
+    toastHelper.error(`${t('cannotFindTable')}: ${tableName}`);
+    return;
+  }
+
+  if (data == null || data.length === 0) {
+    toastHelper.warning(t('noDataToFill'));
+    return;
+  }
+
+  if (clearTable) {
+    table.clear();
+  }
+  table.load(data);
+
+  isModifiedChanged(true);
+  await objectEvaluator.onTableRecalculateAsync(table.name);
+}
+
+function isColumnDataTypeNumber(param: any): boolean {
+  return param.columnDataType === 'number';
+}
+
+function isColumnDataTypeString(param: any): boolean {
+  return param.columnDataType === 'string';
+}
+
+function isColumnDataTypeBoolean(param: any): boolean {
+  return param.columnDataType === 'boolean';
+}
+
+async function executeTableCommandAsync(command: MetaObjectCommand): Promise<void> {
+  console.log(`Executed ${command.title}`);
+  const additionalFunctions = {
+    isModified: isModifiedChanged,
+    isWaiting: isWaitingChanged,
+    recalculate,
+    save: saveTrigger,
+    refresh: refreshTrigger,
+    close: closeTrigger,
+    openPickUp,
+  };
+
+  const commandProcessor = new CommandProcessor(
+    props.dataObject,
+    additionalFunctions,
+    props.logger,
+  );
+
+  let commandExpression = '';
+  switch (command.kind) {
+    case 1:
+      commandExpression = CommandExpressionBuilder.BuildFillCommandExpression(
+        command.getParameterValue(MetaObjectCommandParameterNames.DATA_SOURCE),
+        props.table.name,
+        command.getParameterValue(MetaObjectCommandParameterNames.CLEAR) === 'true',
+      );
+      break;
+    case 2:
+      commandExpression = CommandExpressionBuilder.BuildPickUpCommandExpression(
+        command.getParameterValue(MetaObjectCommandParameterNames.DATA_SOURCE),
+        props.table.name,
+      );
+      break;
+    default:
+      commandExpression = command.expression;
+      break;
+  }
+
+  await commandProcessor.executeAsync(commandExpression);
+
+  if (commandProcessor.error) {
+    const message = `Command "${command.title}" error: ${commandProcessor.error}`;
+    toastHelper.error(message);
+  }
+}
+
+async function onAddClick(): Promise<void> {
+  const tableSettings = props.metaObjectSettings.detailTables.find(
+    (x) => x.uid === props.table.uid,
+  );
+  if (!tableSettings) {
+    return;
+  }
+
+  const ind = props.table.rows.indexOf(selectedRecord.value);
+  const newRow = props.table.newRow(tableSettings, props.dataTypes, props.objectUid, ind);
+  if (ind === -1) {
+    tableKey.value += 1;
+  }
+
+  selectedRecord.value = newRow;
+  await objectEvaluator.onTableChangedAsync(props.table.name, props.table.uid);
+
+  isModifiedChanged(true);
+}
+
+function onClearFiltersClick(): void {
+  initFilters();
+}
+
+function init(): void {
+  initColumns();
+  initFilters();
+
+  tableCommands.value.items = [];
+  props.metaObjectSettings.commands.forEach((command) => {
+    if (command.isActive && command.tableUid === props.table.uid) {
+      tableCommands.value.items.push({
+        label: command.title,
+        command: () => executeTableCommandAsync(command),
+      });
+    }
+  });
+
+  menuItems.value = [];
+  menuItems.value.push({
+    icon: 'pi pi-plus',
+    class: 'text-primary',
+    command: () => onAddClick(),
+  }, {
+    label: 'Filters',
+    icon: 'pi pi-filter-slash',
+    class: 'text-primary',
+    command: () => onClearFiltersClick(),
+  });
+  if (tableCommands.value.items.length) {
+    menuItems.value.push(tableCommands.value);
+  }
+
+  objectEvaluator = new ObjectEvaluator(props.logger, props.metaObjectSettings, props.dataObject);
+}
+
+// Event handlers
+watch(
+  () => props.objectUid,
+  () => {
+    init();
+    loadData();
+  },
+);
+
+watch(
+  () => props.metaObjectSettings,
+  () => {
+    init();
+    loadData();
+  },
+);
+
+function onResize(): void {
+  windowHeight.value = window.innerHeight;
+}
+
+async function onCellEditComplete(event: any): Promise<void> {
+  const row = event.data;
+  const columnName: string = event.field as string;
+  const newRow = event.newData;
+
+  const names = parseDisplayName(columnName);
+  row[columnName] = newRow[columnName];
+  if (names.valueName) {
+    row[names.valueName] = newRow[names.valueName];
+    await objectEvaluator.onRowFieldChangedAsync(names.valueName, props.table.uid, row);
+  } else {
+    await objectEvaluator.onRowFieldChangedAsync(columnName, props.table.uid, row);
+  }
+
+  isModifiedChanged(true);
+}
+
+function onDropDownSelected(row: any, field: string, selectItem: SelectItem): void {
+  const names = parseDisplayName(field);
+  if (names.valueName) {
+    row[names.valueName] = selectItem.value;
+  }
+  row[names.displayName] = selectItem.text;
+}
+
+async function onRowDeleteClick(row: any): Promise<void> {
+  const ind = props.table.rows.indexOf(row);
+  if (ind > -1) {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.table.rows.splice(ind, 1);
+    isModifiedChanged(true);
+  }
+  await objectEvaluator.onTableChangedAsync(props.table.name, props.table.uid);
+}
+
+async function onRowCopyClick(row: any): Promise<void> {
+  const newRow: any = {};
+  Object.entries(row).forEach(([key, value]) => {
+    newRow[key] = value;
+  });
+  newRow.row_number = props.table.rows.length + 1;
+  newRow.id = Guid.create();
+
+  const ind = props.table.rows.indexOf(row);
+  if (ind > -1) {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.table.rows.splice(ind + 1, 0, newRow);
+  }
+
+  selectedRecord.value = newRow;
+  isModifiedChanged(true);
+  await objectEvaluator.onTableChangedAsync(props.table.name, props.table.uid);
+}
+
+function onRowUpClick(row: any): void {
+  const ind = props.table.rows.indexOf(row);
+  if (ind > 0) {
+    const nextInd = ind - 1;
+    const rowNext = props.table.rows[nextInd];
+
+    // eslint-disable-next-line vue/no-mutating-props
+    props.table.rows[nextInd] = row;
+    // eslint-disable-next-line vue/no-mutating-props
+    props.table.rows[ind] = rowNext;
+    isModifiedChanged(true);
+  }
+}
+
+function onRowDownClick(row: any): void {
+  const ind = props.table.rows.indexOf(row);
+  const nextInd = ind + 1;
+  if (nextInd > 0 && nextInd <= props.table.rows.length - 1) {
+    const rowNext = props.table.rows[nextInd];
+
+    // eslint-disable-next-line vue/no-mutating-props
+    props.table.rows[nextInd] = row;
+    // eslint-disable-next-line vue/no-mutating-props
+    props.table.rows[ind] = rowNext;
+    isModifiedChanged(true);
+  }
+}
+
+function onRowRecalculateClick(row: any): void {
+  isWaiting.value = true;
+  objectEvaluator.onRowRecalculateAsync(props.table.name, props.table.uid, row);
+  isWaiting.value = false;
+  isModifiedChanged(true);
+}
+
+function onPageChanged(args: any): void {
+  console.log('Page changed', args);
+  if (props.table.rows.length > args.first) {
+    selectedRecord.value = props.table.rows[args.first];
+  }
+}
+
+function onPickUpClose(): void {
+  isPickUpOpen.value = false;
+}
+
+async function onPickUpAdd(data: any[], tableName: string): Promise<void> {
+  isPickUpOpen.value = false;
+  await loadPickUpDataAsync(data, tableName, false);
+}
+
+async function onPickUpFill(data: any[], tableName: string): Promise<void> {
+  isPickUpOpen.value = false;
+  await loadPickUpDataAsync(data, tableName, true);
+}
+
+// Life cycle hooks
+onMounted(() => {
+  nextTick(() => {
+    window.addEventListener('resize', onResize);
+  });
+
+  init();
+
+  loadData();
+  nextTick(() => {
+    if (props.table.rows.length) {
+      // eslint-disable-next-line prefer-destructuring
+      selectedRecord.value = props.table.rows[0];
+    }
+  });
+
+  objectEvaluator = new ObjectEvaluator(
+    props.logger,
+    props.metaObjectSettings,
+    props.dataObject,
+  );
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize); // Clean up on unmount
+});
+
 </script>
 
 <template>
@@ -481,9 +615,9 @@ export default class DataObjectDetailTableEdit extends Vue {
   <DataTable
     v-model:selection="selectedRecord"
     v-model:filters="filters"
-    :style="dataTableStyle"
-    :scroll-height="dataTableScrollHeight"
-    :value="tableRows"
+    :style="dataTableStyle()"
+    :scroll-height="dataTableScrollHeight()"
+    :value="tableRows()"
     :metaKeySelection="true"
     :rows="100"
     :rowsPerPageOptions="[10, 20, 50, 100, 500]"
@@ -543,7 +677,7 @@ export default class DataObjectDetailTableEdit extends Vue {
           />
         </template>
         <template v-if="isColumnDataTypeBoolean(filterModel)">
-          <span for="isBoolean-filter" class="font-bold"> {{ col.title }} </span>
+          <label for="isBoolean-filter" class="font-bold"> {{ col.title }} </label>
           <TriStateCheckbox v-model="filterModel.value" inputId="isBoolean-filter" />
         </template>
       </template>
@@ -656,14 +790,27 @@ export default class DataObjectDetailTableEdit extends Vue {
       </template>
     </Column>
   </DataTable>
+
+  <DataObjectPickUpDialog v-if="isPickUpOpen"
+                          :data-table="pickUpDataTable"
+                          :table-name="pickUpTableName"
+                          :settings="pickUpSettings"
+                          @close="onPickUpClose"
+                          @add="onPickUpAdd"
+                          @fill="onPickUpFill"></DataObjectPickUpDialog>
+
 </template>
 
-<style >
+<style>
 .bs-row-action span{
   font-size: 12px!important;
 }
 
 .p-tabview-nav-link  {
   padding: 0.5rem!important;
+}
+
+.p-submenu-list{
+  z-index: 10;
 }
 </style>
