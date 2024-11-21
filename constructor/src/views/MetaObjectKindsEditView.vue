@@ -10,8 +10,6 @@ import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import SplitButton from 'primevue/splitbutton';
-import Textarea from 'primevue/textarea';
-import EventEmitter from '@/utils/eventEmitter';
 import Menu from 'primevue/menu';
 import MainTab from '@/components/metaObjectKindEditComponents/MainTab.vue';
 import JsonViewComponent from '@/components/JsonViewComponent.vue';
@@ -24,6 +22,8 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const confirmVue = useConfirm();
+const provider = new MetaObjectKindsProvider();
+const toastHelper = new ToastHelper(useToast());
 
 // Props
 const props = defineProps({
@@ -33,17 +33,35 @@ const props = defineProps({
 // Data
 const isModified = ref(false);
 const isWaiting = ref(true);
-const metaObjectKindTitle = ref('');
 const settings = ref<MetaObjectKindSettings>(new MetaObjectKindSettings());
 const jsonSettings = ref<string>('');
 const activeTab = ref('main');
 
-const formTitle = computed(() => 'Meta object kind');
+const formTitle = computed(() => `${t('metaObjectKind')}: ${settings.value.title}`);
 
 const actions = ref<any[]>([]);
 const navMenuItems = ref<any[]>([]);
 
 // Methods
+async function updateAsync(): Promise<void> {
+  if (props.name === '_new') {
+    settings.value = new MetaObjectKindSettings();
+    return;
+  }
+
+  isWaiting.value = true;
+  const response = await provider.getSettingsItemByName(props.name);
+  isWaiting.value = false;
+
+  if (response.isOK) {
+    settings.value = new MetaObjectKindSettings(response.data);
+    console.log('Settings loaded', settings.value);
+  } else {
+    toastHelper.error(response.message);
+    console.error(response.presentation);
+  }
+}
+
 function downloadJson(): void {
   jsonSettings.value = JSON.stringify(settings.value, null, 2);
 
@@ -67,6 +85,13 @@ function navigateToList(): void {
 }
 
 // Event handlers
+watch(
+  () => props.name,
+  async () => {
+    await updateAsync();
+  },
+);
+
 function onBackClick(): void {
   navigateToList();
 }
@@ -91,7 +116,6 @@ function onNavTabClick(tabName: string): void {
 }
 
 function onDownloadJson(): void {
-  console.log('Downloading meta object kind...');
   downloadJson();
 }
 
@@ -102,6 +126,11 @@ onBeforeMount(() => {
     command: () => onNavTabClick('main'),
   });
 
+  navMenuItems.value.push({
+    label: 'JSON',
+    command: () => onNavTabClick('json'),
+  });
+
   actions.value = [
     {
       label: 'JSON',
@@ -109,6 +138,10 @@ onBeforeMount(() => {
       command: () => onDownloadJson(),
     },
   ];
+});
+
+onMounted(async () => {
+  await updateAsync();
 });
 
 </script>
@@ -127,7 +160,7 @@ onBeforeMount(() => {
     <div class="col-12">
       <ButtonGroup>
         <Button
-          label="Back"
+          :label="$t('back')"
           severity="primary"
           size="small"
           outlined
@@ -135,7 +168,7 @@ onBeforeMount(() => {
           @click="onBackClick"
         />
         <Button
-          label="Save & Close"
+          :label="$t('saveAndClose')"
           severity="primary"
           size="small"
           outlined
@@ -143,7 +176,7 @@ onBeforeMount(() => {
           @click="onSaveCloseClick"
         />
         <Button
-          label="Save"
+          :label="$t('save')"
           severity="primary"
           size="small"
           outlined
@@ -152,7 +185,7 @@ onBeforeMount(() => {
         />
       </ButtonGroup>
       <SplitButton
-        label="Actions"
+        :label="$t('actions')"
         severity="primary"
         size="small"
         class="ml-1"
