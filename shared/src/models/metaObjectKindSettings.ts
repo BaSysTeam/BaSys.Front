@@ -53,7 +53,10 @@ export default class MetaObjectKindSettings {
       return value === null || value === undefined || value === '';
     }
 
-    newStandardColumn(): void {
-      this.standardColumns.push(new MetaObjectKindStandardColumn({}));
+    newStandardColumn(params: any): MetaObjectKindStandardColumn {
+      const newColumn = new MetaObjectKindStandardColumn(params);
+      this.standardColumns.push(newColumn);
+
+      return newColumn;
     }
 }

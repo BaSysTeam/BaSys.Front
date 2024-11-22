@@ -176,7 +176,7 @@ export default class MetadataKindsEditView extends mixins(ResizeWindow) {
   addStandardColumn(): void {
     this.isModified = true;
     this.settings = new MetaObjectKindSettings(JSON.parse(this.settingsJson));
-    this.settings.newStandardColumn();
+    this.settings.newStandardColumn(null);
 
     this.settingsJson = JSON.stringify(this.settings, null, 2);
   }

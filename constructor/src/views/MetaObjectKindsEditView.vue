@@ -66,6 +66,7 @@ async function updateAsync(): Promise<void> {
   }
 
   if (props.name === '_new') {
+    isWaiting.value = false;
     settings.value = new MetaObjectKindSettings();
     return;
   }
@@ -160,7 +161,7 @@ function onSaveClick(): void {
 }
 
 function onSettingsChanged(): void {
-  isWaiting.value = true;
+  isModified.value = true;
 }
 
 function onNavTabClick(tabName: string): void {

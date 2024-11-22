@@ -2,7 +2,6 @@
 import {
   ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed, PropType,
 } from 'vue';
-import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
@@ -11,13 +10,13 @@ import Toolbar from 'primevue/toolbar';
 import ColumnPropertiesPanel from '@/components/metaObjectKindEditComponents/ColumnPropertiesPanel.vue';
 import Listbox from 'primevue/listbox';
 import Badge from 'primevue/badge';
+import { Guid } from 'guid-typescript';
 import MetaObjectKindSettings from '../../../../shared/src/models/metaObjectKindSettings';
 import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 import DataType from '../../../../shared/src/models/dataType';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
-const router = useRouter();
 const confirmVue = useConfirm();
 
 // Props
@@ -28,7 +27,7 @@ const props = defineProps({
   },
   dataTypes: {
     type: Object as PropType<DataType[]>,
-    required: true,
+    required: false,
   },
   windowHeight: {
     type: Number,
@@ -44,30 +43,83 @@ const listStyle = computed(() => ({ maxHeight: `${props.windowHeight - 220}px` }
 const emit = defineEmits({ change: () => true });
 
 // Methods
+function deleteColumn(): void {
+  const indexToDelete = props.settings.standardColumns.findIndex(
+    (column) => column.uid === selectedItem.value.uid,
+  );
+  if (indexToDelete > -1) {
+    props.settings.standardColumns.splice(indexToDelete, 1);
+
+    if (props.settings.standardColumns.length) {
+      // eslint-disable-next-line prefer-destructuring
+      selectedItem.value = props.settings.standardColumns[0];
+    }
+  }
+
+  emit('change');
+}
 
 // Event handlers
 function onAddClick(): void {
-  console.log('onAddClick');
+  const newColumn = props.settings.newStandardColumn(null);
+
+  newColumn.title = `New column ${props.settings.standardColumns.length}`;
+  selectedItem.value = newColumn;
+
+  emit('change');
 }
 
 function onCopyClick(): void {
-  console.log('onCopyClick');
+  if (!selectedItem.value) {
+    return;
+  }
+
+  const newColumn = props.settings.newStandardColumn(selectedItem.value);
+  newColumn.uid = Guid.create().toString();
+  newColumn.title = `${newColumn.title} - copy`;
+  newColumn.name = '';
+  selectedItem.value = newColumn;
+
+  emit('change');
 }
 
 function onDeleteClick(): void {
-  console.log('onDeleteClick');
+  if (!selectedItem.value) {
+    return;
+  }
+
+  confirmVue.require({
+    message: t('deleteColumnQuestion'),
+    header: t('confirmation'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('delete'),
+    accept: () => deleteColumn(),
+  });
 }
 
 function onUpClick(): void {
-  console.log('onUpClick');
+  if (!selectedItem.value) {
+    return;
+  }
+  UpDownHelper.up(props.settings.standardColumns, selectedItem.value);
+
+  emit('change');
 }
 
 function onDownClick(): void {
-  console.log('onDownClick');
+  if (!selectedItem.value) {
+    return;
+  }
+  UpDownHelper.down(props.settings.standardColumns, selectedItem.value);
+
+  emit('change');
 }
 
 function onPropertiesChange(): void {
-  console.log('onPropertiesChange');
+  emit('change');
 }
 
 // Life cycle hooks
