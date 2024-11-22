@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed, PropType,
+  ref,
+  onMounted,
+  onBeforeMount,
+  defineProps,
+  defineEmits,
+  watch,
+  computed,
+  PropType,
+  onBeforeUnmount,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -23,9 +31,17 @@ const props = defineProps({
     type: Object as PropType<MetaObjectKindSettings>,
     required: true,
   },
+  windowHeight: {
+    type: Number,
+    required: true,
+  },
 });
 
 // Data
+const containerStyle = computed(() => ({
+  height: `${props.windowHeight - 180}px`,
+  overflowY: 'auto',
+}));
 
 // Emits
 const emit = defineEmits({ change: () => true });
@@ -38,10 +54,11 @@ function onChange(): void {
 }
 
 // Life cycle hooks
+
 </script>
 
 <template>
-<div class="grid">
+<div class="grid" :style="containerStyle">
   <div class="col-8">
     <!--Uid-->
     <FieldGridComponent title="Uid" label-for="fld-uid">
@@ -154,7 +171,7 @@ function onChange(): void {
                 size="small"
                 autocomplete="off"
                 class="w-full"
-                rows="5"
+                rows="3"
                 v-model="settings.memo"
                 @change="onChange"></Textarea>
     </FieldGridComponent>

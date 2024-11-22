@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, watch, computed,
+  ref, onMounted, onBeforeMount, defineProps, watch, computed, onBeforeUnmount,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -13,16 +13,20 @@ import SplitButton from 'primevue/splitbutton';
 import Menu from 'primevue/menu';
 import MainTab from '@/components/metaObjectKindEditComponents/MainTab.vue';
 import JsonViewComponent from '@/components/JsonViewComponent.vue';
+import StandardFieldsTab from '@/components/metaObjectKindEditComponents/StandardColumnsTab.vue';
+import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectKindsProvider from '../dataProviders/metaObjectKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import DataType from '../../../shared/src/models/dataType';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const confirmVue = useConfirm();
 const provider = new MetaObjectKindsProvider();
+const dataTypesProvider = new DataTypeProvider();
 const toastHelper = new ToastHelper(useToast());
 
 // Props
@@ -36,14 +40,31 @@ const isWaiting = ref(true);
 const settings = ref<MetaObjectKindSettings>(new MetaObjectKindSettings());
 const jsonSettings = ref<string>('');
 const activeTab = ref('main');
+const dataTypes = ref<DataType[]>([]);
 
 const formTitle = computed(() => `${t('metaObjectKind')}: ${settings.value.title}`);
 
 const actions = ref<any[]>([]);
 const navMenuItems = ref<any[]>([]);
+const windowHeight = ref(window.innerHeight);
 
 // Methods
+function registerError(response: any): void {
+  toastHelper.error(response.message);
+  console.error(response.presentation);
+}
+
 async function updateAsync(): Promise<void> {
+  // Get datatypes
+  if (!dataTypes.value.length) {
+    const dataTypeResponse = await dataTypesProvider.getDataTypes();
+    if (dataTypeResponse.isOK) {
+      dataTypes.value = dataTypeResponse.data;
+    } else {
+      registerError(dataTypeResponse);
+    }
+  }
+
   if (props.name === '_new') {
     settings.value = new MetaObjectKindSettings();
     return;
@@ -60,6 +81,37 @@ async function updateAsync(): Promise<void> {
     toastHelper.error(response.message);
     console.error(response.presentation);
   }
+}
+
+async function saveAsync(): Promise<boolean> {
+  let result = false;
+  isWaiting.value = true;
+
+  if (settings.value.isNew()) {
+    const responseInsert = await provider.insert(settings.value);
+    if (responseInsert.isOK) {
+      isModified.value = false;
+      toastHelper.success(responseInsert.message);
+      result = true;
+      settings.value = responseInsert.data;
+    } else {
+      toastHelper.error(responseInsert.message);
+      console.error(responseInsert.presentation);
+    }
+  } else {
+    const responseUpdate = await provider.update(settings.value);
+    if (responseUpdate.isOK) {
+      isModified.value = false;
+      toastHelper.success(responseUpdate.message);
+      result = true;
+    } else {
+      toastHelper.error(responseUpdate.message);
+      console.error(responseUpdate.presentation);
+    }
+  }
+  isWaiting.value = false;
+
+  return result;
 }
 
 function downloadJson(): void {
@@ -96,12 +148,15 @@ function onBackClick(): void {
   navigateToList();
 }
 
-function onSaveCloseClick(): void {
-  console.log('Save close click');
+async function onSaveCloseClick(): Promise<void> {
+  const saveResult = await saveAsync();
+  if (saveResult) {
+    navigateToList();
+  }
 }
 
 function onSaveClick(): void {
-  console.log('Save click');
+  saveAsync();
 }
 
 function onSettingsChanged(): void {
@@ -119,11 +174,20 @@ function onDownloadJson(): void {
   downloadJson();
 }
 
+function onResize(): void {
+  windowHeight.value = window.innerHeight;
+}
+
 // Life cycle hooks
 onBeforeMount(() => {
   navMenuItems.value.push({
     label: t('main'),
     command: () => onNavTabClick('main'),
+  });
+
+  navMenuItems.value.push({
+    label: t('standardColumns'),
+    command: () => onNavTabClick('standard_columns'),
   });
 
   navMenuItems.value.push({
@@ -142,6 +206,11 @@ onBeforeMount(() => {
 
 onMounted(async () => {
   await updateAsync();
+  window.addEventListener('resize', onResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize); // Clean up on unmount
 });
 
 </script>
@@ -205,7 +274,14 @@ onMounted(async () => {
       <div class="col">
         <div v-if="activeTab=='main'">
           <MainTab :settings="settings"
+                   :window-height="windowHeight"
                    @change="onSettingsChanged"></MainTab>
+        </div>
+        <div v-if="activeTab == 'standard_columns'">
+          <StandardFieldsTab :settings="settings"
+                             :window-height="windowHeight"
+                             :data-types="dataTypes"
+                             @change="onSettingsChanged"></StandardFieldsTab>
         </div>
         <div v-if="activeTab == 'json'">
           <JsonViewComponent :json="jsonSettings"></JsonViewComponent>
