@@ -15,6 +15,7 @@ import MainTab from '@/components/metaObjectKindEditComponents/MainTab.vue';
 import JsonViewComponent from '@/components/JsonViewComponent.vue';
 import StandardFieldsTab from '@/components/metaObjectKindEditComponents/StandardColumnsTab.vue';
 import DataTypeProvider from '@/dataProviders/dataTypeProvider';
+import RecordsSettingsTab from '@/components/metaObjectKindEditComponents/RecordsSettingsTab.vue';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectKindsProvider from '../dataProviders/metaObjectKindsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -28,6 +29,7 @@ const confirmVue = useConfirm();
 const provider = new MetaObjectKindsProvider();
 const dataTypesProvider = new DataTypeProvider();
 const toastHelper = new ToastHelper(useToast());
+let buildNavigationMenu: any;
 
 // Props
 const props = defineProps({
@@ -77,6 +79,7 @@ async function updateAsync(): Promise<void> {
 
   if (response.isOK) {
     settings.value = new MetaObjectKindSettings(response.data);
+    buildNavigationMenu();
     console.log('Settings loaded', settings.value);
   } else {
     toastHelper.error(response.message);
@@ -179,22 +182,40 @@ function onResize(): void {
   windowHeight.value = window.innerHeight;
 }
 
+function onCanCreateRecordsChange(): void {
+  isModified.value = true;
+  buildNavigationMenu();
+}
+
 // Life cycle hooks
 onBeforeMount(() => {
-  navMenuItems.value.push({
-    label: t('main'),
-    command: () => onNavTabClick('main'),
-  });
+  buildNavigationMenu = () => {
+    navMenuItems.value = [];
 
-  navMenuItems.value.push({
-    label: t('standardColumns'),
-    command: () => onNavTabClick('standard_columns'),
-  });
+    navMenuItems.value.push({
+      label: t('main'),
+      command: () => onNavTabClick('main'),
+    });
 
-  navMenuItems.value.push({
-    label: 'JSON',
-    command: () => onNavTabClick('json'),
-  });
+    navMenuItems.value.push({
+      label: t('standardColumns'),
+      command: () => onNavTabClick('standard_columns'),
+    });
+
+    if (settings.value.canCreateRecords) {
+      navMenuItems.value.push({
+        label: t('records'),
+        command: () => onNavTabClick('records'),
+      });
+    }
+
+    navMenuItems.value.push({
+      label: 'JSON',
+      command: () => onNavTabClick('json'),
+    });
+  };
+
+  buildNavigationMenu();
 
   actions.value = [
     {
@@ -276,13 +297,19 @@ onBeforeUnmount(() => {
         <div v-if="activeTab=='main'">
           <MainTab :settings="settings"
                    :window-height="windowHeight"
-                   @change="onSettingsChanged"></MainTab>
+                   @change="onSettingsChanged"
+                   @canCreateRecordsChange="onCanCreateRecordsChange"></MainTab>
         </div>
         <div v-if="activeTab == 'standard_columns'">
           <StandardFieldsTab :settings="settings"
                              :window-height="windowHeight"
                              :data-types="dataTypes"
                              @change="onSettingsChanged"></StandardFieldsTab>
+        </div>
+        <div v-if="activeTab == 'records'">
+          <RecordsSettingsTab :settings="settings"
+                              :window-height="windowHeight"
+                              @change="onSettingsChanged"></RecordsSettingsTab>
         </div>
         <div v-if="activeTab == 'json'">
           <JsonViewComponent :json="jsonSettings"></JsonViewComponent>

@@ -44,13 +44,22 @@ const containerStyle = computed(() => ({
 }));
 
 // Emits
-const emit = defineEmits({ change: () => true });
+const emit = defineEmits(
+  {
+    change: () => true,
+    canCreateRecordsChange: () => true,
+  },
+);
 
 // Methods
 
 // Event handlers
 function onChange(): void {
   emit('change');
+}
+
+function onCanCreateRecordsChange(): void {
+  emit('canCreateRecordsChange');
 }
 
 // Life cycle hooks
@@ -140,6 +149,22 @@ function onChange(): void {
       <InputSwitch id="fld-allow-attached-files"
                    v-model="settings.allowAttachedFiles"
                    @change="onChange"></InputSwitch>
+    </FieldGridComponent>
+
+    <!--Use Detail Tables-->
+    <FieldGridComponent :title="$t('detailsTables')"
+                        label-for="fld-use-detail-tables">
+      <InputSwitch id="fld-use-detail-tables"
+                   v-model="settings.useDetailsTables"
+                   @change="onChange"></InputSwitch>
+    </FieldGridComponent>
+
+    <!--Can create records-->
+    <FieldGridComponent :title="$t('canCreateRecords')"
+                        label-for="fld-can-create-records">
+      <InputSwitch id="fld-can-create-records"
+                   v-model="settings.canCreateRecords"
+                   @change="onCanCreateRecordsChange"></InputSwitch>
     </FieldGridComponent>
 
     <!--OrderBy Expression-->
