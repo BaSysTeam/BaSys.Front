@@ -8,6 +8,7 @@ import { createI18n } from 'vue-i18n';
 import App from './App.vue';
 import router from './router';
 import UserSettingsProvider from '../../shared/src/dataProviders/userSettingsProvider';
+import HelpService from '../../shared/src/help/helpService';
 import en from '../../shared/src/i18n/locales/en.json';
 import ru from '../../shared/src/i18n/locales/ru.json';
 
@@ -35,6 +36,8 @@ async function initializeApp(): Promise<void> {
       }, // set locale messages
     });
 
+    const helpService = new HelpService(locale);
+
     const app = createApp(App);
     app.use(router);
     app.use(PrimeVue, { ripple: true });
@@ -43,6 +46,8 @@ async function initializeApp(): Promise<void> {
     app.directive('ripple', Ripple);
     app.directive('tooltip', Tooltip);
     app.use(i18n);
+
+    app.provide('helpService', helpService);
 
     app.mount('#app');
   } catch (error) {

@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed, PropType,
+  ref, inject, onBeforeMount, defineProps, defineEmits, computed, PropType,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import FieldGridComponent from '@/components/FieldGridComponent.vue';
+import Card from 'primevue/card';
 import Dropdown from 'primevue/dropdown';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
+import OverlayPanel from 'primevue/overlaypanel';
 import MetaObjectKindsProvider from '../../dataProviders/metaObjectKindsProvider';
 import MetaObjectKindSettings from '../../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectKindStandardColumn from '../../../../shared/src/models/metaObjectKindStandardColumn';
@@ -18,6 +20,7 @@ import MetaObjectKindStandardColumn from '../../../../shared/src/models/metaObje
 const { t } = useI18n({ useScope: 'global' });
 const confirmVue = useConfirm();
 const provider = new MetaObjectKindsProvider();
+const helpService: any = inject('helpService');
 
 // Props
 const props = defineProps({
@@ -39,6 +42,8 @@ const containerStyle = computed(() => ({
 const kindsSource = ref<any[]>([]);
 const allSettings = ref<MetaObjectKindSettings[]>([]);
 const destinationColumns = ref<MetaObjectKindStandardColumn[]>([]);
+const helpText = ref<string>('');
+const helpPanel = ref();
 
 // Emits
 const emit = defineEmits({ change: () => true });
@@ -87,6 +92,12 @@ function onStorageChange(): void {
   emit('change');
 }
 
+function onHelpClick(evt: any, key: string): void {
+  console.log('Help click', evt, key);
+  helpText.value = helpService.getHelp(key);
+  helpPanel.value.toggle(evt);
+}
+
 // Life cycle hooks
 onBeforeMount(async () => {
   await initAsync();
@@ -105,7 +116,10 @@ onBeforeMount(async () => {
               <!--Source.createRecords-->
               <FieldGridComponent :title="$t('columnCreateRecords')"
                                   :required="true"
-                                  label-for="fld-data-types">
+                                  label-for="fld-data-types"
+                                  help-key="metaObjectKind.RecordSettings.CreateRecords"
+                                  :is-help="true"
+                                  @helpClick="onHelpClick">
                 <Dropdown id="fld-data-types"
                           size="small"
                           class="w-full"
@@ -126,7 +140,11 @@ onBeforeMount(async () => {
               <!--Meta object kind -->
               <FieldGridComponent :title="$t('metaObjectKind')"
                                   :required="true"
-                                  label-for="fld-meta-object-kind">
+                                  label-for="fld-meta-object-kind"
+                                  :is-help="true"
+                                  help-key="metaObjectKind.RecordSettings.Destination"
+                                  @helpClick="onHelpClick">
+
                 <Dropdown id="fld-meta-object-kind"
                           size="small"
                           class="w-full"
@@ -140,7 +158,10 @@ onBeforeMount(async () => {
               <!--Destination.period -->
               <FieldGridComponent :title="$t('columnPeriod')"
                                   :required="true"
-                                  label-for="fld-column-period">
+                                  label-for="fld-column-period"
+                                  :is-help="true"
+                                  help-key="metaObjectKind.RecordSettings.DestinationPeriod"
+                                  @helpClick = "onHelpClick">
                 <Dropdown id="fld-column-period"
                           size="small"
                           class="w-full"
@@ -154,7 +175,10 @@ onBeforeMount(async () => {
               <!--Destination.kind -->
               <FieldGridComponent :title="$t('columnMetaObjectKind')"
                                   :required="true"
-                                  label-for="fld-column-kind">
+                                  :is-help="true"
+                                  help-key="metaObjectKind.RecordSettings.DestinationKind"
+                                  label-for="fld-column-kind"
+                                  @helpClick = "onHelpClick">
                 <Dropdown id="fld-column-kind"
                           size="small"
                           class="w-full"
@@ -168,7 +192,10 @@ onBeforeMount(async () => {
               <!--Destination.object -->
               <FieldGridComponent :title="$t('columnObjectId')"
                                   :required="true"
-                                  label-for="fld-column-object">
+                                  label-for="fld-column-object"
+                                  :is-help="true"
+                                  help-key="metaObjectKind.RecordSettings.DestinationObject"
+                                  @helpClick = "onHelpClick">
                 <Dropdown id="fld-column-object"
                           size="small"
                           class="w-full"
@@ -182,7 +209,10 @@ onBeforeMount(async () => {
               <!--Destination.row -->
               <FieldGridComponent :title="$t('columnRow')"
                                   :required="true"
-                                  label-for="fld-column-row">
+                                  label-for="fld-column-row"
+                                  :is-help="true"
+                                  help-key="metaObjectKind.RecordSettings.DestinationRow"
+                                  @helpClick = "onHelpClick">
                 <Dropdown id="fld-column-row"
                           size="small"
                           class="w-full"
@@ -199,6 +229,15 @@ onBeforeMount(async () => {
       </Accordion>
     </div>
   </div>
+
+  <OverlayPanel ref="helpPanel">
+    <div class="flex flex-column gap-3 w-20rem">
+      <p class="m-0">
+        {{helpText}}
+      </p>
+    </div>
+
+  </OverlayPanel>
 
 </template>
 
