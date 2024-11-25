@@ -5,6 +5,7 @@ import MetaObjectTableColumn from './metaObjectTableColumn';
 import DataTypeDefaults from '../dataProviders/dataTypeDefaults';
 import MetaObjectTable from './metaObjectTable';
 import MetaObjectCommand from './metaObjectCommand';
+import MetaObjectRecordsSettingsItem from './metaObjectRecordsSettingsItem';
 import { MetaObjectCommandParameterNames as ParamNames } from './metaObjectCommandParameterNames';
 
 export default class MetaObjectStorableSettings {
@@ -18,8 +19,9 @@ export default class MetaObjectStorableSettings {
   displayExpression: string;
   isActive:boolean;
   header: MetaObjectTable;
-  detailTables: Array<MetaObjectTable>
-  commands:Array<MetaObjectCommand>
+  detailTables: MetaObjectTable[];
+  commands:MetaObjectCommand[];
+  recordsSettings:MetaObjectRecordsSettingsItem[];
 
   constructor(params: any) {
     let data: any = {};
@@ -44,6 +46,13 @@ export default class MetaObjectStorableSettings {
     this.commands = [];
     if (data.commands) {
       data.commands.forEach((item: any) => this.commands.push(new MetaObjectCommand(item)));
+    }
+
+    this.recordsSettings = [];
+    if (data.recordsSettings) {
+      data.recordsSettings.forEach(
+        (item: any) => this.recordsSettings.push(new MetaObjectRecordsSettingsItem(item)),
+      );
     }
   }
 
