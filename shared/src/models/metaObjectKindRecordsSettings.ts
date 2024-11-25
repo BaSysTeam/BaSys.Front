@@ -3,6 +3,7 @@ export default class MetaObjectKindRecordsSettings {
   storageMetaObjectKindUid: string;
   storagePeriodColumnUid: string;
   storageKindColumnUid: string;
+  storageMetaObjectColumnUid: string;
   storageObjectColumnUid: string;
   storageRowColumnUid: string;
 
@@ -16,6 +17,7 @@ export default class MetaObjectKindRecordsSettings {
     this.storageMetaObjectKindUid = data.storageMetaObjectKindUid || '';
     this.storagePeriodColumnUid = data.storagePeriodColumnUid || '';
     this.storageKindColumnUid = data.storageKindColumnUid || '';
+    this.storageMetaObjectColumnUid = data.storageMetaObjectColumnUid || '';
     this.storageObjectColumnUid = data.storageObjectColumnUid || '';
     this.storageRowColumnUid = data.storageRowColumnUid || '';
   }

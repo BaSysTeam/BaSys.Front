@@ -189,6 +189,23 @@ onBeforeMount(async () => {
                           @change="onChange"></Dropdown>
               </FieldGridComponent>
 
+              <!--Destination.MetaObject -->
+              <FieldGridComponent :title="$t('columnMetaObjectId')"
+                                  :required="true"
+                                  label-for="fld-column-meta-object"
+                                  :is-help="true"
+                                  help-key="metaObjectKind.RecordSettings.DestinationMetaObject"
+                                  @helpClick = "onHelpClick">
+                <Dropdown id="fld-column-meta-object"
+                          size="small"
+                          class="w-full"
+                          :options="destinationColumns"
+                          option-label="title"
+                          option-value="uid"
+                          v-model="settings.recordsSettings.storageMetaObjectColumnUid"
+                          @change="onChange"></Dropdown>
+              </FieldGridComponent>
+
               <!--Destination.object -->
               <FieldGridComponent :title="$t('columnObjectId')"
                                   :required="true"

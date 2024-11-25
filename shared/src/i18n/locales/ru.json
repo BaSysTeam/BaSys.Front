@@ -18,6 +18,7 @@
   "close": "Закрыть",
   "column": "Колонка",
   "columnCreateRecords": "Колонка 'Создать записи'",
+  "columnMetaObjectId": "Колонка 'Мета объект'",
   "columnObjectId": "Колонка 'Регистратор'",
   "columnMetaObjectKind": "Колонка 'Вид объекта'",
   "columnPeriod": "Колонка 'Период'",

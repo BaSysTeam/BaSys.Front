@@ -3,6 +3,7 @@
   "metaObjectKind.RecordSettings.Destination": "Вид объекта метаданных, который будет хранить созданные записи.",
   "metaObjectKind.RecordSettings.DestinationPeriod": "Колонка типа ДатаВремя, хранящая период создания записи.",
   "metaObjectKind.RecordSettings.DestinationKind": "Колонка типа Уникальный идентификатор, хранящая ссылку на вид объекта метаданных, породивший запись.",
-  "metaObjectKind.RecordSettings.DestinationObject": "Колонка, хранящая ссылку на объект метаданных, породивший записи. Тип зависит от типа первичного ключа объекта метаданных.",
+  "metaObjectKind.RecordSettings.DestinationObject": "Колонка, хранящая ссылку на объект, породивший записи. Тип зависит от типа первичного ключа объекта метаданных.",
+  "metaObjectKind.RecordSettings.DestinationMetaObject": "Колонка типа Уникальный идентификатор, хранящая ссылку на объект метаданных, породивший записи.",
   "metaObjectKind.RecordSettings.DestinationRow": "Колонка типа Число, хранящая номер строки табличной части, породившую запись."
 }

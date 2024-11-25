@@ -18,6 +18,7 @@
   "close": "Close",
   "column": "Column",
   "columnCreateRecords": "Column 'Create records'",
+  "columnMetaObjectId": "Column 'Meta Object'",
   "columnObjectId": "Column 'Object Id'",
   "columnMetaObjectKind": "Column 'Meta object kind'",
   "columnPeriod": "Column 'Period'",

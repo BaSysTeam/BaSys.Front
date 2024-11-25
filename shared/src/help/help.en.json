@@ -3,6 +3,7 @@
   "metaObjectKind.RecordSettings.Destination": "The type of metadata object that will store the created records.",
   "metaObjectKind.RecordSettings.DestinationPeriod": "A column of type DateTime that stores the record creation period.",
   "metaObjectKind.RecordSettings.DestinationKind": "A column of type Unique Identifier that stores a reference to the type of metadata object that generated the record.",
-  "metaObjectKind.RecordSettings.DestinationObject": "A column that stores a reference to the metadata object that generated the records. The type depends on the primary key type of the metadata object.",
+  "metaObjectKind.RecordSettings.DestinationMetaObject": "A column of type Unique Identifier that stores a reference to the metadata object that generated the records.",
+  "metaObjectKind.RecordSettings.DestinationObject": "A column that stores a reference to the object that generated the records. The type depends on the primary key type of the metadata object.",
   "metaObjectKind.RecordSettings.DestinationRow": "A column of type Number that stores the row number of the details table that generated the record."
 }
