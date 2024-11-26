@@ -7,10 +7,13 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
+import RecordsSettingsItemEdit
+  from '@/components/metaObjectEditComponents/RecordsSettingsItemEdit.vue';
 import RecordsSettingsSelectDestinationDialog
   from '@/components/metaObjectEditComponents/RecordsSettingsSelectDestinationDialog.vue';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
+import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 import MetaObjectKindSettings from '../../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
 import MetaObjectRecordsSettingsItem from '../../../../shared/src/models/metaObjectRecordsSettingsItem';
@@ -65,6 +68,13 @@ async function initAsync(): Promise<void> {
   console.log('destination settings', destinationSettings.value);
 }
 
+function deleteItem(item: any): void {
+  const ind = props.settings.recordsSettings.indexOf(item);
+  if (ind > -1) {
+    props.settings.recordsSettings.splice(ind, 1);
+  }
+}
+
 // Event handlers
 function onAddClick(): void {
   console.log('onAddClick');
@@ -95,6 +105,29 @@ function onSelectDestinationClose(args: string): void {
   }
 }
 
+function onItemUp(item: any): void {
+  UpDownHelper.up(props.settings.recordsSettings, item);
+  emit('change');
+}
+
+function onItemDown(item: any): void {
+  UpDownHelper.down(props.settings.recordsSettings, item);
+  emit('change');
+}
+
+function onItemRemove(item: any): void {
+  confirmVue.require({
+    message: t('deleteItemQuestion'),
+    header: t('confirmation'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('delete'),
+    accept: () => deleteItem(item),
+  });
+}
+
 // Life cycle hooks
 onMounted(async () => {
   await initAsync();
@@ -119,8 +152,14 @@ onMounted(async () => {
   <div class="grid">
     <div class="col-12">
       <div :key="item.destinationMetaObjectUid"
-           v-for="item in settings.recordsSettings">
-        {{item.destinationMetaObjectUid}}
+           v-for="item in settings.recordsSettings" style="margin-bottom: 3px;">
+       <RecordsSettingsItemEdit :item="item"
+                                :kind-settings="kindSettings"
+                                :destination-settings="destinationSettings"
+                                :settings="settings"
+                                @up="onItemUp(item)"
+                                @down="onItemDown(item)"
+                                @remove="onItemRemove(item)"></RecordsSettingsItemEdit>
       </div>
     </div>
   </div>
