@@ -471,7 +471,8 @@ onMounted(() => {
         </div>
         <div v-if="activeTab == 'records'">
           <RecordsSettingsTab :settings="settings"
-                       @change="onSettingsChanged"></RecordsSettingsTab>
+                              :kind-settings="kindSettings"
+                              @change="onSettingsChanged"></RecordsSettingsTab>
         </div>
         <div v-if="activeTab == 'json'">
           <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>

@@ -6,12 +6,21 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
+import Button from 'primevue/button';
+import RecordsSettingsSelectDestinationDialog
+  from '@/components/metaObjectEditComponents/RecordsSettingsSelectDestinationDialog.vue';
+import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
+import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
+import MetaObjectKindSettings from '../../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
+import MetaObjectRecordsSettingsItem from '../../../../shared/src/models/metaObjectRecordsSettingsItem';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const confirmVue = useConfirm();
+const metaObjectProvider = new MetaObjectProvider();
+const kindProvider = new MetaObjectKindsProvider();
 
 // Props
 const props = defineProps({
@@ -19,22 +28,108 @@ const props = defineProps({
     type: Object as PropType<MetaObjectStorableSettings>,
     required: true,
   },
+  kindSettings: {
+    type: Object as PropType<MetaObjectKindSettings>,
+    required: true,
+  },
 });
 
 // Data
+const destinationSettings = ref<MetaObjectStorableSettings[]>([]);
+const isSelectDestinationDialogOpen = ref<boolean>(false);
+const destinationItems = computed(() => {
+  const items: any[] = [];
+  destinationSettings.value.forEach((item) => {
+    items.push({ uid: item.uid, title: item.title });
+  });
+
+  return items;
+});
 
 // Emits
 const emit = defineEmits({ change: () => true });
 
 // Methods
+async function initAsync(): Promise<void> {
+  console.log('init Records settings');
+  const responseDestinations = await metaObjectProvider.getSettingsListByKindUid(
+    props.kindSettings.recordsSettings.storageMetaObjectKindUid,
+  );
+
+  if (responseDestinations.isOK) {
+    responseDestinations.data.forEach((item) => {
+      destinationSettings.value.push(new MetaObjectStorableSettings(item));
+    });
+  }
+
+  console.log('destination settings', destinationSettings.value);
+}
 
 // Event handlers
+function onAddClick(): void {
+  console.log('onAddClick');
+  isSelectDestinationDialogOpen.value = true;
+}
+
+function onSelectDestinationClose(args: string): void {
+  isSelectDestinationDialogOpen.value = false;
+
+  if (args) {
+    // Check existing current destination.
+    const existingItem = props.settings.recordsSettings.find(
+      (item: any) => item.destinationMetaObjectUid === args,
+    );
+    if (existingItem) {
+      return;
+    }
+
+    // Add new records settings item for selected destination.
+    const selectedItem = destinationSettings.value.find((item) => item.uid === args);
+    if (selectedItem) {
+      const newRecordsSettingsItem = new MetaObjectRecordsSettingsItem(
+        { destinationMetaObjectUid: selectedItem.uid },
+      );
+      props.settings.recordsSettings.push(newRecordsSettingsItem);
+    }
+    emit('change');
+  }
+}
 
 // Life cycle hooks
+onMounted(async () => {
+  await initAsync();
+});
+
 </script>
 
 <template>
-<div>Record settings</div>
+<div class="grid">
+  <div class="col-12">
+    <Button
+      :label="$t('add')"
+      v-tooltip.top="$t('addRecordsSettingsItem')"
+      severity="primary"
+      size="small"
+      outlined
+      icon="pi pi-plus"
+      @click="onAddClick"
+    />
+  </div>
+</div>
+  <div class="grid">
+    <div class="col-12">
+      <div :key="item.destinationMetaObjectUid"
+           v-for="item in settings.recordsSettings">
+        {{item.destinationMetaObjectUid}}
+      </div>
+    </div>
+  </div>
+
+<RecordsSettingsSelectDestinationDialog v-if="isSelectDestinationDialogOpen"
+                                        :items="destinationItems"
+                                        @close="onSelectDestinationClose">
+
+</RecordsSettingsSelectDestinationDialog>
 </template>
 
 <style scoped>
