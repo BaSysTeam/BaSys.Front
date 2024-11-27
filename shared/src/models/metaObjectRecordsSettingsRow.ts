@@ -1,3 +1,4 @@
+import { Guid } from 'guid-typescript';
 import MetaObjectRecordsSettingsColumn from './metaObjectRecordsSettingsColumn';
 
 export default class MetaObjectRecordsSettingsRow {
@@ -13,7 +14,7 @@ export default class MetaObjectRecordsSettingsRow {
     }
 
     this.uid = data.uid || '';
-    this.sourceUid = data.sourceUid || '';
+    this.sourceUid = data.sourceUid || Guid.create().toString();
     this.direction = data.direction || 0;
 
     this.columns = [];
@@ -21,6 +22,21 @@ export default class MetaObjectRecordsSettingsRow {
       data.columns.forEach((column: any) => {
         this.columns.push(new MetaObjectRecordsSettingsColumn(column));
       });
+    }
+  }
+
+  setValue(key: string, value: any):void {
+    if (key === 'direction') {
+      this.direction = value;
+    } else if (key === 'sourceUid') {
+      this.sourceUid = key;
+    } else {
+      const column = this.columns.find(
+        (column) => column.destinationColumnUid === key,
+      );
+      if (column) {
+        column.expression = value;
+      }
     }
   }
 }
