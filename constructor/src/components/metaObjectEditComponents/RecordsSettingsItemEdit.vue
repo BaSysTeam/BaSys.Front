@@ -124,6 +124,21 @@ function directionDisplay(row: any): string {
   return '';
 }
 
+function deleteRow(row: any): void {
+  const settingsRow = props.item.rows.find((item) => item.uid === row.uid);
+  if (settingsRow) {
+    const settingsInd = props.item.rows.indexOf(settingsRow);
+    if (settingsInd > -1) {
+      props.item.rows.splice(settingsInd, 1);
+    }
+  }
+
+  const ind = rows.value.indexOf(row);
+  if (ind > -1) {
+    rows.value.splice(ind, 1);
+  }
+}
+
 // Event handlers
 function onAddClick(): void {
   // Add row to data item.
@@ -148,16 +163,31 @@ function onRemoveClick(): void {
 }
 
 function onCellEditComplete(event: any): void {
-  console.log('CellEdited');
   const row = event.data;
   const columnName: string = event.field as string;
   const newRow = event.newData;
 
   row[columnName] = newRow[columnName];
+
+  const settingsRow = props.item.rows.find((item) => item.uid === row.uid);
+  if (settingsRow) {
+    settingsRow.setValue(columnName, row[columnName]);
+  }
 }
 
 function onRowDeleteClick(row: any): void {
   console.log('RowDeleteClick', row);
+
+  confirmVue.require({
+    message: `${t('deleteRow')}?`,
+    header: t('confirmation'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('delete'),
+    accept: () => deleteRow(row),
+  });
 }
 
 // Life cycle hooks

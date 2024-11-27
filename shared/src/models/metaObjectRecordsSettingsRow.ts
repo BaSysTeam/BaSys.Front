@@ -13,8 +13,8 @@ export default class MetaObjectRecordsSettingsRow {
       data = param;
     }
 
-    this.uid = data.uid || '';
-    this.sourceUid = data.sourceUid || Guid.create().toString();
+    this.uid = data.uid || Guid.create().toString();
+    this.sourceUid = data.sourceUid || '';
     this.direction = data.direction || 0;
 
     this.columns = [];
