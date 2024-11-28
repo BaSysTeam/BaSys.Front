@@ -5,6 +5,7 @@ export default class MetaObjectRecordsSettingsRow {
   uid: string;
   sourceUid: string;
   direction: number;
+  condition: string;
   columns: MetaObjectRecordsSettingsColumn[];
 
   constructor(param: any) {
@@ -16,6 +17,7 @@ export default class MetaObjectRecordsSettingsRow {
     this.uid = data.uid || Guid.create().toString();
     this.sourceUid = data.sourceUid || '';
     this.direction = data.direction || 0;
+    this.condition = data.condition || '';
 
     this.columns = [];
     if (data.columns) {
@@ -29,7 +31,9 @@ export default class MetaObjectRecordsSettingsRow {
     if (key === 'direction') {
       this.direction = value;
     } else if (key === 'sourceUid') {
-      this.sourceUid = key;
+      this.sourceUid = value;
+    } else if (key === 'condition') {
+      this.condition = value;
     } else {
       const column = this.columns.find(
         (column) => column.destinationColumnUid === key,

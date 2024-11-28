@@ -48,6 +48,7 @@ const destinationItems = computed(() => {
 
   return items;
 });
+const initialized = ref<boolean>(false);
 
 // Emits
 const emit = defineEmits({ change: () => true });
@@ -55,6 +56,7 @@ const emit = defineEmits({ change: () => true });
 // Methods
 async function initAsync(): Promise<void> {
   console.log('init Records settings');
+
   const responseDestinations = await metaObjectProvider.getSettingsListByKindUid(
     props.kindSettings.recordsSettings.storageMetaObjectKindUid,
   );
@@ -64,6 +66,7 @@ async function initAsync(): Promise<void> {
       destinationSettings.value.push(new MetaObjectStorableSettings(item));
     });
   }
+  initialized.value = true;
 
   console.log('destination settings', destinationSettings.value);
 }
@@ -149,7 +152,7 @@ onMounted(async () => {
     />
   </div>
 </div>
-  <div class="grid">
+  <div class="grid" v-if="initialized">
     <div class="col-12">
       <div :key="item.destinationMetaObjectUid"
            v-for="item in settings.recordsSettings" style="margin-bottom: 3px;">

@@ -1,5 +1,6 @@
 export default class MetaObjectRecordsSettingsColumn {
   destinationColumnUid: string;
+  name: string;
   expression: string;
 
   constructor(param: any) {
@@ -9,6 +10,7 @@ export default class MetaObjectRecordsSettingsColumn {
     }
 
     this.destinationColumnUid = data.destinationColumnUid || '';
+    this.name = data.name || '';
     this.expression = data.expression || '';
   }
 }
