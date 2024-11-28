@@ -11,6 +11,8 @@ import DataTable from 'primevue/datatable';
 import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
 import Toolbar from 'primevue/toolbar';
+import { Guid } from 'guid-typescript';
+import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 import MetaObjectKindSettings from '../../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
 import MetaObjectRecordsSettingsItem
@@ -70,6 +72,10 @@ const emit = defineEmits({
 });
 
 // Methods
+function getSettingsRow(row: any): any {
+  return props.item.rows.find((item) => item.uid === row.uid);
+}
+
 function shouldAddColumn(column: any, primaryKeyColumn: any): boolean {
   if (primaryKeyColumn) {
     if (column.uid === primaryKeyColumn.uid) {
@@ -115,7 +121,6 @@ function initColumns(): void {
 }
 
 function createRow(settingsRow: MetaObjectRecordsSettingsRow): any {
-  console.log('create row', settingsRow);
   const row: any = {
     uid: settingsRow.uid,
     sourceUid: settingsRow.sourceUid,
@@ -127,7 +132,6 @@ function createRow(settingsRow: MetaObjectRecordsSettingsRow): any {
     row[column.destinationColumnUid] = column.expression;
   });
 
-  console.log('row', row);
   return row;
 }
 
@@ -183,7 +187,7 @@ function sourceDisplay(row: any): string {
 }
 
 function deleteRow(row: any): void {
-  const settingsRow = props.item.rows.find((item) => item.uid === row.uid);
+  const settingsRow = getSettingsRow(row);
   if (settingsRow) {
     const settingsInd = props.item.rows.indexOf(settingsRow);
     if (settingsInd > -1) {
@@ -195,6 +199,8 @@ function deleteRow(row: any): void {
   if (ind > -1) {
     rows.value.splice(ind, 1);
   }
+
+  emit('change');
 }
 
 // Event handlers
@@ -210,6 +216,8 @@ function onAddClick(): void {
   // Add view model row.
   const row = createRow(newSettingsRow);
   rows.value.push(row);
+
+  emit('change');
 }
 
 function onUpClick(): void {
@@ -231,17 +239,14 @@ function onCellEditComplete(event: any): void {
 
   row[columnName] = newRow[columnName];
 
-  const settingsRow = props.item.rows.find((item) => item.uid === row.uid);
+  const settingsRow = getSettingsRow(row);
   if (settingsRow) {
     settingsRow.setValue(columnName, row[columnName]);
   }
-  console.log('cellEditComplete', row, columnName);
-  console.log(settingsRow);
+  emit('change');
 }
 
 function onRowDeleteClick(row: any): void {
-  console.log('RowDeleteClick', row);
-
   confirmVue.require({
     message: `${t('deleteRow')}?`,
     header: t('confirmation'),
@@ -252,6 +257,40 @@ function onRowDeleteClick(row: any): void {
     acceptLabel: t('delete'),
     accept: () => deleteRow(row),
   });
+}
+
+function onRowCopyClick(row: any): void {
+  const settingsRow = getSettingsRow(row);
+  if (settingsRow) {
+    const newSettingsRow = new MetaObjectRecordsSettingsRow(settingsRow);
+    newSettingsRow.uid = Guid.create().toString();
+
+    props.item.rows.push(newSettingsRow);
+
+    const newRow = createRow(newSettingsRow);
+    rows.value.push(newRow);
+    emit('change');
+  }
+}
+
+function onRowUpClick(row: any): void {
+  UpDownHelper.up(rows.value, row);
+  const settingsRow = getSettingsRow(row);
+  if (settingsRow) {
+    UpDownHelper.up(props.item.rows, settingsRow);
+  }
+
+  emit('change');
+}
+
+function onRowDownClick(row: any): void {
+  UpDownHelper.down(rows.value, row);
+  const settingsRow = getSettingsRow(row);
+  if (settingsRow) {
+    UpDownHelper.down(props.item.rows, settingsRow);
+  }
+
+  emit('change');
 }
 
 // Life cycle hooks
@@ -340,13 +379,31 @@ onMounted(() => {
           >
             <Column header=""
                     frozen
-                    style="max-width:50px; min-width:50px; width: 50px;">
+                    style="max-width:100px; min-width:100px; width: 100px;">
               <template #body="{data}">
                 <a href="#"
                    class="mr-2 bs-row-action"
                    tabindex="-1"
                    @click.prevent="onRowDeleteClick(data)">
                   <span class="pi pi-times text-red-500"></span>
+                </a>
+                <a href="#"
+                   class="mr-2 bs-row-action"
+                   tabindex="-1"
+                   @click.prevent="onRowCopyClick(data)">
+                  <span class="pi pi-clone text-primary"></span>
+                </a>
+                <a href="#"
+                   class="mr-2 bs-row-action"
+                   tabindex="-1"
+                   @click.prevent="onRowUpClick(data)">
+                  <span class="pi pi-arrow-up text-primary"></span>
+                </a>
+                <a href="#"
+                   class="mr-2 bs-row-action"
+                   tabindex="-1"
+                   @click.prevent="onRowDownClick(data)">
+                  <span class="pi pi-arrow-down text-primary"></span>
                 </a>
               </template>
             </Column>
