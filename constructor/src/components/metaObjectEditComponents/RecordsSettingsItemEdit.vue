@@ -4,6 +4,7 @@ import {
 } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
+import AutoComplete from 'primevue/autocomplete';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
@@ -50,6 +51,7 @@ const columns = ref<any[]>([]);
 const rows = ref<any[]>([]);
 const directionItems = ref<any[]>([]);
 const sourceItems = ref<any[]>([]);
+const autoCompleteItems = ref<string[]>([]);
 
 const title = computed(() => (destinationItem.value ? destinationItem.value.title : ''));
 const dataTableStyle = computed(() => ({
@@ -78,6 +80,23 @@ function getSettingsRow(row: any): any {
 
 function getCurrentTable(sourceUid: string): any {
   return props.settings.allTables.find((table) => table.uid === sourceUid);
+}
+
+function prepareAutoCompleteItems(row: any): string[] {
+  const items: string[] = [];
+
+  props.settings.header.columns.forEach((col: any) => {
+    items.push(`$h.${col.name}`);
+  });
+
+  const currentTable = getCurrentTable(row.sourceUid);
+  if (currentTable.name !== props.settings.header.name) {
+    currentTable.columns.forEach((col: any) => {
+      items.push(`$r.${col.name}`);
+    });
+  }
+
+  return items;
 }
 
 function shouldAddColumn(column: any, primaryKeyColumn: any): boolean {
@@ -120,8 +139,6 @@ function initColumns(): void {
       });
     }
   });
-
-  console.log('initColumns', columns.value);
 }
 
 function autoFillMappingByTable(
@@ -359,6 +376,15 @@ function onRowDownClick(row: any): void {
   emit('change');
 }
 
+function onAutoCompleteSearch(event: any, row: any): void {
+  if (!event.query.trim().length) {
+    autoCompleteItems.value = prepareAutoCompleteItems(row);
+  } else {
+    autoCompleteItems.value = prepareAutoCompleteItems(row)
+      .filter((str) => str.toLowerCase().startsWith(event.query.toLowerCase()));
+  }
+}
+
 // Life cycle hooks
 onBeforeMount(() => {
   directionItems.value.push({
@@ -528,11 +554,20 @@ onMounted(() => {
                 {{ data[field] }}
               </template>
               <template #editor="{data, field}">
-                <InputText v-model="data[field]"
-                           class="w-full border-noround"
-                           style="padding: 5px"
-                           size="small"
-                           autocomplete="off"></InputText>
+<!--                <InputText v-model="data[field]"-->
+<!--                           class="w-full border-noround"-->
+<!--                           style="padding: 5px"-->
+<!--                           size="small"-->
+<!--                           autocomplete="off"></InputText>-->
+                <AutoComplete v-model="data[field]"
+                              class="w-full border-noround"
+                              :input-style="inputStyle"
+                              size="small"
+                              :suggestions="autoCompleteItems"
+                              @complete="(evt:any):any => onAutoCompleteSearch(evt, data)">
+
+                </AutoComplete>
+
               </template>
             </Column>
             <Column :header="$t('condition')"
