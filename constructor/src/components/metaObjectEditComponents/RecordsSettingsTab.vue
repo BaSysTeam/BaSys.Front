@@ -76,11 +76,11 @@ function deleteItem(item: any): void {
   if (ind > -1) {
     props.settings.recordsSettings.splice(ind, 1);
   }
+  emit('change');
 }
 
 // Event handlers
 function onAddClick(): void {
-  console.log('onAddClick');
   isSelectDestinationDialogOpen.value = true;
 }
 
@@ -131,6 +131,10 @@ function onItemRemove(item: any): void {
   });
 }
 
+function onItemChange(): void {
+  emit('change');
+}
+
 // Life cycle hooks
 onMounted(async () => {
   await initAsync();
@@ -162,7 +166,8 @@ onMounted(async () => {
                                 :settings="settings"
                                 @up="onItemUp(item)"
                                 @down="onItemDown(item)"
-                                @remove="onItemRemove(item)"></RecordsSettingsItemEdit>
+                                @remove="onItemRemove(item)"
+                                @change="onItemChange"></RecordsSettingsItemEdit>
       </div>
     </div>
   </div>

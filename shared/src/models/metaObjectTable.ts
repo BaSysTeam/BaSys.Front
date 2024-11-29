@@ -41,6 +41,10 @@ export default class MetaObjectTable {
     return this.columns.find((x) => x.name === name);
   }
 
+  getColumnByDataType(dataTypeUid: string): MetaObjectTableColumn | undefined {
+    return this.columns.find((x) => x.dataTypeUid === dataTypeUid);
+  }
+
   newColumn(params: any): MetaObjectTableColumn {
     const column = new MetaObjectTableColumn(params);
     this.columns.push(column);

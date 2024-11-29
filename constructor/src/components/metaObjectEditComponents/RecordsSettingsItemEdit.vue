@@ -76,6 +76,10 @@ function getSettingsRow(row: any): any {
   return props.item.rows.find((item) => item.uid === row.uid);
 }
 
+function getCurrentTable(sourceUid: string): any {
+  return props.settings.allTables.find((table) => table.uid === sourceUid);
+}
+
 function shouldAddColumn(column: any, primaryKeyColumn: any): boolean {
   if (primaryKeyColumn) {
     if (column.uid === primaryKeyColumn.uid) {
@@ -118,6 +122,63 @@ function initColumns(): void {
   });
 
   console.log('initColumns', columns.value);
+}
+
+function autoFillMappingByTable(
+  table: any,
+  prefix: string,
+  row: any,
+  settingsRow: any,
+): void {
+  columns.value.forEach((column) => {
+    if (!row[column.uid]) {
+      const destinationColumn = destinationItem.value?.header.getColumn(column.uid);
+
+      if (destinationColumn) {
+        // Try to find column by name.
+        const sourceColumn = table.getColumnByName(destinationColumn.name);
+
+        if (sourceColumn) {
+          const expression = `${prefix}.${sourceColumn.name}`;
+          settingsRow.setValue(column.uid, expression);
+          row[column.uid] = expression;
+        } else {
+          // If we cannot find column by name try to find it by type.
+          const sourceColumnByType = table.getColumnByDataType(
+            destinationColumn.dataTypeUid,
+          );
+
+          if (sourceColumnByType) {
+            const expression = `${prefix}.${sourceColumnByType.name}`;
+            settingsRow.setValue(column.uid, expression);
+            row[column.uid] = expression;
+          }
+        }
+      }
+    }
+  });
+}
+
+function autoFillMapping(row: any): void {
+  const settingsRow = getSettingsRow(row);
+  const currentTable = getCurrentTable(row.sourceUid);
+  const headerTable = props.settings.header;
+
+  if (!currentTable) {
+    return;
+  }
+
+  if (!settingsRow) {
+    return;
+  }
+
+  const isHeader = currentTable.name === 'header';
+  const prefix = isHeader ? '$h' : '$r';
+
+  autoFillMappingByTable(currentTable, prefix, row, settingsRow);
+  if (!isHeader) {
+    autoFillMappingByTable(headerTable, '$h', row, settingsRow);
+  }
 }
 
 function createRow(settingsRow: MetaObjectRecordsSettingsRow): any {
@@ -243,6 +304,11 @@ function onCellEditComplete(event: any): void {
   if (settingsRow) {
     settingsRow.setValue(columnName, row[columnName]);
   }
+
+  if (columnName === 'sourceUid') {
+    autoFillMapping(row);
+  }
+
   emit('change');
 }
 
@@ -383,24 +449,28 @@ onMounted(() => {
               <template #body="{data}">
                 <a href="#"
                    class="mr-2 bs-row-action"
+                   v-tooltip.top="$t('delete')"
                    tabindex="-1"
                    @click.prevent="onRowDeleteClick(data)">
                   <span class="pi pi-times text-red-500"></span>
                 </a>
                 <a href="#"
                    class="mr-2 bs-row-action"
+                   v-tooltip.top="$t('copy')"
                    tabindex="-1"
                    @click.prevent="onRowCopyClick(data)">
                   <span class="pi pi-clone text-primary"></span>
                 </a>
                 <a href="#"
                    class="mr-2 bs-row-action"
+                   v-tooltip.top="$t('up')"
                    tabindex="-1"
                    @click.prevent="onRowUpClick(data)">
                   <span class="pi pi-arrow-up text-primary"></span>
                 </a>
                 <a href="#"
                    class="mr-2 bs-row-action"
+                   v-tooltip.top="$t('down')"
                    tabindex="-1"
                    @click.prevent="onRowDownClick(data)">
                   <span class="pi pi-arrow-down text-primary"></span>
