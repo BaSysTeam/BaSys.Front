@@ -1,5 +1,6 @@
 import { Guid } from 'guid-typescript';
 import MetaObjectKindStandardColumn from './metaObjectKindStandardColumn';
+import MetaObjectKindRecordsSettings from './metaObjectKindRecordsSettings';
 
 export default class MetaObjectKindSettings {
     uid: string;
@@ -9,12 +10,15 @@ export default class MetaObjectKindSettings {
     storeData:boolean;
     isReference:boolean;
     allowAttachedFiles:boolean;
+    canCreateRecords: boolean;
+    useDetailsTables: boolean;
     isStandard:boolean;
     memo:string;
     version:number;
     iconClass:string;
     orderByExpression: string;
     displayExpression: string;
+    recordsSettings: MetaObjectKindRecordsSettings;
     standardColumns: MetaObjectKindStandardColumn[];
     availableRoles: Array<string>;
 
@@ -30,12 +34,16 @@ export default class MetaObjectKindSettings {
       this.storeData = initialData.storeData || false;
       this.isReference = initialData.isReference || false;
       this.allowAttachedFiles = initialData.allowAttachedFiles || false;
+      this.canCreateRecords = initialData.canCreateRecords || false;
+      this.useDetailsTables = initialData.useDetailsTables || false;
       this.isStandard = initialData.isStandard || false;
       this.memo = initialData.memo || '';
       this.version = initialData.version || 0;
       this.iconClass = initialData.iconClass || '';
       this.orderByExpression = initialData.orderByExpression || '';
       this.displayExpression = initialData.displayExpression || '';
+
+      this.recordsSettings = new MetaObjectKindRecordsSettings(initialData.recordsSettings);
 
       this.standardColumns = initialData.standardColumns
         ? initialData.standardColumns.map(
@@ -53,7 +61,10 @@ export default class MetaObjectKindSettings {
       return value === null || value === undefined || value === '';
     }
 
-    newStandardColumn(): void {
-      this.standardColumns.push(new MetaObjectKindStandardColumn({}));
+    newStandardColumn(params: any): MetaObjectKindStandardColumn {
+      const newColumn = new MetaObjectKindStandardColumn(params);
+      this.standardColumns.push(newColumn);
+
+      return newColumn;
     }
 }

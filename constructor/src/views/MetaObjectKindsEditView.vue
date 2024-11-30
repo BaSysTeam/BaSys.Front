@@ -1,18 +1,257 @@
+<script setup lang="ts">
+import {
+  ref, onMounted, onBeforeMount, defineProps, watch, computed, onBeforeUnmount,
+} from 'vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
+import Divider from 'primevue/divider';
+import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
+import SplitButton from 'primevue/splitbutton';
+import Menu from 'primevue/menu';
+import MainTab from '@/components/metaObjectKindEditComponents/MainTab.vue';
+import JsonViewComponent from '@/components/JsonViewComponent.vue';
+import StandardFieldsTab from '@/components/metaObjectKindEditComponents/StandardColumnsTab.vue';
+import DataTypeProvider from '@/dataProviders/dataTypeProvider';
+import RecordsSettingsTab from '@/components/metaObjectKindEditComponents/RecordsSettingsTab.vue';
+import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
+import MetaObjectKindsProvider from '../dataProviders/metaObjectKindsProvider';
+import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import DataType from '../../../shared/src/models/dataType';
+
+// Infrastructure
+const { t } = useI18n({ useScope: 'global' });
+const router = useRouter();
+const confirmVue = useConfirm();
+const provider = new MetaObjectKindsProvider();
+const dataTypesProvider = new DataTypeProvider();
+const toastHelper = new ToastHelper(useToast());
+let buildNavigationMenu: any;
+
+// Props
+const props = defineProps({
+  name: { type: String, required: true },
+});
+
+// Data
+const isModified = ref(false);
+const isWaiting = ref(true);
+const settings = ref<MetaObjectKindSettings>(new MetaObjectKindSettings());
+const jsonSettings = ref<string>('');
+const activeTab = ref('main');
+const dataTypes = ref<DataType[]>([]);
+
+const formTitle = computed(() => `${t('metaObjectKind')}: ${settings.value.title}`);
+
+const actions = ref<any[]>([]);
+const navMenuItems = ref<any[]>([]);
+const windowHeight = ref(window.innerHeight);
+
+// Methods
+function registerError(response: any): void {
+  toastHelper.error(response.message);
+  console.error(response.presentation);
+}
+
+async function updateAsync(): Promise<void> {
+  // Get datatypes
+  if (!dataTypes.value.length) {
+    const dataTypeResponse = await dataTypesProvider.getDataTypes();
+    if (dataTypeResponse.isOK) {
+      dataTypes.value = dataTypeResponse.data;
+    } else {
+      registerError(dataTypeResponse);
+    }
+  }
+
+  if (props.name === '_new') {
+    isWaiting.value = false;
+    settings.value = new MetaObjectKindSettings();
+    return;
+  }
+
+  isWaiting.value = true;
+  const response = await provider.getSettingsItemByName(props.name);
+  isWaiting.value = false;
+
+  if (response.isOK) {
+    settings.value = new MetaObjectKindSettings(response.data);
+    buildNavigationMenu();
+    console.log('Settings loaded', settings.value);
+  } else {
+    toastHelper.error(response.message);
+    console.error(response.presentation);
+  }
+}
+
+async function saveAsync(): Promise<boolean> {
+  let result = false;
+  isWaiting.value = true;
+
+  if (settings.value.isNew()) {
+    const responseInsert = await provider.insert(settings.value);
+    if (responseInsert.isOK) {
+      isModified.value = false;
+      toastHelper.success(responseInsert.message);
+      result = true;
+      settings.value = responseInsert.data;
+    } else {
+      toastHelper.error(responseInsert.message);
+      console.error(responseInsert.presentation);
+    }
+  } else {
+    const responseUpdate = await provider.update(settings.value);
+    if (responseUpdate.isOK) {
+      isModified.value = false;
+      toastHelper.success(responseUpdate.message);
+      result = true;
+    } else {
+      toastHelper.error(responseUpdate.message);
+      console.error(responseUpdate.presentation);
+    }
+  }
+  isWaiting.value = false;
+
+  return result;
+}
+
+function downloadJson(): void {
+  jsonSettings.value = JSON.stringify(settings.value, null, 2);
+
+  const blob = new Blob([jsonSettings.value], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  // Create a link and trigger the download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${settings.value.title}.json`; // Name of the file to be downloaded
+  document.body.appendChild(link);
+  link.click();
+
+  // Clean up by removing the link and revoking the URL
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function navigateToList(): void {
+  router.push('/metadata-kinds');
+}
+
+// Event handlers
+watch(
+  () => props.name,
+  async () => {
+    await updateAsync();
+  },
+);
+
+function onBackClick(): void {
+  navigateToList();
+}
+
+async function onSaveCloseClick(): Promise<void> {
+  const saveResult = await saveAsync();
+  if (saveResult) {
+    navigateToList();
+  }
+}
+
+function onSaveClick(): void {
+  saveAsync();
+}
+
+function onSettingsChanged(): void {
+  isModified.value = true;
+}
+
+function onNavTabClick(tabName: string): void {
+  if (tabName === 'json') {
+    jsonSettings.value = JSON.stringify(settings.value, null, 2);
+  }
+  activeTab.value = tabName;
+}
+
+function onDownloadJson(): void {
+  downloadJson();
+}
+
+function onResize(): void {
+  windowHeight.value = window.innerHeight;
+}
+
+function onCanCreateRecordsChange(): void {
+  isModified.value = true;
+  buildNavigationMenu();
+}
+
+// Life cycle hooks
+onBeforeMount(() => {
+  buildNavigationMenu = () => {
+    navMenuItems.value = [];
+
+    navMenuItems.value.push({
+      label: t('main'),
+      command: () => onNavTabClick('main'),
+    });
+
+    navMenuItems.value.push({
+      label: t('standardColumns'),
+      command: () => onNavTabClick('standard_columns'),
+    });
+
+    if (settings.value.canCreateRecords) {
+      navMenuItems.value.push({
+        label: t('records'),
+        command: () => onNavTabClick('records'),
+      });
+    }
+
+    navMenuItems.value.push({
+      label: 'JSON',
+      command: () => onNavTabClick('json'),
+    });
+  };
+
+  buildNavigationMenu();
+
+  actions.value = [
+    {
+      label: 'JSON',
+      icon: 'pi pi-download',
+      command: () => onDownloadJson(),
+    },
+  ];
+});
+
+onMounted(async () => {
+  await updateAsync();
+  window.addEventListener('resize', onResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize); // Clean up on unmount
+});
+
+</script>
+
 <template>
   <div>
-<!--View title-->
+    <!--View title-->
     <div class="grid">
       <div class="col">
-        <ViewTitleComponent title="Meta object kind"
-         :is-modified="isModified"
-         :is-waiting="isWaiting" />
+        <ViewTitleComponent :title="formTitle"
+                            :is-modified="isModified"
+                            :is-waiting="isWaiting" />
       </div>
     </div>
-<!--Buttons-->
+    <!--Buttons-->
     <div class="col-12">
       <ButtonGroup>
         <Button
-          label="Back"
+          :label="$t('back')"
           severity="primary"
           size="small"
           outlined
@@ -20,7 +259,7 @@
           @click="onBackClick"
         />
         <Button
-          label="Save & Close"
+          :label="$t('saveAndClose')"
           severity="primary"
           size="small"
           outlined
@@ -28,7 +267,7 @@
           @click="onSaveCloseClick"
         />
         <Button
-          label="Save"
+          :label="$t('save')"
           severity="primary"
           size="small"
           outlined
@@ -37,233 +276,50 @@
         />
       </ButtonGroup>
       <SplitButton
-            label="Actions"
-            severity="primary"
-            size="small"
-            class="ml-1"
-            outlined
-            :model="actions"
-          />
+        :label="$t('actions')"
+        severity="primary"
+        size="small"
+        class="ml-1"
+        outlined
+        :model="actions"
+      />
     </div>
 
     <div class="grid">
       <Divider class="m-2" />
     </div>
-<!--Settings edit-->
+    <!--Settings edit-->
     <div class="grid">
-      <div class="col-12">
-        <codemirror
-         ref="codemirrorEditor"
-         v-model="settingsJson"
-         placeholder="Code goes here..."
-         :style="codemirrorStyle"
-         :indent-with-tab="true"
-         :tab-size="2"
-         :extensions="codemirrorExtensions"
-         @change="onSettingsInput"
-        />
+      <div class="col-fixed bs-nav-panel h-screen" style="width: 220px;">
+        <Menu :model="navMenuItems"></Menu>
+      </div>
+      <div class="col">
+        <div v-if="activeTab=='main'">
+          <MainTab :settings="settings"
+                   :window-height="windowHeight"
+                   @change="onSettingsChanged"
+                   @canCreateRecordsChange="onCanCreateRecordsChange"></MainTab>
+        </div>
+        <div v-if="activeTab == 'standard_columns'">
+          <StandardFieldsTab :settings="settings"
+                             :window-height="windowHeight"
+                             :data-types="dataTypes"
+                             @change="onSettingsChanged"></StandardFieldsTab>
+        </div>
+        <div v-if="activeTab == 'records'">
+          <RecordsSettingsTab :settings="settings"
+                              :window-height="windowHeight"
+                              @change="onSettingsChanged"></RecordsSettingsTab>
+        </div>
+        <div v-if="activeTab == 'json'">
+          <JsonViewComponent :json="jsonSettings"></JsonViewComponent>
+        </div>
       </div>
     </div>
 
   </div>
 </template>
 
-<script lang="ts">
-import { Options, mixins } from 'vue-class-component';
-import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
-import { Codemirror } from 'vue-codemirror';
-import { json as jsonLang } from '@codemirror/lang-json';
-import { githubLight } from '@ddietr/codemirror-themes/github-light';
-import Divider from 'primevue/divider';
-import Button from 'primevue/button';
-import ButtonGroup from 'primevue/buttongroup';
-import SplitButton from 'primevue/splitbutton';
-import Textarea from 'primevue/textarea';
-import EventEmitter from '@/utils/eventEmitter';
-import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
-import MetaObjectKindsProvider from '../dataProviders/metaObjectKindsProvider';
-import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
-import ToastHelper from '../../../shared/src/helpers/toastHelper';
-import { ResizeWindow } from '../../../shared/src/mixins/resizeWindow';
+<style scoped>
 
-@Options({
-  props: {
-    name: { type: String, require: true },
-  },
-  components: {
-    ViewTitleComponent,
-    Divider,
-    Button,
-    ButtonGroup,
-    SplitButton,
-    Textarea,
-    Codemirror,
-  },
-})
-export default class MetadataKindsEditView extends mixins(ResizeWindow) {
-  name!:string;
-  settings = new MetaObjectKindSettings();
-  router = useRouter();
-  provider = new MetaObjectKindsProvider();
-  toastHelper = new ToastHelper(useToast());
-
-  settingsJson = '';
-  isWaiting = false;
-  isModified = false;
-
-  codemirrorExtensions = [jsonLang(), githubLight];
-  codemirrorEditor: any = null;
-
-  actions = [
-    {
-      label: 'json',
-      icon: 'pi pi-download',
-      command: () => this.downloadJson(),
-    },
-    {
-      label: 'Standard column',
-      icon: 'pi pi-plus',
-      command: () => this.addStandardColumn(),
-    },
-
-  ];
-
-  get codemirrorStyle(): object {
-    return {
-      height: `${this.windowHeight - 150}px`,
-    };
-  }
-
-  onBackClick(): void {
-    this.navigateToList();
-  }
-
-  async onSaveCloseClick(): Promise<void> {
-    const saveResult = await this.save();
-    if (saveResult) {
-      this.navigateToList();
-    }
-  }
-
-  onSaveClick():void {
-    this.save();
-  }
-
-  onSettingsInput(): void {
-    this.isModified = true;
-    // this.settings = new MetaObjectKindSettings(JSON.parse(this.settingsJson));
-    // this.settings.onNameChanged();
-    // this.settingsJson = this.toJSON(this.settings);
-  }
-
-  downloadJson(): void {
-    const blob = new Blob([this.settingsJson], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    // Create a link and trigger the download
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${this.settings.title}.json`; // Name of the file to be downloaded
-    document.body.appendChild(link);
-    link.click();
-
-    // Clean up by removing the link and revoking the URL
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-
-  addStandardColumn(): void {
-    this.isModified = true;
-    this.settings = new MetaObjectKindSettings(JSON.parse(this.settingsJson));
-    this.settings.newStandardColumn();
-
-    this.settingsJson = JSON.stringify(this.settings, null, 2);
-  }
-
-  async save(): Promise<boolean> {
-    let result = false;
-    this.isWaiting = true;
-    this.settings = new MetaObjectKindSettings(JSON.parse(this.settingsJson));
-
-    if (this.settings.isNew()) {
-      const responseInsert = await this.provider.insert(this.settings);
-      if (responseInsert.isOK) {
-        this.isModified = false;
-        this.toastHelper.success(responseInsert.message);
-        result = true;
-        this.settings = responseInsert.data;
-        this.settingsJson = JSON.stringify(this.settings, null, 2);
-      } else {
-        this.toastHelper.error(responseInsert.message);
-        console.error(responseInsert.presentation);
-      }
-    } else {
-      const responseUpdate = await this.provider.update(this.settings);
-      if (responseUpdate.isOK) {
-        this.isModified = false;
-        this.toastHelper.success(responseUpdate.message);
-        result = true;
-      } else {
-        this.toastHelper.error(responseUpdate.message);
-        console.error(responseUpdate.presentation);
-      }
-    }
-    this.isWaiting = false;
-
-    if (result) {
-      EventEmitter.emit('metadata-kinds-changed');
-    }
-
-    return result;
-  }
-
-  async update(): Promise<void> {
-    if (this.name === '_new') {
-      this.settings = new MetaObjectKindSettings();
-      this.settingsJson = this.toJSON(this.settings);
-      return;
-    }
-
-    this.isWaiting = true;
-    const response = await this.provider.getSettingsItemByName(this.name);
-    this.isWaiting = false;
-
-    if (response.isOK) {
-      this.settings = response.data;
-      this.settingsJson = JSON.stringify(this.settings, null, 2);
-      console.log('Settings loaded', this.settings);
-      console.log(this.settingsJson);
-    } else {
-      this.toastHelper.error(response.message);
-      console.error(response.presentation);
-    }
-  }
-
-  navigateToList(): void {
-    this.router.push('/metadata-kinds');
-  }
-
-  toJSON(object:any): string {
-    const replacer = (key: string, value: any): any => {
-      const excludedKeys = ['_name']; // Add any internal/private properties to exclude
-      if (excludedKeys.includes(key)) {
-        return undefined;
-      }
-      return value;
-    };
-
-    return JSON.stringify(object, replacer, 2);
-  }
-
-  mounted(): void {
-    console.log('mounted', this.name);
-    this.$nextTick(() => { console.log('nextTick, name', this.name); this.update(); });
-
-    if (this.codemirrorEditor) {
-      console.log('Codemirror instance:', this.codemirrorEditor);
-    }
-  }
-}
-
-</script>
+</style>

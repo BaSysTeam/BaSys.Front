@@ -16,6 +16,7 @@ import DataTypeProvider from '@/dataProviders/dataTypeProvider';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
 import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
 import MainTab from '@/components/metaObjectEditComponents/MainTab.vue';
+import RecordsSettingsTab from '@/components/metaObjectEditComponents/RecordsSettingsTab.vue';
 import HeaderFieldsTab from '@/components/metaObjectEditComponents/HeaderFieldsTab.vue';
 import TableSettingsTab from '@/components/metaObjectEditComponents/TableSettingsTab.vue';
 import JsonTab from '@/components/metaObjectEditComponents/JsonTab.vue';
@@ -49,6 +50,7 @@ const isModified = ref(false);
 const isWaiting = ref(true);
 
 const settings = ref<MetaObjectStorableSettings>(new MetaObjectStorableSettings({}));
+const kindSettings = ref<MetaObjectKindSettings>(new MetaObjectKindSettings({}));
 const selectedTable = ref<MetaObjectTable>(new MetaObjectTable(null));
 const dataTypes = ref<DataType[]>([]);
 
@@ -67,6 +69,8 @@ const formTitle = computed(() => `${metaObjectKindTitle.value}.${settings.value.
 // Methods
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 let initTableMenu = ():void => {};
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+let initNavMenu = ():void => {};
 
 function registerError(response: any): void {
   toastHelper.error(response.message);
@@ -146,16 +150,16 @@ async function update(): Promise<void> {
     }
   }
 
+  const kindResponse = await kindsProvider.getSettingsItemByName(props.kind);
+  if (!kindResponse.isOK) {
+    registerError(kindResponse);
+    return;
+  }
+  kindSettings.value = new MetaObjectKindSettings(kindResponse.data);
+  initNavMenu();
+
   if (isNew()) {
-    const kindResponse = await kindsProvider.getSettingsItemByName(props.kind);
-
     isWaiting.value = false;
-    if (!kindResponse.isOK) {
-      registerError(kindResponse);
-      return;
-    }
-
-    const kindSettings = new MetaObjectKindSettings(kindResponse.data);
 
     isModified.value = true;
     const headerTable = new MetaObjectTable({
@@ -164,7 +168,7 @@ async function update(): Promise<void> {
       uid: Guid.create().toString(),
     });
 
-    kindSettings.standardColumns.forEach((stColumn) => {
+    kindSettings.value.standardColumns.forEach((stColumn) => {
       const headerColumn = new MetaObjectTableColumn(null);
       headerColumn.fillByStandardColumn(stColumn);
       headerTable.columns.push(headerColumn);
@@ -172,7 +176,7 @@ async function update(): Promise<void> {
 
     settings.value = new MetaObjectStorableSettings({
       header: headerTable,
-      metaObjectKindUid: kindSettings.uid,
+      metaObjectKindUid: kindSettings.value.uid,
     });
     metaObjectKindTitle.value = kindResponse.data.title;
 
@@ -313,32 +317,45 @@ function onJsonChanged(): void {
 
 // Life cycle hooks
 onBeforeMount(() => {
-  navMenuItems.value.push({
-    label: t('main'),
-    command: () => onNavTabClick('main'),
-  });
+  initNavMenu = () => {
+    navMenuItems.value = [];
 
-  navMenuItems.value.push({
-    label: t('columns'),
-    command: () => onNavTabClick('fields'),
-  });
+    navMenuItems.value.push({
+      label: t('main'),
+      command: () => onNavTabClick('main'),
+    });
 
-  navMenuItems.value.push({
-    label: t('commands'),
-    command: () => onNavTabClick('commands'),
-  });
+    navMenuItems.value.push({
+      label: t('columns'),
+      command: () => onNavTabClick('fields'),
+    });
 
-  navMenuItems.value.push(tableGroups.value);
+    navMenuItems.value.push({
+      label: t('commands'),
+      command: () => onNavTabClick('commands'),
+    });
 
-  const otherGroup = {
-    label: t('other'),
-    items: [{
-      label: 'JSON',
-      command: () => onNavTabClick('json'),
-    }],
+    if (kindSettings.value.canCreateRecords) {
+      navMenuItems.value.push({
+        label: t('records'),
+        command: () => onNavTabClick('records'),
+      });
+    }
+
+    navMenuItems.value.push(tableGroups.value);
+
+    const otherGroup = {
+      label: t('other'),
+      items: [{
+        label: 'JSON',
+        command: () => onNavTabClick('json'),
+      }],
+    };
+
+    navMenuItems.value.push(otherGroup);
   };
 
-  navMenuItems.value.push(otherGroup);
+  initNavMenu();
 
   actions.value = [
     {
@@ -451,6 +468,11 @@ onMounted(() => {
         <div v-if="activeTab == 'commands'">
           <CommandsTab :settings="settings"
                        @change="onSettingsChanged"></CommandsTab>
+        </div>
+        <div v-if="activeTab == 'records'">
+          <RecordsSettingsTab :settings="settings"
+                              :kind-settings="kindSettings"
+                              @change="onSettingsChanged"></RecordsSettingsTab>
         </div>
         <div v-if="activeTab == 'json'">
           <JsonTab :settings="settings" @change="onJsonChanged"></JsonTab>
