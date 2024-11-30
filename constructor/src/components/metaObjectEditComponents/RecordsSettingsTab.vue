@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed, PropType,
+  ref, onMounted, onBeforeMount, defineProps, defineEmits, computed, PropType, onDeactivated,
 } from 'vue';
-import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
@@ -12,7 +10,7 @@ import RecordsSettingsItemEdit
 import RecordsSettingsSelectDestinationDialog
   from '@/components/metaObjectEditComponents/RecordsSettingsSelectDestinationDialog.vue';
 import MetaObjectProvider from '@/dataProviders/metaObjectProvider';
-import MetaObjectKindsProvider from '@/dataProviders/metaObjectKindsProvider';
+import EventEmitter from '@/utils/eventEmitter';
 import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 import MetaObjectKindSettings from '../../../../shared/src/models/metaObjectKindSettings';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
@@ -20,10 +18,8 @@ import MetaObjectRecordsSettingsItem from '../../../../shared/src/models/metaObj
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
-const router = useRouter();
 const confirmVue = useConfirm();
 const metaObjectProvider = new MetaObjectProvider();
-const kindProvider = new MetaObjectKindsProvider();
 
 // Props
 const props = defineProps({
@@ -49,14 +45,28 @@ const destinationItems = computed(() => {
   return items;
 });
 const initialized = ref<boolean>(false);
+const windowHeight = ref(window.innerHeight);
+const windowWidth = ref(window.innerWidth);
+const isMenuMinimized = ref<any>(false);
+
+const containerStyle = computed(() => ({
+  maxHeight: `${windowHeight.value - 180}px`,
+  overflowY: 'auto',
+}));
+
+const containerWidth = computed(() => {
+  if (isMenuMinimized.value === true) {
+    return windowWidth.value - 300;
+  }
+
+  return windowWidth.value - 450;
+});
 
 // Emits
 const emit = defineEmits({ change: () => true });
 
 // Methods
 async function initAsync(): Promise<void> {
-  console.log('init Records settings');
-
   const responseDestinations = await metaObjectProvider.getSettingsListByKindUid(
     props.kindSettings.recordsSettings.storageMetaObjectKindUid,
   );
@@ -67,8 +77,6 @@ async function initAsync(): Promise<void> {
     });
   }
   initialized.value = true;
-
-  console.log('destination settings', destinationSettings.value);
 }
 
 function deleteItem(item: any): void {
@@ -135,9 +143,27 @@ function onItemChange(): void {
   emit('change');
 }
 
+function onResize(): void {
+  windowHeight.value = window.innerHeight;
+  windowWidth.value = window.innerWidth;
+}
+
 // Life cycle hooks
+onBeforeMount(() => {
+  EventEmitter.on('burger-clicked', (args) => {
+    // eslint-disable-next-line prefer-destructuring
+    isMenuMinimized.value = args[0];
+  });
+});
+
 onMounted(async () => {
+  window.addEventListener('resize', onResize);
+  windowHeight.value = window.innerHeight;
   await initAsync();
+});
+
+onDeactivated(() => {
+  window.removeEventListener('resize', onResize);
 });
 
 </script>
@@ -156,7 +182,7 @@ onMounted(async () => {
     />
   </div>
 </div>
-  <div class="grid" v-if="initialized">
+  <div class="grid" v-if="initialized" :style="containerStyle">
     <div class="col-12">
       <div :key="item.destinationMetaObjectUid"
            v-for="item in settings.recordsSettings" style="margin-bottom: 3px;">
@@ -164,6 +190,7 @@ onMounted(async () => {
                                 :kind-settings="kindSettings"
                                 :destination-settings="destinationSettings"
                                 :settings="settings"
+                                :container-width="containerWidth"
                                 @up="onItemUp(item)"
                                 @down="onItemDown(item)"
                                 @remove="onItemRemove(item)"

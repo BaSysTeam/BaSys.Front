@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, defineEmits, defineProps, onBeforeMount, onMounted, PropType, ref, watch,
+  computed, defineEmits, defineProps, onBeforeMount, onMounted, PropType, ref,
 } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
@@ -43,6 +43,10 @@ const props = defineProps({
     type: Object as PropType<MetaObjectRecordsSettingsItem>,
     required: true,
   },
+  containerWidth: {
+    type: Number,
+    required: true,
+  },
 });
 
 // Data
@@ -64,6 +68,10 @@ const inputStyle = ref<any>({
   borderRadius: 0,
   padding: '5px',
 });
+
+const containerStyle = computed(() => ({
+  maxWidth: `${props.containerWidth}px`,
+}));
 
 // Emits
 const emit = defineEmits({
@@ -447,7 +455,7 @@ onMounted(() => {
         </Toolbar>
       </template>
       <template #content>
-        <div style="max-width:1100px;">
+        <div :style="containerStyle">
           <DataTable
             v-model:selection="selectedRecord"
             :style="dataTableStyle"
@@ -461,7 +469,6 @@ onMounted(() => {
             edit-mode="cell"
             @cell-edit-complete="onCellEditComplete"
             :pt="{
-                table: { style: 'width: 1000px; max-width: 1000px' },
                 column: {
                     bodycell: ({ state }:any) => ({
                         class: [{ 'p-0': state['d_editing'] }]
@@ -554,11 +561,6 @@ onMounted(() => {
                 {{ data[field] }}
               </template>
               <template #editor="{data, field}">
-<!--                <InputText v-model="data[field]"-->
-<!--                           class="w-full border-noround"-->
-<!--                           style="padding: 5px"-->
-<!--                           size="small"-->
-<!--                           autocomplete="off"></InputText>-->
                 <AutoComplete v-model="data[field]"
                               class="w-full border-noround"
                               :input-style="inputStyle"
