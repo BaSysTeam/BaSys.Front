@@ -27,6 +27,7 @@ import { Options, Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
 import { usePrimeVue } from 'primevue/config';
 import Toast from 'primevue/toast';
+import EventEmitter from '@/utils/eventEmitter';
 import NavigationPanelComponent from '@/components/NavigationPanelComponent.vue';
 import AppHeaderComponent from '../../shared/src/components/AppHeaderComponent.vue';
 import UserActionsComponent from '../../shared/src/components/UserActionsComponent.vue';
@@ -57,6 +58,7 @@ export default class App extends Vue {
     } else {
       this.navPanelWidth = 200;
     }
+    EventEmitter.emit('burger-clicked', this.isMenuMinimized);
   }
 
   onProfileClicked(): void {
