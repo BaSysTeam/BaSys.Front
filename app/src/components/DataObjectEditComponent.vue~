@@ -97,7 +97,7 @@ export default class DataObjectEditComponent extends Vue {
   async save(): Promise<void> {
     this.isWaitingChanged(true);
     const objectToSave = new DataObject(null);
-    objectToSave.init(this.model.item, false);
+    objectToSave.init(this.model.item, true);
     objectToSave.convertDatesToIso();
 
     if (this.model.isNew) {
