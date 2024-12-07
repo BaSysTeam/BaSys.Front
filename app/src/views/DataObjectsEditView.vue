@@ -13,12 +13,14 @@ import Sidebar from 'primevue/sidebar';
 import SplitButton from 'primevue/splitbutton';
 import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
 import LogPanel from '@/components/LogPanel.vue';
+import DataObjectRecordsDialog from '@/components/DataObjectRecordsDialog.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import { LogLevels } from '../../../shared/src/enums/logLevels';
 
 @Options({
   components: {
+    DataObjectRecordsDialog,
     RecordsButton,
     LogPanel,
     ViewTitleComponent,
@@ -61,6 +63,7 @@ export default class DataObjectEditView extends Vue {
   logger = new InMemoryLogger(LogLevels.Error);
   actionsButtonItems: any[] = [];
   canCreateRecords = false;
+  isRecordsDialogOpen = false;
 
   router = useRouter();
 
@@ -83,7 +86,11 @@ export default class DataObjectEditView extends Vue {
   }
 
   onRecordsClick(): void {
-    console.log('Records click');
+    this.isRecordsDialogOpen = true;
+  }
+
+  onRecordsDialogClose(): void {
+    this.isRecordsDialogOpen = false;
   }
 
   onIsModifiedChanged(args: boolean): void {
@@ -244,6 +251,9 @@ export default class DataObjectEditView extends Vue {
       </div>
     </div>
   </div>
+
+  <DataObjectRecordsDialog v-if="isRecordsDialogOpen"
+                           @close="onRecordsDialogClose"></DataObjectRecordsDialog>
 
   <LogPanel :visible="isCalculationLogOpen"
             :logger="logger"

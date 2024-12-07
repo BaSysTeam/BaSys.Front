@@ -115,6 +115,9 @@
                           :regime="editRegime"
                           @close="onEditDialogClose"
                           @saved="onItemInDialogSaved"></DataObjectEditDialog>
+
+    <DataObjectRecordsDialog v-if="isRecordsDialogOpen"
+                             @close="onRecordsDialogClose"></DataObjectRecordsDialog>
     <ConfirmDialog :draggable="false"></ConfirmDialog>
   </div>
 </template>
@@ -139,6 +142,7 @@ import DataObjectEditDialog from '@/components/DataObjectEditDialog.vue';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import RecordsButton from '@/components/standardButtons/RecordsButton.vue';
+import DataObjectRecordsDialog from '@/components/DataObjectRecordsDialog.vue';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -149,6 +153,7 @@ import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 
 @Options({
   components: {
+    DataObjectRecordsDialog,
     RecordsButton,
     ViewTitleComponent,
     DataTable,
@@ -187,6 +192,7 @@ export default class DataObjectsListView extends Vue {
   confirm = useConfirm();
   windowHeight = window.innerHeight;
   isEditDialogOpen = false;
+  isRecordsDialogOpen = false;
   editRegime = 'edit';
 
   get dataTableStyle(): object {
@@ -242,7 +248,7 @@ export default class DataObjectsListView extends Vue {
   }
 
   onRecordsClick(): void {
-    console.log('Records click');
+    this.isRecordsDialogOpen = true;
   }
 
   onRowDblClick():void {
@@ -255,6 +261,10 @@ export default class DataObjectsListView extends Vue {
 
   onItemInDialogSaved(savedUid: string): void {
     this.handleItemSaved(savedUid);
+  }
+
+  onRecordsDialogClose(): void {
+    this.isRecordsDialogOpen = false;
   }
 
   async handleItemSaved(savedUid: string): Promise<void> {
