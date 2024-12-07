@@ -2,7 +2,6 @@
 import {
   defineProps, defineEmits,
 } from 'vue';
-import Button from 'primevue/button';
 
 // Props
 const props = defineProps({ buttonClass: { type: String, default: 'ml-1', required: false } });

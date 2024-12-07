@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {
-  defineProps, defineEmits,
+  defineProps, defineEmits
 } from 'vue';
-import Button from 'primevue/button';
+
+
+
 
 // Props
 const props = defineProps({ buttonClass: { type: String, default: 'ml-1', required: false } });
@@ -14,6 +16,8 @@ const emit = defineEmits({ click: () => true });
 function onClick(): void {
   emit('click');
 }
+
+// Life cycle hooks
 </script>
 
 <template>

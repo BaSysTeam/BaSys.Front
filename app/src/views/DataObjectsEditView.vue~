@@ -207,8 +207,8 @@ export default class DataObjectEditView extends Vue {
           />
 
         </ButtonGroup>
-        <RecordsButton v-if="canCreateRecords"
-                       @click="onRecordsClick">
+        <RecordsButton v-if="canCreateRecords" @click="onRecordsClick">
+
         </RecordsButton>
 
         <SplitButton

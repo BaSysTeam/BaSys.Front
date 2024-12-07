@@ -138,7 +138,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import DataObjectEditDialog from '@/components/DataObjectEditDialog.vue';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
-import RecordsButton from '@/components/standardButtons/RecordsButton.vue';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -146,6 +145,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import MetaObjectKindStandardColumn from '../../../shared/src/models/metaObjectKindStandardColumn';
 import DataTypeDefaults from '../../../shared/src/dataProviders/dataTypeDefaults';
 import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
+import RecordsButton from '@/components/standardButtons/RecordsButton.vue';
 
 @Options({
   components: {

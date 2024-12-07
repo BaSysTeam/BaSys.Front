@@ -94,10 +94,14 @@ export default class DataObjectEditComponent extends Vue {
     return uid;
   }
 
+  get canCreateRecords(): boolean {
+    return this.model.metaObjectKindSettings.canCreateRecords;
+  }
+
   async save(): Promise<void> {
     this.isWaitingChanged(true);
     const objectToSave = new DataObject(null);
-    objectToSave.init(this.model.item, true);
+    objectToSave.init(this.model.item, false);
     objectToSave.convertDatesToIso();
 
     if (this.model.isNew) {
@@ -261,6 +265,11 @@ export default class DataObjectEditComponent extends Vue {
   @Emit('closeTrigger')
   closeTrigger(): void {
     console.log('Close trigger');
+  }
+
+  @Emit('canCreateRecordsChanged')
+  canCreateRecordsChanged(flag: boolean): boolean {
+    return flag;
   }
 
   onTableIsModifiedChanged(args: boolean): void {

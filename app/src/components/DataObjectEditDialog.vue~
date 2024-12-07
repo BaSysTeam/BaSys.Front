@@ -6,10 +6,10 @@ import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
 import LogPanel from '@/components/LogPanel.vue';
-import RecordsButton from '@/components/standardButtons/RecordsButton.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import { LogLevels } from '../../../shared/src/enums/logLevels';
+import RecordsButton from '@/components/standardButtons/RecordsButton.vue';
 
 @Options({
   components: {

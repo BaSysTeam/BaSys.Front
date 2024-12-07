@@ -94,6 +94,10 @@ export default class DataObjectEditComponent extends Vue {
     return uid;
   }
 
+  get canCreateRecords(): boolean {
+    return this.model.metaObjectKindSettings.canCreateRecords;
+  }
+
   async save(): Promise<void> {
     this.isWaitingChanged(true);
     const objectToSave = new DataObject(null);
@@ -145,6 +149,7 @@ export default class DataObjectEditComponent extends Vue {
 
     try {
       await this.loadDataObject();
+      this.canCreateRecordsChanged(this.canCreateRecords);
     } catch (error) {
       console.error('Error loading data object:', error);
       this.toastHelper.error('An error occurred while loading the data object.');
@@ -261,6 +266,11 @@ export default class DataObjectEditComponent extends Vue {
   @Emit('closeTrigger')
   closeTrigger(): void {
     console.log('Close trigger');
+  }
+
+  @Emit('canCreateRecordsChanged')
+  canCreateRecordsChanged(flag: boolean): boolean {
+    return flag;
   }
 
   onTableIsModifiedChanged(args: boolean): void {
