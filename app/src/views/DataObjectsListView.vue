@@ -117,6 +117,9 @@
                           @saved="onItemInDialogSaved"></DataObjectEditDialog>
 
     <DataObjectRecordsDialog v-if="isRecordsDialogOpen"
+                             :kind="kind"
+                             :name="name"
+                             :uid="selectedUid"
                              @close="onRecordsDialogClose"></DataObjectRecordsDialog>
     <ConfirmDialog :draggable="false"></ConfirmDialog>
   </div>
@@ -248,6 +251,7 @@ export default class DataObjectsListView extends Vue {
   }
 
   onRecordsClick(): void {
+    this.selectedUid = this.getCurrentUid();
     this.isRecordsDialogOpen = true;
   }
 

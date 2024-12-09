@@ -253,6 +253,9 @@ export default class DataObjectEditView extends Vue {
   </div>
 
   <DataObjectRecordsDialog v-if="isRecordsDialogOpen"
+                           :kind="kind"
+                           :name="name"
+                           :uid="uid"
                            @close="onRecordsDialogClose"></DataObjectRecordsDialog>
 
   <LogPanel :visible="isCalculationLogOpen"

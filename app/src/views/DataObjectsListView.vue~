@@ -116,7 +116,11 @@
                           @close="onEditDialogClose"
                           @saved="onItemInDialogSaved"></DataObjectEditDialog>
 
-    <DataObjectRecordsDialog v-if="isRecordsDialogOpen"></DataObjectRecordsDialog>
+    <DataObjectRecordsDialog v-if="isRecordsDialogOpen"
+                             :kind="kind"
+                             :name="name"
+                             :uid="selectedUid"
+                             @close="onRecordsDialogClose"></DataObjectRecordsDialog>
     <ConfirmDialog :draggable="false"></ConfirmDialog>
   </div>
 </template>
@@ -260,6 +264,10 @@ export default class DataObjectsListView extends Vue {
 
   onItemInDialogSaved(savedUid: string): void {
     this.handleItemSaved(savedUid);
+  }
+
+  onRecordsDialogClose(): void {
+    this.isRecordsDialogOpen = false;
   }
 
   async handleItemSaved(savedUid: string): Promise<void> {
