@@ -10,9 +10,13 @@ export default class DataObjectRecordsDialogViewModel {
 
     this.tabs = [];
     if (data.tabs) {
-      data.tabs.forEach((item) => {
+      data.tabs.forEach((item: any) => {
         this.tabs.push(new DataObjectRecordsDialogTab(item));
       });
+    }
+
+    if (this.tabs.length) {
+      this.tabs[0].isActive = 1;
     }
   }
 }

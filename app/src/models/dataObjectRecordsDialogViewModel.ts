@@ -14,5 +14,9 @@ export default class DataObjectRecordsDialogViewModel {
         this.tabs.push(new DataObjectRecordsDialogTab(item));
       });
     }
+
+    if (this.tabs.length) {
+      this.tabs[0].isActive = true;
+    }
   }
 }

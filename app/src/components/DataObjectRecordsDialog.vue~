@@ -2,22 +2,18 @@
 import {
   ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed,
 } from 'vue';
-import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import DataObjectRecordsProvider from '@/dataProviders/dataObjectRecordsProvider';
 import DataObjectRecordsDialogViewModel from '@/models/dataObjectRecordsDialogViewModel';
+import DataObjectRecordsTable from '@/components/DataObjectRecordsTable.vue';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
-const router = useRouter();
-const confirmVue = useConfirm();
 const provider = new DataObjectRecordsProvider();
 const toastHelper = new ToastHelper(useToast());
 
@@ -31,6 +27,7 @@ const props = defineProps({
 // Data
 const title = ref<string>(t('records'));
 const model = ref<DataObjectRecordsDialogViewModel>(new DataObjectRecordsDialogViewModel(null));
+const activeTabIndex = ref<number>(0);
 
 // Emit
 const emit = defineEmits(
@@ -41,7 +38,7 @@ const emit = defineEmits(
 
 // Methods
 async function initAsync(): Promise<void> {
-  const response = await provider.getModel(props.kind, props.name, props.uid);
+  const response = await provider.getModelAsync(props.kind, props.name, props.uid);
 
   if (response.isOK) {
     model.value = new DataObjectRecordsDialogViewModel(response.data);
@@ -51,15 +48,24 @@ async function initAsync(): Promise<void> {
   }
 }
 
-// Event handlers
-function onCloseClick(): void {
-  emit('close');
+function setTabActive(tabIndex: number): void {
+  model.value.tabs.forEach((tab) => {
+    tab.isActive = false;
+  });
+
+  const activeTab = model.value.tabs[activeTabIndex.value];
+  activeTab.isActive = true;
 }
 
+// Event handlers
 function updateVisible(value: boolean): void {
   if (!value) {
     emit('close');
   }
+}
+
+function onTabChange(args: any): void {
+  console.log('OnTabChange', args);
 }
 
 // Life cycle hooks
@@ -77,27 +83,24 @@ onMounted(async () => {
     :header="title"
     :visible="true"
     :draggable="false"
-    :style="{width: '50rem'}"
+    :style="{width: '75%'}"
     @update:visible="updateVisible">
     <div>
-      <TabView>
-        <TabPanel v-for="tab in model.tabs" :key="tab.key" :header="tab.title">
-          <div>Tab content</div>
+      <TabView v-model:activeIndex="activeTabIndex"
+               @tabChange="onTabChange">
+        <TabPanel v-for="tab in model.tabs"
+                  :key="tab.key"
+                  :header="tab.title">
+          <DataObjectRecordsTable :is-active="tab.isActive"
+                                  :kind="kind"
+                                  :name="name"
+                                  :object-uid="uid"
+                                  :register-uid="tab.uid"
+                                  :columns="tab.columns"
+                                  ></DataObjectRecordsTable>
         </TabPanel>
       </TabView>
     </div>
-    <template #footer>
-      <Button
-        class="mr-1"
-        :label="$t('close')"
-        severity="secondary"
-        size="small"
-        outlined
-        icon="pi pi-times"
-        @click="onCloseClick"
-      />
-
-    </template>
   </Dialog>
 </template>
 
