@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, defineProps, PropType, watch, computed,
+  ref, onMounted, defineProps, defineEmits, PropType, watch, computed,
 } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
@@ -25,8 +25,8 @@ const props = defineProps({
 });
 
 // Defaults
-const defaultRowsPerPage = 20;
-const defaultRowsPerPageSource = [10, 20, 50, 100];
+const defaultRowsPerPage = 100;
+const defaultRowsPerPageSource = [10, 20, 50, 100, 200, 500];
 
 // Data
 const rows = ref<any[]>([]);
@@ -36,6 +36,11 @@ const rowsPerPageSource = ref<number[]>(defaultRowsPerPageSource);
 const dataTableStyle = computed(() => ({
   fontSize: '14px',
 }));
+
+// Emits
+const emits = defineEmits({
+  isWaitingChange: (value: boolean) => true,
+});
 
 // Methods
 function getColumn(name: string): any {
@@ -70,12 +75,16 @@ async function initAsync(): Promise<void> {
     return;
   }
 
+  emits('isWaitingChange', true);
+
   const response = await provider.getRecordsAsync(
     props.kind,
     props.name,
     props.objectUid,
     props.registerUid,
   );
+
+  emits('isWaitingChange', false);
 
   if (response.isOK) {
     rows.value = response.data.rows;

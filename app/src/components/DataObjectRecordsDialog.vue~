@@ -68,7 +68,7 @@ function updateVisible(value: boolean): void {
   }
 }
 
-function onTabChange(): void {
+function onTabChange(args: any): void {
   setTabActive();
 }
 
