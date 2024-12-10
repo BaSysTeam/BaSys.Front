@@ -4,6 +4,7 @@ export default class DataTableColumnViewModel {
   title: string;
   width: string;
   dataType: string;
+  numberDigits: number;
   isReference: boolean;
   style: any;
 
@@ -17,9 +18,16 @@ export default class DataTableColumnViewModel {
     this.title = data.title || '';
     this.width = data.width || '';
     this.dataType = data.dataType || '';
+    this.numberDigits = data.numberDigits || 0;
     this.isReference = data.isReference || false;
 
-    this.style = {};
+    this.style = { width: 'auto', minWidth: 'auto', maxWidth: 'auto' };
+    if (this.width) {
+      this.setWidth(this.width);
+    }
+    if (this.isNumber && !this.isReference) {
+      this.style.textAlign = 'right';
+    }
   }
 
   get isBoolean(): boolean {
@@ -32,5 +40,11 @@ export default class DataTableColumnViewModel {
 
   get isDate(): boolean {
     return this.dataType === 'date';
+  }
+
+  setWidth(widthExpression: string): void {
+    this.style.width = widthExpression;
+    this.style.maxWidth = widthExpression;
+    this.style.minWidth = widthExpression;
   }
 }

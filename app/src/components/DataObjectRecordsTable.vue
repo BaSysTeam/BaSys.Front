@@ -1,23 +1,16 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, PropType, watch, computed,
+  ref, onMounted, defineProps, PropType, watch, computed,
 } from 'vue';
-import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue/useconfirm';
-import { useI18n } from 'vue-i18n';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import DataObjectRecordsProvider from '@/dataProviders/dataObjectRecordsProvider';
 import DataTableColumnViewModel from '@/models/dataTableColumnViewModel';
-import DataObjectRecordsDialogViewModel from '@/models/dataObjectRecordsDialogViewModel';
 import ValuesFormatter from '../../../shared/src/helpers/valuesFormatter';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 
 // Infrastructure
-const { t } = useI18n({ useScope: 'global' });
-const router = useRouter();
-const confirmVue = useConfirm();
 const provider = new DataObjectRecordsProvider();
 const toastHelper = new ToastHelper(useToast());
 
@@ -60,6 +53,9 @@ function formatValue(row: any, field: string): any {
     if (column.isDate) {
       return ValuesFormatter.formatDateTime(row[field]);
     }
+    if (column.isNumber) {
+      return ValuesFormatter.formatNumber(row[field], column.numberDigits);
+    }
   }
 
   return row[field];
@@ -80,9 +76,6 @@ async function initAsync(): Promise<void> {
     props.objectUid,
     props.registerUid,
   );
-
-  console.log('Init records table', props.registerUid);
-  console.log('Rows', response.data.rows);
 
   if (response.isOK) {
     rows.value = response.data.rows;

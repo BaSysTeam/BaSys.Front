@@ -56,12 +56,12 @@ function getColumn(name: string): any {
 function formatValue(row: any, field: string): any {
   const column = props.columns.find((x) => x.name === field);
 
-  console.log('format value', row, field);
-  console.log('current column', column);
-
   if (column) {
     if (column.isDate) {
       return ValuesFormatter.formatDateTime(row[field]);
+    }
+    if (column.isNumber) {
+      return ValuesFormatter.formatNumber(row[field], column.numberDigits);
     }
   }
 
@@ -83,9 +83,6 @@ async function initAsync(): Promise<void> {
     props.objectUid,
     props.registerUid,
   );
-
-  console.log('Init records table', props.registerUid);
-  console.log('Rows', response.data.rows);
 
   if (response.isOK) {
     rows.value = response.data.rows;
