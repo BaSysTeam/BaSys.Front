@@ -35,26 +35,11 @@ export default class DataObjectRecordsProvider {
     return result;
   }
 
-  async createRecordsAsync(kind: string, name: string, uid: string):
-    Promise<ResultWrapper<boolean>> {
+  async createRecordsAsync(kind: string, name: string, uid: string): Promise<ResultWrapper<boolean>> {
     let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
 
     try {
       const { data } = await axios.post(`${this.BASE_URL}/${kind}/${name}/${uid}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
-  }
-
-  async deleteRecordsAsync(kind: string, name: string, uid: string):
-    Promise<ResultWrapper<boolean>> {
-    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
-
-    try {
-      const { data } = await axios.delete(`${this.BASE_URL}/${kind}/${name}/${uid}`);
       result = data;
     } catch (error) {
       console.error('error', error);

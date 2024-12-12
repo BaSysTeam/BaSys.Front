@@ -10,6 +10,7 @@ import DataObject from '@/models/dataObject';
 import DataObjectHeaderEdit from '@/components/DataObjectHeaderEdit.vue';
 import DataObjectDetailTableEdit from '@/components/DataObjectDetailTableEdit.vue';
 import ObjectEvaluator from '@/evalEngine/objectEvaluator';
+import DataObjectRecordsProvider from '@/dataProviders/dataObjectRecordsProvider';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
@@ -85,6 +86,7 @@ export default class DataObjectEditComponent extends Vue {
   isModified = false;
   title = '';
   dataObjectsProvider = new DataObjectsProvider();
+  recordsProvider = new DataObjectRecordsProvider();
   model = new DataObjectViewModel(null);
   toastHelper = new ToastHelper(useToast());
   windowHeight = window.innerHeight;
@@ -239,6 +241,46 @@ export default class DataObjectEditComponent extends Vue {
 
   public triggerRecalculateClick(): void {
     this.recalculate();
+  }
+
+  async createRecords(): Promise<void> {
+    if (this.isModified) {
+      return;
+    }
+
+    const response = await this.recordsProvider.createRecordsAsync(this.kind, this.name, this.uid);
+    if (response.isOK) {
+      this.toastHelper.success('Records created');
+      this.model.setCreateRecords(true);
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+  }
+
+  async deleteRecords(): Promise<void> {
+    if (this.isModified) {
+      return;
+    }
+
+    const response = await this.recordsProvider.deleteRecordsAsync(this.kind, this.name, this.uid);
+    if (response.isOK) {
+      this.toastHelper.success('Records deleted');
+      this.model.setCreateRecords(false);
+    } else {
+      this.toastHelper.error(response.message);
+      console.error(response.presentation);
+    }
+  }
+
+  public triggerCreateRecords(): void {
+    console.log('trigger create records');
+    this.createRecords();
+  }
+
+  public triggerDeleteRecords(): void {
+    console.log('trigger delete records');
+    this.deleteRecords();
   }
 
   @Emit('isModifiedChanged')

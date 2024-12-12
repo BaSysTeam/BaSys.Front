@@ -135,15 +135,10 @@ export default class DataObjectEditView extends Vue {
 
   onCreateRecordsClick(): void {
     console.log('Create records');
-    if (this.editComponentRef) {
-      this.editComponentRef.triggerCreateRecords();
-    }
   }
 
   onDeleteRecordsClick(): void {
-    if (this.editComponentRef) {
-      this.editComponentRef.triggerDeleteRecords();
-    }
+    console.log('Delete records');
   }
 
   onLogPanelHide(): void {
