@@ -16,7 +16,7 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import ConfirmDialog from 'primevue/confirmdialog';
-import DataObjectEditDialog from '@/components/DataObjectEditDialog.vue';
+import DataObjectEditDialog from '@/components/DataObjectEditDialogDeprecated.vue';
 import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import RecordsButton from '@/components/standardButtons/RecordsButton.vue';
@@ -416,7 +416,7 @@ async function onCreateRecordsClick(): Promise<void> {
     toastHelper.success(t('recordsCreated'));
     setCreateRecords(true);
   } else {
-   registerError(response);
+    registerError(response);
   }
 }
 

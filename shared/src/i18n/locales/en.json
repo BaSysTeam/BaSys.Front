@@ -78,6 +78,7 @@
   "kind": "Kind",
   "level": "Level",
   "link": "Link",
+  "log": "Log",
   "logLevel": "Log level",
   "main": "Main",
   "mainTab": "Main",

@@ -1,6 +1,8 @@
-<script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { Prop, Ref } from 'vue-property-decorator';
+<script setup lang="ts">
+import {
+  ref, onMounted, defineProps, defineEmits,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
@@ -12,144 +14,154 @@ import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponen
 import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
 import { LogLevels } from '../../../shared/src/enums/logLevels';
 
-@Options({
-  components: {
-    DataObjectRecordsDialog,
-    RecordsButton,
-    LogPanel,
-    Dialog,
-    Button,
-    SplitButton,
-    DataObjectEditComponent,
-    ViewTitleComponent,
-  },
-})
-export default class DataObjectEditDialog extends Vue {
-  // Regime of editing: edit | copy | add.
-  @Prop({ required: true, type: String, default: 'edit' })
-  regime!: string;
+// Infrastructure
+const { t } = useI18n({ useScope: 'global' });
+const logger = new InMemoryLogger(LogLevels.Error);
 
-  // Name of metadata object kind.
-  @Prop({ required: true, type: String })
-  kind!: string;
+// Props
+const props = defineProps({
+  regime: { type: String, required: true, default: 'edit' },
+  kind: { type: String, required: true },
+  name: { type: String, required: true },
+  uid: { type: String, default: '' },
+  copyUid: { type: String, default: '' },
+  title: { type: String, default: '' },
+});
 
-  // Name of metadata object.
-  @Prop({ required: true, type: String })
-  name!: string;
+// Data
+const isModified = ref(false);
+const isWaiting = ref(false);
+const closeAfterSave = ref(false);
+const isCalculationLogOpen = ref(false);
+const actionsButtonItems = ref<any[]>([]);
+const canCreateRecords = ref(false);
+const isRecordsDialogOpen = ref(false);
+const editComponentRef = ref<any>(null);
 
-  // Identifier of editing item.
-  @Prop({ type: String, default: '' })
-  uid!: string;
+// Emit
+const emit = defineEmits({
+  close: () => true,
+  saved: (args: string) => true,
+});
 
-  // Identifier of source item (item which was copied).
-  @Prop({ type: String, default: '' })
-  copyUid!: string;
+// Methods
 
-  // Title of the dialog.
-  @Prop({ type: String, default: '' })
-  title!: string;
+// Event handlers
+function onCloseClick(): void {
+  emit('close');
+}
 
-  isModified = false;
-  isWaiting = false;
-  closeAfterSave = false;
-  isCalculationLogOpen = false;
-  logger = new InMemoryLogger(LogLevels.Error);
-  actionsButtonItems: any[] = [];
-  canCreateRecords = false;
-  isRecordsDialogOpen = false;
+function onRecordsClick(): void {
+  isRecordsDialogOpen.value = true;
+}
 
-  @Ref()
-  editComponentRef!: any;
+function onRecordsDialogClose(): void {
+  isRecordsDialogOpen.value = false;
+}
 
-  onCloseClick(): void {
-    this.$emit('close');
-  }
-
-  onRecordsClick(): void {
-    this.isRecordsDialogOpen = true;
-  }
-
-  onRecordsDialogClose(): void {
-    this.isRecordsDialogOpen = false;
-  }
-
-  onSaveClick(): void {
-    console.log('onSaveClick');
-    if (this.editComponentRef) {
-      console.log('It is edit component');
-      this.editComponentRef.triggerSaveClick();
-    }
-  }
-
-  onSaveAndCloseClick(): void {
-    console.log('onSaveCloseClick');
-    if (this.editComponentRef) {
-      console.log('It is edit component');
-      this.closeAfterSave = true;
-      this.editComponentRef.triggerSaveClick();
-    }
-  }
-
-  onIsModifiedChanged(args: boolean): void {
-    this.isModified = args;
-  }
-
-  onIsWaitingChanged(args: boolean): void {
-    this.isWaiting = args;
-  }
-
-  onSaved(args: string): void {
-    console.log('saved', args);
-    this.$emit('saved', args);
-    if (args && this.closeAfterSave) {
-      this.$emit('close');
-    }
-    this.closeAfterSave = false;
-  }
-
-  onCloseTriggered(): void {
-    this.$emit('close');
-  }
-
-  onCalculationLogClick(): void {
-    this.isCalculationLogOpen = true;
-  }
-
-  onRecalculateClick(): void {
-    if (this.editComponentRef) {
-      this.editComponentRef.triggerRecalculateClick();
-    }
-  }
-
-  onLogPanelHide(): void {
-    this.isCalculationLogOpen = false;
-  }
-
-  updateVisible(value: boolean): void {
-    if (!value) {
-      this.$emit('close');
-    }
-  }
-
-  onCanCreateRecordsChanged(flagValue: boolean):void {
-    this.canCreateRecords = flagValue;
-  }
-
-  mounted(): void {
-    this.actionsButtonItems = [
-      {
-        label: 'Calculation log',
-        icon: 'pi pi-list',
-        command: () => this.onCalculationLogClick(),
-      },
-      {
-        label: 'Recalculate',
-        icon: 'pi pi-replay',
-        command: () => this.onRecalculateClick(),
-      },
-    ];
+function onSaveClick(): void {
+  if (editComponentRef.value) {
+    editComponentRef.value.triggerSaveClick();
   }
 }
+
+function onSaveAndCloseClick(): void {
+  if (editComponentRef.value) {
+    closeAfterSave.value = true;
+    editComponentRef.value.triggerSaveClick();
+  }
+}
+
+function onIsModifiedChanged(args: boolean): void {
+  isModified.value = args;
+}
+
+function onIsWaitingChanged(args: boolean): void {
+  isWaiting.value = args;
+}
+
+function onSaved(args: string): void {
+  emit('saved', args);
+  if (args && closeAfterSave.value) {
+    emit('close');
+  }
+  closeAfterSave.value = false;
+}
+
+function onCloseTriggered(): void {
+  emit('close');
+}
+
+function onCalculationLogClick(): void {
+  isCalculationLogOpen.value = true;
+}
+
+function onRecalculateClick(): void {
+  if (editComponentRef.value) {
+    editComponentRef.value.triggerRecalculateClick();
+  }
+}
+
+function onLogPanelHide(): void {
+  isCalculationLogOpen.value = false;
+}
+
+function updateVisible(value: boolean): void {
+  if (!value) {
+    emit('close');
+  }
+}
+
+function onCreateRecordsClick(): void {
+  if (editComponentRef.value) {
+    editComponentRef.value.triggerCreateRecords();
+  }
+}
+
+function onDeleteRecordsClick(): void {
+  if (editComponentRef.value) {
+    editComponentRef.value.triggerDeleteRecords();
+  }
+}
+
+function initActionsButtonItems(): void {
+  actionsButtonItems.value = [];
+
+  actionsButtonItems.value = [
+    {
+      label: t('calculationLog'),
+      icon: 'pi pi-list',
+      command: () => onCalculationLogClick(),
+    },
+    {
+      label: t('recalculate'),
+      icon: 'pi pi-replay',
+      command: () => onRecalculateClick(),
+    },
+  ];
+
+  if (canCreateRecords.value) {
+    actionsButtonItems.value.push({
+      label: t('createRecords'),
+      command: () => onCreateRecordsClick(),
+    });
+    actionsButtonItems.value.push({
+      label: t('deleteRecords'),
+      command: () => onDeleteRecordsClick(),
+    });
+  }
+}
+
+function onCanCreateRecordsChanged(flagValue: boolean):void {
+  canCreateRecords.value = flagValue;
+  initActionsButtonItems();
+}
+
+// Life cycle hooks
+onMounted(() => {
+  initActionsButtonItems();
+});
+
 </script>
 
 <template>
@@ -232,6 +244,9 @@ export default class DataObjectEditDialog extends Vue {
   </div>
 
   <DataObjectRecordsDialog v-if="isRecordsDialogOpen"
+                           :kind="kind"
+                           :name="name"
+                           :uid="uid"
                            @close="onRecordsDialogClose"></DataObjectRecordsDialog>
 
   <LogPanel :visible="isCalculationLogOpen"
