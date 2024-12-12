@@ -11,6 +11,7 @@ import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
+import SplitButton from 'primevue/splitbutton';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
@@ -21,6 +22,7 @@ import MetaObjectColumnViewModel from '@/models/metaObjectColumnViewModel';
 import RecordsButton from '@/components/standardButtons/RecordsButton.vue';
 import DataObjectRecordsDialog from '@/components/DataObjectRecordsDialog.vue';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
+import DataObjectRecordsProvider from '@/dataProviders/dataObjectRecordsProvider';
 import DataObjectList from '../models/dataObjectList';
 import DataObjectsProvider from '../dataProviders/dataObjectsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -35,6 +37,7 @@ const router = useRouter();
 const confirmVue = useConfirm();
 const toastHelper = new ToastHelper(useToast());
 const dataObjectsProvider = new DataObjectsProvider();
+const recordsProvider = new DataObjectRecordsProvider();
 
 // Props
 const props = defineProps({
@@ -56,6 +59,9 @@ const windowHeight = ref<number>(window.innerHeight);
 const isEditDialogOpen = ref<boolean>(false);
 const isRecordsDialogOpen = ref<boolean>(false);
 const editRegime = ref<string>('edit');
+const actionsButtonItems = ref<any[]>([]);
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+let initActionButtonItems = ():void => {};
 
 const dataTableStyle = computed(() => ({
   height: `${windowHeight.value - 150}px`,
@@ -70,6 +76,11 @@ const isSelectedRecordEmpty = computed(
 );
 
 // Methods
+function registerError(response: any): void {
+  toastHelper.error(response.message);
+  console.error(response.presentation);
+}
+
 function getPrimaryKey(): MetaObjectKindStandardColumn | null {
   const filterResult = dataObjectList.value.metaObjectKindSettings.standardColumns
     .filter((x) => x.isPrimaryKey);
@@ -80,10 +91,7 @@ function getPrimaryKey(): MetaObjectKindStandardColumn | null {
 }
 
 function navigateToAdd(): void {
-  const kindName = dataObjectList.value.metaObjectKindSettings.name;
-  const objectName = dataObjectList.value.metaObjectSettings.name;
-
-  router.push({ name: 'data-objects-add', params: { kind: kindName, name: objectName } });
+  router.push({ name: 'data-objects-add', params: { kind: props.kind, name: props.name } });
 }
 
 function getCurrentUid(): string {
@@ -93,10 +101,22 @@ function getCurrentUid(): string {
   return selectedRecord.value[primaryKey.name];
 }
 
-function navigateToEdit(): void {
-  const kindName = dataObjectList.value.metaObjectKindSettings.name;
-  const objectName = dataObjectList.value.metaObjectSettings.name;
+function setCreateRecords(flagValue: boolean): void {
+  if (isSelectedRecordEmpty.value) {
+    return;
+  }
+  const columnUid = dataObjectList.value.metaObjectKindSettings
+    .recordsSettings.sourceCreateRecordsColumnUid;
 
+  const columnCreateRecords = dataObjectList.value.metaObjectSettings.header.columns
+    .find((column) => column.uid === columnUid);
+
+  if (columnCreateRecords) {
+    selectedRecord.value[columnCreateRecords.name] = flagValue;
+  }
+}
+
+function navigateToEdit(): void {
   const filterResult = dataObjectList.value.metaObjectKindSettings.standardColumns
     .filter((x) => x.isPrimaryKey);
 
@@ -105,20 +125,17 @@ function navigateToEdit(): void {
   const primaryKey = filterResult[0];
   const uid = selectedRecord.value[primaryKey.name];
 
-  router.push({ name: 'data-objects-edit', params: { kind: kindName, name: objectName, uid } });
+  router.push({ name: 'data-objects-edit', params: { kind: props.kind, name: props.name, uid } });
 }
 
 function navigateToCopy(): void {
-  const kindName = dataObjectList.value.metaObjectKindSettings.name;
-  const objectName = dataObjectList.value.metaObjectSettings.name;
-
   const primaryKey = getPrimaryKey();
   if (!primaryKey) {
     return;
   }
   const uid = selectedRecord.value[primaryKey.name];
 
-  router.push({ name: 'data-objects-copy', params: { kind: kindName, name: objectName, copyUid: uid } });
+  router.push({ name: 'data-objects-copy', params: { kind: props.kind, name: props.name, copyUid: uid } });
 }
 
 function startAdd(): void {
@@ -146,7 +163,6 @@ function startCopy(): void {
 }
 
 function startEdit(): void {
-  console.log('start edit, title', this.title);
   if (isSelectedRecordEmpty.value) {
     return;
   }
@@ -182,8 +198,7 @@ async function deleteItem(): Promise<void> {
     }
     toastHelper.success(response.message);
   } else {
-    toastHelper.error(response.message);
-    console.error(response.presentation);
+    registerError(response);
   }
 }
 
@@ -203,7 +218,6 @@ function initColumns(): void {
 
     columns.value.push(columnViewModel);
   });
-  console.log('init columns list', columns.value);
 }
 
 function initFilters(): void {
@@ -234,12 +248,10 @@ function initFilters(): void {
 async function init(): Promise<void> {
   isWaiting.value = true;
 
-  const response = await dataObjectsProvider.getCollection(this.kind, this.name);
+  const response = await dataObjectsProvider.getCollection(props.kind, props.name);
   if (response.isOK) {
     dataObjectList.value = response.data;
     dataTableItems.value = dataObjectList.value.items.map((x) => x.header);
-    console.log('list response', response.data);
-    console.log('items', dataTableItems.value);
     if (dataTableItems.value.length) {
     // eslint-disable-next-line prefer-destructuring
       selectedRecord.value = dataTableItems.value[0];
@@ -248,9 +260,9 @@ async function init(): Promise<void> {
     document.title = `${title.value} - BaSYS`;
     initColumns();
     initFilters();
+    initActionButtonItems();
   } else {
-    toastHelper.error(response.message);
-    console.error(response.presentation);
+    registerError(response);
   }
 
   isWaiting.value = false;
@@ -322,8 +334,7 @@ async function handleItemSaved(savedUid: string): Promise<void> {
       selectedRecord.value = dataTableItems.value[index];
     }
   } else {
-    toastHelper.error(response.message);
-    console.error(response.presentation);
+    registerError(response);
   }
 }
 
@@ -359,13 +370,13 @@ function onDeleteClick(): void {
   }
 
   confirmVue.require({
-    message: 'Delete item?',
-    header: 'Confirmation',
+    message: t('deleteItemQuestion'),
+    header: t('confirmation'),
     icon: 'pi pi-exclamation-triangle',
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
-    acceptLabel: 'Delete',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('delete'),
     accept: () => deleteItem(),
   });
 }
@@ -395,12 +406,55 @@ function onRecordsDialogClose(): void {
   isRecordsDialogOpen.value = false;
 }
 
+async function onCreateRecordsClick(): Promise<void> {
+  if (isSelectedRecordEmpty.value) {
+    return;
+  }
+  const uid = getCurrentUid();
+  const response = await recordsProvider.createRecordsAsync(props.kind, props.name, uid);
+  if (response.isOK) {
+    toastHelper.success(t('recordsCreated'));
+    setCreateRecords(true);
+  } else {
+   registerError(response);
+  }
+}
+
+async function onDeleteRecordsClick(): Promise<void> {
+  if (isSelectedRecordEmpty.value) {
+    return;
+  }
+  const uid = getCurrentUid();
+  const response = await recordsProvider.deleteRecordsAsync(props.kind, props.name, uid);
+  if (response.isOK) {
+    toastHelper.success(t('recordsDeleted'));
+    setCreateRecords(false);
+  } else {
+    registerError(response);
+  }
+}
+
 function onResize(): void {
   windowHeight.value = window.innerHeight;
 }
 
 // Life cycle hooks
 onMounted(() => {
+  initActionButtonItems = () => {
+    actionsButtonItems.value = [];
+
+    if (canCreateRecords.value) {
+      actionsButtonItems.value.push({
+        label: t('createRecords'),
+        command: () => onCreateRecordsClick(),
+      });
+      actionsButtonItems.value.push({
+        label: t('deleteRecords'),
+        command: () => onDeleteRecordsClick(),
+      });
+    }
+  };
+
   window.addEventListener('resize', onResize);
   document.title = 'BaSYS';
   windowHeight.value = window.innerHeight;
@@ -460,6 +514,15 @@ onDeactivated(() => {
           icon="pi pi-clone"
           @click="onCopyClick"
         />
+
+        <SplitButton v-if="canCreateRecords"
+          class="ml-1"
+          :label="$t('actions')"
+          severity="primary"
+          size="small"
+          outlined
+          :model="actionsButtonItems">
+        </SplitButton>
       </div>
     </div>
     <div class="grid">

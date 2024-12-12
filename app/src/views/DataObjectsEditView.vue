@@ -2,7 +2,6 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Ref } from 'vue-property-decorator';
 import { useRouter } from 'vue-router';
-import DataObjectWithMetadata from '@/models/dataObjectWithMetadata';
 import DataView from 'primevue/dataview';
 import Divider from 'primevue/divider';
 import Button from 'primevue/button';
