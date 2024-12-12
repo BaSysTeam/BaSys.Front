@@ -1,0 +1,301 @@
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Ref } from 'vue-property-decorator';
+import { useRouter } from 'vue-router';
+import DataView from 'primevue/dataview';
+import Divider from 'primevue/divider';
+import Button from 'primevue/button';
+import ButtonGroup from 'primevue/buttongroup';
+import RecordsButton from '@/components/standardButtons/RecordsButton.vue';
+import InputText from 'primevue/inputtext';
+import Sidebar from 'primevue/sidebar';
+import SplitButton from 'primevue/splitbutton';
+import DataObjectEditComponent from '@/components/DataObjectEditComponent.vue';
+import LogPanel from '@/components/LogPanel.vue';
+import DataObjectRecordsDialog from '@/components/DataObjectRecordsDialog.vue';
+import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+import InMemoryLogger from '../../../shared/src/models/inMemoryLogger';
+import { LogLevels } from '../../../shared/src/enums/logLevels';
+
+@Options({
+  components: {
+    DataObjectRecordsDialog,
+    RecordsButton,
+    LogPanel,
+    ViewTitleComponent,
+    DataView,
+    Divider,
+    Button,
+    ButtonGroup,
+    InputText,
+    Sidebar,
+    SplitButton,
+    DataObjectEditComponent,
+  },
+})
+export default class DataObjectEditView extends Vue {
+  // Name of metadata object kind.
+  @Prop({ required: true, type: String })
+  kind!: string;
+
+  // Name of metadata object.
+  @Prop({ required: true, type: String })
+  name!: string;
+
+  // Identifier of editing item.
+  @Prop({ required: false, type: String, default: '' })
+  uid!: string;
+
+  // Identifier of source item (item which was copied).
+  @Prop({ required: false, type: String, default: '' })
+  copyUid!: string;
+
+  @Ref()
+  editComponentRef!: any;
+
+  isWaiting = false;
+  isModified = false;
+  isCalculationLogOpen = false;
+  closeAfterSave = false;
+  title = 'BaSYS';
+  editRegime = 'edit';
+  logger = new InMemoryLogger(LogLevels.Error);
+  actionsButtonItems: any[] = [];
+  canCreateRecords = false;
+  isRecordsDialogOpen = false;
+
+  router = useRouter();
+
+  onBackClick(): void {
+    this.returnToList();
+  }
+
+  onSaveCloseClick(): void {
+    console.log('saveAndClose');
+    if (this.editComponentRef) {
+      this.closeAfterSave = true;
+      this.editComponentRef.triggerSaveClick();
+    }
+  }
+
+  onSaveClick(): void {
+    if (this.editComponentRef) {
+      this.editComponentRef.triggerSaveClick();
+    }
+  }
+
+  onRecordsClick(): void {
+    this.isRecordsDialogOpen = true;
+  }
+
+  onRecordsDialogClose(): void {
+    this.isRecordsDialogOpen = false;
+  }
+
+  onIsModifiedChanged(args: boolean): void {
+    this.isModified = args;
+  }
+
+  onIsWaitingChanged(args: boolean): void {
+    this.isWaiting = args;
+  }
+
+  onCanCreateRecordsChanged(flagValue: boolean): void {
+    this.canCreateRecords = flagValue;
+    this.initActionsButtonItems();
+  }
+
+  onTitleChanged(args: string): void {
+    this.title = args;
+    document.title = `${args} - BaSYS`;
+  }
+
+  onSaved(args: string): void {
+    console.log('saved', args);
+    if (args && this.closeAfterSave) {
+      this.returnToList();
+    }
+    this.closeAfterSave = false;
+  }
+
+  onCloseTriggered(): void {
+    this.returnToList();
+  }
+
+  onCalculationLogClick(): void {
+    this.isCalculationLogOpen = true;
+  }
+
+  onRecalculateClick(): void {
+    if (this.editComponentRef) {
+      this.editComponentRef.triggerRecalculateClick();
+    }
+  }
+
+  onCreateRecordsClick(): void {
+    console.log('Create records');
+    if (this.editComponentRef) {
+      this.editComponentRef.triggerCreateRecords();
+    }
+  }
+
+  onDeleteRecordsClick(): void {
+    if (this.editComponentRef) {
+      this.editComponentRef.triggerDeleteRecords();
+    }
+  }
+
+  onLogPanelHide(): void {
+    this.isCalculationLogOpen = false;
+  }
+
+  returnToList(): void {
+    this.router.push({
+      name: 'data-objects',
+      params: {
+        kind: this.kind,
+        name: this.name,
+      },
+    });
+  }
+
+  defineEditRegime(): void {
+    if (this.$route.name === 'data-objects-copy') {
+      this.editRegime = 'copy';
+    } else if (this.$route.name === 'data-objects-add') {
+      this.editRegime = 'add';
+    } else {
+      this.editRegime = 'edit';
+    }
+  }
+
+  beforeMount(): void {
+    this.defineEditRegime();
+    console.log('DataObjectEditView before mount', this.editRegime, this.$route.name);
+  }
+
+  initActionsButtonItems(): void {
+    this.actionsButtonItems = [];
+    this.actionsButtonItems = [
+      {
+        label: 'Calculation log',
+        icon: 'pi pi-list',
+        command: () => this.onCalculationLogClick(),
+      },
+      {
+        label: 'Recalculate',
+        icon: 'pi pi-replay',
+        command: () => this.onRecalculateClick(),
+      },
+    ];
+    if (this.canCreateRecords) {
+      this.actionsButtonItems.push({
+        label: 'Create records',
+        command: () => this.onCreateRecordsClick(),
+      });
+      this.actionsButtonItems.push({
+        label: 'Delete records',
+        command: () => this.onDeleteRecordsClick(),
+      });
+    }
+  }
+
+  mounted(): void {
+    this.initActionsButtonItems();
+  }
+}
+</script>
+
+<template>
+  <div>
+    <div class="grid">
+      <div class="col">
+        <ViewTitleComponent :title="title" :is-modified="isModified" :is-waiting="isWaiting"/>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="col">
+        <ButtonGroup>
+          <Button
+            :label="$t('back')"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-arrow-left"
+            @click="onBackClick"
+          />
+          <Button
+            :label="$t('saveAndClose')"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-save"
+            @click="onSaveCloseClick"
+          />
+          <Button
+            :label="$t('save')"
+            severity="primary"
+            size="small"
+            outlined
+            icon="pi pi-save"
+            @click="onSaveClick"
+          />
+
+        </ButtonGroup>
+        <RecordsButton v-if="canCreateRecords"
+                       @click="onRecordsClick">
+        </RecordsButton>
+
+        <SplitButton
+          class="ml-1"
+          :label="$t('actions')"
+          severity="primary"
+          size="small"
+          outlined
+          :model="actionsButtonItems">
+        </SplitButton>
+
+      </div>
+    </div>
+    <div class="grid">
+      <Divider class="m-2"/>
+    </div>
+    <div class="grid">
+      <div class="col-12">
+        <DataObjectEditComponent ref="editComponentRef"
+                                 :regime="editRegime"
+                                 :kind="kind"
+                                 :name="name"
+                                 :uid="uid"
+                                 :copyUid="copyUid"
+                                 :logger="logger"
+                                 render-place="page"
+                                 @is-modified-changed="onIsModifiedChanged"
+                                 @is-waiting-changed="onIsWaitingChanged"
+                                 @canCreateRecordsChanged="onCanCreateRecordsChanged"
+                                 @title-changed="onTitleChanged"
+                                 @saved="onSaved"
+                                 @close-trigger="onCloseTriggered"></DataObjectEditComponent>
+      </div>
+    </div>
+  </div>
+
+  <DataObjectRecordsDialog v-if="isRecordsDialogOpen"
+                           :kind="kind"
+                           :name="name"
+                           :uid="uid"
+                           @close="onRecordsDialogClose"></DataObjectRecordsDialog>
+
+  <LogPanel :visible="isCalculationLogOpen"
+            :logger="logger"
+            :title="$t('calculationLog')"
+            @hide="onLogPanelHide"></LogPanel>
+</template>
+
+<style scoped>
+.bs-required:after {
+  content: "*";
+  color: red;
+  font-size: 12pt;
+}
+</style>
