@@ -36,8 +36,8 @@ export default class DataObjectRecordsProvider {
   }
 
   async createRecordsAsync(kind: string, name: string, uid: string):
-    Promise<ResultWrapper<boolean>> {
-    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
+    Promise<ResultWrapper<any[]>> {
+    let result: ResultWrapper<any[]> = new ResultWrapper<any[]>();
 
     try {
       const { data } = await axios.post(`${this.BASE_URL}/${kind}/${name}/${uid}`);

@@ -1,6 +1,7 @@
 {
   "actions": "Действия",
   "add": "Добавить",
+  "all": "Все",
   "administration": "Администрирование",
   "addRecordsSettingsItem": "Добавить настройку записей",
   "addTableQuestion": "Добавить таблицу?",
@@ -56,6 +57,7 @@
   "down": "Вниз",
   "edit": "Редактировать",
   "editMethod": "Способ редактирования",
+  "errors": "Ошибки",
   "execute": "Выполнить",
   "expression": "Выражение",
   "expressionsConsole": "Консоль выражений",

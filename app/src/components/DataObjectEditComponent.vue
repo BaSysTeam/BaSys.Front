@@ -139,6 +139,9 @@ export default class DataObjectEditComponent extends Vue {
         this.isModifiedChanged(false);
         this.toastHelper.success(response.message);
         this.saved(this.model.getUid());
+        if (this.logger) {
+          this.logger.load(response.data);
+        }
       } else {
         this.handleError(response);
         this.saved('');
@@ -252,6 +255,9 @@ export default class DataObjectEditComponent extends Vue {
     if (response.isOK) {
       this.toastHelper.success('Records created');
       this.model.setCreateRecords(true);
+      if (this.logger) {
+        this.logger.load(response.data);
+      }
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);

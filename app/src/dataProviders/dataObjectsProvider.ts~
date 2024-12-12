@@ -70,8 +70,8 @@ export default class DataObjectsProvider {
   }
 
   async updateItem(metaObjectKindUid: string, metaObjectUid: string, item: DataObject)
-    : Promise<ResultWrapper<any[]>> {
-    let result: ResultWrapper<any[]> = new ResultWrapper<any[]>();
+    : Promise<ResultWrapper<number>> {
+    let result: ResultWrapper<number> = new ResultWrapper<number>();
 
     try {
       const payload = new DataObjectSaveDto(metaObjectKindUid, metaObjectUid, item);
