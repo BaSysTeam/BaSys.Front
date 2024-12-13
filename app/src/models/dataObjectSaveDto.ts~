@@ -6,12 +6,10 @@ export default class DataObjectSaveDto {
   item: DataObject;
   logLevel: number;
 
-  constructor(
-    metaObjectKindUid: string,
+  constructor(metaObjectKindUid: string,
     metaObjectUid: string,
     item: DataObject,
-    logLevel: number,
-  ) {
+    logLevel: number) {
     this.metaObjectKindUid = metaObjectKindUid;
     this.metaObjectUid = metaObjectUid;
     this.item = item;

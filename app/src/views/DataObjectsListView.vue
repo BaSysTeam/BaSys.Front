@@ -411,7 +411,7 @@ async function onCreateRecordsClick(): Promise<void> {
     return;
   }
   const uid = getCurrentUid();
-  const response = await recordsProvider.createRecordsAsync(props.kind, props.name, uid);
+  const response = await recordsProvider.createRecordsAsync(props.kind, props.name, uid, 4);
   if (response.isOK) {
     toastHelper.success(t('recordsCreated'));
     setCreateRecords(true);
