@@ -19,6 +19,7 @@ export default class InMemoryLogger {
  }
 
  clear(): void {
+   console.log('log cleared');
    this.messages = [];
  }
 
