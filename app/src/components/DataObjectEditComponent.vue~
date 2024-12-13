@@ -255,9 +255,6 @@ export default class DataObjectEditComponent extends Vue {
     if (response.isOK) {
       this.toastHelper.success('Records created');
       this.model.setCreateRecords(true);
-      if (this.logger) {
-        this.logger.load(response.data);
-      }
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);

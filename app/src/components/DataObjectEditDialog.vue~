@@ -44,6 +44,8 @@ const emit = defineEmits({
   saved: (args: string) => true,
 });
 
+// Methods
+
 // Event handlers
 function onCloseClick(): void {
   emit('close');

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  defineProps, PropType, defineEmits, ref, watch, onBeforeMount,
+  defineProps, PropType, defineEmits, ref, watch, onBeforeMount, computed,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';

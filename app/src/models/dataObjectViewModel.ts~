@@ -135,15 +135,6 @@ export default class DataObjectViewModel {
     this.isNew = this.checkIsNew();
   }
 
-  setCreateRecords(createRecords: boolean): void {
-    const columnUid = this.metaObjectKindSettings.recordsSettings.sourceCreateRecordsColumnUid;
-    const column = this.metaObjectSettings.header.getColumn(columnUid);
-    if (column == null) {
-      return;
-    }
-    this.item.header[column.name] = createRecords;
-  }
-
   getUid(): string {
     const primaryKey = this.metaObjectSettings.header.getPrimaryKey();
     if (primaryKey == null) {
