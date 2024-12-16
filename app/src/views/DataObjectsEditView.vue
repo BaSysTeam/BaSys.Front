@@ -35,6 +35,7 @@ const isModified = ref(false);
 const isCalculationLogOpen = ref(false);
 const closeAfterSave = ref(false);
 const title = ref('BaSYS');
+const currentUid = ref<string>('');
 const editRegime = ref('edit');
 const actionsButtonItems = ref<any[]>([]);
 const canCreateRecords = ref(false);
@@ -110,6 +111,7 @@ function onTitleChanged(args: string):void {
 }
 
 function onSaved(args: string): void {
+  currentUid.value = args;
   if (args && closeAfterSave.value) {
     returnToList();
   }
@@ -179,6 +181,7 @@ onBeforeMount(() => {
 
 onMounted(() => {
   initActionsButtonItems();
+  currentUid.value = props.uid;
 });
 
 </script>
@@ -260,7 +263,7 @@ onMounted(() => {
   <DataObjectRecordsDialog v-if="isRecordsDialogOpen"
                            :kind="kind"
                            :name="name"
-                           :uid="uid"
+                           :uid="currentUid"
                            @close="onRecordsDialogClose"></DataObjectRecordsDialog>
 
   <LogPanel :visible="isCalculationLogOpen"
