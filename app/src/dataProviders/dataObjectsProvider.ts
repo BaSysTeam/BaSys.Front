@@ -54,12 +54,22 @@ export default class DataObjectsProvider {
     return result;
   }
 
-  async createItem(metaObjectKindUid: string, metaObjectUid: string, item: DataObject)
+  async createItem(
+    metaObjectKindUid: string,
+    metaObjectUid: string,
+    item: DataObject,
+    logLevel: number,
+  )
     : Promise<ResultWrapper<string>> {
     let result: ResultWrapper<string> = new ResultWrapper<string>();
 
     try {
-      const payload = new DataObjectSaveDto(metaObjectKindUid, metaObjectUid, item);
+      const payload = new DataObjectSaveDto(
+        metaObjectKindUid,
+        metaObjectUid,
+        item,
+        logLevel,
+      );
       const { data } = await axios.post(this.BASE_URL, payload);
       result = data;
     } catch (error) {
@@ -69,12 +79,22 @@ export default class DataObjectsProvider {
     return result;
   }
 
-  async updateItem(metaObjectKindUid: string, metaObjectUid: string, item: DataObject)
+  async updateItem(
+    metaObjectKindUid: string,
+    metaObjectUid: string,
+    item: DataObject,
+    logLevel: number,
+  )
     : Promise<ResultWrapper<any[]>> {
     let result: ResultWrapper<any[]> = new ResultWrapper<any[]>();
 
     try {
-      const payload = new DataObjectSaveDto(metaObjectKindUid, metaObjectUid, item);
+      const payload = new DataObjectSaveDto(
+        metaObjectKindUid,
+        metaObjectUid,
+        item,
+        logLevel,
+      );
       const { data } = await axios.put(this.BASE_URL, payload);
       result = data;
     } catch (error) {
