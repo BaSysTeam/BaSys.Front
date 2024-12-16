@@ -16,18 +16,26 @@ interface Date{
 }
 
 Date.prototype.beginDay = function beginDay(): Date {
-  return new Date(this.getFullYear(), this.getMonth(), this.getDate());
+  return new Date(
+    Date.UTC(
+      this.getFullYear(),
+      this.getMonth(),
+      this.getDate(),
+    ),
+  );
 };
 
 Date.prototype.endDay = function endDay(): Date {
   return new Date(
-    this.getFullYear(),
-    this.getMonth(),
-    this.getDate(),
-    23,
-    59,
-    59,
-    999,
+    Date.UTC(
+      this.getFullYear(),
+      this.getMonth(),
+      this.getDate(),
+      23,
+      59,
+      59,
+      999,
+    ),
   );
 };
 
@@ -38,11 +46,23 @@ Date.prototype.addDays = function addDays(days: number): Date {
 };
 
 Date.prototype.beginMonth = function beginMonth():Date {
-  return new Date(this.getFullYear(), this.getMonth(), 1);
+  return new Date(
+    Date.UTC(
+      this.getFullYear(),
+      this.getMonth(),
+      1,
+    ),
+  );
 };
 
 Date.prototype.endMonth = function endMonth(): Date {
-  return (new Date(this.getFullYear(), this.getMonth() + 1, 0)).endDay();
+  return (new Date(
+    Date.UTC(
+      this.getFullYear(),
+      this.getMonth() + 1,
+      0,
+    ),
+  )).endDay();
 };
 
 Date.prototype.addMonths = function addMonths(months):Date {
@@ -78,7 +98,16 @@ Date.prototype.beginQuarter = function beginQuarter():Date {
       month = 0;
   }
 
-  return new Date(this.getFullYear(), month, 1, 0, 0, 0);
+  return new Date(
+    Date.UTC(
+      this.getFullYear(),
+      month,
+      1,
+      0,
+      0,
+      0,
+    ),
+  );
 };
 
 Date.prototype.endQuarter = function endQuarter():Date {
@@ -108,7 +137,13 @@ Date.prototype.endQuarter = function endQuarter():Date {
       month = 2;
   }
 
-  return (new Date(this.getFullYear(), month, 1)).endMonth();
+  return (new Date(
+    Date.UTC(
+      this.getFullYear(),
+      month,
+      1,
+    ),
+  )).endMonth();
 };
 
 Date.prototype.addQuarters = function addQuarters(quarters):Date {
@@ -122,13 +157,15 @@ Date.prototype.beginYear = function beginYear(): Date {
 
 Date.prototype.endYear = function endYear(): Date {
   return new Date(
-    this.getFullYear(),
-    11,
-    31,
-    23,
-    59,
-    59,
-    999,
+    Date.UTC(
+      this.getFullYear(),
+      11,
+      31,
+      23,
+      59,
+      59,
+      999,
+    ),
   );
 };
 
