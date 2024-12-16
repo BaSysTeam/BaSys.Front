@@ -105,6 +105,7 @@ export default class DataObjectEditComponent extends Vue {
     const objectToSave = new DataObject(null);
     objectToSave.init(this.model.item, false);
     objectToSave.convertDatesToIso();
+    const logLevel = this.logger?.minimumLevel ?? 4;
 
     if (this.model.isNew) {
       // Insert new item.
@@ -112,6 +113,7 @@ export default class DataObjectEditComponent extends Vue {
         this.model.metaObjectKindSettings.uid,
         this.model.metaObjectSettings.uid,
         objectToSave,
+        logLevel,
       );
 
       this.isWaitingChanged(false);
@@ -131,6 +133,7 @@ export default class DataObjectEditComponent extends Vue {
         this.model.metaObjectKindSettings.uid,
         this.model.metaObjectSettings.uid,
         objectToSave,
+        logLevel,
       );
 
       this.isWaitingChanged(false);
@@ -251,10 +254,17 @@ export default class DataObjectEditComponent extends Vue {
       return;
     }
 
-    const response = await this.recordsProvider.createRecordsAsync(this.kind, this.name, this.uid);
+    const logLevel = this.logger?.minimumLevel ?? 4;
+    const response = await this.recordsProvider.createRecordsAsync(this.kind,
+      this.name,
+      this.uid,
+      logLevel);
     if (response.isOK) {
       this.toastHelper.success('Records created');
       this.model.setCreateRecords(true);
+      if (this.logger) {
+        this.logger.load(response.data);
+      }
     } else {
       this.toastHelper.error(response.message);
       console.error(response.presentation);
