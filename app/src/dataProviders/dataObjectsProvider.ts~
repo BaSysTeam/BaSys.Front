@@ -22,7 +22,7 @@ export default class DataObjectsProvider {
     return result;
   }
 
-  async queryRegistratorRoute(dto: any): Promise<ResultWrapper<DataObjectList>> {
+  async getRegistratorRoute(dto: any): Promise<ResultWrapper<DataObjectList>> {
     let result: ResultWrapper<DataObjectList> = new ResultWrapper<DataObjectList>();
 
     try {

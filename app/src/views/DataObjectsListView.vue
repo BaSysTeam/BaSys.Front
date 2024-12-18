@@ -75,6 +75,14 @@ const isSelectedRecordEmpty = computed(
   () => Object.keys(selectedRecord.value).length === 0,
 );
 
+const isRecordsList = computed(
+  () => dataObjectList.value.isRecordsList,
+);
+
+const isDisabled = computed(
+  () => dataObjectList.value.isRecordsList,
+);
+
 // Methods
 function registerError(response: any): void {
   toastHelper.error(response.message);
@@ -116,16 +124,35 @@ function setCreateRecords(flagValue: boolean): void {
   }
 }
 
-function navigateToEdit(): void {
-  const filterResult = dataObjectList.value.metaObjectKindSettings.standardColumns
-    .filter((x) => x.isPrimaryKey);
+async function navigateToEdit(): Promise<void> {
+  if (dataObjectList.value.isRecordsList) {
+    // Navigate to records creator.
+    const queryDto: any = {
+      kind: props.kind,
+      name: props.name,
+      data: selectedRecord.value,
+    };
 
-  if (!filterResult.length) return;
+    const response = await dataObjectsProvider.queryRegistratorRoute(queryDto);
+    if (response.isOK) {
+      const routeData:any = response.data;
+      const url = `app#/data-objects/edit/${routeData.kind}/${routeData.name}/${routeData.uid}`;
+      window.open(url, '_blank');
+    } else {
+      registerError(response);
+    }
+  } else {
+    // Navigate to DataObject edit.
+    const filterResult = dataObjectList.value.metaObjectKindSettings.standardColumns
+      .filter((x) => x.isPrimaryKey);
 
-  const primaryKey = filterResult[0];
-  const uid = selectedRecord.value[primaryKey.name];
+    if (!filterResult.length) return;
 
-  router.push({ name: 'data-objects-edit', params: { kind: props.kind, name: props.name, uid } });
+    const primaryKey = filterResult[0];
+    const uid = selectedRecord.value[primaryKey.name];
+
+    await router.push({ name: 'data-objects-edit', params: { kind: props.kind, name: props.name, uid } });
+  }
 }
 
 function navigateToCopy(): void {
@@ -251,6 +278,7 @@ async function init(): Promise<void> {
   const response = await dataObjectsProvider.getCollection(props.kind, props.name);
   if (response.isOK) {
     dataObjectList.value = response.data;
+    console.log('DataObjectList', dataObjectList.value);
     dataTableItems.value = dataObjectList.value.items.map((x) => x.header);
     if (dataTableItems.value.length) {
     // eslint-disable-next-line prefer-destructuring
@@ -479,6 +507,7 @@ onDeactivated(() => {
         <ButtonGroup>
           <Button
             :label="$t('add')"
+            :disabled="isDisabled"
             severity="primary"
             size="small"
             outlined
@@ -487,6 +516,7 @@ onDeactivated(() => {
           />
           <Button
             :label="$t('edit')"
+            :disabled = "isDisabled"
             severity="primary"
             size="small"
             outlined
@@ -495,6 +525,7 @@ onDeactivated(() => {
           />
           <Button
             :label="$t('delete')"
+            :disabled = "isDisabled"
             severity="danger"
             size="small"
             outlined
@@ -508,6 +539,7 @@ onDeactivated(() => {
         <Button
           class="ml-1"
           v-tooltip="$t('copy')"
+          :disabled="isDisabled"
           severity="primary"
           size="small"
           outlined
@@ -518,6 +550,7 @@ onDeactivated(() => {
         <SplitButton v-if="canCreateRecords"
           class="ml-1"
           :label="$t('actions')"
+          :disabled="isDisabled"
           severity="primary"
           size="small"
           outlined
