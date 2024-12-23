@@ -41,17 +41,19 @@ export default class MetaObjectColumnViewModel {
     this.name = column.name;
     this.uid = column.uid;
     this.title = column.title;
-    this.dataTypeUid = column.dataTypeUid;
-    this.required = column.required;
-    this.numberDigits = column.numberDigits;
+    this.dataTypeUid = column.dataSettings.dataTypeUid;
+    this.required = column.dataSettings.required;
+    this.numberDigits = column.dataSettings.numberDigits;
 
-    this.isPrimaryKey = column.primaryKey;
+    this.isPrimaryKey = column.dataSettings.primaryKey;
 
     if (this.isPrimaryKey) {
       return;
     }
 
-    const dataType = dataTypes.find((x) => x.uid === column.dataTypeUid);
+    const dataType = dataTypes.find(
+      (x) => x.uid === column.dataSettings.dataTypeUid,
+    );
 
     if (!dataType) {
       return;
