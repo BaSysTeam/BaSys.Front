@@ -1,22 +1,26 @@
 import { Guid } from 'guid-typescript';
 import MetaObjectKindStandardColumn from './metaObjectKindStandardColumn';
 import MetaObjectTableColumnRenderSettings from './metaObjectTableColumnRenderSettings';
+import MetaObjectTableColumnDataSettings from './metaObjectTableColumnDataSettings';
 import DependencyInfo from './dependencyInfo';
 
 export default class MetaObjectTableColumn {
   uid:string;
   title:string;
   name:string;
-  dataTypeUid:string;
-  stringLength:number;
-  numberDigits:number;
-  primaryKey:boolean;
-  required:boolean;
-  unique:boolean;
-  defaultValue: string;
-  isStandard:boolean;
-  renderSettings:MetaObjectTableColumnRenderSettings;
   formula:string;
+  isStandard:boolean;
+  // dataTypeUid:string;
+  // stringLength:number;
+  // numberDigits:number;
+  // primaryKey:boolean;
+  // required:boolean;
+  // unique:boolean;
+  // defaultValue: string;
+
+  renderSettings:MetaObjectTableColumnRenderSettings;
+  dataSettings: MetaObjectTableColumnDataSettings;
+
   dependencies: DependencyInfo[];
 
   constructor(params: any) {
@@ -28,15 +32,10 @@ export default class MetaObjectTableColumn {
     this.uid = data.uid || Guid.create().toString();
     this.title = data.title || '';
     this.name = data.name || '';
-    this.dataTypeUid = data.dataTypeUid || '';
-    this.stringLength = data.stringLength || 100;
-    this.numberDigits = data.numberDigits || 2;
-    this.primaryKey = data.primaryKey || false;
-    this.required = data.required || false;
-    this.unique = data.unique || false;
-    this.defaultValue = data.defaultValue || null;
+
     this.isStandard = data.isStandard || false;
 
+    this.dataSettings = new MetaObjectTableColumnDataSettings(data.dataSettings);
     this.renderSettings = new MetaObjectTableColumnRenderSettings(data.renderSettings);
 
     this.formula = data.formula || '';
@@ -52,12 +51,7 @@ export default class MetaObjectTableColumn {
     this.uid = standardColumn.uid;
     this.title = standardColumn.title;
     this.name = standardColumn.name;
-    this.dataTypeUid = standardColumn.dataTypeUid;
-    this.stringLength = standardColumn.stringLength;
-    this.numberDigits = standardColumn.numberDigits;
-    this.primaryKey = standardColumn.isPrimaryKey;
-    this.required = standardColumn.isRequired;
-    this.unique = standardColumn.isUnique;
+    this.dataSettings = new MetaObjectTableColumnDataSettings(standardColumn.dataSettings);
     this.isStandard = true;
   }
 }

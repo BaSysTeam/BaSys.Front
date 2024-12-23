@@ -119,12 +119,14 @@ export default class DataObjectDetailsTable {
   ): any {
     const newRow: any = {};
     tableSettings.columns.forEach((column) => {
-      const dataType = dataTypes.find((x) => x.uid === column.dataTypeUid);
+      const dataType = dataTypes.find(
+        (x) => x.uid === column.dataSettings.dataTypeUid,
+      );
       if (dataType) {
         let currentValue: any = '';
 
-        if (column.defaultValue) {
-          currentValue = this.parseDefaultValue(column.defaultValue, dataType.dbType);
+        if (column.dataSettings.defaultValue) {
+          currentValue = this.parseDefaultValue(column.dataSettings.defaultValue, dataType.dbType);
         } else if (dataType.uid === DataTypeDefaults.Int.uid
             || dataType.uid === DataTypeDefaults.Long.uid
             || dataType.uid === DataTypeDefaults.Decimal.uid) {

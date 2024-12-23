@@ -126,7 +126,7 @@ function onChange(): void {
           <!--Number digits-->
           <FieldGridComponent :title="$t('numberDigits')"
                               label-for="fld-number-digits"
-                              v-if="isNumber(column.dataSettings.dataTypeUid)">
+                              v-if="isNumber(column.dataTypeUid)">
 
             <InputNumber id="fld-number-digits"
                          v-model="column.dataSettings.numberDigits"
@@ -144,7 +144,7 @@ function onChange(): void {
           <!--String length-->
           <FieldGridComponent :title="$t('stringLength')"
                               label-for="fld-string-length"
-                              v-if="isString(column.dataSettings.dataTypeUid)">
+                              v-if="isString(column.dataTypeUid)">
             <InputNumber id="fld-string-length"
                          v-model="column.dataSettings.stringLength"
                          class="w-full"

@@ -199,31 +199,31 @@ onBeforeMount(() => {
              class="col-4 bs-label">{{$t('primaryKey')}}</label>
       <div class="col-8">
         <InputSwitch id="column-primary-key"
-                     v-model="column.dataSettings.primaryKey"
+                     v-model="column.primaryKey"
                      :disabled="isColumnDisabled()"
                      @change="onChange"></InputSwitch>
       </div>
     </div>
 
     <!--Unique-->
-    <div class="field grid" v-if="!column.dataSettings.primaryKey">
+    <div class="field grid" v-if="!column.primaryKey">
       <label for="column-unique"
              class="col-4 bs-label">{{$t('unique')}}</label>
       <div class="col-8">
         <InputSwitch id="column-unique"
-                     v-model="column.dataSettings.unique"
+                     v-model="column.unique"
                      :disabled="isColumnDisabled()"
                      @change="onChange"></InputSwitch>
       </div>
     </div>
 
     <!--Required-->
-    <div class="field grid" v-if="!column.dataSettings.primaryKey">
+    <div class="field grid" v-if="!column.primaryKey">
       <label for="column-required"
              class="col-4 bs-label">{{$t('required')}}</label>
       <div class="col-8">
         <InputSwitch id="column-required"
-                     v-model="column.dataSettings.required"
+                     v-model="column.required"
                      :disabled="isColumnDisabled()"
                      @change="onChange"></InputSwitch>
       </div>
@@ -235,7 +235,7 @@ onBeforeMount(() => {
                  size="small"
                  autocomplete="off"
                  class="w-full"
-                 v-model="column.dataSettings.defaultValue"
+                 v-model="column.defaultValue"
                  @change="onChange"></InputText>
     </FieldGridComponent>
 

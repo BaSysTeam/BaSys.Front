@@ -189,7 +189,7 @@ function initColumns(): void {
     || column.name === 'row_number') {
       return;
     }
-    const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataSettings.dataTypeUid);
+    const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);
 
     const columnName = isPrimitive ? column.name : `${column.name}_display`;
 

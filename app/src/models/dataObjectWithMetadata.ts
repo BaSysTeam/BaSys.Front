@@ -28,7 +28,7 @@ export default class DataObjectWithMetadata {
 
     // Convert ISO string to Date.
     this.metaObjectSettings.header.columns.forEach((column: MetaObjectTableColumn) => {
-      if (column.dataTypeUid === DataTypeDefaults.DateTime.uid) {
+      if (column.dataSettings.dataTypeUid === DataTypeDefaults.DateTime.uid) {
         console.log('date value before', this.item.header[column.name]);
         const isoString = this.item.header[column.name];
         if (isoString === '0001-01-01T00:00:00' || !isoString) {
@@ -84,7 +84,7 @@ export default class DataObjectWithMetadata {
       return false;
     }
 
-    if (primaryKey.dataTypeUid === '0234c067-7868-46b2-ba8e-e22fae5255cb') {
+    if (primaryKey.dataSettings.dataTypeUid === '0234c067-7868-46b2-ba8e-e22fae5255cb') {
       return true;
     }
 

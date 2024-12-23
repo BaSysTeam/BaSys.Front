@@ -79,8 +79,8 @@ export default class MetaObjectStorableSettings {
     pkColumn.uid = Guid.create().toString();
     pkColumn.name = 'id';
     pkColumn.title = 'Id';
-    pkColumn.dataTypeUid = DataTypeDefaults.Long.uid;
-    pkColumn.primaryKey = true;
+    pkColumn.dataSettings.dataTypeUid = DataTypeDefaults.Long.uid;
+    pkColumn.dataSettings.primaryKey = true;
     pkColumn.isStandard = true;
 
     detailTable.columns.push(pkColumn);
@@ -90,8 +90,8 @@ export default class MetaObjectStorableSettings {
     objectUidColumn.uid = Guid.create().toString();
     objectUidColumn.name = 'object_uid';
     objectUidColumn.title = 'Object UID';
-    objectUidColumn.dataTypeUid = objectPrimaryKeyDataTypeUid;
-    objectUidColumn.required = true;
+    objectUidColumn.dataSettings.dataTypeUid = objectPrimaryKeyDataTypeUid;
+    objectUidColumn.dataSettings.required = true;
     objectUidColumn.isStandard = true;
 
     detailTable.columns.push(objectUidColumn);
@@ -101,8 +101,8 @@ export default class MetaObjectStorableSettings {
     rowNumberColumn.uid = Guid.create().toString();
     rowNumberColumn.name = 'row_number';
     rowNumberColumn.title = 'Row number';
-    rowNumberColumn.dataTypeUid = DataTypeDefaults.Int.uid;
-    rowNumberColumn.required = true;
+    rowNumberColumn.dataSettings.dataTypeUid = DataTypeDefaults.Int.uid;
+    rowNumberColumn.dataSettings.required = true;
     rowNumberColumn.isStandard = true;
 
     detailTable.columns.push(rowNumberColumn);

@@ -91,7 +91,7 @@ function registerError(response: any): void {
 
 function getPrimaryKey(): MetaObjectKindStandardColumn | null {
   const filterResult = dataObjectList.value.metaObjectKindSettings.standardColumns
-    .filter((x) => x.isPrimaryKey);
+    .filter((x) => x.dataSettings.primaryKey);
 
   if (!filterResult.length) return null;
 
@@ -113,6 +113,11 @@ function setCreateRecords(flagValue: boolean): void {
   if (isSelectedRecordEmpty.value) {
     return;
   }
+  if (!dataObjectList.value.metaObjectKindSettings
+    .recordsSettings) {
+    return;
+  }
+
   const columnUid = dataObjectList.value.metaObjectKindSettings
     .recordsSettings.sourceCreateRecordsColumnUid;
 
@@ -144,7 +149,7 @@ async function navigateToEdit(): Promise<void> {
   } else {
     // Navigate to DataObject edit.
     const filterResult = dataObjectList.value.metaObjectKindSettings.standardColumns
-      .filter((x) => x.isPrimaryKey);
+      .filter((x) => x.dataSettings.primaryKey);
 
     if (!filterResult.length) return;
 
@@ -233,7 +238,7 @@ function initColumns(): void {
   columns.value = [];
   // eslint-disable-next-line no-restricted-syntax
   dataObjectList.value.metaObjectSettings.header.columns.forEach((column) => {
-    const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataTypeUid);
+    const isPrimitive = DataTypeDefaults.IsPrimitiveType(column.dataSettings.dataTypeUid);
 
     const columnName = isPrimitive ? column.name : `${column.name}_display`;
 
