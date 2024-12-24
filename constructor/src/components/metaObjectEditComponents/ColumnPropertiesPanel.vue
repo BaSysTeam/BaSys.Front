@@ -17,6 +17,7 @@ import ControlKindDefaults from '../../../../shared/src/dataProviders/controlKin
 import DataType from '../../../../shared/src/models/dataType';
 import DataTypeDefaults from '../../../../shared/src/dataProviders/dataTypeDefaults';
 import MetaObjectTableColumn from '../../../../shared/src/models/metaObjectTableColumn';
+import NameHelper from '../../../../shared/src/helpers/nameHelper';
 
 // @component
 const name = 'ColumnPropertiesPanel';
@@ -62,6 +63,13 @@ watch(() => props.column, (newValue, oldValue) => {
 });
 
 function onChange(): void {
+  emit('change');
+}
+
+function onTitleChange(): void {
+  if (!props.column.name) {
+    props.column.name = NameHelper.prepareName(props.column.title, false, 0);
+  }
   emit('change');
 }
 
@@ -116,7 +124,7 @@ onBeforeMount(() => {
                        autocomplete="off"
                        class="w-full"
                        v-model="column.title"
-                       @change="onChange"></InputText>
+                       @change="onTitleChange"></InputText>
           </div>
         </div>
 
@@ -157,7 +165,7 @@ onBeforeMount(() => {
     </div>
 
     <!--Number digits-->
-    <div class="field grid" v-if="isNumber(column.dataTypeUid)">
+    <div class="field grid" v-if="isNumber(column.dataSettings.dataTypeUid)">
       <label for="column-number-digits"
              class="col-4 bs-label">{{$t('numberDigits')}}</label>
       <div class="col-8">
@@ -175,7 +183,7 @@ onBeforeMount(() => {
     </div>
 
     <!--String length-->
-    <div class="field grid" v-if="isString(column.dataTypeUid)">
+    <div class="field grid" v-if="isString(column.dataSettings.dataTypeUid)">
       <label for="column-string-length"
              class="col-4 bs-label">{{$t('stringLength')}}</label>
       <div class="col-8">
