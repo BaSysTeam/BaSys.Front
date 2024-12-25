@@ -57,7 +57,7 @@ function onTitleChange(): void {
                    disabled
                    class="w-full"
                    v-model="settings.uid"
-                   @change="onChange"></InputText>
+                   @change="onTitleChange"></InputText>
       </div>
     </div>
 
@@ -70,7 +70,7 @@ function onTitleChange(): void {
                    autocomplete="off"
                    class="w-full"
                    v-model="settings.title"
-                   @change="onTitleChange"></InputText>
+                   @change="onChange"></InputText>
       </div>
     </div>
 

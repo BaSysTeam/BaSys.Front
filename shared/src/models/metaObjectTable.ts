@@ -25,7 +25,7 @@ export default class MetaObjectTable {
   }
 
   getPrimaryKey(): MetaObjectTableColumn | null {
-    const filterResult = this.columns.filter((x) => x.primaryKey);
+    const filterResult = this.columns.filter((x) => x.dataSettings.primaryKey);
     if (filterResult.length) {
       return filterResult[0];
     }
@@ -42,7 +42,7 @@ export default class MetaObjectTable {
   }
 
   getColumnByDataType(dataTypeUid: string): MetaObjectTableColumn | undefined {
-    return this.columns.find((x) => x.dataTypeUid === dataTypeUid);
+    return this.columns.find((x) => x.dataSettings.dataTypeUid === dataTypeUid);
   }
 
   newColumn(params: any): MetaObjectTableColumn {

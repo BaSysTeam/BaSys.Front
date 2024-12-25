@@ -18,9 +18,9 @@ export default class MetaObjectKindSettings {
     iconClass:string;
     orderByExpression: string;
     displayExpression: string;
-    recordsSettings: MetaObjectKindRecordsSettings;
+    recordsSettings: MetaObjectKindRecordsSettings | null;
     standardColumns: MetaObjectKindStandardColumn[];
-    availableRoles: Array<string>;
+    availableRights: Array<string>;
 
     constructor(params: any = {}) {
       let initialData: any = {};
@@ -43,14 +43,18 @@ export default class MetaObjectKindSettings {
       this.orderByExpression = initialData.orderByExpression || '';
       this.displayExpression = initialData.displayExpression || '';
 
-      this.recordsSettings = new MetaObjectKindRecordsSettings(initialData.recordsSettings);
+      if (this.canCreateRecords) {
+        this.recordsSettings = new MetaObjectKindRecordsSettings(initialData.recordsSettings);
+      } else {
+        this.recordsSettings = null;
+      }
 
       this.standardColumns = initialData.standardColumns
         ? initialData.standardColumns.map(
           (item: any) => new MetaObjectKindStandardColumn(item),
         ) : [];
 
-      this.availableRoles = initialData.availableRoles || [];
+      this.availableRights = initialData.availableRights || [];
     }
 
     isNew():boolean {

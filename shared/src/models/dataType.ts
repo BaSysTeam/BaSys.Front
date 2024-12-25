@@ -1,11 +1,13 @@
 import { DbType } from '../enums/dbTypes';
 
 export default class DataType {
-  uid!: string;
-  title!: string;
-  isPrimitive!: boolean;
-  dbType!: DbType;
-  objectKindUid!: string;
+  uid: string;
+  kind: string;
+  name: string;
+  title: string;
+  isPrimitive: boolean;
+  dbType: DbType;
+  objectKindUid: string;
 
   constructor(param: any) {
     let data: any = {};
@@ -14,6 +16,8 @@ export default class DataType {
     }
 
     this.uid = data.uid || '';
+    this.kind = data.kind || '';
+    this.name = data.name || '';
     this.title = data.title || '';
     this.dbType = data.dbType || DbType.String;
     this.isPrimitive = data.isPrimitive || false;

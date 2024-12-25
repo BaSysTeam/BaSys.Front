@@ -75,7 +75,6 @@ function onTitleChange(): void {
 
 function onDataTypeChange(): void {
   if (!props.column.name) {
-    // Substitute Name and Title for column from DataType.
     const dataType = props.dataTypes.find((x) => x.uid === props.column.dataSettings.dataTypeUid);
     if (dataType) {
       props.column.name = NameHelper.prepareName(dataType.name, false, 0);

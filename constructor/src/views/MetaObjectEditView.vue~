@@ -342,9 +342,10 @@ onBeforeMount(() => {
       });
     }
 
-    if (kindSettings.value.useDetailsTables) {
+    if (kindSettings.value.useDetailsTables){
       navMenuItems.value.push(tableGroups.value);
     }
+
 
     const otherGroup = {
       label: t('other'),
