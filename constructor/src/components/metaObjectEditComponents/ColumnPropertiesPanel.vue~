@@ -74,6 +74,16 @@ function onTitleChange(): void {
 }
 
 function onDataTypeChange(): void {
+  if (!props.column.name) {
+    const dataType = props.dataTypes.find((x) => x.uid === props.column.dataSettings.dataTypeUid);
+    if (dataType) {
+      props.column.name = NameHelper.prepareName(dataType.name, false, 0);
+      const ind = dataType.title.indexOf('.');
+      if (ind > -1) {
+        props.column.title = dataType.title.substring(ind + 1);
+      }
+    }
+  }
   prepareControlKinds();
   emit('change');
 }
@@ -165,7 +175,7 @@ onBeforeMount(() => {
     </div>
 
     <!--Number digits-->
-    <div class="field grid" v-if="isNumber(column.dataTypeUid)">
+    <div class="field grid" v-if="isNumber(column.dataSettings.dataTypeUid)">
       <label for="column-number-digits"
              class="col-4 bs-label">{{$t('numberDigits')}}</label>
       <div class="col-8">
@@ -183,7 +193,7 @@ onBeforeMount(() => {
     </div>
 
     <!--String length-->
-    <div class="field grid" v-if="isString(column.dataTypeUid)">
+    <div class="field grid" v-if="isString(column.dataSettings.dataTypeUid)">
       <label for="column-string-length"
              class="col-4 bs-label">{{$t('stringLength')}}</label>
       <div class="col-8">

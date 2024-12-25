@@ -74,6 +74,17 @@ function onTitleChange(): void {
 }
 
 function onDataTypeChange(): void {
+  if (!props.column.name) {
+    // Substitute Name and Title for column from DataType.
+    const dataType = props.dataTypes.find((x) => x.uid === props.column.dataSettings.dataTypeUid);
+    if (dataType) {
+      props.column.name = NameHelper.prepareName(dataType.name, false, 0);
+      const ind = dataType.title.indexOf('.');
+      if (ind > -1) {
+        props.column.title = dataType.title.substring(ind + 1);
+      }
+    }
+  }
   prepareControlKinds();
   emit('change');
 }
