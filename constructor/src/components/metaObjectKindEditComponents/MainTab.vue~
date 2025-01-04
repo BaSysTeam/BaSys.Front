@@ -26,6 +26,7 @@ const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const confirmVue = useConfirm();
 const helpService: any = inject('helpService');
+const helpPanel = ref();
 
 // Props
 const props = defineProps({
@@ -45,7 +46,6 @@ const containerStyle = computed(() => ({
   overflowY: 'auto',
 }));
 const helpText = ref<string>('');
-const helpPanel = ref();
 
 // Emits
 const emit = defineEmits(

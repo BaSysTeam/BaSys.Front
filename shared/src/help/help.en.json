@@ -1,4 +1,6 @@
 {
+  "constructor.uid": "Unique identifier of the object",
+  "constructor.title": "The name of the item that will be displayed in the interface. Maximum length is 100 characters.",
   "metaObjectKind.RecordSettings.CreateRecords": "A flag in the object that generates records, indicating that records need to be created.",
   "metaObjectKind.RecordSettings.Destination": "The type of metadata object that will store the created records.",
   "metaObjectKind.RecordSettings.DestinationPeriod": "A column of type DateTime that stores the record creation period.",

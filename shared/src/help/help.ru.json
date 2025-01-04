@@ -1,4 +1,6 @@
 {
+  "constructor.uid": "Уникальный идентификатор объекта",
+  "constructor.title": "Название элемента, которое будет отображаться в интерфейсе. Максимальная длина 100 символов.",
   "metaObjectKind.RecordSettings.CreateRecords": "Флаг в объекте, порождающем записи, указывающий, что необходимо создать записи.",
   "metaObjectKind.RecordSettings.Destination": "Вид объекта метаданных, который будет хранить созданные записи.",
   "metaObjectKind.RecordSettings.DestinationPeriod": "Колонка типа ДатаВремя, хранящая период создания записи.",

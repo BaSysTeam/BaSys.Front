@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import {
-  defineProps, PropType, defineEmits, ref, watch, onMounted,
+  defineProps, PropType, defineEmits, ref, watch, onMounted, inject,
 } from 'vue';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import InputSwitch from 'primevue/inputswitch';
 import Dropdown from 'primevue/dropdown';
+import OverlayPanel from 'primevue/overlaypanel';
+import FieldGridComponent from '@/components/FieldGridComponent.vue';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
 import NameHelper from '../../../../shared/src/helpers/nameHelper';
 
@@ -25,6 +27,11 @@ const props = defineProps({
   },
 });
 
+// Data
+const helpService: any = inject('helpService');
+const helpPanel = ref();
+const helpText = ref<string>('');
+
 // Emits
 const emit = defineEmits({ change: () => true });
 
@@ -41,6 +48,11 @@ function onTitleChange(): void {
   emit('change');
 }
 
+function onHelpClick(evt: any, key: string): void {
+  helpText.value = helpService.getHelp(key);
+  helpPanel.value.toggle(evt);
+}
+
 </script>
 
 <template>
@@ -48,31 +60,34 @@ function onTitleChange(): void {
   <div class="col-8">
 
     <!--Uid-->
-    <div class="field grid">
-      <label for="fld-uid" class="col-4 bs-label">Uid</label>
-      <div class="col-8">
-        <InputText id="fld-uid"
-                   size="small"
-                   autocomplete="off"
-                   disabled
-                   class="w-full"
-                   v-model="settings.uid"
-                   @change="onChange"></InputText>
-      </div>
-    </div>
+    <FieldGridComponent title="Uid"
+                        label-for="fld-uid"
+                        :is-help="true"
+                        help-key="constructor.uid"
+                        @helpClick="onHelpClick">
+      <InputText id="fld-uid"
+                 size="small"
+                 autocomplete="off"
+                 disabled
+                 class="w-full"
+                 v-model="settings.uid"
+                 @change="onChange"></InputText>
+    </FieldGridComponent>
 
     <!--Title-->
-    <div class="field grid">
-      <label for="fld-title" class="col-4 bs-label bs-required">{{$t('title')}}</label>
-      <div class="col-8">
-        <InputText id="fld-title"
-                   size="small"
-                   autocomplete="off"
-                   class="w-full"
-                   v-model="settings.title"
-                   @change="onTitleChange"></InputText>
-      </div>
-    </div>
+    <FieldGridComponent :title="$t('title')"
+                        :required="true"
+                        label-for="fld-title"
+                        :is-help="true"
+                        help-key="constructor.title"
+                        @helpClick="onHelpClick">
+      <InputText id="fld-title"
+                 size="small"
+                 autocomplete="off"
+                 class="w-full"
+                 v-model="settings.title"
+                 @change="onTitleChange"></InputText>
+    </FieldGridComponent>
 
     <!--Name-->
     <div class="field grid">
@@ -157,6 +172,16 @@ function onTitleChange(): void {
 
   </div>
 </div>
+
+  <OverlayPanel ref="helpPanel">
+    <div class="flex flex-column gap-3 w-20rem">
+      <p class="m-0">
+        {{helpText}}
+      </p>
+    </div>
+
+  </OverlayPanel>
+
 </template>
 
 <style scoped>
