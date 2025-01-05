@@ -1,6 +1,6 @@
 {
   "constructor.uid": "Уникальный идентификатор объекта",
-  "constructor.iconClass": "CSS класс отображаемой иконки. Отображаются иконки из библиотеки PrimeIcons https://v3.primevue.org/icons/",
+  "constructor.iconClas": "CSS класс отображаемой иконки. Отображаются иконки из библиотеки PrimeIcons https://v3.primevue.org/icons/",
   "constructor.title": "Название элемента, которое будет отображаться в интерфейсе. Максимальная длина 100 символов.",
   "metaObjectKind.RecordSettings.CreateRecords": "Флаг в объекте, порождающем записи, указывающий, что необходимо создать записи.",
   "metaObjectKind.RecordSettings.Destination": "Вид объекта метаданных, который будет хранить созданные записи.",

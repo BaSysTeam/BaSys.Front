@@ -111,7 +111,10 @@ function onHelpClick(evt: any, key: string): void {
     <!--Name-->
     <FieldGridComponent :title="$t('name')"
                         :required="true"
-                        label-for="fld-name">
+                        label-for="fld-name"
+                        :is-help="true"
+                        help-key="metaObjectKind.name"
+                        @helpClick="onHelpClick">
       <InputText id="fld-name"
                  size="small"
                  autocomplete="off"
@@ -134,7 +137,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--Icon class-->
     <FieldGridComponent :title="$t('iconClass')"
-                        label-for="fld-icon-class">
+                        label-for="fld-icon-class"
+                        :is-help="true"
+                        help-key="constructor.iconClass"
+                        @helpClick="onHelpClick">
       <InputText id="fld-icon-class"
                  size="small"
                  autocomplete="off"
