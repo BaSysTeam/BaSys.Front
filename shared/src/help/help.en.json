@@ -9,5 +9,6 @@
   "metaObjectKind.RecordSettings.DestinationMetaObject": "A column of type Unique Identifier that stores a reference to the metadata object that generated the records.",
   "metaObjectKind.RecordSettings.DestinationObject": "A column that stores a reference to the object that generated the records. The type depends on the primary key type of the metadata object.",
   "metaObjectKind.RecordSettings.DestinationRow": "A column of type Number that stores the row number of the details table that generated the record.",
-  "metaObjectKind.name": "A string identifier for the metadata kind. It must contain only lowercase Latin letters, digits, and underscores. The maximum length is 40 characters. It is used when creating database tables and in references to forms of metadata objects of this kind."
+  "metaObjectKind.name": "A string identifier for the metadata kind. It must contain only lowercase Latin letters, digits, and underscores. The maximum length is 40 characters. It is used when creating database tables and in references to forms of metadata objects of this kind.",
+  "metaObjectKind.prefix": "The prefix of the database table for objects of this metadata kind. It can contain only lowercase Latin letters and digits. The maximum length is 4 characters."
 }

@@ -126,7 +126,10 @@ function onHelpClick(evt: any, key: string): void {
     <!--Prefix-->
     <FieldGridComponent :title="$t('prefix')"
                         :required="true"
-                        label-for="fld-prefix">
+                        label-for="fld-prefix"
+                        :is-help="true"
+                        help-key="metaObjectKind.prefix"
+                        @helpClick="onHelpClick">
       <InputText id="fld-prefix"
                  size="small"
                  autocomplete="off"
