@@ -1,20 +1,23 @@
 <script setup lang="ts">
 import {
-  defineProps, PropType, defineEmits, ref, watch, onMounted,
+  defineProps, PropType, defineEmits, ref, inject,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import InputSwitch from 'primevue/inputswitch';
 import Dropdown from 'primevue/dropdown';
+import OverlayPanel from 'primevue/overlaypanel';
+import FieldGridComponent from '@/components/FieldGridComponent.vue';
 import MetaObjectStorableSettings from '../../../../shared/src/models/metaObjectStorableSettings';
 import NameHelper from '../../../../shared/src/helpers/nameHelper';
 
-// @component
-const name = 'MainTab';
+// Infrastructure
+const { t } = useI18n({ useScope: 'global' });
 
 const editMethods = ref([
-  { value: 0, text: 'Page' },
-  { value: 1, text: 'Dialog' },
+  { value: 0, text: t('editMethodPage') },
+  { value: 1, text: t('editMethodDialog') },
 ]);
 
 // Props
@@ -24,6 +27,11 @@ const props = defineProps({
     required: true,
   },
 });
+
+// Data
+const helpService: any = inject('helpService');
+const helpPanel = ref();
+const helpText = ref<string>('');
 
 // Emits
 const emit = defineEmits({ change: () => true });
@@ -41,6 +49,11 @@ function onTitleChange(): void {
   emit('change');
 }
 
+function onHelpClick(evt: any, key: string): void {
+  helpText.value = helpService.getHelp(key);
+  helpPanel.value.toggle(evt);
+}
+
 </script>
 
 <template>
@@ -48,115 +61,136 @@ function onTitleChange(): void {
   <div class="col-8">
 
     <!--Uid-->
-    <div class="field grid">
-      <label for="fld-uid" class="col-4 bs-label">Uid</label>
-      <div class="col-8">
-        <InputText id="fld-uid"
-                   size="small"
-                   autocomplete="off"
-                   disabled
-                   class="w-full"
-                   v-model="settings.uid"
-                   @change="onTitleChange"></InputText>
-      </div>
-    </div>
+    <FieldGridComponent title="Uid"
+                        label-for="fld-uid"
+                        :is-help="true"
+                        help-key="constructor.uid"
+                        @helpClick="onHelpClick">
+      <InputText id="fld-uid"
+                 size="small"
+                 autocomplete="off"
+                 disabled
+                 class="w-full"
+                 v-model="settings.uid"
+                 @change="onChange"></InputText>
+    </FieldGridComponent>
 
     <!--Title-->
-    <div class="field grid">
-      <label for="fld-title" class="col-4 bs-label bs-required">{{$t('title')}}</label>
-      <div class="col-8">
-        <InputText id="fld-title"
-                   size="small"
-                   autocomplete="off"
-                   class="w-full"
-                   v-model="settings.title"
-                   @change="onChange"></InputText>
-      </div>
-    </div>
+    <FieldGridComponent :title="$t('title')"
+                        :required="true"
+                        label-for="fld-title"
+                        :is-help="true"
+                        help-key="constructor.title"
+                        @helpClick="onHelpClick">
+      <InputText id="fld-title"
+                 size="small"
+                 autocomplete="off"
+                 class="w-full"
+                 v-model="settings.title"
+                 @change="onTitleChange"></InputText>
+    </FieldGridComponent>
 
     <!--Name-->
-    <div class="field grid">
-      <label for="fld-name" class="col-4 bs-label bs-required">{{$t('name')}}</label>
-      <div class="col-8">
-        <InputText id="fld-name"
-                   size="small"
-                   autocomplete="off"
-                   class="w-full"
-                   v-model="settings.name"
-                   @change="onChange"></InputText>
-      </div>
-    </div>
-
-    <!--Memo-->
-    <div class="field grid">
-      <label for="fld-memo" class="col-4 bs-label">{{$t('memo')}}</label>
-      <div class="col-8">
-        <Textarea id="fld-memo"
-                   size="small"
-                   autocomplete="off"
-                   class="w-full"
-                   rows="5"
-                   v-model="settings.memo"
-                   @change="onChange"></Textarea>
-      </div>
-    </div>
+    <FieldGridComponent :title="$t('name')"
+                        :required="true"
+                        label-for="fld-name"
+                        :is-help="true"
+                        help-key="metaObject.name"
+                        @helpClick="onHelpClick">
+      <InputText id="fld-name"
+                 size="small"
+                 autocomplete="off"
+                 class="w-full"
+                 v-model="settings.name"
+                 @change="onChange"></InputText>
+    </FieldGridComponent>
 
     <!--Order expression-->
-    <div class="field grid">
-      <label for="fld-order-expression" class="col-4 bs-label">{{$t('orderExpression')}}</label>
-      <div class="col-8">
-        <InputText id="fld-order-expression"
-                   size="small"
-                   autocomplete="off"
-                   class="w-full"
-                   v-model="settings.orderByExpression"
-                   @change="onChange"></InputText>
-      </div>
-    </div>
+    <FieldGridComponent :title="$t('orderExpression')"
+                        label-for="fld-order-expression"
+                        :is-help="true"
+                        help-key="metaObject.orderByExpression"
+                        @helpClick="onHelpClick">
+
+      <InputText id="fld-order-expression"
+                 size="small"
+                 autocomplete="off"
+                 class="w-full"
+                 v-model="settings.orderByExpression"
+                 @change="onChange"></InputText>
+    </FieldGridComponent>
 
     <!--Display expression-->
-    <div class="field grid">
-      <label for="fld-display-expression"
-             class="col-4 bs-label">{{$t('displayExpression')}}</label>
-      <div class="col-8">
-        <InputText id="fld-display-expression"
-                   size="small"
-                   autocomplete="off"
-                   class="w-full"
-                   v-model="settings.displayExpression"
-                   @change="onChange"></InputText>
-      </div>
-    </div>
+    <FieldGridComponent :title="$t('displayExpression')"
+                        label-for="fld-display-expression"
+                        :is-help="true"
+                        help-key="metaObject.displayExpression"
+                        @helpClick="onHelpClick">
+      <InputText id="fld-display-expression"
+                 size="small"
+                 autocomplete="off"
+                 class="w-full"
+                 v-model="settings.displayExpression"
+                 @change="onChange"></InputText>
+    </FieldGridComponent>
 
     <!--Edit method-->
-    <div class="field grid">
-      <label for="fld-edit-method"
-             class="col-4 bs-label bs-required">{{$t('editMethod')}}</label>
-      <div class="col-8">
-       <Dropdown id="fld-edit-method"
-                 class="w-full"
-                 size="small"
-                 v-model="settings.editMethod"
-                 :options="editMethods"
-                 option-label="text"
-                 option-value="value"
-                 @change="onChange"></Dropdown>
-      </div>
-    </div>
+    <FieldGridComponent :title="$t('editMethod')"
+                        label-for="fld-edit-method"
+                        :is-help="true"
+                        help-key="metaObject.editMethod"
+                        @helpClick="onHelpClick">
 
+      <Dropdown id="fld-edit-method"
+                class="w-full"
+                size="small"
+                v-model="settings.editMethod"
+                :options="editMethods"
+                option-label="text"
+                option-value="value"
+                @change="onChange"></Dropdown>
+
+    </FieldGridComponent>
+    
     <!--Is active-->
-    <div class="field grid">
-      <label for="fld-is-active"
-             class="col-4 bs-label">{{$t('isActive')}}</label>
-      <div class="col-8">
-        <InputSwitch id="fld-is-active"
-                     v-model="settings.isActive"
-                     @change="onChange"></InputSwitch>
-      </div>
-    </div>
+    <FieldGridComponent :title="$t('isActive')"
+                        label-for="fld-is-active"
+                        :is-help="true"
+                        help-key="metaObject.isActive"
+                        @helpClick="onHelpClick">
+
+      <InputSwitch id="fld-is-active"
+                   v-model="settings.isActive"
+                   @change="onChange"></InputSwitch>
+    </FieldGridComponent>
+
+    <!--Memo-->
+    <FieldGridComponent :title="$t('memo')"
+                        label-for="fld-memo"
+                        :is-help="true"
+                        help-key="constructor.memo"
+                        @helpClick="onHelpClick">
+      <Textarea id="fld-memo"
+                size="small"
+                autocomplete="off"
+                class="w-full"
+                rows="5"
+                v-model="settings.memo"
+                @change="onChange"></Textarea>
+    </FieldGridComponent>
 
   </div>
 </div>
+
+  <OverlayPanel ref="helpPanel">
+    <div class="flex flex-column gap-3 w-20rem">
+      <p class="m-0">
+        {{helpText}}
+      </p>
+    </div>
+
+  </OverlayPanel>
+
 </template>
 
 <style scoped>

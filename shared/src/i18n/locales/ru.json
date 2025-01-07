@@ -57,6 +57,8 @@
   "down": "Вниз",
   "edit": "Редактировать",
   "editMethod": "Способ редактирования",
+  "editMethodPage": "На странице",
+  "editMethodDialog": "В диалоге",
   "errors": "Ошибки",
   "execute": "Выполнить",
   "expression": "Выражение",
