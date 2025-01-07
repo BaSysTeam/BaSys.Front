@@ -151,7 +151,7 @@ function onHelpClick(evt: any, key: string): void {
                 @change="onChange"></Dropdown>
 
     </FieldGridComponent>
-
+    
     <!--Is active-->
     <FieldGridComponent :title="$t('isActive')"
                         label-for="fld-is-active"

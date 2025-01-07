@@ -2,6 +2,7 @@
   "constructor.uid": "Unique identifier of the object",
   "constructor.iconClass": "CSS class of icon. Icons from library PrimeIcons https://v3.primevue.org/icons/ can be displayed only.",
   "constructor.title": "The name of the item that will be displayed in the interface. Maximum length is 100 characters.",
+  "constructor.memo": "Free-form text information. Maximum length 300 characters.",
   "metaObjectKind.recordSettings.createRecords": "A flag in the object that generates records, indicating that records need to be created.",
   "metaObjectKind.recordSettings.destination": "The type of metadata object that will store the created records.",
   "metaObjectKind.recordSettings.destinationPeriod": "A column of type DateTime that stores the record creation period.",
@@ -18,5 +19,9 @@
   "metaObjectKind.canCreateRecords": "If enabled, objects of this kind can create records. Additional configuration is required in the \"Record settings\" section.  This is applicable only to objects with the \"Stores data\" setting enabled.",
   "metaObjectKind.orderByExpression": "An expression for sorting items in a list. It can be overridden in the Metadata Object settings. The expression should include the names of sorting fields along with their sorting direction, separated by commas. If a direction is not specified, it is assumed to be \"asc\". Examples: \"title\", \"number desc, date desc\". This is applicable only to objects with the \"Stores Data\" setting enabled.",
   "metaObjectKind.displayExpression": "An expression that defines the display format of an object of this kind. It can be overridden in the Metadata Object settings. The expression can include either a field name or a display template, where fields are specified within double curly braces {{field_name}}. Examples: \"title\", \"Operation #{{number}} from {{date}}\". This is applicable only to objects with the \"Stores Data\" setting enabled.",
-  "metaObjectKind.memo": "Free-form text information. Maximum length 300 characters."
+  "metaObject.name": "A string identifier for the metadata object. It must contain only lowercase Latin letters, digits, and underscores. The maximum length is 30 characters. It is used when creating database tables and in references to forms of this metadata object.",
+  "metaObject.orderByExpression": "An expression for sorting items in a list. If not specified, the default expression defined in the metadata kind is used. If specified, this expression overrides the default for the metadata object. The expression should include the names of sorting fields along with their sorting direction, separated by commas. If a direction is not specified, it is assumed to be \"asc\". Examples: \"title\", \"number desc, date desc\".",
+  "metaObject.displayExpression": "An expression that defines the display format of an object of this kind. If not specified, the default expression defined in the metadata kind is used. If specified, this expression overrides the default for the metadata object. The expression can include either a field name or a display template, where fields are specified within double curly braces {{field_name}}. Examples: \"title\", \"Operation #{{number}} from {{date}}\".",
+  "metaObject.editMethod": "Defines the method for editing the object: on a separate page or in a modal window.",
+  "metaObject.isActive": "If enabled, the object is added to the menu with automatic filling."
 }

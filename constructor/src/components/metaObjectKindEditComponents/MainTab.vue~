@@ -169,7 +169,7 @@ function onHelpClick(evt: any, key: string): void {
                         :is-help="true"
                         help-key="metaObjectKind.isReference"
                         @helpClick="onHelpClick"
-                        v-if="metaObjectKind.storeData">
+                        v-if="settings.storeData">
       <InputSwitch id="fld-is-reference"
                    v-model="settings.isReference"
                    @change="onChange"></InputSwitch>
@@ -181,7 +181,7 @@ function onHelpClick(evt: any, key: string): void {
                         :is-help="true"
                         help-key="metaObjectKind.allowAttachedFiles"
                         @helpClick="onHelpClick"
-                        v-if="metaObjectKind.storeData">
+                        v-if="settings.storeData">
       <InputSwitch id="fld-allow-attached-files"
                    v-model="settings.allowAttachedFiles"
                    @change="onChange"></InputSwitch>
@@ -193,7 +193,7 @@ function onHelpClick(evt: any, key: string): void {
                         :is-help="true"
                         help-key="metaObjectKind.useDetailsTables"
                         @helpClick="onHelpClick"
-                        v-if="metaObjectKind.storeData">
+                        v-if="settings.storeData">
       <InputSwitch id="fld-use-detail-tables"
                    v-model="settings.useDetailsTables"
                    @change="onChange"></InputSwitch>
@@ -205,7 +205,7 @@ function onHelpClick(evt: any, key: string): void {
                         :is-help="true"
                         help-key="metaObjectKind.canCreateRecords"
                         @helpClick="onHelpClick"
-                        v-if="metaObjectKind.storeData">
+                        v-if="settings.storeData">
       <InputSwitch id="fld-can-create-records"
                    v-model="settings.canCreateRecords"
                    @change="onCanCreateRecordsChange"></InputSwitch>
@@ -217,7 +217,7 @@ function onHelpClick(evt: any, key: string): void {
                         :is-help="true"
                         help-key="metaObjectKind.orderByExpression"
                         @helpClick="onHelpClick"
-                        v-if="metaObjectKind.storeData">
+                        v-if="settings.storeData">
       <InputText id="fld-order-by-expression"
                  size="small"
                  autocomplete="off"
@@ -232,7 +232,7 @@ function onHelpClick(evt: any, key: string): void {
                         :is-help="true"
                         help-key="metaObjectKind.displayExpression"
                         @helpClick="onHelpClick"
-                        v-if="metaObjectKind.storeData">
+                        v-if="settings.storeData">
       <InputText id="fld-display-expression"
                  size="small"
                  autocomplete="off"
