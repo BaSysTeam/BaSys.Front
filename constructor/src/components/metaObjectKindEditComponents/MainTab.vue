@@ -154,7 +154,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--Store data-->
     <FieldGridComponent :title="$t('storeData')"
-                        label-for="fld-store-data">
+                        label-for="fld-store-data"
+                        :is-help="true"
+                        help-key="metaObjectKind.storeData"
+                        @helpClick="onHelpClick">
       <InputSwitch id="fld-store-data"
                    v-model="settings.storeData"
                    @change="onChange"></InputSwitch>
@@ -162,7 +165,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--Is reference-->
     <FieldGridComponent :title="$t('isReference')"
-                        label-for="fld-is-reference">
+                        label-for="fld-is-reference"
+                        :is-help="true"
+                        help-key="metaObjectKind.isReference"
+                        @helpClick="onHelpClick">
       <InputSwitch id="fld-is-reference"
                    v-model="settings.isReference"
                    @change="onChange"></InputSwitch>
@@ -170,7 +176,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--Allow attached files-->
     <FieldGridComponent :title="$t('allowAttachedFiles')"
-                        label-for="fld-allow-attached-files">
+                        label-for="fld-allow-attached-files"
+                        :is-help="true"
+                        help-key="metaObjectKind.allowAttachedFiles"
+                        @helpClick="onHelpClick">
       <InputSwitch id="fld-allow-attached-files"
                    v-model="settings.allowAttachedFiles"
                    @change="onChange"></InputSwitch>
@@ -178,7 +187,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--Use Detail Tables-->
     <FieldGridComponent :title="$t('detailsTables')"
-                        label-for="fld-use-detail-tables">
+                        label-for="fld-use-detail-tables"
+                        :is-help="true"
+                        help-key="metaObjectKind.useDetailsTables"
+                        @helpClick="onHelpClick">
       <InputSwitch id="fld-use-detail-tables"
                    v-model="settings.useDetailsTables"
                    @change="onChange"></InputSwitch>
@@ -186,7 +198,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--Can create records-->
     <FieldGridComponent :title="$t('canCreateRecords')"
-                        label-for="fld-can-create-records">
+                        label-for="fld-can-create-records"
+                        :is-help="true"
+                        help-key="metaObjectKind.canCreateRecords"
+                        @helpClick="onHelpClick">
       <InputSwitch id="fld-can-create-records"
                    v-model="settings.canCreateRecords"
                    @change="onCanCreateRecordsChange"></InputSwitch>
@@ -194,7 +209,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--OrderBy Expression-->
     <FieldGridComponent :title="$t('orderExpression')"
-                        label-for="fld-order-by-expression">
+                        label-for="fld-order-by-expression"
+                        :is-help="true"
+                        help-key="metaObjectKind.orderByExpression"
+                        @helpClick="onHelpClick">
       <InputText id="fld-order-by-expression"
                  size="small"
                  autocomplete="off"
@@ -205,7 +223,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--Display expression-->
     <FieldGridComponent :title="$t('displayExpression')"
-                        label-for="fld-display-expression">
+                        label-for="fld-display-expression"
+                        :is-help="true"
+                        help-key="metaObjectKind.displayExpression"
+                        @helpClick="onHelpClick">
       <InputText id="fld-display-expression"
                  size="small"
                  autocomplete="off"
@@ -216,7 +237,10 @@ function onHelpClick(evt: any, key: string): void {
 
     <!--Memo-->
     <FieldGridComponent :title="$t('memo')"
-                        label-for="fld-memo">
+                        label-for="fld-memo"
+                        :is-help="true"
+                        help-key="metaObjectKind.memo"
+                        @helpClick="onHelpClick">
       <Textarea id="fld-memo"
                 size="small"
                 autocomplete="off"

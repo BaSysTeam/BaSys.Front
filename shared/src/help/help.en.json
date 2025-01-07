@@ -10,5 +10,13 @@
   "metaObjectKind.RecordSettings.DestinationObject": "A column that stores a reference to the object that generated the records. The type depends on the primary key type of the metadata object.",
   "metaObjectKind.RecordSettings.DestinationRow": "A column of type Number that stores the row number of the details table that generated the record.",
   "metaObjectKind.name": "A string identifier for the metadata kind. It must contain only lowercase Latin letters, digits, and underscores. The maximum length is 40 characters. It is used when creating database tables and in references to forms of metadata objects of this kind.",
-  "metaObjectKind.prefix": "The prefix of the database table for objects of this metadata kind. It can contain only lowercase Latin letters and digits. The maximum length is 4 characters."
+  "metaObjectKind.prefix": "The prefix of the database table for objects of this metadata kind. It can contain only lowercase Latin letters and digits. The maximum length is 4 characters.",
+  "metaObjectKind.storeData": "If enabled, tables will be created in the database to store data associated with objects of the corresponding metadata kind.",
+  "metaObjectKind.isReference": "If enabled, metadata objects of this kind can be used as references in the fields of other objects. This is applicable only to objects with the \"Stores data\" setting enabled.",
+  "metaObjectKind.allowAttachedFiles": "If enabled, objects of this kind can have attachments. This is applicable only to objects with the \"Stores data\" setting enabled.",
+  "metaObjectKind.useDetailsTables": "If enabled, objects of this kind can have details tables. This is applicable only to objects with the \"Stores data\" setting enabled.",
+  "metaObjectKind.canCreateRecords": "If enabled, objects of this kind can create records. Additional configuration is required in the \"Record settings\" section.  This is applicable only to objects with the \"Stores data\" setting enabled.",
+  "metaObjectKind.orderByExpression": "An expression for sorting items in a list. It can be overridden in the Metadata Object settings. The expression should include the names of sorting fields along with their sorting direction, separated by commas. If a direction is not specified, it is assumed to be \"asc\". Examples: \"title\", \"number desc, date desc\". This is applicable only to objects with the \"Stores Data\" setting enabled.",
+  "metaObjectKind.displayExpression": "An expression that defines the display format of an object of this kind. It can be overridden in the Metadata Object settings. The expression can include either a field name or a display template, where fields are specified within double curly braces {{field_name}}. Examples: \"title\", \"Operation #{{number}} from {{date}}\". This is applicable only to objects with the \"Stores Data\" setting enabled.",
+  "metaObjectKind.memo": "Free-form text information. Maximum length 300 characters."
 }
