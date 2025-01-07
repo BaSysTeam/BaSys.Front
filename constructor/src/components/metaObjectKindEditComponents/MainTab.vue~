@@ -245,7 +245,7 @@ function onHelpClick(evt: any, key: string): void {
     <FieldGridComponent :title="$t('memo')"
                         label-for="fld-memo"
                         :is-help="true"
-                        help-key="constructor.memo"
+                        help-key="metaObjectKind.memo"
                         @helpClick="onHelpClick">
       <Textarea id="fld-memo"
                 size="small"

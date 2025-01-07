@@ -56,6 +56,8 @@
   "down": "Down",
   "edit": "Edit",
   "editMethod": "Edit method",
+  "editMethodPage": "Page",
+  "editMethodDialog": "Dialog",
   "errors": "Errors",
   "execute": "Execute",
   "expression": "Expression",
