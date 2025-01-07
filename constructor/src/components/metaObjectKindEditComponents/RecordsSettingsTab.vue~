@@ -52,7 +52,7 @@ const emit = defineEmits({ change: () => true });
 function initDestinationColumns(): void {
   destinationColumns.value = [];
 
-  if (!props.settings.recordsSettings){
+  if (!props.settings.recordsSettings) {
     return;
   }
 
