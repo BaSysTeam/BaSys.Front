@@ -46,6 +46,7 @@
   "default": "Default",
   "delete": "Delete",
   "deleteRecords": "Delete records",
+  "deleteColumnQuestion": "Delete column?",
   "deleteCommandQuestion": "Delete command?",
   "deleteItemQuestion": "Delete item?",
   "deleteRow": "Delete row",

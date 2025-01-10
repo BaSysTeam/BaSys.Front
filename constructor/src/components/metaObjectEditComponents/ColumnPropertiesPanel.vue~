@@ -75,6 +75,7 @@ function onTitleChange(): void {
 
 function onDataTypeChange(): void {
   if (!props.column.name) {
+    // Substitute Name and Title for column from DataType.
     const dataType = props.dataTypes.find((x) => x.uid === props.column.dataSettings.dataTypeUid);
     if (dataType) {
       props.column.name = NameHelper.prepareName(dataType.name, false, 0);
@@ -210,19 +211,7 @@ onBeforeMount(() => {
                      @update:model-value="onChange"></InputNumber>
       </div>
     </div>
-
-    <!--Primary key-->
-    <div class="field grid">
-      <label for="column-primary-key"
-             class="col-4 bs-label">{{$t('primaryKey')}}</label>
-      <div class="col-8">
-        <InputSwitch id="column-primary-key"
-                     v-model="column.dataSettings.primaryKey"
-                     :disabled="isColumnDisabled()"
-                     @change="onChange"></InputSwitch>
-      </div>
-    </div>
-
+    
     <!--Unique-->
     <div class="field grid" v-if="!column.dataSettings.primaryKey">
       <label for="column-unique"
