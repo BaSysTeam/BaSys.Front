@@ -212,18 +212,6 @@ onBeforeMount(() => {
       </div>
     </div>
 
-    <!--Primary key-->
-    <div class="field grid">
-      <label for="column-primary-key"
-             class="col-4 bs-label">{{$t('primaryKey')}}</label>
-      <div class="col-8">
-        <InputSwitch id="column-primary-key"
-                     v-model="column.dataSettings.primaryKey"
-                     :disabled="isColumnDisabled()"
-                     @change="onChange"></InputSwitch>
-      </div>
-    </div>
-
     <!--Unique-->
     <div class="field grid" v-if="!column.dataSettings.primaryKey">
       <label for="column-unique"
