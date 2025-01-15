@@ -1,7 +1,7 @@
 <template>
   <Toast />
   <AppHeaderComponent
-    title="BaSYS: DB manage"
+    title="BaSys: DB manage"
     @burgerClicked="onBurgerClicked"
   >
     <template #languageSwitcher>

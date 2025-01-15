@@ -6,7 +6,7 @@ import HomeView from '../views/HomeView.vue';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/databases',
+    redirect: '/SuperAdmin/databases',
   },
   {
     path: '/home',
@@ -21,6 +21,11 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/databases',
     name: 'databases',
+    component: DbInfoRecordsListView,
+  },
+  {
+    path: '/SuperAdmin/databases',
+    name: 'superadmin-databases',
     component: DbInfoRecordsListView,
   },
 ];

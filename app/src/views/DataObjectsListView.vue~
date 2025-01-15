@@ -114,7 +114,7 @@ function setCreateRecords(flagValue: boolean): void {
     return;
   }
   if (!dataObjectList.value.metaObjectKindSettings
-    .recordsSettings){
+    .recordsSettings) {
     return;
   }
 

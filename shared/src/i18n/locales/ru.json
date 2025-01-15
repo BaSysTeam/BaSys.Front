@@ -46,6 +46,7 @@
   "dataSource": "Источник данных",
   "default": "По-умолчанию",
   "delete": "Удалить",
+  "deleteColumnQuestion": "Удалить колонку?",
   "deleteCommandQuestion": "Удалить команду?",
   "deleteItemQuestion": "Удалить элемент?",
   "deleteRecords": "Удалить записи",

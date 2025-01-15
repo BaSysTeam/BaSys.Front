@@ -65,6 +65,7 @@ let initActionButtonItems = ():void => {};
 
 const dataTableStyle = computed(() => ({
   height: `${windowHeight.value - 150}px`,
+  width: '1200px',
 }));
 
 const canCreateRecords = computed(
