@@ -6,11 +6,11 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
+import WorkflowSettings from '../../../../shared/src/models/workflowModel/workflowSettings';
 import InputSwitch from 'primevue/inputswitch';
 import FieldGridComponent from '@/components/FieldGridComponent.vue';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
-import WorkflowSettings from '../../../../shared/src/models/workflowModel/workflowSettings';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
