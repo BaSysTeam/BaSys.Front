@@ -3,6 +3,7 @@ import MetaObjectEditView from '@/views/MetaObjectEditView.vue';
 import MetaObjectsListView from '@/views/MetaObjectsListView.vue';
 import ExpressionsConsoleView from '@/views/ExpressionsConsoleView.vue';
 import MetaObjectMenuEditView from '@/views/MetaObjectMenuEditView.vue';
+import MetaObjectWorkflowEditView from '@/views/MetaObjectWorkflowEditView.vue';
 import HomeView from '../views/HomeView.vue';
 import DataTypesView from '../views/DataTypesView.vue';
 import MetadataKindsListView from '../views/MetaObjectKindsListView.vue';
@@ -51,6 +52,24 @@ const routes: Array<RouteRecordRaw> = [
     path: '/meta-menus/copy/:name',
     name: 'meta-menus-copy',
     component: MetaObjectMenuEditView,
+    props: true,
+  },
+  {
+    path: '/meta-workflows/add',
+    name: 'meta-workflows-add',
+    component: MetaObjectWorkflowEditView,
+    props: true,
+  },
+  {
+    path: '/meta-workflows/edit/:name',
+    name: 'meta-workflows-edit',
+    component: MetaObjectWorkflowEditView,
+    props: true,
+  },
+  {
+    path: '/meta-workflows/copy/:name',
+    name: 'meta-workflows-copy',
+    component: MetaObjectWorkflowEditView,
     props: true,
   },
   {
