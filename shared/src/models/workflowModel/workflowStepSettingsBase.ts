@@ -5,6 +5,7 @@ export default class WorkflowStepSettingsBase {
   kindName: string;
   kindUid: string;
   title: string;
+  name: string;
   memo: string;
   isActive: boolean;
   constructor(param: any) {
@@ -17,6 +18,7 @@ export default class WorkflowStepSettingsBase {
     this.kindName = data.kindName || '';
     this.kindUid = data.kindUid || '';
     this.title = data.title || '';
+    this.name = data.name || '';
     this.memo = data.memo || '';
     this.isActive = data.isActive || true;
   }

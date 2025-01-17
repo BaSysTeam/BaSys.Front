@@ -1,0 +1,51 @@
+<script setup lang="ts">
+import {
+  defineProps, defineEmits, PropType,
+} from 'vue';
+import InputText from 'primevue/inputtext';
+import FieldGridComponent from '@/components/FieldGridComponent.vue';
+import StepEditBase from '@/components/metaObjectWorkflowEditComponents/StepEditBase.vue';
+import MessageStepSettings from '../../../../shared/src/models/workflowModel/messageStepSettings';
+
+// Props
+const props = defineProps({
+  settings: { type: Object as PropType<MessageStepSettings>, required: true },
+});
+
+// Emits
+const emit = defineEmits(
+  {
+    change: () => true,
+  },
+);
+
+// Methods
+
+// Event handlers
+function onChange(): void {
+  emit('change');
+}
+
+// Life cycle hooks
+</script>
+
+<template>
+  <StepEditBase :settings="props.settings" @change="onChange">
+    <!--Message-->
+    <FieldGridComponent :title="$t('message')"
+                        :required="true"
+                        label-for="fld-message">
+      <InputText id="fld-message"
+                 size="small"
+                 autocomplete="off"
+                 class="w-full"
+                 v-model="settings.message"
+                 @change="onChange"></InputText>
+    </FieldGridComponent>
+  </StepEditBase>
+
+</template>
+
+<style scoped>
+
+</style>

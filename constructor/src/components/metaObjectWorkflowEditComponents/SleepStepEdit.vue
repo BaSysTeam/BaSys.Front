@@ -1,0 +1,48 @@
+<script setup lang="ts">
+import {
+  defineProps, defineEmits, PropType,
+} from 'vue';
+import InputText from 'primevue/inputtext';
+import FieldGridComponent from '@/components/FieldGridComponent.vue';
+import StepEditBase from '@/components/metaObjectWorkflowEditComponents/StepEditBase.vue';
+import SleepStepSettings from '../../../../shared/src/models/workflowModel/sleepStepSettings';
+
+// Props
+const props = defineProps({
+  settings: { type: Object as PropType<SleepStepSettings>, required: true },
+});
+
+// Emits
+const emit = defineEmits(
+  {
+    change: () => true,
+  },
+);
+
+// Event handlers
+function onChange(): void {
+  emit('change');
+}
+
+// Life cycle hooks
+</script>
+
+<template>
+  <StepEditBase :settings="props.settings" @change="onChange">
+    <!--Delay-->
+    <FieldGridComponent :title="$t('delay')+', ms'"
+                        :required="true"
+                        label-for="fld-delay">
+      <InputText id="fld-delay"
+                 size="small"
+                 autocomplete="off"
+                 class="w-full"
+                 v-model="settings.delay"
+                 @change="onChange"></InputText>
+    </FieldGridComponent>
+  </StepEditBase>
+</template>
+
+<style scoped>
+
+</style>

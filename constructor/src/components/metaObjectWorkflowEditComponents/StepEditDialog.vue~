@@ -1,0 +1,82 @@
+<script setup lang="ts">
+import {
+  ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed,
+} from 'vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import SleepStepEdit from '@/components/metaObjectWorkflowEditComponents/SleepStepEdit.vue';
+import MessageStepEdit from '@/components/metaObjectWorkflowEditComponents/MessageStepEdit.vue';
+
+// Infrastructure
+const { t } = useI18n({ useScope: 'global' });
+const router = useRouter();
+const confirmVue = useConfirm();
+
+// Props
+const props = defineProps({
+  settings: { type: Object, required: true },
+});
+
+// Data
+
+// Emit
+const emit = defineEmits(
+  {
+    close: (value: string | null) => true,
+  },
+);
+
+// Methods
+
+// Event handlers
+function onCloseClick(): void {
+  emit('close', null);
+}
+
+function updateVisible(value: boolean): void {
+  if (!value) {
+    emit('close', null);
+  }
+}
+
+// Life cycle hooks
+</script>
+
+<template>
+  <Dialog
+    modal
+    class="pb-0"
+    position="top"
+    :header="settings.title"
+    :visible="true"
+    :draggable="false"
+    :maximizable="true"
+    :style="{width: '20rem'}"
+    @update:visible="updateVisible">
+    <div>
+     <SleepStepEdit v-if="settings.kind=='sleep'"
+                    :settings="settings"></SleepStepEdit>
+     <MessageStepEdit v-if="settings.kind=='message'"
+                      :settings="settings"></MessageStepEdit>
+    </div>
+    <template #footer>
+      <Button
+        class="mr-1"
+        :label="$t('close')"
+        severity="secondary"
+        size="small"
+        outlined
+        icon="pi pi-times"
+        @click="onCloseClick"
+      />
+    </template>
+  </Dialog>
+</template>
+
+<style scoped>
+
+</style>

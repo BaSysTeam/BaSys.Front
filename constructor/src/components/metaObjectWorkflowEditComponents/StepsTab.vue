@@ -19,6 +19,7 @@ import Toolbar from 'primevue/toolbar';
 import Listbox from 'primevue/listbox';
 import SplitButton from 'primevue/splitbutton';
 import Badge from 'primevue/badge';
+import StepEditDialog from '@/components/metaObjectWorkflowEditComponents/StepEditDialog.vue';
 import WorkflowSettings from '../../../../shared/src/models/workflowModel/workflowSettings';
 
 // Infrastructure
@@ -38,6 +39,7 @@ const props = defineProps({
 const selectedItem:any = ref(null);
 const windowHeight = ref(window.innerHeight);
 const addCommandItems = ref<any[]>([]);
+const isStepEditDialogOpen = ref(false);
 
 function listStyle(): any {
   return {
@@ -53,8 +55,17 @@ const emit = defineEmits({ change: () => true });
 // Event handlers
 function onAddClick(kind: string): void {
   console.log(`Add click: ${kind}`);
-  props.settings.newStep(kind);
+  selectedItem.value = props.settings.newStep(kind);
+  isStepEditDialogOpen.value = true;
   emit('change');
+}
+
+function onEditClick(): void {
+  if (!selectedItem.value) {
+    return;
+  }
+
+  isStepEditDialogOpen.value = true;
 }
 
 function onCopyClick(): void {
@@ -81,15 +92,19 @@ function onResize(): void {
   windowHeight.value = window.innerHeight;
 }
 
+function onStepEditDialogClose(): void {
+  isStepEditDialogOpen.value = false;
+}
+
 // Life cycle hooks
 onBeforeMount(() => {
   addCommandItems.value = [
     {
-      label: t('sleepStep'),
+      label: t('delay'),
       command: () => onAddClick('sleep'),
     },
     {
-      label: t('messageStep'),
+      label: t('message'),
       command: () => onAddClick('message'),
     },
 
@@ -121,6 +136,12 @@ onBeforeUnmount(() => {
           outlined
           :model="addCommandItems"
         />
+        <Button icon="pi pi-pencil"
+                v-tooltip.top="$t('edit')"
+                severity="primary"
+                size="small"
+                text
+                @click="onEditClick" />
         <Button icon="pi pi-copy"
                 v-tooltip.top="$t('copy')"
                 severity="primary"
@@ -165,6 +186,10 @@ onBeforeUnmount(() => {
     </Listbox>
   </div>
 </div>
+
+  <StepEditDialog v-if="isStepEditDialogOpen"
+                  :settings="selectedItem"
+                  @close="onStepEditDialogClose"></StepEditDialog>
 </template>
 
 <style scoped>
