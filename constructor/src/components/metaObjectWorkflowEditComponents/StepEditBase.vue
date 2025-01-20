@@ -1,17 +1,25 @@
 <script setup lang="ts">
 import {
-  defineProps, defineEmits, PropType,
+  defineProps, defineEmits, PropType, computed,
 } from 'vue';
 import InputText from 'primevue/inputtext';
 import FieldGridComponent from '@/components/FieldGridComponent.vue';
 import InputSwitch from 'primevue/inputswitch';
 import Textarea from 'primevue/textarea';
+import Dropdown from 'primevue/dropdown';
 import NameHelper from '../../../../shared/src/helpers/nameHelper';
+import WorkflowSettings from '../../../../shared/src/models/workflowModel/workflowSettings';
 
 // Props
 const props = defineProps({
-  settings: { type: Object as PropType<any>, required: true },
+  stepSettings: { type: Object as PropType<any>, required: true },
+  workflowSettings: { type: Object as PropType<WorkflowSettings>, required: true },
 });
+
+// Data
+const otherSteps = computed(() => props.workflowSettings.steps.filter(
+  (step) => step.uid !== props.stepSettings.uid,
+));
 
 // Emits
 const emit = defineEmits(
@@ -26,8 +34,8 @@ function onChange(): void {
 }
 
 function onTitleChange(): void {
-  if (!props.settings.name) {
-    props.settings.name = NameHelper.prepareName(props.settings.title, true, 0);
+  if (!props.stepSettings.name) {
+    props.stepSettings.name = NameHelper.prepareName(props.stepSettings.title, true, 0);
   }
 
   emit('change');
@@ -39,6 +47,22 @@ function onTitleChange(): void {
   <div class="grid">
     <div class="col-12">
 
+      <!-- Previous step -->
+      <FieldGridComponent :title="$t('previousStep')"
+                          label-for="fld-previous-step">
+
+        <Dropdown id="fld-previous-step"
+                  size="small"
+                  class="w-full"
+                  :options="otherSteps"
+                  option-label="title"
+                  option-value="uid"
+                  :show-clear="true"
+                  v-model="stepSettings.previousStepUid"
+                  @change="onChange"></Dropdown>
+
+      </FieldGridComponent>
+
       <!--Title-->
       <FieldGridComponent :title="$t('title')"
                           :required="true"
@@ -47,7 +71,7 @@ function onTitleChange(): void {
                    size="small"
                    autocomplete="off"
                    class="w-full"
-                   v-model="settings.title"
+                   v-model="stepSettings.title"
                    @change="onTitleChange"></InputText>
       </FieldGridComponent>
 
@@ -59,7 +83,7 @@ function onTitleChange(): void {
                    size="small"
                    autocomplete="off"
                    class="w-full"
-                   v-model="settings.name"
+                   v-model="stepSettings.name"
                    @change="onChange"></InputText>
       </FieldGridComponent>
 
@@ -74,7 +98,7 @@ function onTitleChange(): void {
                 autocomplete="off"
                 class="w-full"
                 rows="5"
-                v-model="settings.memo"
+                v-model="stepSettings.memo"
                 @change="onChange"></Textarea>
       </FieldGridComponent>
 
@@ -82,7 +106,7 @@ function onTitleChange(): void {
       <FieldGridComponent :title="$t('isActive')"
                           label-for="fld-is-active">
         <InputSwitch id="fld-is-active"
-                     v-model="settings.isActive"
+                     v-model="stepSettings.isActive"
                      @change="onChange"></InputSwitch>
       </FieldGridComponent>
 

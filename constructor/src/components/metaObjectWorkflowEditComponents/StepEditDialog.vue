@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed,
+  ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed, PropType,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -10,6 +10,7 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import SleepStepEdit from '@/components/metaObjectWorkflowEditComponents/SleepStepEdit.vue';
 import MessageStepEdit from '@/components/metaObjectWorkflowEditComponents/MessageStepEdit.vue';
+import WorkflowSettings from '../../../../shared/src/models/workflowModel/workflowSettings';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
@@ -18,7 +19,8 @@ const confirmVue = useConfirm();
 
 // Props
 const props = defineProps({
-  settings: { type: Object, required: true },
+  stepSettings: { type: Object, required: true },
+  workflowSettings: { type: Object as PropType<WorkflowSettings>, required: true },
 });
 
 // Data
@@ -51,26 +53,27 @@ function updateVisible(value: boolean): void {
     modal
     class="pb-0"
     position="top"
-    :header="settings.title"
+    :header="stepSettings.title"
     :visible="true"
     :draggable="false"
     :maximizable="true"
     :style="{width: '50rem'}"
     @update:visible="updateVisible">
     <div>
-     <SleepStepEdit v-if="settings.kindName == 'sleep'"
-                    :settings="settings"></SleepStepEdit>
-     <MessageStepEdit v-if="settings.kindName == 'message'"
-                      :settings="settings"></MessageStepEdit>
+     <SleepStepEdit v-if="stepSettings.kindName == 'sleep'"
+                    :step-settings="stepSettings"
+                    :workflow-settings="workflowSettings"></SleepStepEdit>
+     <MessageStepEdit v-if="stepSettings.kindName == 'message'"
+                      :step-settings="stepSettings"
+                      :workflow-settings="workflowSettings"></MessageStepEdit>
     </div>
     <template #footer>
       <Button
         class="mr-1"
-        :label="$t('close')"
-        severity="secondary"
+        label="OK"
+        severity="primary"
         size="small"
         outlined
-        icon="pi pi-times"
         @click="onCloseClick"
       />
     </template>

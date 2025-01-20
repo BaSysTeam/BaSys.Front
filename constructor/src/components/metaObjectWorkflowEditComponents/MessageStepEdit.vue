@@ -5,11 +5,12 @@ import {
 import InputText from 'primevue/inputtext';
 import FieldGridComponent from '@/components/FieldGridComponent.vue';
 import StepEditBase from '@/components/metaObjectWorkflowEditComponents/StepEditBase.vue';
-import MessageStepSettings from '../../../../shared/src/models/workflowModel/messageStepSettings';
+import WorkflowSettings from '../../../../shared/src/models/workflowModel/workflowSettings';
 
 // Props
 const props = defineProps({
-  settings: { type: Object as PropType<MessageStepSettings>, required: true },
+  stepSettings: { type: Object as PropType<any>, required: true },
+  workflowSettings: { type: Object as PropType<WorkflowSettings>, required: true },
 });
 
 // Emits
@@ -28,7 +29,9 @@ function onChange(): void {
 </script>
 
 <template>
-  <StepEditBase :settings="props.settings" @change="onChange">
+  <StepEditBase :step-settings="props.stepSettings"
+                :workflow-settings="props.workflowSettings"
+                @change="onChange">
     <!--Message-->
     <FieldGridComponent :title="$t('message')"
                         :required="true"
@@ -37,7 +40,7 @@ function onChange(): void {
                  size="small"
                  autocomplete="off"
                  class="w-full"
-                 v-model="settings.message"
+                 v-model="stepSettings.message"
                  @change="onChange"></InputText>
     </FieldGridComponent>
   </StepEditBase>

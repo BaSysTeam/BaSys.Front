@@ -19,6 +19,7 @@ import StepsTab from '@/components/metaObjectWorkflowEditComponents/StepsTab.vue
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import WorkflowSettings from '../../../shared/src/models/workflowModel/workflowSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
@@ -33,7 +34,7 @@ const props = defineProps({
 });
 
 // Data
-const kind = 'menu';
+const kind = 'workflow';
 const activeTab = ref('main');
 const settings = ref<WorkflowSettings>(new WorkflowSettings(null));
 const jsonSettings = ref<string>('');
@@ -263,6 +264,7 @@ onMounted(async () => {
   </div>
 
 </div>
+  <ConfirmDialog></ConfirmDialog>
 </template>
 
 <style scoped>

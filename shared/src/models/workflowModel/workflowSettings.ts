@@ -27,7 +27,7 @@ export default class WorkflowSettings {
     this.steps = [];
   }
 
-  newStep(kind: string): any {
+  newStep(kind: string, previousUid: string): any {
     let newStep = null;
     const nextStepNumber = this.steps.length + 1;
 
@@ -36,6 +36,7 @@ export default class WorkflowSettings {
         newStep = new SleepStepSettings({
           title: `Sleep ${nextStepNumber}`,
           name: `sleep_${nextStepNumber}`,
+          previousStepUid: previousUid,
         });
         break;
       case 'message':
@@ -43,6 +44,7 @@ export default class WorkflowSettings {
           {
             title: `Message ${nextStepNumber}`,
             name: `message_${nextStepNumber}`,
+            previousStepUid: previousUid,
           },
         );
         break;
@@ -54,5 +56,20 @@ export default class WorkflowSettings {
       this.steps.push(newStep);
     }
     return newStep;
+  }
+
+  deleteStep(step: any): void {
+    const ind = this.steps.indexOf(step);
+    if (ind > -1) {
+      // Clear references for deleted step.
+      this.steps.forEach((currentStep) => {
+        if (currentStep.previousStepUid === step.uid) {
+          currentStep.previousStepUid = '';
+        }
+      });
+
+      // Delete step.
+      this.steps.splice(ind, 1);
+    }
   }
 }

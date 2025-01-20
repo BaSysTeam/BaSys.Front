@@ -21,6 +21,7 @@ import SplitButton from 'primevue/splitbutton';
 import Badge from 'primevue/badge';
 import StepEditDialog from '@/components/metaObjectWorkflowEditComponents/StepEditDialog.vue';
 import WorkflowSettings from '../../../../shared/src/models/workflowModel/workflowSettings';
+import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
@@ -40,22 +41,31 @@ const selectedItem:any = ref(null);
 const windowHeight = ref(window.innerHeight);
 const addCommandItems = ref<any[]>([]);
 const isStepEditDialogOpen = ref(false);
-
-function listStyle(): any {
-  return {
-    height: `${windowHeight.value - 200}px`,
-  };
-}
+const listStyle = computed(() => ({
+  height: `${windowHeight.value - 200}px`,
+}));
 
 // Emits
 const emit = defineEmits({ change: () => true });
 
 // Methods
+function stepTitle(step: any):string {
+  if (!step.previousStepUid) {
+    return step.title;
+  }
+
+  const previousStep = props.settings.steps.find((s) => s.uid === step.previousStepUid);
+  if (!previousStep) {
+    return step.title;
+  }
+
+  return `${previousStep.title} ⟶ ${step.title}`;
+}
 
 // Event handlers
 function onAddClick(kind: string): void {
-  console.log(`Add click: ${kind}`);
-  selectedItem.value = props.settings.newStep(kind);
+  const previousUid = selectedItem.value ? selectedItem.value.uid : null;
+  selectedItem.value = props.settings.newStep(kind, previousUid);
   isStepEditDialogOpen.value = true;
   emit('change');
 }
@@ -68,20 +78,56 @@ function onEditClick(): void {
   isStepEditDialogOpen.value = true;
 }
 
+function onListDoubleClick(): void {
+  if (!selectedItem.value) {
+    return;
+  }
+  isStepEditDialogOpen.value = true;
+}
+
 function onCopyClick(): void {
   console.log('Copy click');
 }
 
 function onDeleteClick(): void {
-  console.log('Delete click');
+  if (!selectedItem.value) {
+    return;
+  }
+
+  confirmVue.require({
+    message: t('deleteStepQuestion'),
+    header: t('confirmation'),
+    icon: 'pi pi-exclamation-triangle',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    rejectLabel: t('cancel'),
+    acceptLabel: t('delete'),
+    accept: () => {
+      props.settings.deleteStep(selectedItem.value);
+      if (props.settings.steps.length) {
+        [selectedItem.value] = props.settings.steps;
+      }
+      emit('change');
+    },
+  });
 }
 
 function onUpClick(): void {
-  console.log('Up click');
+  if (!selectedItem.value) {
+    return;
+  }
+  UpDownHelper.up(props.settings.steps, selectedItem.value);
+
+  emit('change');
 }
 
 function onDownClick(): void {
-  console.log('Down click');
+  if (!selectedItem.value) {
+    return;
+  }
+  UpDownHelper.down(props.settings.steps, selectedItem.value);
+
+  emit('change');
 }
 
 function onChange(): void {
@@ -174,12 +220,12 @@ onBeforeUnmount(() => {
     <Listbox v-if="settings"
              v-model="selectedItem"
              :options="settings.steps"
-             :list-style="listStyle()"
-             option-label="title">
+             :list-style="listStyle"
+             @dblclick="onListDoubleClick">
       <template #option="{option, index}">
         <div>
           <Badge :value="index+1" severity="info"></Badge>
-          <span class="ml-2">{{option.title}}</span>
+          <span class="ml-2">{{stepTitle(option)}}</span>
           <span class="pi pi-check ml-2" style="float:right" v-if="option.isActive"></span>
         </div>
       </template>
@@ -188,7 +234,8 @@ onBeforeUnmount(() => {
 </div>
 
   <StepEditDialog v-if="isStepEditDialogOpen"
-                  :settings="selectedItem"
+                  :step-settings="selectedItem"
+                  :workflow-settings="settings"
                   @close="onStepEditDialogClose"></StepEditDialog>
 </template>
 

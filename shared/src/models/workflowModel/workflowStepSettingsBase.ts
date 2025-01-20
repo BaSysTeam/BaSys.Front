@@ -2,6 +2,7 @@ import { Guid } from 'guid-typescript';
 
 export default class WorkflowStepSettingsBase {
   uid: string;
+  previousStepUid: string;
   kindName: string;
   kindUid: string;
   title: string;
@@ -15,6 +16,7 @@ export default class WorkflowStepSettingsBase {
     }
 
     this.uid = data.uid || Guid.create().toString();
+    this.previousStepUid = data.previousStepUid || '';
     this.kindName = data.kindName || '';
     this.kindUid = data.kindUid || '';
     this.title = data.title || '';

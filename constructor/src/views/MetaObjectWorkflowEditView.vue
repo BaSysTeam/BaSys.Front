@@ -16,6 +16,7 @@ import JsonViewComponent from '@/components/JsonViewComponent.vue';
 import Menu from 'primevue/menu';
 import MainTab from '@/components/metaObjectWorkflowEditComponents/MainTab.vue';
 import StepsTab from '@/components/metaObjectWorkflowEditComponents/StepsTab.vue';
+import ConfirmDialog from 'primevue/confirmdialog';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import WorkflowSettings from '../../../shared/src/models/workflowModel/workflowSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -263,6 +264,7 @@ onMounted(async () => {
   </div>
 
 </div>
+  <ConfirmDialog></ConfirmDialog>
 </template>
 
 <style scoped>
