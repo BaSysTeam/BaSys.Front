@@ -20,6 +20,7 @@ import Listbox from 'primevue/listbox';
 import SplitButton from 'primevue/splitbutton';
 import Badge from 'primevue/badge';
 import StepEditDialog from '@/components/metaObjectWorkflowEditComponents/StepEditDialog.vue';
+import { Guid } from 'guid-typescript';
 import WorkflowSettings from '../../../../shared/src/models/workflowModel/workflowSettings';
 import UpDownHelper from '../../../../shared/src/helpers/upDowHelper';
 
@@ -38,6 +39,7 @@ const props = defineProps({
 
 // Data
 const selectedItem:any = ref(null);
+const lastSelectedItem = ref(null);
 const windowHeight = ref(window.innerHeight);
 const addCommandItems = ref<any[]>([]);
 const isStepEditDialogOpen = ref(false);
@@ -65,7 +67,15 @@ function stepTitle(step: any):string {
 // Event handlers
 function onAddClick(kind: string): void {
   const previousUid = selectedItem.value ? selectedItem.value.uid : null;
-  selectedItem.value = props.settings.newStep(kind, previousUid);
+
+  const params = {
+    previousStepUid: previousUid,
+    kindName: kind,
+    name: `step_${props.settings.steps.length + 1}`,
+    title: `Step ${props.settings.steps.length + 1}`,
+  };
+
+  selectedItem.value = props.settings.newStep(kind, params);
   isStepEditDialogOpen.value = true;
   emit('change');
 }
@@ -78,6 +88,14 @@ function onEditClick(): void {
   isStepEditDialogOpen.value = true;
 }
 
+function onListChange(event: any): void {
+  if (!event.value) {
+    selectedItem.value = lastSelectedItem.value; // Restore the previous selection
+  } else {
+    lastSelectedItem.value = event.value; // Save the new selection
+  }
+}
+
 function onListDoubleClick(): void {
   if (!selectedItem.value) {
     return;
@@ -86,7 +104,20 @@ function onListDoubleClick(): void {
 }
 
 function onCopyClick(): void {
-  console.log('Copy click');
+  if (!selectedItem.value) {
+    return;
+  }
+
+  const newStep = props.settings.newStep(selectedItem.value.kindName, selectedItem.value);
+  newStep.title = `${newStep.title} - copy`;
+  newStep.name = '';
+  newStep.previousStepUid = '';
+  newStep.uid = Guid.create().toString();
+
+  selectedItem.value = newStep;
+  isStepEditDialogOpen.value = true;
+
+  emit('change');
 }
 
 function onDeleteClick(): void {
@@ -159,6 +190,10 @@ onBeforeMount(() => {
 
 onMounted(() => {
   window.addEventListener('resize', onResize);
+  if (props.settings.steps.length) {
+    [selectedItem.value] = props.settings.steps;
+    lastSelectedItem.value = selectedItem.value;
+  }
 });
 
 onBeforeUnmount(() => {
@@ -221,6 +256,8 @@ onBeforeUnmount(() => {
              v-model="selectedItem"
              :options="settings.steps"
              :list-style="listStyle"
+             :meta-key-selection="false"
+             @change="onListChange"
              @dblclick="onListDoubleClick">
       <template #option="{option, index}">
         <div>

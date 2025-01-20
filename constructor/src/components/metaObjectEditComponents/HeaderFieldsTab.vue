@@ -186,7 +186,8 @@ onBeforeUnmount(() => {
                v-model="selectedItem"
                :options="settings.header.columns"
                :list-style="listStyle"
-               option-label="title">
+               option-label="title"
+               :meta-key-selection="false">
         <template #option="{option, index}">
             <div>
               <Badge :value="index+1" severity="info"></Badge>

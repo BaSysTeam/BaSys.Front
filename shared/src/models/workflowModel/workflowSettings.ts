@@ -40,25 +40,18 @@ export default class WorkflowSettings {
     }
   }
 
-  newStep(kind: string, previousUid: string): any {
+  newStep(kind: string, params: any): any {
     let newStep = null;
-    const nextStepNumber = this.steps.length + 1;
 
     switch (kind) {
       case 'sleep':
-        newStep = new SleepStepSettings({
-          title: `Sleep ${nextStepNumber}`,
-          name: `sleep_${nextStepNumber}`,
-          previousStepUid: previousUid,
-        });
+        newStep = new SleepStepSettings(
+          params,
+        );
         break;
       case 'message':
         newStep = new MessageStepSettings(
-          {
-            title: `Message ${nextStepNumber}`,
-            name: `message_${nextStepNumber}`,
-            previousStepUid: previousUid,
-          },
+          params,
         );
         break;
       default:
