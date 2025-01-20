@@ -1,4 +1,5 @@
 import { Guid } from 'guid-typescript';
+import WorkflowStepKind from './workflowStepKind';
 import SleepStepSettings from './sleepStepSettings';
 import MessageStepSettings from './messageStepSettings';
 import WorkflowStepSettingsBase from './workflowStepSettingsBase';
@@ -25,6 +26,18 @@ export default class WorkflowSettings {
     this.isActive = data.isActive || true;
 
     this.steps = [];
+
+    if (data.steps != null) {
+      data.steps.forEach((step: any) => {
+        if (step.kindUid === WorkflowStepKind.Sleep.uid) {
+          this.steps.push(new SleepStepSettings(step));
+        } else if (step.kindUid === WorkflowStepKind.Message.uid) {
+          this.steps.push(new MessageStepSettings(step));
+        } else {
+          throw new Error(`Wrong step kind ${step.kindUid}`);
+        }
+      });
+    }
   }
 
   newStep(kind: string, previousUid: string): any {
