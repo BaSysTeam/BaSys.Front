@@ -44,10 +44,12 @@
   "dataTypes": "Data types",
   "dataSource": "Data source",
   "default": "Default",
+  "delay": "Delay",
   "delete": "Delete",
   "deleteRecords": "Delete records",
   "deleteColumnQuestion": "Delete column?",
   "deleteCommandQuestion": "Delete command?",
+  "deleteStepQuestion": "Delete step?",
   "deleteItemQuestion": "Delete item?",
   "deleteRow": "Delete row",
   "deleteTableQuestion": "Delete table?",
@@ -90,6 +92,7 @@
   "manage": "Manage",
   "menuSettings": "Menu settings",
   "memo": "Memo",
+  "message": "Message",
   "metaObjectKind": "Meta object kind",
   "metaObjectKinds": "Meta object kinds",
   "metaObjects": "Meta objects",
@@ -107,6 +110,7 @@
   "pickUpAddTooltip": "Add selected data to table",
   "pickUpFillTooltip": "Clear table and add selected data",
   "prefix": "Prefix",
+  "previousStep": "Previous step",
   "primaryKey": "Primary key",
   "recalculate": "Recalculate",
   "records": "Records",
@@ -121,6 +125,7 @@
   "selectObject": "Select object",
   "separator": "Separator",
   "source": "Source",
+  "steps": "Steps",
   "standardColumns": "Standard columns",
   "storeData": "Store data",
   "stringLength": "String length",
@@ -132,6 +137,7 @@
   "unique": "Unique",
   "up": "Up",
   "update": "Update",
-  "welcome": "Welcome"
+  "welcome": "Welcome",
+  "workflow": "Workflow"
 }
 

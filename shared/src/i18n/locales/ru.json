@@ -45,9 +45,11 @@
   "dataTypes": "Типы данных",
   "dataSource": "Источник данных",
   "default": "По-умолчанию",
+  "delay": "Пауза",
   "delete": "Удалить",
   "deleteColumnQuestion": "Удалить колонку?",
   "deleteCommandQuestion": "Удалить команду?",
+  "deleteStepQuestion": "Удалить шаг?",
   "deleteItemQuestion": "Удалить элемент?",
   "deleteRecords": "Удалить записи",
   "deleteRow": "Удалить строку",
@@ -91,6 +93,7 @@
   "memo": "Комментарий",
   "manage": "Управление",
   "menuSettings": "Настройки меню",
+  "message": "Сообщение",
   "metaObjectKind": "Вид метаданных",
   "metaObjectKinds": "Виды метаданных",
   "metaObjects": "Объекты метаданных",
@@ -108,6 +111,7 @@
   "pickUpAddTooltip": "Добавить выбранные данные в таблицу",
   "pickUpFillTooltip": "Очистить таблицу и добавить выбранные данные",
   "prefix": "Префикс",
+  "previousStep": "Предыдущий шаг",
   "primaryKey": "Первичный ключ",
   "recalculate": "Пересчитать",
   "records": "Записи",
@@ -122,6 +126,7 @@
   "selectObject": "Выбор объекта",
   "separator": "Разделитель",
   "source": "Источник",
+  "steps": "Шаги",
   "standardColumns": "Стандартные колонки",
   "storeData": "Хранит данные",
   "stringLength": "Длина строки",
@@ -133,5 +138,6 @@
   "unique": "Уникальное",
   "up": "Вверх",
   "update": "Обновить",
-  "welcome": "Добро пожаловать"
+  "welcome": "Добро пожаловать",
+  "workflow": "Процесс"
 }
