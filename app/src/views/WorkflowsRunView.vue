@@ -1,0 +1,74 @@
+<script setup lang="ts">
+import {
+  ref, onMounted, onBeforeMount, defineProps, watch, computed,
+} from 'vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
+import Button from 'primevue/button';
+import Divider from 'primevue/divider';
+import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
+
+// Infrastructure
+const { t } = useI18n({ useScope: 'global' });
+const router = useRouter();
+const confirmVue = useConfirm();
+
+// Props
+const props = defineProps({
+  name: { type: String, required: true },
+});
+
+// Data
+const isWaiting = ref(false);
+const formTitle = computed(() => `${t('workflowRun')}: ${props.name}`);
+
+// Methods
+
+// Event handlers
+function onRunClick(): void {
+  console.log('Run click');
+}
+
+// Life cycle hooks
+</script>
+
+<template>
+  <!--View title-->
+  <div class="grid">
+    <div class="col">
+      <ViewTitleComponent :title="formTitle" :is-waiting="isWaiting" />
+    </div>
+  </div>
+
+  <!--Command panel-->
+  <div class="grid">
+    <div class="col-12">
+      <Button
+        :label="$t('execute')"
+        class="ml-1"
+        severity="primary"
+        outlined
+        size="small"
+        icon="pi pi-play"
+        @click="onRunClick"
+      />
+    </div>
+  </div>
+
+  <!--Divider-->
+  <div class="grid">
+    <Divider class="m-2" />
+  </div>
+
+  <!--Content-->
+  <div class="grid">
+    <div class="col-12">
+    </div>
+  </div>
+</template>
+
+<style scoped>
+
+</style>

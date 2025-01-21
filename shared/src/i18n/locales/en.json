@@ -138,6 +138,7 @@
   "up": "Up",
   "update": "Update",
   "welcome": "Welcome",
-  "workflow": "Workflow"
+  "workflow": "Workflow",
+  "workflowRun": "Workflow run"
 }
 

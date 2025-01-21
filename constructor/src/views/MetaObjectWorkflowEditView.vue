@@ -157,6 +157,11 @@ function onSettingsChanged(): void {
   isModified.value = true;
 }
 
+function onRunClick(): void {
+  const url = `app#/workflows-run/${settings.value.name}`;
+  window.open(url, '_blank');
+}
+
 // Life cycle hooks
 onBeforeMount(() => {
   actionItems.value = [
@@ -225,6 +230,13 @@ onMounted(async () => {
           @click="onSaveClick"
         />
       </ButtonGroup>
+      <Button
+        class="ml-1"
+        severity="success"
+        size="small"
+        icon="pi pi-play"
+        @click="onRunClick"
+      />
       <SplitButton
         :label="$t('actions')"
         severity="primary"
