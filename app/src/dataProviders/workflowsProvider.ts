@@ -1,0 +1,20 @@
+import axios from 'axios';
+import ResultWrapper from '../../../shared/src/models/resultWrapper';
+
+export default class WorkflowsProvider {
+  private readonly BASE_URL = '/api/app/v1/Workflows';
+
+  async startAsync(name: string):
+    Promise<ResultWrapper<any>> {
+    let result: ResultWrapper<any> = new ResultWrapper<any>();
+
+    try {
+      const { data } = await axios.post(`${this.BASE_URL}/start/${name}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+}

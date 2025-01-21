@@ -8,12 +8,14 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
+import WorkflowsProvider from '@/dataProviders/workflowsProvider';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
 const router = useRouter();
 const confirmVue = useConfirm();
+const provider = new WorkflowsProvider();
 
 // Props
 const props = defineProps({
@@ -27,8 +29,12 @@ const formTitle = computed(() => `${t('workflowRun')}: ${props.name}`);
 // Methods
 
 // Event handlers
-function onRunClick(): void {
+async function onRunClick(): Promise<void> {
   console.log('Run click');
+  isWaiting.value = true;
+  const response = await provider.startAsync(props.name);
+  console.log('Run result', response);
+  isWaiting.value = false;
 }
 
 // Life cycle hooks
