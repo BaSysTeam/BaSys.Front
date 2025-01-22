@@ -139,6 +139,7 @@
   "update": "Update",
   "welcome": "Welcome",
   "workflow": "Workflow",
-  "workflowRun": "Workflow run"
+  "workflowRun": "Workflow run",
+  "workflowsBoard": "Workflows board"
 }
 
