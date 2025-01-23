@@ -17,4 +17,32 @@ export default class WorkflowsProvider {
 
     return result;
   }
+
+  async checkAsync(runUid: string):
+    Promise<ResultWrapper<any>> {
+    let result: ResultWrapper<any> = new ResultWrapper<any>();
+
+    try {
+      const { data } = await axios.get(`${this.BASE_URL}/check/${runUid}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
+
+  async terminateAsync(runUid: string):
+    Promise<ResultWrapper<any>> {
+    let result: ResultWrapper<any> = new ResultWrapper<any>();
+
+    try {
+      const { data } = await axios.delete(`${this.BASE_URL}/${runUid}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
 }
