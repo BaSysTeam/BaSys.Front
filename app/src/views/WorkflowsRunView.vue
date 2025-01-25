@@ -48,6 +48,14 @@ async function checkAsync(): Promise<void> {
   console.log(`Check ${new Date()}`, response);
   isWaiting.value = false;
   if (response.isOK) {
+    // Sync steps status
+    response.data.steps.forEach((item: any) => {
+      const step = steps.value.find((s: any) => s.id === item.id);
+      if (step) {
+        step.status = item.status;
+      }
+    });
+
     if (response.data.status === 2) {
       isRunning.value = false;
       toastHelper.success('Workflow finished');
@@ -153,22 +161,6 @@ async function onStopClick(): Promise<void> {
   <!--Content-->
   <div class="grid">
     <div class="col-4">
-<!--      <Listbox-->
-<!--               v-model="selectedItem"-->
-<!--               :options="steps"-->
-<!--               :list-style="listStyle"-->
-<!--               option-label="title"-->
-<!--               :meta-key-selection="false">-->
-<!--        <template #empty>-->
-<!--          <div>Steps</div>-->
-<!--        </template>-->
-<!--        <template #option="{option, index}">-->
-<!--          <div style="border-bottom: 1px solid #ececec">-->
-<!--            <Badge :value="index+1" severity="info"></Badge>-->
-<!--            <span class="ml-2">{{option.title}}</span>-->
-<!--          </div>-->
-<!--        </template>-->
-<!--      </Listbox>-->
 
       <DataView :value="steps" style="border:1px solid #ececec">
         <template #empty>
@@ -185,6 +177,11 @@ async function onStopClick(): Promise<void> {
               <div style="border-bottom: 1px solid #ececec; font-size: 1rem; padding: 0.5rem">
                 <Badge :value="index+1" severity="info"></Badge>
                 <span class="ml-1">{{ item.title }}</span>
+                <span class="pi pi-spin pi-spinner ml-2"
+                      style="float:right" v-if="item.status == 2"></span>
+                <span class="pi pi-check ml-2"
+                      style="float:right"
+                      v-if="item.status == 3"></span>
               </div>
             </div>
           </div>
