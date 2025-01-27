@@ -60,7 +60,6 @@ async function checkAsync(): Promise<void> {
       }
     });
 
-    messages.value = [];
     response.data.messages.forEach((item:any) => {
       messages.value.push(new LogMessage(item));
     });
