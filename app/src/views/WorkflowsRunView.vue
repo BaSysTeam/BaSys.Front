@@ -14,6 +14,7 @@ import DataView from 'primevue/dataview';
 import WorkflowsProvider from '@/dataProviders/workflowsProvider';
 import Toolbar from 'primevue/toolbar';
 import SelectButton from 'primevue/selectbutton';
+import SettingsPanel from '@/components/workflowRunComponents/SettingsPanel.vue';
 import LogMessage from '../../../shared/src/models/logMessage';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
@@ -33,6 +34,7 @@ const props = defineProps({
 // Data
 const isWaiting = ref(false);
 const isRunning = ref(false);
+const isSettingsPanelVisible = ref(false);
 const runUid = ref('');
 const steps = ref<any[]>([]);
 const messages = ref<LogMessage[]>([]);
@@ -128,6 +130,14 @@ async function onStopClick(): Promise<void> {
   }
 }
 
+function onOpenSettingsPanelClick(): void {
+  isSettingsPanelVisible.value = true;
+}
+
+function onSettingsPanelHide(): void {
+  isSettingsPanelVisible.value = false;
+}
+
 // Life cycle hooks
 </script>
 
@@ -159,6 +169,15 @@ async function onStopClick(): Promise<void> {
         size="small"
         icon="pi pi-stop"
         @click="onStopClick"
+      />
+      <Button
+        :disabled="isWaiting || isRunning"
+        class="ml-1"
+        severity="primary"
+        outlined
+        size="small"
+        icon="pi pi-cog"
+        @click="onOpenSettingsPanelClick"
       />
     </div>
   </div>
@@ -226,6 +245,10 @@ async function onStopClick(): Promise<void> {
 
     </div>
   </div>
+
+  <SettingsPanel :visible="isSettingsPanelVisible"
+                 @hide="onSettingsPanelHide"></SettingsPanel>
+
 </template>
 
 <style scoped>
