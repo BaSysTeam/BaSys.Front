@@ -19,7 +19,7 @@ module.exports = {
     'vuejs-accessibility/form-control-has-label': 'off',
     'vuejs-accessibility/no-autofocus': 'off',
     'vuejs-accessibility/anchor-has-content': 'off',
-    'vue/ no-mutating-props': 'off',
+    'vue/no-mutating-props': 'off',
     'import/prefer-default-export': 'off',
     'no-shadow': 'off', // Turn off the base rule,
     '@typescript-eslint/no-explicit-any': 'off',

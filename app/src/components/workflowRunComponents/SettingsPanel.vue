@@ -7,6 +7,10 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import Sidebar from 'primevue/sidebar';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
+import ParametersTab from '@/components/workflowRunComponents/ParametersTab.vue';
+import WorkflowParameter from '../../../../shared/src/models/workflowModel/workflowParameter';
 
 // Infrastructure
 const { t } = useI18n({ useScope: 'global' });
@@ -19,6 +23,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
     default: false,
+  },
+  parameters: {
+    type: Object as PropType<WorkflowParameter>,
+    required: true,
   },
 });
 
@@ -50,11 +58,15 @@ onBeforeMount(() => {
 
 <template>
   <Sidebar v-model:visible="isVisible"
-           class="w-full md:w-20rem lg:w-30rem"
-           header="Settings"
+           style="width: 50rem;"
+           :header="$t('settings')"
            position="right"
            @hide="onHide">
-    <div>Settings</div>
+    <TabView>
+      <TabPanel :header="$t('parameters')">
+        <ParametersTab :parameters="props.parameters"></ParametersTab>
+      </TabPanel>
+    </TabView>
   </Sidebar>
 </template>
 

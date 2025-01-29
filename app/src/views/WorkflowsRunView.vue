@@ -8,6 +8,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import Badge from 'primevue/badge';
 import Button from 'primevue/button';
+import ConfirmDialog from 'primevue/confirmdialog';
 import Divider from 'primevue/divider';
 import Listbox from 'primevue/listbox';
 import DataView from 'primevue/dataview';
@@ -16,6 +17,7 @@ import Toolbar from 'primevue/toolbar';
 import SelectButton from 'primevue/selectbutton';
 import SettingsPanel from '@/components/workflowRunComponents/SettingsPanel.vue';
 import LogMessage from '../../../shared/src/models/logMessage';
+import WorkflowParameter from '../../../shared/src/models/workflowModel/workflowParameter';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 
@@ -38,6 +40,7 @@ const isSettingsPanelVisible = ref(false);
 const runUid = ref('');
 const steps = ref<any[]>([]);
 const messages = ref<LogMessage[]>([]);
+const parameters = ref<WorkflowParameter[]>([]);
 const selectedItem = ref<any>(null);
 const formTitle = computed(() => `${t('workflowRun')}: ${props.name}`);
 const windowHeight = ref(window.innerHeight);
@@ -96,7 +99,8 @@ async function onRunClick(): Promise<void> {
   isWaiting.value = true;
   steps.value = [];
   messages.value = [];
-  const response = await provider.startAsync(props.name);
+  const startDto = { name: props.name, parameters: parameters.value };
+  const response = await provider.startAsync(startDto);
   console.log('Run result', response);
   isWaiting.value = false;
 
@@ -247,7 +251,10 @@ function onSettingsPanelHide(): void {
   </div>
 
   <SettingsPanel :visible="isSettingsPanelVisible"
+                 :parameters="parameters"
                  @hide="onSettingsPanelHide"></SettingsPanel>
+
+  <ConfirmDialog></ConfirmDialog>
 
 </template>
 
