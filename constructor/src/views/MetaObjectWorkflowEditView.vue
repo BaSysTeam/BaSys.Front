@@ -16,6 +16,7 @@ import JsonViewComponent from '@/components/JsonViewComponent.vue';
 import Menu from 'primevue/menu';
 import MainTab from '@/components/metaObjectWorkflowEditComponents/MainTab.vue';
 import StepsTab from '@/components/metaObjectWorkflowEditComponents/StepsTab.vue';
+import LogTab from '@/components/metaObjectWorkflowEditComponents/LogTab.vue';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import WorkflowSettings from '../../../shared/src/models/workflowModel/workflowSettings';
@@ -186,6 +187,10 @@ onBeforeMount(() => {
     command: () => onNavTabClick('steps'),
   },
   {
+    label: t('log'),
+    command: () => onNavTabClick('log'),
+  },
+  {
     label: 'JSON',
     command: () => onNavTabClick('json'),
   },
@@ -266,6 +271,10 @@ onMounted(async () => {
       <div v-if="activeTab=='steps'">
         <StepsTab :settings="settings"
                   @change="onSettingsChanged"></StepsTab>
+
+      </div>
+      <div v-if="activeTab=='log'">
+        <LogTab :settings="settings"></LogTab>
 
       </div>
       <div v-if="activeTab == 'json'">
