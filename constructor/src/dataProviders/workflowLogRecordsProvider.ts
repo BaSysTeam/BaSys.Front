@@ -4,7 +4,7 @@ import ResultWrapper from '../../../shared/src/models/resultWrapper';
 export default class WorkflowLogRecordsProvider {
   private readonly BASE_URL = '/api/constructor/v1/WorkflowLogRecords';
 
-  async GetWorkflowLifecycleRecords(workflowUid: string): Promise<ResultWrapper<any>> {
+  async getWorkflowLifecycleRecords(workflowUid: string): Promise<ResultWrapper<any>> {
     let result: ResultWrapper<any> = new ResultWrapper<any>();
 
     try {
@@ -17,7 +17,7 @@ export default class WorkflowLogRecordsProvider {
     return result;
   }
 
-  async GetRecordsByRun(runUid: string): Promise<ResultWrapper<any>> {
+  async getRecordsByRun(runUid: string): Promise<ResultWrapper<any>> {
     let result: ResultWrapper<any> = new ResultWrapper<any>();
 
     try {
