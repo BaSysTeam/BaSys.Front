@@ -59,12 +59,14 @@ async function updateAsync(): Promise<void> {
 function statusDisplay(status: number): string {
   switch (status) {
     case 0:
-      return 'Running';
+      return 'Waiting';
     case 1:
-      return 'Suspended';
+      return 'Running';
     case 2:
-      return 'Completed';
+      return 'Suspended';
     case 3:
+      return 'Completed';
+    case 4:
       return 'Terminated';
     default:
       return '';
