@@ -134,6 +134,7 @@
   "settings": "Settings",
   "source": "Source",
   "start": "Start",
+  "status": "Status",
   "stop": "Stop",
   "steps": "Steps",
   "standardColumns": "Standard columns",
