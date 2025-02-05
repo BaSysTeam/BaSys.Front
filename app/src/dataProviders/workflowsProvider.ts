@@ -33,8 +33,8 @@ export default class WorkflowsProvider {
   }
 
   async terminateAsync(runUid: string):
-    Promise<ResultWrapper<any>> {
-    let result: ResultWrapper<any> = new ResultWrapper<any>();
+    Promise<ResultWrapper<boolean>> {
+    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
 
     try {
       const { data } = await axios.delete(`${this.BASE_URL}/${runUid}`);

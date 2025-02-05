@@ -16,4 +16,18 @@ export default class WorkflowsBoardProvider {
 
     return result;
   }
+
+  async terminateAsync(runUid: string):
+    Promise<ResultWrapper<boolean>> {
+    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
+
+    try {
+      const { data } = await axios.delete(`${this.BASE_URL}/${runUid}`);
+      result = data;
+    } catch (error) {
+      console.error('error', error);
+    }
+
+    return result;
+  }
 }

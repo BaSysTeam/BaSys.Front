@@ -32,17 +32,16 @@ const selectedRow = ref<any>(null);
 const windowHeight = ref(window.innerHeight);
 
 const dataTableStyle = computed(() => ({
-  height: `${windowHeight.value - 150}px`,
+  height: `${windowHeight.value - 220}px`,
   fontSize: '0.8rem',
 }));
-const dataTableScrollHeight = computed(() => `${windowHeight.value - 150}px`);
+const dataTableScrollHeight = computed(() => `${windowHeight.value - 220}px`);
 const formTitle = computed(() => `${t('workflowsBoard')} (${rows.value.length})`);
 
 // Methods
 async function updateAsync(): Promise<void> {
   isWaiting.value = true;
   const response = await provider.getInfo();
-  console.log('update', response);
   isWaiting.value = false;
 
   rows.value = [];
@@ -50,6 +49,20 @@ async function updateAsync(): Promise<void> {
     response.data.forEach((item) => {
       rows.value.push(new WorkflowInfo(item));
     });
+  } else {
+    toastHelper.error(response.message);
+    console.error(response.presentation);
+  }
+}
+
+async function terminateAsync(runUid: string): Promise<void> {
+  isWaiting.value = true;
+  const response = await provider.terminateAsync(runUid);
+  isWaiting.value = false;
+
+  if (response.isOK) {
+    toastHelper.success(response.message);
+    await updateAsync();
   } else {
     toastHelper.error(response.message);
     console.error(response.presentation);
@@ -76,6 +89,10 @@ function statusDisplay(status: number): string {
 // Event handlers
 function onUpdateClick(): void {
   updateAsync();
+}
+
+function onRowTerminateClick(row: WorkflowInfo): void {
+  terminateAsync(row.runUid);
 }
 
 function onResize(): void {
@@ -158,6 +175,21 @@ onBeforeUnmount(() => {
           <Column field="origin" :header="$t('logOrigin')" style="width: 150px"></Column>
           <Column field="workflowTitle" :header="$t('workflow')"></Column>
           <Column field="userName" :header="$t('user')"></Column>
+          <Column :header="$t('actions')"
+                  style="max-width:200px; min-width:200px; width: 200px;">
+            <template #body="{ data }">
+
+              <a href="#"
+                 v-if="(data.status == 0 || data.status == 1) && !isWaiting"
+                 v-tooltip.top="$t('stop')"
+                 class="mr-2 bs-row-action"
+                 tabindex="-1"
+                 @click.prevent="onRowTerminateClick(data)">
+                <span class="pi pi-stop-circle text-red-500"></span>
+              </a>
+
+            </template>
+          </Column>
         </DataTable>
       </div>
     </div>
