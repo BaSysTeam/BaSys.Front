@@ -171,6 +171,7 @@ onBeforeUnmount(() => {
               {{statusDisplay(data[field])}}
             </template>
           </Column>
+          <Column field="version" :header="$t('version')" style="width: 70px"></Column>
           <Column field="runUid" header="Run Uid" style="width: 300px"></Column>
           <Column field="origin" :header="$t('logOrigin')" style="width: 150px"></Column>
           <Column field="workflowTitle" :header="$t('workflow')"></Column>

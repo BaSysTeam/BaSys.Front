@@ -5,6 +5,7 @@ export default class WorkflowInfo {
   workflowUid: string;
   workflowName: string;
   workflowTitle: string;
+  version: number;
   origin: string;
   userName: string;
   userUid: string;
@@ -21,6 +22,7 @@ export default class WorkflowInfo {
     this.workflowUid = data.workflowUid || '';
     this.workflowName = data.workflowName || '';
     this.workflowTitle = data.workflowTitle || '';
+    this.version = data.version || 0;
     this.origin = data.origin || '';
     this.userName = data.userName || '';
     this.userUid = data.userUid || '';

@@ -6,6 +6,7 @@ export default class WorkflowLogRecord {
   logMessage: string;
   kind: number;
   level: number;
+  version: number;
   origin: string;
   runUid: string;
   workflowUid: string;
@@ -24,6 +25,7 @@ export default class WorkflowLogRecord {
     this.logMessage = data.logMessage || '';
     this.kind = data.kind || 0;
     this.level = data.level || 0;
+    this.version = data.version || 0;
     this.runUid = data.runUid || '';
     this.origin = data.origin || '';
     this.workflowUid = data.workflowUid || '';

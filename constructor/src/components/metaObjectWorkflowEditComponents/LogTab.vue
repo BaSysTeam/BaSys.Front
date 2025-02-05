@@ -172,6 +172,7 @@ onMounted(async () => {
         >
           <template #empty> {{$t('noData')}} </template>
           <Column field="raiseDate" :header="$t('period')" style="width:200px"></Column>
+          <Column field="version" :header="$t('version')" style="width:70px"></Column>
           <Column field="runUid" header="Run Uid" style="width: 270px"></Column>
           <Column field="origin" :header="$t('logOrigin')" style="width: 150px"></Column>
           <Column field="userName" :header="$t('user')"></Column>
