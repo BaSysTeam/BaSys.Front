@@ -108,7 +108,7 @@ function navigateToEdit(): void {
   if (props.kind === 'menu') {
     router.push({ name: 'meta-menus-edit', params: { name: metaObject.name } });
   } else if (props.kind === 'workflow') {
-    router.push({ name: 'workflows-edit', params: { name: metaObject.name } });
+    router.push({ name: 'meta-workflows-edit', params: { name: metaObject.name } });
   } else {
     router.push({ name: 'meta-objects-edit', params: { kind: props.kind, name: metaObject.name } });
   }
@@ -118,7 +118,7 @@ function navigateToAdd(): void {
   if (props.kind === 'menu') {
     router.push({ name: 'meta-menus-add', params: { kind: props.kind } });
   } else if (props.kind === 'workflow') {
-    router.push({ name: 'workflows-add', params: { kind: props.kind } });
+    router.push({ name: 'meta-workflows-add', params: { kind: props.kind } });
   } else {
     router.push({ name: 'meta-objects-add', params: { kind: props.kind } });
   }
@@ -132,7 +132,7 @@ function navigateToCopy(): void {
   if (props.kind === 'menu') {
     router.push({ name: 'meta-menus-copy', params: { name: metaObject.name } });
   } else if (props.kind === 'workflow') {
-    router.push({ name: 'workflows-copy', params: { name: metaObject.name } });
+    router.push({ name: 'meta-workflows-copy', params: { name: metaObject.name } });
   } else {
     router.push({ name: 'meta-objects-copy', params: { kind: props.kind, name: metaObject.name } });
   }
@@ -231,7 +231,12 @@ function onRunClick(): void {
     return;
   }
   const metaObject = selectedRow.value as MetaObject;
-  const url = `app#/data-objects/${props.kind}/${metaObject.name}`;
+  let url = '';
+  if (props.kind === 'workflow') {
+    url = `app#/workflows-run/${metaObject.name}`;
+  } else {
+    url = `app#/data-objects/${props.kind}/${metaObject.name}`;
+  }
   window.open(url, '_blank');
 }
 
@@ -326,6 +331,7 @@ onMounted(async () => {
         v-if="kind !='menu'"
         class="ml-1"
         severity="success"
+        outlined
         size="small"
         icon="pi pi-play"
         @click="onRunClick"

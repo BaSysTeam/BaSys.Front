@@ -18,6 +18,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'no-shadow': 'off', // Turn off the base rule,
     '@typescript-eslint/no-explicit-any': 'off',
+    'vuejs-accessibility/anchor-has-content': 'off',
     'linebreak-style': ['off', 'windows'],
     '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
     'lines-between-class-members': [

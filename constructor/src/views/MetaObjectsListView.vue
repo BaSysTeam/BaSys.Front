@@ -231,7 +231,12 @@ function onRunClick(): void {
     return;
   }
   const metaObject = selectedRow.value as MetaObject;
-  const url = `app#/data-objects/${props.kind}/${metaObject.name}`;
+  let url = '';
+  if (props.kind === 'workflow') {
+    url = `app#/workflows-run/${metaObject.name}`;
+  } else {
+    url = `app#/data-objects/${props.kind}/${metaObject.name}`;
+  }
   window.open(url, '_blank');
 }
 
