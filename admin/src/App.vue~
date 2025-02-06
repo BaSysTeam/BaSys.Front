@@ -124,8 +124,8 @@ export default class App extends Vue {
       ],
     },
     {
-      label: 'Workflows',
-      icon: 'pi pi-table',
+      label: 'Workflows board',
+      icon: 'pi pi-cog',
       route: '/workflows-board',
     },
     {

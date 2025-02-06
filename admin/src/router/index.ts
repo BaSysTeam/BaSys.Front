@@ -4,6 +4,7 @@ import LoggingSettingView from '@/views/LoggingSettingView.vue';
 import FileStorageSettingsView from '@/views/FileStorageSettingsView.vue';
 import UserGroupsView from '@/views/UserGroupsView.vue';
 import UserGroupEditView from '@/views/UserGroupEditView.vue';
+import WorkflowsBoardView from '@/views/WorkflowsBoardView.vue';
 import HomeView from '../views/HomeView.vue';
 import UserListView from '../views/UserListView.vue';
 import UserEditView from '../views/UserEditView.vue';
@@ -54,6 +55,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/settings/fileStorage',
     name: 'fileStorageSetting',
     component: FileStorageSettingsView,
+  },
+  {
+    path: '/workflows-board',
+    name: 'workflows-board',
+    component: WorkflowsBoardView,
   },
 ];
 
