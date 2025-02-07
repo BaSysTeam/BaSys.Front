@@ -15,7 +15,7 @@ export default class WorkflowScheduleRecord {
 
     this.uid = data.uid || Guid.create().toString();
     this.workflowUid = data.workflowUid || '';
-    this.cronExpression = data.cronExpression || '';
+    this.cronExpression = data.cronExpression || '* * * * *';
     this.memo = data.memo || '';
     this.isActive = data.isActive || false;
   }
