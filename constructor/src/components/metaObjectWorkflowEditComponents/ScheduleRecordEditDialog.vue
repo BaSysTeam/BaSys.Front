@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import {
-  ref, onMounted, onBeforeMount, defineProps, defineEmits, watch, computed, PropType,
+  ref, onMounted, defineProps, defineEmits, PropType,
 } from 'vue';
-import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue/useconfirm';
-import { useI18n } from 'vue-i18n';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -13,12 +9,8 @@ import InputSwitch from 'primevue/inputswitch';
 import WorkflowScheduleRecord from '@/models/workflowScheduleRecord';
 import FieldGridComponent from '@/components/FieldGridComponent.vue';
 import { Guid } from 'guid-typescript';
+import * as CronParser from 'cron-parser';
 import ViewTitleComponent from '../../../../shared/src/components/ViewTitleComponent.vue';
-
-// Infrastructure
-const { t } = useI18n({ useScope: 'global' });
-const router = useRouter();
-const confirmVue = useConfirm();
 
 // Props
 const props = defineProps({
@@ -29,6 +21,8 @@ const props = defineProps({
 // Data
 const isModified = ref(false);
 const record = ref<WorkflowScheduleRecord>(new WorkflowScheduleRecord(null));
+const nextExecutions = ref<string[]>([]);
+const cronParseError = ref<string>('');
 
 // Emit
 const emit = defineEmits(
@@ -38,6 +32,23 @@ const emit = defineEmits(
 );
 
 // Methods
+function calcNextExecutions(): void {
+  const intervalCount = 5;
+  const options = { utc: true };
+
+  try {
+    const interval = CronParser.parseExpression(record.value.cronExpression, options);
+    nextExecutions.value = [];
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < intervalCount; i++) {
+      nextExecutions.value.push(`${interval.next().toISOString().substring(0, 19)} UTC`);
+    }
+    cronParseError.value = '';
+  } catch (err: any) {
+    cronParseError.value = err.toString();
+    console.error(err);
+  }
+}
 
 // Event handlers
 function onCloseClick(): void {
@@ -57,6 +68,11 @@ function updateVisible(value: boolean): void {
   if (!value) {
     emit('close', null);
   }
+}
+
+function onCronChange(): void {
+  isModified.value = true;
+  calcNextExecutions();
 }
 
 function onChange(): void {
@@ -81,6 +97,8 @@ onMounted(() => {
     default:
       break;
   }
+
+  calcNextExecutions();
 });
 
 </script>
@@ -116,8 +134,23 @@ onMounted(() => {
                    autocomplete="off"
                    class="w-full"
                    v-model="record.cronExpression"
-                   @change="onChange"></InputText>
+                   @change="onCronChange"></InputText>
       </FieldGridComponent>
+
+      <div class="grid">
+        <div class="col-4"></div>
+        <div class="col-8" v-if="cronParseError">
+          <span class="text-red-500">{{cronParseError}}</span>
+        </div>
+        <div class="col-8" v-else>
+          <ul style="margin: 0">
+            <li v-for="item in nextExecutions"
+                :key="item"
+                class="text-primary"
+                style="list-style-type: none; margin-bottom: 10px;">{{item}}</li>
+          </ul>
+        </div>
+      </div>
 
       <!--Memo-->
       <FieldGridComponent :title="$t('memo')" label-for="fld-memo">
@@ -131,6 +164,10 @@ onMounted(() => {
 
     </div>
     <template #footer>
+      <a href="https://crontab.guru/"
+         target="_blank"
+         class="text-primary"
+         style="margin: 5px auto 5px 0;">{{$t('cronExpressionBuilder')}}</a>
       <Button
         class="mr-1"
         :label="$t('cancel')"
