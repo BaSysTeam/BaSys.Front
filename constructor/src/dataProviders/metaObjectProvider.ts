@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BaseProvider from '@/dataProviders/baseProvider';
 import MetaObjectListViewModel from '@/models/metaObjectListViewModel';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import MetaObjectStorableSettings from '../../../shared/src/models/metaObjectStorableSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 

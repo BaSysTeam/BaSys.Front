@@ -1,5 +1,5 @@
 import axios from 'axios';
-import ResultWrapper from '../../../shared/src/models/resultWrapper';
+import ResultWrapper from '../models/resultWrapper';
 
 export default abstract class BaseProvider {
   protected readonly BASE_URL: string;
@@ -21,11 +21,24 @@ export default abstract class BaseProvider {
 
       const result = new ResultWrapper<T>();
       result.isOK = false;
+
       if (axios.isAxiosError(error)) {
+        const status = error.response?.status || 500;
         result.message = error.response?.data?.message || error.message;
-        result.status = error.response?.status || 500;
+        result.status = status;
+
+        if (status === 401) {
+          console.warn('Login expired. Redirecting to login page.');
+          window.location.href = '/Identity/Account/Login'; // Redirect to login page.
+        } else if (status === 500) {
+          console.error('Server error:', error.response?.data);
+        } else if (status === 404) {
+          console.error('Not found:', error.config?.url);
+        } else {
+          console.error('Unknown error.');
+        }
       } else {
-        result.message = 'Unexpected error occurred.';
+        result.message = 'Unknown error.';
         result.status = 500;
       }
 

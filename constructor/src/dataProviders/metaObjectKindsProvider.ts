@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BaseProvider from '@/dataProviders/baseProvider';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import MetaObjectKind from '../models/metaObjectKind';
 import MetaObjectKindSettings from '../../../shared/src/models/metaObjectKindSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';

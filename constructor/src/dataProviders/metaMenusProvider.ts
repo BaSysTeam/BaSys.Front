@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BaseProvider from '@/dataProviders/baseProvider';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import MenuSettings from '../../../shared/src/models/menuModel/menuSettings';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 

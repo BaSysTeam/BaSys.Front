@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BaseProvider from '@/dataProviders/baseProvider';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import DataType from '../../../shared/src/models/dataType';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 

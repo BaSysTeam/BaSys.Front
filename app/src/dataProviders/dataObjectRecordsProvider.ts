@@ -1,20 +1,14 @@
 import axios from 'axios';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class DataObjectRecordsProvider {
-  readonly BASE_URL = '/api/app/v1/DataObjectRecords';
+export default class DataObjectRecordsProvider extends BaseProvider {
+  constructor() {
+    super('/api/app/v1/DataObjectRecords');
+  }
 
   async getModelAsync(kind: string, name: string, uid: string): Promise<ResultWrapper<any>> {
-    let result: ResultWrapper<any> = new ResultWrapper<any>();
-
-    try {
-      const { data } = await axios.get(`${this.BASE_URL}/Model/${kind}/${name}/${uid}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.get(`${this.BASE_URL}/Model/${kind}/${name}/${uid}`));
   }
 
   async getRecordsAsync(
@@ -23,43 +17,16 @@ export default class DataObjectRecordsProvider {
     objectUid: string,
     registerUid: string,
   ): Promise<ResultWrapper<any>> {
-    let result: ResultWrapper<any> = new ResultWrapper<any>();
-
-    try {
-      const { data } = await axios.get(`${this.BASE_URL}/Records/${kind}/${name}/${objectUid}/${registerUid}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.get(`${this.BASE_URL}/Records/${kind}/${name}/${objectUid}/${registerUid}`));
   }
 
   async createRecordsAsync(kind: string, name: string, uid: string, logLevel: number):
     Promise<ResultWrapper<any[]>> {
-    let result: ResultWrapper<any[]> = new ResultWrapper<any[]>();
-
-    try {
-      const { data } = await axios.post(`${this.BASE_URL}/${kind}/${name}/${uid}?logLevel=${logLevel}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.post(`${this.BASE_URL}/${kind}/${name}/${uid}?logLevel=${logLevel}`));
   }
 
   async deleteRecordsAsync(kind: string, name: string, uid: string):
     Promise<ResultWrapper<boolean>> {
-    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
-
-    try {
-      const { data } = await axios.delete(`${this.BASE_URL}/${kind}/${name}/${uid}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.delete(`${this.BASE_URL}/${kind}/${name}/${uid}`));
   }
 }
