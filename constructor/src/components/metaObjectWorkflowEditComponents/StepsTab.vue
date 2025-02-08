@@ -204,7 +204,7 @@ onBeforeUnmount(() => {
 
 <template>
 <div class="grid">
-  <div class="col-6">
+  <div class="col-8">
     <!--Steps command panel-->
     <Toolbar style="padding: 0.2rem; margin-bottom: 0.2rem">
       <template #start>

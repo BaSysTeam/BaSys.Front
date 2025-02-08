@@ -18,6 +18,7 @@ import MainTab from '@/components/metaObjectWorkflowEditComponents/MainTab.vue';
 import StepsTab from '@/components/metaObjectWorkflowEditComponents/StepsTab.vue';
 import LogTab from '@/components/metaObjectWorkflowEditComponents/LogTab.vue';
 import ConfirmDialog from 'primevue/confirmdialog';
+import ScheduleTab from '@/components/metaObjectWorkflowEditComponents/ScheduleTab.vue';
 import ViewTitleComponent from '../../../shared/src/components/ViewTitleComponent.vue';
 import WorkflowSettings from '../../../shared/src/models/workflowModel/workflowSettings';
 import ToastHelper from '../../../shared/src/helpers/toastHelper';
@@ -187,6 +188,10 @@ onBeforeMount(() => {
     command: () => onNavTabClick('steps'),
   },
   {
+    label: t('schedule'),
+    command: () => onNavTabClick('schedule'),
+  },
+  {
     label: t('log'),
     command: () => onNavTabClick('log'),
   },
@@ -271,6 +276,10 @@ onMounted(async () => {
       <div v-if="activeTab=='steps'">
         <StepsTab :settings="settings"
                   @change="onSettingsChanged"></StepsTab>
+
+      </div>
+      <div v-if="activeTab=='schedule'">
+       <ScheduleTab :workflow-uid="settings.uid"></ScheduleTab>
 
       </div>
       <div v-if="activeTab=='log'">
