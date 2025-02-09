@@ -1,20 +1,14 @@
 import axios from 'axios';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import DataType from '../../../shared/src/models/dataType';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class DataTypeProvider {
-  private readonly BASE_URL = '/api/constructor/v1/DataTypes';
+export default class DataTypeProvider extends BaseProvider {
+  constructor() {
+    super('/api/constructor/v1/DataTypes');
+  }
 
   async getDataTypes(): Promise<ResultWrapper<DataType[]>> {
-    let result: ResultWrapper<DataType[]> = new ResultWrapper<DataType[]>();
-
-    try {
-      const { data } = await axios.get(this.BASE_URL);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.get(this.BASE_URL));
   }
 }

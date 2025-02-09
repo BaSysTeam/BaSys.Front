@@ -1,72 +1,30 @@
 import AppRecord from '@/models/appRecord';
 import axios from 'axios';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class AppRecordProvider {
-  readonly BASE_URL = '/api/sa/v1/AppRecords';
+export default class AppRecordProvider extends BaseProvider {
+  constructor() {
+    super('/api/sa/v1/AppRecords');
+  }
 
   async getAppRecords(): Promise<ResultWrapper<AppRecord[]>> {
-    let result: ResultWrapper<AppRecord[]> = new ResultWrapper<AppRecord[]>();
-
-    try {
-      const { data } = await axios.get(this.BASE_URL);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.get(this.BASE_URL));
   }
 
   async getAppRecordById(id: string): Promise<ResultWrapper<AppRecord>> {
-    let result: ResultWrapper<AppRecord> = new ResultWrapper<AppRecord>();
-
-    try {
-      const { data } = await axios.get(`${this.BASE_URL}/${id}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.get(`${this.BASE_URL}/${id}`));
   }
 
   async addAppRecord(appRecord: AppRecord): Promise<ResultWrapper<AppRecord>> {
-    let result: ResultWrapper<AppRecord> = new ResultWrapper<AppRecord>();
-
-    try {
-      const { data } = await axios.post(this.BASE_URL, appRecord);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.post(this.BASE_URL, appRecord));
   }
 
   async updateAppRecord(appRecord: AppRecord): Promise<ResultWrapper<AppRecord>> {
-    let result: ResultWrapper<AppRecord> = new ResultWrapper<AppRecord>();
-
-    try {
-      const { data } = await axios.put(this.BASE_URL, appRecord);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.put(this.BASE_URL, appRecord));
   }
 
   async deleteAppRecord(id: string): Promise<ResultWrapper<number>> {
-    let result: ResultWrapper<number> = new ResultWrapper<number>();
-
-    try {
-      const { data } = await axios.delete(`${this.BASE_URL}/${id}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.delete(`${this.BASE_URL}/${id}`));
   }
 }

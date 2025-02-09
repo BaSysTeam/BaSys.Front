@@ -1,6 +1,6 @@
 import axios from 'axios';
 import WorkflowScheduleRecord from '@/models/workflowScheduleRecord';
-import BaseProvider from '@/dataProviders/baseProvider';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
 export default class WorkflowScheduleProvider extends BaseProvider {

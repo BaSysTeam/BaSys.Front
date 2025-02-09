@@ -1,25 +1,25 @@
 import axios from 'axios';
 import SelectItem from '@/models/selectItem';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class SelectItemsProvider {
-  private readonly BASE_URL = '/api/app/v1/SelectItems';
+export default class SelectItemsProvider extends BaseProvider {
   private readonly resultsCache: any = {};
 
-  async getCollection(dataTypeUid: string): Promise<ResultWrapper<SelectItem[]>> {
-    let result: ResultWrapper<SelectItem[]> = new ResultWrapper<SelectItem[]>();
+  constructor() {
+    super('/api/app/v1/SelectItems');
+  }
 
+  async getCollection(dataTypeUid: string): Promise<ResultWrapper<any>> {
     const cachedResult = this.resultsCache[dataTypeUid];
     if (cachedResult) {
       return cachedResult;
     }
 
-    try {
-      const { data } = await axios.get(`${this.BASE_URL}/${dataTypeUid}`);
-      result = data;
+    const result = await this.handleRequest(axios.get(`${this.BASE_URL}/${dataTypeUid}`));
+
+    if (result.isOK) {
       this.resultsCache[dataTypeUid] = result;
-    } catch (error) {
-      console.error('error', error);
     }
 
     return result;
@@ -27,15 +27,6 @@ export default class SelectItemsProvider {
 
   async getItem(dataTypeUid: string, uid: string)
     : Promise<ResultWrapper<SelectItem>> {
-    let result: ResultWrapper<SelectItem> = new ResultWrapper<SelectItem>();
-
-    try {
-      const { data } = await axios.get(`${this.BASE_URL}/${dataTypeUid}/${uid}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.get(`${this.BASE_URL}/${dataTypeUid}/${uid}`));
   }
 }
