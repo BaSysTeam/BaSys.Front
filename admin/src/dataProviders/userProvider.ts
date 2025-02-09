@@ -1,113 +1,44 @@
 import axios from 'axios';
 import User from '../models/user';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class UserProvider {
-    private readonly BASE_URL = '/api/admin/v1/Users';
+export default class UserProvider extends BaseProvider {
+  constructor() {
+    super('/api/admin/v1/Users');
+  }
 
-    async getAllUsers(): Promise<ResultWrapper<User[]>> {
-      let result: ResultWrapper<User[]> = new ResultWrapper<User[]>();
+  async getAllUsers(): Promise<ResultWrapper<User[]>> {
+    return this.handleRequest(axios.get(this.BASE_URL));
+  }
 
-      try {
-        const { data } = await axios.get(this.BASE_URL);
-        result = data;
-      } catch (error) {
-        console.error('error', error);
-      }
+  async getUser(id: string): Promise<ResultWrapper<User>> {
+    return this.handleRequest(axios.get(`${this.BASE_URL}/${id}`));
+  }
 
-      return result;
-    }
+  async createUser(user: User): Promise<ResultWrapper<User>> {
+    return this.handleRequest(axios.post(this.BASE_URL, user));
+  }
 
-    async getUser(id: string): Promise<ResultWrapper<User>> {
-      let result: ResultWrapper<User> = new ResultWrapper<User>();
+  async updateUser(user: User): Promise<ResultWrapper<User>> {
+    return this.handleRequest(axios.put(this.BASE_URL, user));
+  }
 
-      try {
-        const { data } = await axios.get(`${this.BASE_URL}/${id}`);
-        result = data;
-      } catch (error) {
-        console.error('error', error);
-      }
+  async deleteUser(id: string): Promise<ResultWrapper<number>> {
+    return this.handleRequest(axios.delete(`${this.BASE_URL}/${id}`));
+  }
 
-      return result;
-    }
+  async disableUser(id: string): Promise<ResultWrapper<string>> {
+    return this.handleRequest(axios.patch(`${this.BASE_URL}/${id}/disable`));
+  }
 
-    async createUser(user: User): Promise<ResultWrapper<User>> {
-      let result: ResultWrapper<User> = new ResultWrapper<User>();
+  async enableUser(id: string): Promise<ResultWrapper<string>> {
+    return this.handleRequest(axios.patch(`${this.BASE_URL}/${id}/enable`));
+  }
 
-      try {
-        const { data } = await axios.post(this.BASE_URL, user);
-        result = data;
-      } catch (error) {
-        console.error('error', error);
-      }
-
-      return result;
-    }
-
-    async updateUser(user: User): Promise<ResultWrapper<User>> {
-      let result: ResultWrapper<User> = new ResultWrapper<User>();
-
-      try {
-        const { data } = await axios.put(this.BASE_URL, user);
-        result = data;
-      } catch (error) {
-        console.error('error', error);
-      }
-
-      return result;
-    }
-
-    async deleteUser(id: string): Promise<ResultWrapper<number>> {
-      let result: ResultWrapper<number> = new ResultWrapper<number>();
-
-      try {
-        const { data } = await axios.delete(`${this.BASE_URL}/${id}`);
-        result = data;
-      } catch (error) {
-        console.error('error', error);
-      }
-
-      return result;
-    }
-
-    async disableUser(id: string): Promise<ResultWrapper<string>> {
-      let result: ResultWrapper<string> = new ResultWrapper<string>();
-
-      try {
-        const { data } = await axios.patch(`${this.BASE_URL}/${id}/disable`);
-        result = data;
-      } catch (error) {
-        console.error('error', error);
-      }
-
-      return result;
-    }
-
-    async enableUser(id: string): Promise<ResultWrapper<string>> {
-      let result: ResultWrapper<string> = new ResultWrapper<string>();
-
-      try {
-        const { data } = await axios.patch(`${this.BASE_URL}/${id}/enable`);
-        result = data;
-      } catch (error) {
-        console.error('error', error);
-      }
-
-      return result;
-    }
-
-    async changePassword(id: string, newPassword: string): Promise<ResultWrapper<number>> {
-      let result: ResultWrapper<number> = new ResultWrapper<number>();
-
-      try {
-        const { data } = await axios.patch(`${this.BASE_URL}/${id}/password`, {
-          newPassword,
-        });
-        result = data;
-      } catch (error) {
-        console.error('error', error);
-      }
-
-      return result;
-    }
+  async changePassword(id: string, newPassword: string): Promise<ResultWrapper<number>> {
+    return this.handleRequest(axios.patch(`${this.BASE_URL}/${id}/password`, {
+      newPassword,
+    }));
+  }
 }

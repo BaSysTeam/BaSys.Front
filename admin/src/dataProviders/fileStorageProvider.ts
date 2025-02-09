@@ -1,48 +1,24 @@
 import axios from 'axios';
 import FileStorageConfig from '@/models/fileStorageConfig';
 import StorageKind from '@/models/storageKind';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class FileStorageProvider {
-  private readonly BASE_URL = '/api/admin/v1/FileStorageConfig';
+export default class FileStorageProvider extends BaseProvider {
+  constructor() {
+    super('/api/admin/v1/FileStorageConfig');
+  }
 
   async getFileStorageConfig(): Promise<ResultWrapper<FileStorageConfig>> {
-    let result: ResultWrapper<FileStorageConfig> = new ResultWrapper<FileStorageConfig>();
-
-    try {
-      const { data } = await axios.get(this.BASE_URL);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.get(this.BASE_URL));
   }
 
   async updateFileStorageConfig(param: FileStorageConfig): Promise<ResultWrapper<boolean>> {
-    let result: ResultWrapper<boolean> = new ResultWrapper<boolean>();
-
-    try {
-      const { data } = await axios.put(this.BASE_URL, param);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.put(this.BASE_URL, param));
   }
 
   async getStorageKinds(): Promise<ResultWrapper<StorageKind[]>> {
-    let result: ResultWrapper<StorageKind[]> = new ResultWrapper<StorageKind[]>();
-
-    try {
-      const url = `${this.BASE_URL}/GetStorageKinds`;
-      const { data } = await axios.get(url);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    const url = `${this.BASE_URL}/GetStorageKinds`;
+    return this.handleRequest(axios.get(url));
   }
 }

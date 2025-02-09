@@ -1,58 +1,25 @@
 import axios from 'axios';
+import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class MetaMenusProvider {
-  private readonly BASE_URL = '/api/constructor/v1/MetaWorkflows';
+export default class MetaMenusProvider extends BaseProvider {
+  constructor() {
+    super('/api/constructor/v1/MetaWorkflows');
+  }
 
   async getItem(name: string): Promise<ResultWrapper<any>> {
-    let result: ResultWrapper<any> = new ResultWrapper<any>();
-
-    try {
-      const { data } = await axios.get(`${this.BASE_URL}/${name}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.get(`${this.BASE_URL}/${name}`));
   }
 
   async create(settings: any): Promise<ResultWrapper<number>> {
-    let result = new ResultWrapper<number>();
-
-    try {
-      const { data } = await axios.post(this.BASE_URL, settings);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.post(this.BASE_URL, settings));
   }
 
   async update(settings: any): Promise<ResultWrapper<number>> {
-    let result = new ResultWrapper<number>();
-
-    try {
-      const { data } = await axios.put(this.BASE_URL, settings);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.put(this.BASE_URL, settings));
   }
 
   async delete(name: string): Promise<ResultWrapper<number>> {
-    let result = new ResultWrapper<number>();
-
-    try {
-      const { data } = await axios.delete(`${this.BASE_URL}/${name}`);
-      result = data;
-    } catch (error) {
-      console.error('error', error);
-    }
-
-    return result;
+    return this.handleRequest(axios.delete(`${this.BASE_URL}/${name}`));
   }
 }
