@@ -2,9 +2,13 @@ import axios from 'axios';
 import BaseProvider from '../../../shared/src/dataProviders/baseProvider';
 import ResultWrapper from '../../../shared/src/models/resultWrapper';
 
-export default class MetaMenusProvider extends BaseProvider {
+export default class MetaWorkflowsProvider extends BaseProvider {
   constructor() {
     super('/api/constructor/v1/MetaWorkflows');
+  }
+
+  async getCollection(): Promise<ResultWrapper<any>> {
+    return this.handleRequest(axios.get(`${this.BASE_URL}`));
   }
 
   async getItem(name: string): Promise<ResultWrapper<any>> {

@@ -12,7 +12,7 @@ import Badge from 'primevue/badge';
 import Listbox from 'primevue/listbox';
 import WorkflowTrigger from '@/models/workflowTrigger';
 import WorkflowTriggersProvider from '@/dataProviders/workflowTriggersProvider';
-import WorkflowScheduleRecord from '@/models/workflowScheduleRecord';
+import TriggerEditDialog from '@/components/metaObjectEditComponents/TriggerEditDialog.vue';
 import ToastHelper from '../../../../shared/src/helpers/toastHelper';
 
 // Infrastructure
@@ -72,28 +72,32 @@ async function refresh(): Promise<void> {
 }
 
 async function save(editResult: any): Promise<void> {
-  // editResult.record.workflowUid = props.workflowUid;
+  console.log('editResult', editResult);
+  editResult.data.metaObjectUid = props.metaObjectUid;
+  editResult.data.metaObjectKindUid = props.metaObjectKindUid;
+
+  console.log('editResult', editResult);
   if (editResult.regime === 'add' || editResult.regime === 'copy') {
     // Create new item.
     isWaiting.value = true;
-    const response = await provider.create(editResult.record);
+    const response = await provider.create(editResult.data);
     isWaiting.value = false;
 
     if (response.isOK) {
       await refresh();
-      selectItem(editResult.record.uid);
+      selectItem(editResult.data.uid);
     } else {
       handleError(response);
     }
   } else if (editResult.regime === 'edit' && editResult.isModified) {
     // Update existing item.
     isWaiting.value = true;
-    const response = await provider.update(editResult.record);
+    const response = await provider.update(editResult.data);
     isWaiting.value = false;
 
     if (response.isOK) {
       await refresh();
-      selectItem(editResult.record.uid);
+      selectItem(editResult.data.uid);
     } else {
       handleError(response);
     }
@@ -250,6 +254,11 @@ onMounted(async () => {
       </Listbox>
     </div>
   </div>
+
+  <TriggerEditDialog v-if="isEditDialogOpen"
+                     :regime="dialogRegime"
+                     :item="selectedItem"
+                     @close="onEditDialogClose"></TriggerEditDialog>
 </template>
 
 <style scoped>
