@@ -149,7 +149,7 @@ function onDeleteClick(): void {
   }
 
   confirmVue.require({
-    message: `${t('deleteItem')} "${selectedItem.value.cronExpression}" ?`,
+    message: `${t('deleteItem')}?`,
     header: t('confirmation'),
     icon: 'pi pi-exclamation-triangle',
     rejectClass: 'p-button-secondary p-button-outlined',
