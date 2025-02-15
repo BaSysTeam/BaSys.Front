@@ -154,6 +154,19 @@ export default class DataTable {
     return result;
   }
 
+  cumSum(cumColumn: string, baseColumn: string): DataTable {
+    this.checkExistingColumn(cumColumn);
+    this.checkExistingColumn(baseColumn);
+
+    let cumSum = 0;
+    this.rows.forEach((row) => {
+      cumSum += row[baseColumn];
+      row[cumColumn] = cumSum;
+    });
+
+    return this;
+  }
+
   min(columnName: string): any {
     this.checkExistingColumn(columnName);
 
