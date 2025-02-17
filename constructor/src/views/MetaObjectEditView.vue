@@ -19,6 +19,7 @@ import MainTab from '@/components/metaObjectEditComponents/MainTab.vue';
 import RecordsSettingsTab from '@/components/metaObjectEditComponents/RecordsSettingsTab.vue';
 import HeaderFieldsTab from '@/components/metaObjectEditComponents/HeaderFieldsTab.vue';
 import TableSettingsTab from '@/components/metaObjectEditComponents/TableSettingsTab.vue';
+import TriggersTab from '@/components/metaObjectEditComponents/TriggersTab.vue';
 import JsonTab from '@/components/metaObjectEditComponents/JsonTab.vue';
 import { Guid } from 'guid-typescript';
 import CommandsTab from '@/components/metaObjectEditComponents/CommandsTab.vue';
@@ -335,6 +336,11 @@ onBeforeMount(() => {
       command: () => onNavTabClick('commands'),
     });
 
+    navMenuItems.value.push({
+      label: t('triggers'),
+      command: () => onNavTabClick('triggers'),
+    });
+
     if (kindSettings.value.canCreateRecords) {
       navMenuItems.value.push({
         label: t('records'),
@@ -470,6 +476,10 @@ onMounted(() => {
         <div v-if="activeTab == 'commands'">
           <CommandsTab :settings="settings"
                        @change="onSettingsChanged"></CommandsTab>
+        </div>
+        <div v-if="activeTab == 'triggers'">
+          <TriggersTab :meta-object-kind-uid="settings.metaObjectKindUid"
+                       :meta-object-uid="settings.uid"></TriggersTab>
         </div>
         <div v-if="activeTab == 'records'">
           <RecordsSettingsTab :settings="settings"
