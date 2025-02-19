@@ -12,9 +12,10 @@
       <div class="col-6">
         <Card>
           <template #content>
+            <!--Application title-->
             <div class="grid">
               <div class="col-3 flex align-items-center">
-                <span class="bs-required">Application title</span>
+                <span>Application title</span>
               </div>
               <div class="col">
                 <InputText
@@ -28,6 +29,8 @@
                 />
               </div>
             </div>
+
+            <!--DataBase UID -->
             <div class="grid">
               <div class="col-3 flex align-items-center">
                 <span class="bs-required">Database uid</span>
@@ -51,6 +54,19 @@
                 </InputGroup>
               </div>
             </div>
+
+            <!--Use workflows scheduler-->
+            <div class="grid">
+              <div class="col-3 flex align-items-center">
+                <span class="bs-required">Use workflows scheduler</span>
+              </div>
+              <div class="col">
+                <InputSwitch v-model="appConstants.useWorkflowsScheduler"
+                             @change="save"></InputSwitch>
+              </div>
+            </div>
+
+            <!--App version-->
             <div class="grid">
               <div class="col-3 flex align-items-center">
                 <span>App version</span>
@@ -80,6 +96,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import Divider from 'primevue/divider';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
+import InputSwitch from 'primevue/inputswitch';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Button from 'primevue/button';
@@ -98,6 +115,7 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
     Divider,
     Card,
     InputText,
+    InputSwitch,
     InputGroup,
     InputGroupAddon,
     Button,
@@ -108,8 +126,8 @@ import ToastHelper from '../../../shared/src/helpers/toastHelper';
 export default class MainSettingView extends Vue {
   isGenerateUidDialogVisible = false;
   isWaiting = false;
-  appConstants = new AppConstants();
-  appConstantsCached = new AppConstants();
+  appConstants = new AppConstants(null);
+  appConstantsCached = new AppConstants(null);
   toastHelper = new ToastHelper(useToast());
   confirm = useConfirm();
   dataProvider = new AppConstantsProvider();
